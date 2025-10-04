@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>
     body {
       background: linear-gradient(135deg, #2f855a, #48bb78, #38a169);
