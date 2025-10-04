@@ -6,6 +6,9 @@
   <title>Login - Microfinancial Logistics</title>
   <link rel="icon" type="image/png" href="{{ asset('images/mlogo.png') }}">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdeliver.net/npm/daisyui@latest/dist/full.css"></script>
+  <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>
     body {
