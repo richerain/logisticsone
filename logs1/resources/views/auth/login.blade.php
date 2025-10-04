@@ -178,11 +178,10 @@
     </div>
 
     <div class="section-2">
-      <div id="loginPanel" class="panel active shadow-xl">
+      <div id="loginPanel" class="panel active border-b-4 border-t-4 border-green-600">
         <div class="card w-full bg-base-100">
-          <div class="card-body">
-            <h2 class="card-title text-2xl font-bold text-center mb-2 text-gray-700 panel-title"></h2>
-            <div class="text-center text-gray-600 font-bold text-xl uppercase">Welcome to Logistics I</div>
+          <div class="card-body"> 
+            <div class="text-center text-gray-600 font-bold text-xl uppercase">Welcome to Logistics 1</div>
             <form id="loginForm" class="space-y-6">
               <div id="invalidAlert" class="custom-alert">
                 <i class='bx bxs-error-circle'></i>
