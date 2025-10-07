@@ -60,7 +60,7 @@
       align-items: center;
     }
     .company-logo img {
-      width: 300px;
+      width: 400px;
       height: auto;
       opacity: 1;
     }
