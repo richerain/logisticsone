@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Microfinancial Logistics</title>
+  <title>Login</title>
   <link rel="icon" type="image/png" href="{{ asset('images/micrologo.png') }}">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/combine/npm/daisyui@5/base/rootscrollgutter.css,npm/daisyui@5/base/scrollbar.css,npm/daisyui@5/base/rootcolor.css,npm/daisyui@5/base/rootscrolllock.css,npm/daisyui@5/base/reset.css,npm/daisyui@5/base/svg.css,npm/daisyui@5/base/properties.css,npm/daisyui@5/components/input.css,npm/daisyui@5/components/timeline.css,npm/daisyui@5/components/swap.css,npm/daisyui@5/components/divider.css,npm/daisyui@5/components/rating.css,npm/daisyui@5/components/steps.css,npm/daisyui@5/components/hovergallery.css,npm/daisyui@5/components/loading.css,npm/daisyui@5/components/diff.css,npm/daisyui@5/components/filter.css,npm/daisyui@5/components/badge.css,npm/daisyui@5/components/table.css,npm/daisyui@5/components/radio.css,npm/daisyui@5/components/indicator.css,npm/daisyui@5/components/collapse.css,npm/daisyui@5/components/link.css,npm/daisyui@5/components/dropdown.css,npm/daisyui@5/components/calendar.css,npm/daisyui@5/components/dock.css,npm/daisyui@5/components/mask.css,npm/daisyui@5/components/mockup.css,npm/daisyui@5/components/chat.css,npm/daisyui@5/components/navbar.css,npm/daisyui@5/components/fab.css,npm/daisyui@5/components/list.css,npm/daisyui@5/components/carousel.css,npm/daisyui@5/components/drawer.css,npm/daisyui@5/components/kbd.css,npm/daisyui@5/components/avatar.css,npm/daisyui@5/components/alert.css,npm/daisyui@5/components/countdown.css,npm/daisyui@5/components/hero.css,npm/daisyui@5/components/menu.css,npm/daisyui@5/components/status.css,npm/daisyui@5/components/toggle.css,npm/daisyui@5/components/range.css,npm/daisyui@5/components/validator.css,npm/daisyui@5/components/fieldset.css,npm/daisyui@5/components/label.css,npm/daisyui@5/components/skeleton.css,npm/daisyui@5/components/stack.css,npm/daisyui@5/components/footer.css,npm/daisyui@5/components/breadcrumbs.css,npm/daisyui@5/components/toast.css,npm/daisyui@5/components/stat.css,npm/daisyui@5/components/radialprogress.css,npm/daisyui@5/components/tab.css,npm/daisyui@5/components/checkbox.css,npm/daisyui@5/components/select.css,npm/daisyui@5/components/fileinput.css,npm/daisyui@5/components/card.css,npm/daisyui@5/components/textarea.css,npm/daisyui@5/components/button.css,npm/daisyui@5/components/modal.css,npm/daisyui@5/components/tooltip.css,npm/daisyui@5/components/progress.css,npm/daisyui@5/utilities/typography.css,npm/daisyui@5/utilities/radius.css,npm/daisyui@5/utilities/glass.css,npm/daisyui@5/utilities/join.css,npm/daisyui@5/colors/properties-extended.css,npm/daisyui@5/colors/responsive.css,npm/daisyui@5/colors/states-extended.css,npm/daisyui@5/colors/states.css,npm/daisyui@5/colors/properties.css,npm/daisyui@5/colors/responsive-extended.css,npm/daisyui@5/theme/light.css" rel="stylesheet" type="text/css" />
@@ -175,8 +175,8 @@
           <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
         </div>
         <div class="company-text uppercase relative z-index-2 text-gray-800">
-          <h1 class="font-bold">Microfinancial</h1>
-          <p class="mt-0.1 text-gray-600">Logistics I Department</p>
+          <h1 class="font-bold text-gold-500">Microfinance</h1>
+          <p class="mt-0.1 text-gold-600">Logistics I Department</p>
         </div>
       </div>
     </div>
