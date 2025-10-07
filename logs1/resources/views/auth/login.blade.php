@@ -175,7 +175,7 @@
           <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
         </div>
         <div class="company-text uppercase relative z-index-2 text-gray-800">
-          <h1 class="font-bold text-gold-500">Microfinance</h1>
+          <h1 class="font-bold text-gold-500">Microfinance 1</h1>
           <p class="mt-0.1 text-gold-600">Logistics I Department</p>
         </div>
       </div>
@@ -185,7 +185,7 @@
       <div id="loginPanel" class="panel active border-b-4 border-t-4 border-green-600">
         <div class="card w-full bg-base-100">
           <div class="card-body"> 
-            <div class="text-center text-gray-600 font-bold text-xl uppercase">Welcome to Logistics 1</div>
+            <div class="text-center text-gray-600 font-bold text-xl uppercase">Welcome to Logistics I</div>
             <form id="loginForm" class="space-y-6">
               <div id="invalidAlert" class="custom-alert">
                 <i class='bx bxs-error-circle'></i>
@@ -279,7 +279,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Successfully Login!',
-                    text: 'Redirecting to dashboard...',
+                    text: 'Redirecting to...',
                     timer: 2000,
                     showConfirmButton: false
                 }).then(() => {
