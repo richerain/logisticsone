@@ -16,6 +16,10 @@
   </div>
 
   <script>
+    // Clear localStorage
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('user');
+    
     setTimeout(() => {
       window.location.href = '/login';
     }, 2000);

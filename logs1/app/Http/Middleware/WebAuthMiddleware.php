@@ -16,7 +16,17 @@ class WebAuthMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Check if user is authenticated via cookie or localStorage
-        $isAuthenticated = isset($_COOKIE['isAuthenticated']) && $_COOKIE['isAuthenticated'] === 'true';
+        $isAuthenticated = false;
+        
+        // Check cookie first
+        if (isset($_COOKIE['isAuthenticated']) && $_COOKIE['isAuthenticated'] === 'true') {
+            $isAuthenticated = true;
+        }
+        
+        // If not authenticated via cookie, check if this is an API request with headers
+        if (!$isAuthenticated && $request->hasHeader('X-User-Id')) {
+            $isAuthenticated = true;
+        }
         
         if (!$isAuthenticated) {
             return redirect()->route('login');

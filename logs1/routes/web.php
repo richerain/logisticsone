@@ -8,8 +8,15 @@ Route::view('/', 'auth.login')->name('root');
 
 // Custom auth views/routes (no real auth checks)
 Route::get('/login', function () {
-    // Check if user is already logged in
-    $isAuthenticated = isset($_COOKIE['isAuthenticated']) && $_COOKIE['isAuthenticated'] === 'true';
+    // Check if user is already logged in via multiple methods
+    $isAuthenticated = false;
+    
+    // Check cookie
+    if (isset($_COOKIE['isAuthenticated']) && $_COOKIE['isAuthenticated'] === 'true') {
+        $isAuthenticated = true;
+    }
+    
+    // Check localStorage via JavaScript will handle on frontend
     if ($isAuthenticated) {
         return redirect()->route('dashboard');
     }
@@ -40,11 +47,6 @@ Route::get('/logout', function () {
     
     return redirect()->route('logout.splash');
 })->name('logout');
-
-// Cleanup route to clear localStorage
-Route::get('/logout-cleanup', function () {
-    return view('auth.logout-cleanup');
-})->name('logout.cleanup');
 
 // Redirect /home to dashboard (default post-login)
 Route::get('/home', function () {
