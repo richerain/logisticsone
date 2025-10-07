@@ -175,7 +175,7 @@
           <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
         </div>
         <div class="company-text uppercase relative z-index-2 text-gray-800">
-          <h1 class="font-bold text-gold-500">Microfinance 1</h1>
+          <h1 class="font-bold text-gold-500">Microfinance I</h1>
           <p class="mt-0.1 text-gold-600">Logistics I Department</p>
         </div>
       </div>
