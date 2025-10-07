@@ -58,7 +58,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-top: 2rem;
     }
     .company-logo img {
       width: 300px;
@@ -171,7 +170,7 @@
   <div class="container">
     <div class="section-1">
       <div class="company-content">
-        <div class="company-logo">
+        <div class="company-logo mt-2rem">
           <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
         </div>
         <div class="company-text uppercase relative z-index-2 text-gray-800">
