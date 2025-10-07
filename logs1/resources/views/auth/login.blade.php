@@ -60,9 +60,6 @@
       align-items: center;
     }
     .company-logo img {
-      width: 400px;
-      height: auto;
-      opacity: 1;
     }
     .company-text h1 {
       font-size: 3rem;
@@ -171,7 +168,7 @@
     <div class="section-1">
       <div class="company-content">
         <div class="company-logo mt-2rem">
-          <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
+          <img class="w-400 h-auto opacity-1" src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
         </div>
         <div class="company-text uppercase relative z-index-2 text-gray-800">
           <h1 class="font-bold text-gold-500">Microfinance I</h1>
