@@ -10,7 +10,7 @@ Route::put('/profile/update', [GatewayController::class, 'updateProfile']);
 Route::post('/profile/upload-picture', [GatewayController::class, 'uploadProfilePicture']);
 // login routes end
 
-// module2-sws entire routes start
+// module1-sws entire routes start
 // SWS Inventory routes
 Route::get('/sws/inventory', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/inventory');
@@ -140,8 +140,3 @@ Route::post('/psm/reorders', function (Request $request) {
 
 // module5-dtlr entire routes start
 // module5-dtlr entire routes end
-
-// CORS headers
-Route::middleware([])->group(function () {
-    // Add CORS headers for all API routes
-});

@@ -114,7 +114,11 @@ class InventoryController extends Controller
     public function show($id)
     {
         try {
-            $inventory = Inventory::with('storage')->findOrFail($id);
+            // Find by item_id (string) or by auto-increment id
+            $inventory = Inventory::with('storage')
+                ->where('item_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
 
             return response()->json([
                 'success' => true,
@@ -152,7 +156,11 @@ class InventoryController extends Controller
         try {
             DB::beginTransaction();
 
-            $inventory = Inventory::findOrFail($id);
+            // Find by item_id (string) or by auto-increment id
+            $inventory = Inventory::where('item_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
+                
             $oldStorage = $inventory->item_storage_from;
             $oldStock = $inventory->item_stock;
 
@@ -196,7 +204,10 @@ class InventoryController extends Controller
         try {
             DB::beginTransaction();
 
-            $inventory = Inventory::findOrFail($id);
+            // Find by item_id (string) or by auto-increment id
+            $inventory = Inventory::where('item_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
             
             // Update storage used units
             $storage = Storage::where('storage_id', $inventory->item_storage_from)->first();

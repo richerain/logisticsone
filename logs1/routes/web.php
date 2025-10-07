@@ -53,6 +53,9 @@ Route::get('/home', function () {
     return redirect()->route('dashboard');
 });
 
+// Login processing route
+Route::post('/process-login', [FrontendController::class, 'processLogin'])->name('process.login');
+
 // Protected routes - with authentication middleware
 Route::middleware(['web.auth'])->group(function () {
     Route::get('/dashboard', [FrontendController::class, 'dashboard'])->name('dashboard');
@@ -90,6 +93,3 @@ Route::middleware(['web.auth'])->group(function () {
 
 // profile-route
 Route::post('/api/profile/update', [FrontendController::class, 'updateProfile'])->name('api.profile.update');
-
-// API route for login processing
-Route::post('/api/auth/login', [FrontendController::class, 'processLogin'])->name('api.login');

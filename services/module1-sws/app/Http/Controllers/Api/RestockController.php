@@ -71,7 +71,7 @@ class RestockController extends Controller
             DB::beginTransaction();
 
             // Get inventory item details
-            $inventory = Inventory::findOrFail($request->restock_item_id);
+            $inventory = Inventory::where('item_id', $request->restock_item_id)->firstOrFail();
             
             $restockId = Restock::generateRestockId();
             
@@ -126,7 +126,11 @@ class RestockController extends Controller
     public function show($id)
     {
         try {
-            $restock = Restock::with('inventory')->findOrFail($id);
+            // Find by restock_id (string) or by auto-increment id
+            $restock = Restock::with('inventory')
+                ->where('restock_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
 
             return response()->json([
                 'success' => true,
@@ -159,7 +163,12 @@ class RestockController extends Controller
         try {
             DB::beginTransaction();
 
-            $restock = Restock::with('inventory')->findOrFail($id);
+            // Find by restock_id (string) or by auto-increment id
+            $restock = Restock::with('inventory')
+                ->where('restock_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
+                
             $oldStatus = $restock->restock_status;
             $oldUnit = $restock->restock_item_unit;
 
@@ -206,7 +215,11 @@ class RestockController extends Controller
     public function destroy($id)
     {
         try {
-            $restock = Restock::findOrFail($id);
+            // Find by restock_id (string) or by auto-increment id
+            $restock = Restock::where('restock_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
+                
             $restock->delete();
 
             return response()->json([

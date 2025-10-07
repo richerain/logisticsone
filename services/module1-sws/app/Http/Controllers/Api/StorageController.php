@@ -95,7 +95,11 @@ class StorageController extends Controller
     public function show($id)
     {
         try {
-            $storage = Storage::with('inventories')->findOrFail($id);
+            // Find by storage_id (string) or by auto-increment id
+            $storage = Storage::with('inventories')
+                ->where('storage_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
 
             return response()->json([
                 'success' => true,
@@ -128,7 +132,11 @@ class StorageController extends Controller
         }
 
         try {
-            $storage = Storage::findOrFail($id);
+            // Find by storage_id (string) or by auto-increment id
+            $storage = Storage::where('storage_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
+                
             $storage->update($request->all());
 
             return response()->json([
@@ -147,7 +155,10 @@ class StorageController extends Controller
     public function destroy($id)
     {
         try {
-            $storage = Storage::findOrFail($id);
+            // Find by storage_id (string) or by auto-increment id
+            $storage = Storage::where('storage_id', $id)
+                ->orWhere('id', $id)
+                ->firstOrFail();
             
             // Check if storage has items
             if ($storage->inventories()->count() > 0) {

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\WebAuthMiddleware;
+use App\Http\Middleware\CheckRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -11,9 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Register custom middleware
+        // Register your custom middleware aliases
         $middleware->alias([
-            'web.auth' => \App\Http\Middleware\WebAuthMiddleware::class,
+            'web.auth' => WebAuthMiddleware::class,
+            'role' => CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
