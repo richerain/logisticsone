@@ -13,28 +13,28 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
                 <div class="stat-figure text-primary">
                     <i class="bx bx-refresh text-3xl"></i>
                 </div>
                 <div class="stat-title">Total Re-Orders</div>
                 <div class="stat-value text-primary" id="total-reorders">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
                 <div class="stat-figure text-warning">
                     <i class="bx bx-time text-3xl"></i>
                 </div>
                 <div class="stat-title">Pending</div>
                 <div class="stat-value text-warning" id="pending-reorders">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-blue-400">
                 <div class="stat-figure text-info">
                     <i class="bx bx-rocket text-3xl"></i>
                 </div>
                 <div class="stat-title">Auto-Triggered</div>
                 <div class="stat-value text-info" id="auto-reorders">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
                 <div class="stat-figure text-success">
                     <i class="bx bx-check-circle text-3xl"></i>
                 </div>
@@ -177,11 +177,12 @@
 
     async function loadReorders() {
         try {
+            showLoadingState();
             const response = await fetch(`${API_BASE_URL}/reorders`);
             const data = await response.json();
             
-            if (response.ok) {
-                reorders = data;
+            if (response.ok && data.success) {
+                reorders = data.data || [];
                 renderReorders();
                 updateReorderStats();
             } else {
@@ -189,8 +190,34 @@
             }
         } catch (error) {
             console.error('Error loading re-orders:', error);
-            Swal.fire('Error', 'Failed to load re-orders: ' + error.message, 'error');
+            showErrorState('Failed to load re-orders: ' + error.message);
         }
+    }
+
+    function showLoadingState() {
+        const tbody = document.getElementById('reorders-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center py-8">
+                    <div class="loading loading-spinner loading-lg"></div>
+                    <p class="text-gray-500 mt-2">Loading re-orders...</p>
+                </td>
+            </tr>
+        `;
+    }
+
+    function showErrorState(message) {
+        const tbody = document.getElementById('reorders-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center py-8">
+                    <i class="bx bx-error text-4xl text-red-400 mb-2"></i>
+                    <p class="text-red-500">${message}</p>
+                    <button class="btn btn-sm btn-outline mt-2" onclick="loadReorders()">Retry</button>
+                </td>
+            </tr>
+        `;
+        Swal.fire('Error', message, 'error');
     }
 
     async function loadFormData() {
@@ -198,19 +225,22 @@
             // Load orders for dropdown
             const ordersResponse = await fetch(`${API_BASE_URL}/orders`);
             if (ordersResponse.ok) {
-                orders = await ordersResponse.json();
+                const ordersData = await ordersResponse.json();
+                orders = ordersData.success ? ordersData.data || [] : [];
             }
 
             // Load products for dropdown
             const productsResponse = await fetch(`${API_BASE_URL}/products`);
             if (productsResponse.ok) {
-                products = await productsResponse.json();
+                const productsData = await productsResponse.json();
+                products = productsData.success ? productsData.data || [] : [];
             }
 
             // Load shops for dropdown
             const shopsResponse = await fetch(`${API_BASE_URL}/shops`);
             if (shopsResponse.ok) {
-                shops = await shopsResponse.json();
+                const shopsData = await shopsResponse.json();
+                shops = shopsData.success ? shopsData.data || [] : [];
             }
         } catch (error) {
             console.error('Error loading form data:', error);
@@ -240,16 +270,16 @@
                     <div class="text-sm text-gray-500">Shop: ${reorder.shop?.shop_name || 'N/A'}</div>
                 </td>
                 <td>${reorder.shop?.vendor?.ven_name || 'N/A'}</td>
-                <td>${reorder.quantity}</td>
-                <td class="font-semibold">₱${parseFloat(reorder.total_amount).toFixed(2)}</td>
+                <td>${reorder.quantity || 0}</td>
+                <td class="font-semibold">₱${parseFloat(reorder.total_amount || 0).toFixed(2)}</td>
                 <td>
                     <span class="badge ${getBudgetStatusBadgeClass(reorder.budget_approval_status)}">
-                        ${reorder.budget_approval_status}
+                        ${reorder.budget_approval_status || 'pending'}
                     </span>
                 </td>
                 <td>
                     <span class="badge ${getReorderStatusBadgeClass(reorder.restock_status)}">
-                        ${reorder.restock_status}
+                        ${reorder.restock_status || 'pending'}
                     </span>
                 </td>
                 <td>
@@ -257,7 +287,7 @@
                         ${reorder.order_id ? 'Manual' : 'Auto'}
                     </span>
                 </td>
-                <td>${new Date(reorder.created_at).toLocaleDateString()}</td>
+                <td>${reorder.created_at ? new Date(reorder.created_at).toLocaleDateString() : 'N/A'}</td>
                 <td>
                     <div class="flex space-x-1">
                         <button class="btn btn-xs btn-outline btn-info" onclick="viewReorderDetails(${reorder.restock_id})">
@@ -313,15 +343,15 @@
                     <p><strong>Product:</strong> ${reorder.product?.prod_name || 'N/A'}</p>
                     <p><strong>Vendor:</strong> ${reorder.shop?.vendor?.ven_name || 'N/A'}</p>
                     <p><strong>Shop:</strong> ${reorder.shop?.shop_name || 'N/A'}</p>
-                    <p><strong>Quantity:</strong> ${reorder.quantity}</p>
-                    <p><strong>Restock Price:</strong> ₱${parseFloat(reorder.restock_price).toFixed(2)}</p>
-                    <p><strong>Total Amount:</strong> ₱${parseFloat(reorder.total_amount).toFixed(2)}</p>
-                    <p><strong>Budget Status:</strong> <span class="badge ${getBudgetStatusBadgeClass(reorder.budget_approval_status)}">${reorder.budget_approval_status}</span></p>
-                    <p><strong>Re-Order Status:</strong> <span class="badge ${getReorderStatusBadgeClass(reorder.restock_status)}">${reorder.restock_status}</span></p>
-                    <p><strong>Trigger Threshold:</strong> ${reorder.trigger_threshold}</p>
-                    <p><strong>SWS Stock ID:</strong> ${reorder.sws_stock_id}</p>
+                    <p><strong>Quantity:</strong> ${reorder.quantity || 0}</p>
+                    <p><strong>Restock Price:</strong> ₱${parseFloat(reorder.restock_price || 0).toFixed(2)}</p>
+                    <p><strong>Total Amount:</strong> ₱${parseFloat(reorder.total_amount || 0).toFixed(2)}</p>
+                    <p><strong>Budget Status:</strong> <span class="badge ${getBudgetStatusBadgeClass(reorder.budget_approval_status)}">${reorder.budget_approval_status || 'pending'}</span></p>
+                    <p><strong>Re-Order Status:</strong> <span class="badge ${getReorderStatusBadgeClass(reorder.restock_status)}">${reorder.restock_status || 'pending'}</span></p>
+                    <p><strong>Trigger Threshold:</strong> ${reorder.trigger_threshold || 10}</p>
+                    <p><strong>SWS Stock ID:</strong> ${reorder.sws_stock_id || 'N/A'}</p>
                     <p><strong>Description:</strong> ${reorder.restock_desc || 'No description'}</p>
-                    <p><strong>Created:</strong> ${new Date(reorder.created_at).toLocaleString()}</p>
+                    <p><strong>Created:</strong> ${reorder.created_at ? new Date(reorder.created_at).toLocaleString() : 'N/A'}</p>
                 </div>
             `,
             icon: 'info',
@@ -410,7 +440,7 @@
 
             const result = await response.json();
 
-            if (response.ok) {
+            if (response.ok && result.success) {
                 Swal.fire('Success', 'Re-order created successfully!', 'success');
                 closeCreateReorderModal();
                 loadReorders();

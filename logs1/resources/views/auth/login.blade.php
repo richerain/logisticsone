@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
   <link rel="icon" type="image/png" href="{{ asset('images/micrologo.png') }}">
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" type="text/css" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/combine/npm/daisyui@5/base/rootscrollgutter.css,npm/daisyui@5/base/scrollbar.css,npm/daisyui@5/base/rootcolor.css,npm/daisyui@5/base/rootscrolllock.css,npm/daisyui@5/base/reset.css,npm/daisyui@5/base/svg.css,npm/daisyui@5/base/properties.css,npm/daisyui@5/components/input.css,npm/daisyui@5/components/timeline.css,npm/daisyui@5/components/swap.css,npm/daisyui@5/components/divider.css,npm/daisyui@5/components/rating.css,npm/daisyui@5/components/steps.css,npm/daisyui@5/components/hovergallery.css,npm/daisyui@5/components/loading.css,npm/daisyui@5/components/diff.css,npm/daisyui@5/components/filter.css,npm/daisyui@5/components/badge.css,npm/daisyui@5/components/table.css,npm/daisyui@5/components/radio.css,npm/daisyui@5/components/indicator.css,npm/daisyui@5/components/collapse.css,npm/daisyui@5/components/link.css,npm/daisyui@5/components/dropdown.css,npm/daisyui@5/components/calendar.css,npm/daisyui@5/components/dock.css,npm/daisyui@5/components/mask.css,npm/daisyui@5/components/mockup.css,npm/daisyui@5/components/chat.css,npm/daisyui@5/components/navbar.css,npm/daisyui@5/components/fab.css,npm/daisyui@5/components/list.css,npm/daisyui@5/components/carousel.css,npm/daisyui@5/components/drawer.css,npm/daisyui@5/components/kbd.css,npm/daisyui@5/components/avatar.css,npm/daisyui@5/components/alert.css,npm/daisyui@5/components/countdown.css,npm/daisyui@5/components/hero.css,npm/daisyui@5/components/menu.css,npm/daisyui@5/components/status.css,npm/daisyui@5/components/toggle.css,npm/daisyui@5/components/range.css,npm/daisyui@5/components/validator.css,npm/daisyui@5/components/fieldset.css,npm/daisyui@5/components/label.css,npm/daisyui@5/components/skeleton.css,npm/daisyui@5/components/stack.css,npm/daisyui@5/components/footer.css,npm/daisyui@5/components/breadcrumbs.css,npm/daisyui@5/components/toast.css,npm/daisyui@5/components/stat.css,npm/daisyui@5/components/radialprogress.css,npm/daisyui@5/components/tab.css,npm/daisyui@5/components/checkbox.css,npm/daisyui@5/components/select.css,npm/daisyui@5/components/fileinput.css,npm/daisyui@5/components/card.css,npm/daisyui@5/components/textarea.css,npm/daisyui@5/components/button.css,npm/daisyui@5/components/modal.css,npm/daisyui@5/components/tooltip.css,npm/daisyui@5/components/progress.css,npm/daisyui@5/utilities/typography.css,npm/daisyui@5/utilities/radius.css,npm/daisyui@5/utilities/glass.css,npm/daisyui@5/utilities/join.css,npm/daisyui@5/colors/properties-extended.css,npm/daisyui@5/colors/responsive.css,npm/daisyui@5/colors/states-extended.css,npm/daisyui@5/colors/states.css,npm/daisyui@5/colors/properties.css,npm/daisyui@5/colors/responsive-extended.css,npm/daisyui@5/theme/light.css" rel="stylesheet" type="text/css" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #2f855a, #48bb78, #38a169);
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       min-height: 100vh;
       margin: 0;
       display: flex;
@@ -44,8 +44,8 @@
       right: 0;
       top: 0;
       bottom: 0;
-      font-family: Arial, sans-serif;
-      padding: 1rem;
+      font-family: 'Inter', Arial, sans-serif;
+      padding: 2rem;
       box-sizing: border-box;
     }
     .company-content {
@@ -58,111 +58,165 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      margin-bottom: 2rem;
     }
     .company-logo img {
-      width: 400px;
+      width: 320px;
       height: auto;
       opacity: 1;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
     }
     .company-text h1 {
-      font-size: 3rem;
+      font-size: 2.5rem;
+      font-weight: 800;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
     }
     .company-text p {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
+      color: #374151;
+      font-weight: 500;
     }
-    .panel {
+    .login-card {
       width: 100%;
-      max-width: calc(40vw - 4rem);
-      padding: 1.5rem;
-      display: none;
-      box-sizing: border-box;
+      max-width: 420px;
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      margin: 0 auto;
-    }
-    .panel.active {
-      display: block;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
     }
     .btn-green {
-      background-color: #10b981;
-      color: #f3f4f6;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
       border: none;
-      text-transform: none;
-      font-family: Arial, sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      height: 3.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
     .btn-green:hover {
-      background-color: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
     }
     .input-icon {
       position: absolute;
       left: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #4b5563;
+      color: #6b7280;
       z-index: 10;
+      transition: color 0.3s ease;
     }
     .password-toggle {
       position: absolute;
       right: 1rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #4b5563;
+      color: #6b7280;
       cursor: pointer;
       z-index: 10;
+      transition: color 0.3s ease;
     }
     .input:focus ~ .input-icon,
     .input:focus ~ .password-toggle {
-      color: #059669;
+      color: #10b981;
+    }
+    .form-input {
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding-left: 3rem;
+      padding-right: 3rem;
+      height: 3.5rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .form-input:focus {
+      background: white;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    .form-input:hover {
+      border-color: #d1d5db;
     }
     .error-message {
       color: #ef4444;
       font-size: 0.875rem;
-      margin-top: 0.25rem;
+      margin-top: 0.5rem;
       display: none;
-      text-transform: none;
-      font-family: Arial, sans-serif;
+      font-weight: 500;
+      align-items: center;
+      gap: 0.5rem;
     }
     .input-error {
       border-color: #ef4444 !important;
-    }
-    .custom-alert {
-      border-left: 4px solid #ef4444;
       background-color: #fef2f2;
-      padding: 1rem;
-      border-radius: 0.375rem;
-      display: none;
+    }
+    .input-error:focus {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    /* Custom alert styles */
+    .custom-login-alert {
+      background: linear-gradient(135deg, #fef2f2, #fecaca);
+      border-left: 4px solid #ef4444;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+      animation: slideIn 0.3s ease-out;
     }
-    .custom-alert i {
+    .custom-login-alert i {
       color: #ef4444;
-      font-size: 1.25rem;
+      font-size: 1.5rem;
+      flex-shrink: 0;
     }
-    .custom-alert span {
+    .custom-login-alert span {
       color: #7f1d1d;
-      font-size: 0.875rem;
-      text-transform: none;
-      font-family: Arial, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      line-height: 1.4;
     }
-    .forgot-password {
-      text-align: right;
-      text-transform: none;
-      font-family: Arial, sans-serif;
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .card-title, .label-text, .btn {
-      text-transform: none;
+    .welcome-text {
+      background: linear-gradient(135deg, #374151, #6b7280);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
     }
-    .panel-title {
-      width: 100%;
+    .welcome-subtitle {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      font-weight: 500;
     }
-    .login-subtitle {
-      text-align: center;
-      color: #6b7280;
-      font-size: 1rem;
-      margin-top: -0.5rem;
-      margin-bottom: 1.5rem;
+    .form-label {
+      color: #374151;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .card-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+      margin: 1.5rem 0;
     }
   </style>
 </head>
@@ -170,52 +224,66 @@
   <div class="container">
     <div class="section-1">
       <div class="company-content">
-        <div class="company-logo mt-2rem">
+        <div class="company-logo">
           <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
         </div>
-        <div class="company-text uppercase relative z-index-2 text-gray-800">
-          <h1 class="font-bold text-gold-500">Microfinance I</h1>
-          <p class="mt-0.1 text-gold-600">Logistics I Department</p>
+        <div class="company-text uppercase">
+          <h1 class="bg-gray-800">Microfinancial</h1>
+          <p>Logistics I Department</p>
         </div>
       </div>
     </div>
 
     <div class="section-2">
-      <div id="loginPanel" class="panel active border-b-4 border-t-4 border-green-600">
-        <div class="card w-full bg-base-100">
-          <div class="card-body"> 
-            <div class="text-center text-gray-600 font-bold text-xl uppercase">Welcome to Logistics I</div>
-            <form id="loginForm" class="space-y-6">
-              <div id="invalidAlert" class="custom-alert">
-                <i class='bx bxs-error-circle'></i>
-                <span id="invalidAlertMessage">Invalid email or password</span>
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text text-gray-600 font-medium">Email</span>
-                </label>
-                <div class="relative">
-                  <input type="email" id="email" name="email" placeholder="Enter your email" class="input input-bordered input-lg w-full bg-gray-50 text-gray-800 focus:border-green-500 transition-all pl-10">
-                  <i class='bx bxs-envelope input-icon text-lg'></i>
-                </div>
-                <div class="error-message" id="emailError">The email is required</div>
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text text-gray-600 font-medium">Password</span>
-                </label>
-                <div class="relative">
-                  <input type="password" id="password" name="password" placeholder="Enter your password" class="input input-bordered input-lg w-full bg-gray-50 text-gray-800 focus:border-green-500 transition-all pl-10 pr-10">
-                  <i class='bx bxs-lock-alt input-icon text-lg'></i>
-                  <i class='bx bx-show password-toggle text-lg' id="togglePassword"></i>
-                </div>
-                <div class="error-message" id="passwordError">The password is required</div>
-              </div>
-              <div class="card-actions">
-                <button type="submit" class="btn btn-green btn-lg w-full mt-4">Login</button>
-              </div>
-            </form>
+      <div class="login-card">
+        <div class="card-body p-8"> 
+          <!-- Header Section -->
+          <div class="text-center mb-6">
+            <div class="welcome-text">Welcome to Logistics I</div>
+            <div class="welcome-subtitle">Sign in to access your account</div>
           </div>
+
+          <!-- Error Alert -->
+          <div id="loginErrorAlert" class="custom-login-alert hidden">
+            <i class='bx bx-x-circle'></i>
+            <span id="loginErrorMessage">Invalid email or password.</span>
+          </div>
+
+          <form id="loginForm" class="space-y-5">
+            <!-- Email Input -->
+            <div class="form-control">
+              <label class="form-label">Email Address</label>
+              <div class="relative">
+                <input type="email" id="email" name="email" placeholder="Enter your email address" class="form-input input-lg w-full">
+                <i class='bx bxs-envelope input-icon text-lg'></i>
+              </div>
+              <div class="error-message" id="emailError">
+                <i class='bx bx-error-circle'></i>
+                <span>The email is required</span>
+              </div>
+            </div>
+
+            <!-- Password Input -->
+            <div class="form-control">
+              <label class="form-label">Password</label>
+              <div class="relative">
+                <input type="password" id="password" name="password" placeholder="Enter your password" class="form-input input-lg w-full">
+                <i class='bx bxs-lock-alt input-icon text-lg'></i>
+                <i class='bx bx-show password-toggle text-lg' id="togglePassword"></i>
+              </div>
+              <div class="error-message" id="passwordError">
+                <i class='bx bx-error-circle'></i>
+                <span>The password is required</span>
+              </div>
+            </div>
+
+            <!-- Login Button -->
+            <div class="form-control mt-8">
+              <button type="submit" class="btn btn-green btn-lg w-full">
+                Sign In
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -230,23 +298,67 @@
         this.classList.toggle('bxs-hide');
     });
 
+    function showErrorAlert(message) {
+        const alert = document.getElementById('loginErrorAlert');
+        const messageSpan = document.getElementById('loginErrorMessage');
+        messageSpan.textContent = message;
+        alert.classList.remove('hidden');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            hideErrorAlert();
+        }, 5000);
+    }
+
+    function hideErrorAlert() {
+        const alert = document.getElementById('loginErrorAlert');
+        alert.classList.add('hidden');
+    }
+
+    // Add input event listeners to remove error styling when user starts typing
+    document.getElementById('email').addEventListener('input', function() {
+        this.classList.remove('input-error');
+        document.getElementById('emailError').style.display = 'none';
+    });
+
+    document.getElementById('password').addEventListener('input', function() {
+        this.classList.remove('input-error');
+        document.getElementById('passwordError').style.display = 'none';
+    });
+
     async function handleLogin(event) {
         event.preventDefault();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
 
+        // Clear previous errors
+        hideErrorAlert();
+        document.getElementById('emailError').style.display = 'none';
+        document.getElementById('passwordError').style.display = 'none';
+        document.getElementById('email').classList.remove('input-error');
+        document.getElementById('password').classList.remove('input-error');
+
         // Basic validation
-        if (!email || !password) {
-            document.getElementById('invalidAlert').style.display = 'flex';
+        let hasError = false;
+        if (!email) {
+            document.getElementById('emailError').style.display = 'flex';
+            document.getElementById('email').classList.add('input-error');
+            hasError = true;
+        }
+        if (!password) {
+            document.getElementById('passwordError').style.display = 'flex';
+            document.getElementById('password').classList.add('input-error');
+            hasError = true;
+        }
+        
+        if (hasError) {
             return;
         }
 
-        document.getElementById('invalidAlert').style.display = 'none';
-
         // Show loading alert
         Swal.fire({
-            title: 'Verifying Login',
-            text: 'Please wait...',
+            title: 'Verifying Credentials',
+            text: 'Please wait while we secure your access...',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
@@ -278,22 +390,22 @@
 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Successfully Login!',
-                    text: 'Redirecting to...',
+                    title: 'Access Granted!',
+                    text: 'Welcome back! Redirecting to your dashboard...',
                     timer: 2000,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    background: '#f0fdf4',
+                    color: '#065f46'
                 }).then(() => {
-                    window.location.href = '/login-splash';
+                    // Redirect to dashboard directly
+                    window.location.href = '/dashboard';
                 });
             } else {
-                throw new Error(data.message || 'Login failed');
+                throw new Error(data.message || 'Invalid email or password.');
             }
         } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Failed',
-                text: error.message || 'Invalid email or password'
-            });
+            Swal.close(); // Close the loading alert
+            showErrorAlert(error.message || 'Invalid email or password. Please check your credentials and try again.');
         }
     }
 
@@ -305,16 +417,28 @@
         const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
         const hasUser = localStorage.getItem('user');
         
-        // Only redirect if we have both authentication flag AND user data
-        if (isAuthenticated && hasUser) {
+        // Also check cookies as backup
+        const cookieAuth = document.cookie.split('; ').find(row => row.startsWith('isAuthenticated='));
+        const cookieUser = document.cookie.split('; ').find(row => row.startsWith('user='));
+        
+        const isReallyAuthenticated = isAuthenticated && hasUser || 
+                                   (cookieAuth && cookieAuth.split('=')[1] === 'true' && cookieUser);
+
+        // Only redirect if we have valid authentication
+        if (isReallyAuthenticated) {
             try {
-                const user = JSON.parse(hasUser);
+                const user = hasUser ? JSON.parse(hasUser) : 
+                            cookieUser ? JSON.parse(decodeURIComponent(cookieUser.split('=')[1])) : null;
+                
                 if (user && user.id) {
                     window.location.href = '/dashboard';
                 }
             } catch (e) {
                 // If user data is invalid, stay on login page
                 console.error('Invalid user data:', e);
+                // Clear invalid data
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('user');
             }
         }
     });

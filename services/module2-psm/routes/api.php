@@ -14,10 +14,10 @@ Route::delete('/vendors/{id}', [PSMController::class, 'deleteVendor']);
 Route::get('/shops', [PSMController::class, 'getShops']);
 Route::post('/shops', [PSMController::class, 'createShop']);
 
-// Products Management Routes
+// Products Management Routes - FIXED: Use PUT for updates
 Route::get('/products', [PSMController::class, 'getProducts']);
 Route::post('/products', [PSMController::class, 'createProduct']);
-Route::put('/products/{id}', [PSMController::class, 'updateProduct']);
+Route::put('/products/{id}', [PSMController::class, 'updateProduct']); // Use PUT for updates
 Route::delete('/products/{id}', [PSMController::class, 'deleteProduct']);
 
 // Vendor Market Routes

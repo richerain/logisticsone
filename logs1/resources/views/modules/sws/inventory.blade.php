@@ -400,17 +400,17 @@ function displayInventoryData(data) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                    <button onclick="viewItem('${item.item_id}')" class="btn btn-sm btn-circle btn-info" title="View full Detail">
-                        <i class="bx bxs-show"></i>
+                    <button onclick="viewItem('${item.item_id}')" class="btn btn-sm btn-circle bg-blue-300" title="View full Detail">
+                        <i class="bx bx-show-alt"></i>
                     </button>
-                    <button onclick="editItem('${item.item_id}')" class="btn btn-sm btn-circle btn-warning" title="Edit">
-                        <i class="bx bxs-edit"></i>
+                    <button onclick="editItem('${item.item_id}')" class="btn btn-sm btn-circle bg-yellow-300" title="Edit">
+                        <i class="bx bx-edit"></i>
                     </button>
-                    <button onclick="requestRestock('${item.item_id}')" class="btn btn-sm btn-circle btn-primary" title="Request Restock">
-                        <i class="bx bxs-cart"></i>
+                    <button onclick="requestRestock('${item.item_id}')" class="btn btn-sm btn-circle bg-green-300" title="Request Restock">
+                        <i class="bx bx-cart"></i>
                     </button>
-                    <button onclick="deleteItem('${item.item_id}')" class="btn btn-sm btn-circle btn-error" title="Delete">
-                        <i class="bx bxs-trash"></i>
+                    <button onclick="deleteItem('${item.item_id}')" class="btn btn-sm btn-circle bg-red-300" title="Delete">
+                        <i class="bx bx-trash"></i>
                     </button>
                 </div>
             </td>

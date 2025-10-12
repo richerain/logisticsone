@@ -82,7 +82,7 @@
                     <li>
                         <a href="{{ route('modules.psm.reorder-management') }}" title="Re-Order Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.reorder-management') ? 'bg-white/30' : '' }}">
                             <i class="bx bx-refresh mr-2"></i>
-                            <span class="module-text">Re-Order Management</span>
+                            <span class="module-text">Re-Order Management <p class="badge badge-xs badge-warning">#</p></span>
                         </a>
                     </li>
                     <li>
@@ -109,15 +109,39 @@
                 </a>
                 <ul class="submodules hidden pl-4 space-y-2">
                     <li>
-                        <a href="{{ route('modules.plt.shipment') }}" title="Shipment Tracking" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.shipment') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-direction-right mr-2"></i>
-                            <span class="module-text">Shipment Tracking</span>
+                        <a href="{{ route('modules.plt.projects') }}" title="Project Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.projects') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-briefcase mr-2"></i>
+                            <span class="module-text">Project Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.plt.route') }}" title="Route Planning" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.route') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-map-pin mr-2"></i>
-                            <span class="module-text">Route Planning</span>
+                        <a href="{{ route('modules.plt.dispatches') }}" title="Dispatch Tracking" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.dispatches') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-truck mr-2"></i>
+                            <span class="module-text">Dispatch Tracking</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('modules.plt.resources') }}" title="Resource Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.resources') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-cube mr-2"></i>
+                            <span class="module-text">Resource Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('modules.plt.allocations') }}" title="Resource Allocation" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.allocations') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-user-check mr-2"></i>
+                            <span class="module-text">Resource Allocation</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('modules.plt.milestones') }}" title="Milestone Tracking" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.milestones') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-flag mr-2"></i>
+                            <span class="module-text">Milestone Tracking</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('modules.plt.tracking-logs') }}" title="Tracking Logs" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.tracking-logs') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-notepad mr-2"></i>
+                            <span class="module-text">Tracking Logs</span>
                         </a>
                     </li>
                 </ul>
@@ -143,6 +167,24 @@
                             <span class="module-text">Maintenance Scheduling</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="#" title="Asset Transfers" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.transfers') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-truck mr-2"></i>
+                            <span class="module-text">Asset Transfers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" title="Disposal Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.disposals') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-trash-alt mr-2"></i>
+                            <span class="module-text">Disposal Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" title="Reports & Analytics" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.reports') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-report mr-2"></i>
+                            <span class="module-text">Reports & Analytics</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
 
@@ -161,9 +203,21 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ route('modules.dtlr.documents') }}" title="Document Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.documents') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-file-doc mr-2"></i>
+                            <span class="module-text">Document Management</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('modules.dtlr.logs') }}" title="Tracking Logs" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.logs') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-notepad mr-2"></i>
                             <span class="module-text">Tracking Logs</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('modules.dtlr.reviews') }}" title="Document Reviews" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.reviews') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-check-shield mr-2"></i>
+                            <span class="module-text">Document Reviews</span>
                         </a>
                     </li>
                 </ul>

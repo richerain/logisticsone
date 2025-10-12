@@ -15,28 +15,28 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg  shadow-lg border-l-4 border-primary">
                 <div class="stat-figure text-primary">
                     <i class="bx bx-money text-3xl"></i>
                 </div>
                 <div class="stat-title">Total Requests</div>
                 <div class="stat-value text-primary" id="total-approvals">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
                 <div class="stat-figure text-warning">
                     <i class="bx bx-time text-3xl"></i>
                 </div>
                 <div class="stat-title">Pending</div>
                 <div class="stat-value text-warning" id="pending-approvals">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
                 <div class="stat-figure text-success">
                     <i class="bx bx-check-circle text-3xl"></i>
                 </div>
                 <div class="stat-title">Approved</div>
                 <div class="stat-value text-success" id="approved-approvals">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-error">
                 <div class="stat-figure text-error">
                     <i class="bx bx-x-circle text-3xl"></i>
                 </div>
@@ -132,6 +132,35 @@
     let budgetApprovals = [];
     let currentApprovalTab = 'all';
 
+    // Format functions
+    function formatRequestId(budId) {
+        return 'BA' + budId.toString().padStart(6, '0');
+    }
+
+    function formatEntityId(entityType, entityId) {
+        switch(entityType) {
+            case 'order': return 'ORD' + entityId.toString().padStart(6, '0');
+            case 'restock': return 'RST' + entityId.toString().padStart(6, '0');
+            case 'requisition': return 'REQ' + entityId.toString().padStart(6, '0');
+            default: return 'EN' + entityId.toString().padStart(6, '0');
+        }
+    }
+
+    function formatBudgetName(entityType, entityId, budName) {
+        switch(entityType) {
+            case 'order': return 'Order ' + formatEntityId('order', entityId);
+            case 'restock': return 'Restock ' + formatEntityId('restock', entityId);
+            case 'requisition': return 'Requisition ' + formatEntityId('requisition', entityId);
+            default: return budName || 'Budget Request';
+        }
+    }
+
+    function calculateTotalAmount(quantity, unitPrice) {
+        const qty = parseFloat(quantity) || 0;
+        const price = parseFloat(unitPrice) || 0;
+        return qty * price;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         loadBudgetApprovals();
         setupApprovalTabs();
@@ -155,11 +184,12 @@
 
     async function loadBudgetApprovals() {
         try {
+            showLoadingState();
             const response = await fetch(`${API_BASE_URL}/budget-approvals`);
             const data = await response.json();
             
-            if (response.ok) {
-                budgetApprovals = data;
+            if (response.ok && data.success) {
+                budgetApprovals = data.data || [];
                 filterApprovalsByTab();
                 updateApprovalStats();
             } else {
@@ -167,8 +197,34 @@
             }
         } catch (error) {
             console.error('Error loading budget approvals:', error);
-            Swal.fire('Error', 'Failed to load budget approvals: ' + error.message, 'error');
+            showErrorState('Failed to load budget approvals: ' + error.message);
         }
+    }
+
+    function showLoadingState() {
+        const tbody = document.getElementById('approvals-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8">
+                    <div class="loading loading-spinner loading-lg"></div>
+                    <p class="text-gray-500 mt-2">Loading budget approvals...</p>
+                </td>
+            </tr>
+        `;
+    }
+
+    function showErrorState(message) {
+        const tbody = document.getElementById('approvals-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8">
+                    <i class="bx bx-error text-4xl text-red-400 mb-2"></i>
+                    <p class="text-red-500">${message}</p>
+                    <button class="btn btn-sm btn-outline mt-2" onclick="loadBudgetApprovals()">Retry</button>
+                </td>
+            </tr>
+        `;
+        Swal.fire('Error', message, 'error');
     }
 
     function filterApprovalsByTab() {
@@ -193,10 +249,12 @@
         }
 
         if (searchTerm) {
+            const searchTermLower = searchTerm.toLowerCase();
             filteredApprovals = filteredApprovals.filter(approval => 
-                approval.bud_id.toString().includes(searchTerm) ||
-                approval.bud_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                approval.entity_type.toLowerCase().includes(searchTerm.toLowerCase())
+                formatRequestId(approval.bud_id).toLowerCase().includes(searchTermLower) ||
+                (approval.bud_name && approval.bud_name.toLowerCase().includes(searchTermLower)) ||
+                (approval.entity_type && approval.entity_type.toLowerCase().includes(searchTermLower)) ||
+                formatEntityId(approval.entity_type, approval.entity_id).toLowerCase().includes(searchTermLower)
             );
         }
 
@@ -218,21 +276,31 @@
             return;
         }
 
-        tbody.innerHTML = approvalsToRender.map(approval => `
+        tbody.innerHTML = approvalsToRender.map(approval => {
+            const requestId = formatRequestId(approval.bud_id);
+            const entityId = formatEntityId(approval.entity_type, approval.entity_id);
+            const budgetName = formatBudgetName(approval.entity_type, approval.entity_id, approval.bud_name);
+            
+            // Calculate total amount if not already set
+            const totalAmount = approval.total_budget && parseFloat(approval.total_budget) > 0 
+                ? parseFloat(approval.total_budget)
+                : calculateTotalAmount(approval.quantity, approval.unit_price);
+            
+            return `
             <tr>
-                <td class="font-mono font-semibold">#${approval.bud_id.toString().padStart(6, '0')}</td>
+                <td class="font-mono font-semibold">${requestId}</td>
                 <td>
-                    <span class="badge badge-outline">${approval.entity_type}</span>
+                    <span class="badge badge-outline">${approval.entity_type || 'N/A'}</span>
                 </td>
-                <td>Entity #${approval.entity_id}</td>
-                <td>${approval.bud_name || 'N/A'}</td>
-                <td class="font-semibold">₱${parseFloat(approval.total_budget || 0).toFixed(2)}</td>
+                <td class="font-mono">${entityId}</td>
+                <td>${budgetName}</td>
+                <td class="font-semibold">₱${totalAmount.toFixed(2)}</td>
                 <td>
                     <span class="badge ${getApprovalStatusBadgeClass(approval.bud_status)}">
-                        ${approval.bud_status}
+                        ${approval.bud_status || 'pending'}
                     </span>
                 </td>
-                <td>${new Date(approval.created_at).toLocaleDateString()}</td>
+                <td>${approval.created_at ? new Date(approval.created_at).toLocaleDateString() : 'N/A'}</td>
                 <td>
                     <div class="flex space-x-1">
                         <button class="btn btn-xs btn-outline btn-info" onclick="viewApprovalDetails(${approval.bud_id})">
@@ -246,7 +314,8 @@
                     </div>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function getApprovalStatusBadgeClass(status) {
@@ -272,19 +341,29 @@
         const approval = budgetApprovals.find(a => a.bud_id === approvalId);
         if (!approval) return;
 
+        const requestId = formatRequestId(approval.bud_id);
+        const entityId = formatEntityId(approval.entity_type, approval.entity_id);
+        const budgetName = formatBudgetName(approval.entity_type, approval.entity_id, approval.bud_name);
+        
+        // Calculate total amount if not already set
+        const totalAmount = approval.total_budget && parseFloat(approval.total_budget) > 0 
+            ? parseFloat(approval.total_budget)
+            : calculateTotalAmount(approval.quantity, approval.unit_price);
+
         Swal.fire({
-            title: `Budget Request #${approval.bud_id.toString().padStart(6, '0')}`,
+            title: `Budget Request ${requestId}`,
             html: `
                 <div class="text-left space-y-2">
-                    <p><strong>Type:</strong> ${approval.entity_type}</p>
-                    <p><strong>Entity ID:</strong> ${approval.entity_id}</p>
-                    <p><strong>Budget Name:</strong> ${approval.bud_name || 'N/A'}</p>
-                    <p><strong>Quantity:</strong> ${approval.quantity || 'N/A'}</p>
+                    <p><strong>Request ID:</strong> ${requestId}</p>
+                    <p><strong>Type:</strong> ${approval.entity_type || 'N/A'}</p>
+                    <p><strong>Entity ID:</strong> ${entityId}</p>
+                    <p><strong>Budget Name:</strong> ${budgetName}</p>
+                    <p><strong>Quantity:</strong> ${approval.quantity || '0'}</p>
                     <p><strong>Unit Price:</strong> ₱${parseFloat(approval.unit_price || 0).toFixed(2)}</p>
-                    <p><strong>Total Budget:</strong> ₱${parseFloat(approval.total_budget || 0).toFixed(2)}</p>
-                    <p><strong>Status:</strong> <span class="badge ${getApprovalStatusBadgeClass(approval.bud_status)}">${approval.bud_status}</span></p>
+                    <p><strong>Total Budget:</strong> ₱${totalAmount.toFixed(2)}</p>
+                    <p><strong>Status:</strong> <span class="badge ${getApprovalStatusBadgeClass(approval.bud_status)}">${approval.bud_status || 'pending'}</span></p>
                     <p><strong>Description:</strong> ${approval.bud_desc || 'No description'}</p>
-                    <p><strong>Created:</strong> ${new Date(approval.created_at).toLocaleString()}</p>
+                    <p><strong>Created:</strong> ${approval.created_at ? new Date(approval.created_at).toLocaleString() : 'N/A'}</p>
                     ${approval.approved_at ? `<p><strong>Approved:</strong> ${new Date(approval.approved_at).toLocaleString()}</p>` : ''}
                 </div>
             `,
@@ -297,6 +376,15 @@
         const approval = budgetApprovals.find(a => a.bud_id === approvalId);
         if (!approval) return;
 
+        const requestId = formatRequestId(approval.bud_id);
+        const entityId = formatEntityId(approval.entity_type, approval.entity_id);
+        const budgetName = formatBudgetName(approval.entity_type, approval.entity_id, approval.bud_name);
+        
+        // Calculate total amount if not already set
+        const totalAmount = approval.total_budget && parseFloat(approval.total_budget) > 0 
+            ? parseFloat(approval.total_budget)
+            : calculateTotalAmount(approval.quantity, approval.unit_price);
+
         document.getElementById('approvalId').value = approval.bud_id;
         document.getElementById('approvalType').value = approval.entity_type;
         document.getElementById('entityId').value = approval.entity_id;
@@ -305,9 +393,11 @@
         document.getElementById('approvalDetails').innerHTML = `
             <div class="bg-base-200 p-4 rounded-lg">
                 <h4 class="font-semibold mb-2">Request Details</h4>
-                <p><strong>Type:</strong> ${approval.entity_type}</p>
-                <p><strong>Budget Name:</strong> ${approval.bud_name || 'N/A'}</p>
-                <p><strong>Amount:</strong> ₱${parseFloat(approval.total_budget || 0).toFixed(2)}</p>
+                <p><strong>Request ID:</strong> ${requestId}</p>
+                <p><strong>Type:</strong> ${approval.entity_type || 'N/A'}</p>
+                <p><strong>Entity ID:</strong> ${entityId}</p>
+                <p><strong>Budget Name:</strong> ${budgetName}</p>
+                <p><strong>Amount:</strong> ₱${totalAmount.toFixed(2)}</p>
                 <p><strong>Description:</strong> ${approval.bud_desc || 'No description'}</p>
             </div>
         `;
@@ -346,7 +436,7 @@
 
             const result = await response.json();
 
-            if (response.ok) {
+            if (response.ok && result.success) {
                 Swal.fire('Success', 'Budget request updated successfully!', 'success');
                 closeApprovalModal();
                 loadBudgetApprovals();

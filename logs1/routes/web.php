@@ -16,7 +16,12 @@ Route::get('/login', function () {
         $isAuthenticated = true;
     }
     
-    // Check localStorage via JavaScript will handle on frontend
+    // Check if we have valid user data
+    $userCookie = isset($_COOKIE['user']) ? json_decode($_COOKIE['user'], true) : null;
+    if ($userCookie && isset($userCookie['id'])) {
+        $isAuthenticated = true;
+    }
+    
     if ($isAuthenticated) {
         return redirect()->route('dashboard');
     }
@@ -76,8 +81,12 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/modules/psm/shop-management', [FrontendController::class, 'psmShopManagement'])->name('modules.psm.shop-management');
     
     // PLT
-    Route::get('/modules/plt/shipment', [FrontendController::class, 'pltShipment'])->name('modules.plt.shipment');
-    Route::get('/modules/plt/route', [FrontendController::class, 'pltRoute'])->name('modules.plt.route');
+    Route::get('/modules/plt/projects', [FrontendController::class, 'pltProjects'])->name('modules.plt.projects');
+    Route::get('/modules/plt/dispatches', [FrontendController::class, 'pltDispatches'])->name('modules.plt.dispatches');
+    Route::get('/modules/plt/resources', [FrontendController::class, 'pltResources'])->name('modules.plt.resources');
+    Route::get('/modules/plt/allocations', [FrontendController::class, 'pltAllocations'])->name('modules.plt.allocations');
+    Route::get('/modules/plt/milestones', [FrontendController::class, 'pltMilestones'])->name('modules.plt.milestones');
+    Route::get('/modules/plt/tracking-logs', [FrontendController::class, 'pltTrackingLogs'])->name('modules.plt.tracking-logs');
 
     // ALMS
     Route::get('/modules/alms/registration', [FrontendController::class, 'almsRegistration'])->name('modules.alms.registration');
@@ -85,7 +94,9 @@ Route::middleware(['web.auth'])->group(function () {
 
     // DTLR
     Route::get('/modules/dtlr/upload', [FrontendController::class, 'dtlrUpload'])->name('modules.dtlr.upload');
+    Route::get('/modules/dtlr/documents', [FrontendController::class, 'dtlrDocuments'])->name('modules.dtlr.documents');
     Route::get('/modules/dtlr/logs', [FrontendController::class, 'dtlrLogs'])->name('modules.dtlr.logs');
+    Route::get('/modules/dtlr/reviews', [FrontendController::class, 'dtlrReviews'])->name('modules.dtlr.reviews');
 
     // User Management
     Route::get('/modules/user-management', [FrontendController::class, 'userManagement'])->name('modules.user-management');

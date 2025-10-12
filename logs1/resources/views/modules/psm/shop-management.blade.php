@@ -13,28 +13,28 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded- shadow-lg border-l-4 border-primary">
                 <div class="stat-figure text-primary">
                     <i class="bx bx-store text-3xl"></i>
                 </div>
                 <div class="stat-title">Total Shops</div>
                 <div class="stat-value text-primary" id="total-shops">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
                 <div class="stat-figure text-success">
                     <i class="bx bx-check-circle text-3xl"></i>
                 </div>
                 <div class="stat-title">Active</div>
                 <div class="stat-value text-success" id="active-shops">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
                 <div class="stat-figure text-warning">
                     <i class="bx bx-wrench text-3xl"></i>
                 </div>
                 <div class="stat-title">Maintenance</div>
                 <div class="stat-value text-warning" id="maintenance-shops">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-error">
                 <div class="stat-figure text-error">
                     <i class="bx bx-x-circle text-3xl"></i>
                 </div>
@@ -136,11 +136,12 @@
 
         async function loadShops() {
             try {
+                showLoadingState();
                 const response = await fetch(`${API_BASE_URL}/shops`);
                 const data = await response.json();
                 
-                if (response.ok) {
-                    shops = data;
+                if (response.ok && data.success) {
+                    shops = data.data || [];
                     renderShops(shops);
                     updateShopStats();
                 } else {
@@ -148,15 +149,43 @@
                 }
             } catch (error) {
                 console.error('Error loading shops:', error);
-                Swal.fire('Error', 'Failed to load shops: ' + error.message, 'error');
+                showErrorState('Failed to load shops: ' + error.message);
             }
+        }
+
+        function showLoadingState() {
+            const tbody = document.getElementById('shops-table-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-8">
+                        <div class="loading loading-spinner loading-lg"></div>
+                        <p class="text-gray-500 mt-2">Loading shops...</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function showErrorState(message) {
+            const tbody = document.getElementById('shops-table-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-8">
+                        <i class="bx bx-error text-4xl text-red-400 mb-2"></i>
+                        <p class="text-red-500">${message}</p>
+                        <button class="btn btn-sm btn-outline mt-2" onclick="loadShops()">Retry</button>
+                    </td>
+                </tr>
+            `;
+            Swal.fire('Error', message, 'error');
         }
 
         async function loadVendors() {
             try {
                 const response = await fetch(`${API_BASE_URL}/vendors`);
-                if (response.ok) {
-                    vendors = await response.json();
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    vendors = data.data || [];
                     populateVendorDropdown();
                 }
             } catch (error) {
@@ -190,16 +219,16 @@
                     </td>
                     <td>
                         <div class="flex items-center space-x-2">
-                            <span class="font-semibold">${shop.shop_prods}</span>
+                            <span class="font-semibold">${shop.shop_prods || 0}</span>
                             <span class="text-sm text-gray-500">products</span>
                         </div>
                     </td>
                     <td>
                         <span class="badge ${getShopStatusBadgeClass(shop.shop_status)}">
-                            ${shop.shop_status}
+                            ${shop.shop_status || 'active'}
                         </span>
                     </td>
-                    <td>${new Date(shop.created_at).toLocaleDateString()}</td>
+                    <td>${shop.created_at ? new Date(shop.created_at).toLocaleDateString() : 'N/A'}</td>
                     <td>
                         <div class="flex space-x-1">
                             <button class="btn btn-xs btn-outline btn-info" onclick="viewShopDetails(${shop.shop_id})">
@@ -241,7 +270,7 @@
             select.innerHTML = '<option value="">Select Vendor</option>' +
                 vendors.map(vendor => `
                     <option value="${vendor.ven_id}">
-                        ${vendor.ven_name} - ${vendor.ven_email}
+                        ${vendor.ven_name} - ${vendor.ven_email || 'N/A'}
                     </option>
                 `).join('');
         }
@@ -249,8 +278,8 @@
         function filterShops(searchTerm) {
             const filtered = shops.filter(shop => 
                 shop.shop_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                shop.vendor?.ven_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                shop.vendor?.ven_email.toLowerCase().includes(searchTerm.toLowerCase())
+                (shop.vendor?.ven_name && shop.vendor.ven_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (shop.vendor?.ven_email && shop.vendor.ven_email.toLowerCase().includes(searchTerm.toLowerCase()))
             );
             renderShops(filtered);
         }
@@ -266,10 +295,10 @@
                         <p><strong>Vendor:</strong> ${shop.vendor?.ven_name || 'N/A'}</p>
                         <p><strong>Vendor Email:</strong> ${shop.vendor?.ven_email || 'N/A'}</p>
                         <p><strong>Vendor Contact:</strong> ${shop.vendor?.ven_contacts || 'N/A'}</p>
-                        <p><strong>Products:</strong> ${shop.shop_prods}</p>
-                        <p><strong>Status:</strong> <span class="badge ${getShopStatusBadgeClass(shop.shop_status)}">${shop.shop_status}</span></p>
-                        <p><strong>Created:</strong> ${new Date(shop.created_at).toLocaleString()}</p>
-                        <p><strong>Last Updated:</strong> ${new Date(shop.updated_at).toLocaleString()}</p>
+                        <p><strong>Products:</strong> ${shop.shop_prods || 0}</p>
+                        <p><strong>Status:</strong> <span class="badge ${getShopStatusBadgeClass(shop.shop_status)}">${shop.shop_status || 'active'}</span></p>
+                        <p><strong>Created:</strong> ${shop.created_at ? new Date(shop.created_at).toLocaleString() : 'N/A'}</p>
+                        <p><strong>Last Updated:</strong> ${shop.updated_at ? new Date(shop.updated_at).toLocaleString() : 'N/A'}</p>
                     </div>
                 `,
                 icon: 'info',
@@ -303,7 +332,7 @@
 
                 const result = await response.json();
 
-                if (response.ok) {
+                if (response.ok && result.success) {
                     Swal.fire('Success', 'Shop added successfully!', 'success');
                     closeAddShopModal();
                     loadShops();
@@ -336,11 +365,13 @@
                         method: 'DELETE'
                     });
 
-                    if (response.ok) {
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
                         Swal.fire('Deleted!', 'Shop has been deleted.', 'success');
                         loadShops();
                     } else {
-                        throw new Error('Failed to delete shop');
+                        throw new Error(result.message || 'Failed to delete shop');
                     }
                 } catch (error) {
                     Swal.fire('Error', 'Failed to delete shop: ' + error.message, 'error');

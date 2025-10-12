@@ -13,38 +13,60 @@
         <p class="text-sm text-gray-500 mt-2">Your Role: <span id="user-role" class="font-semibold"></span></p>
     </div>
 
-<!-- testing point -->
- <div class="grid grid-row-4 ">
-    <div class="stats shadow-lg border-l-4 border-green-600 m-5">
-        <div class="stat">
-            <div class="stat-title">Pagmamahal kay maam riche</div>
-            <div class="stat-value">rating: 100000%</div>
-            <div class="stat-desc">description</div>
+    <!-- Stats Grid: 4 Columns x 2 Rows (8 Cards Total) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5">
+        <!-- Row 1: Cards 1-4 -->
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
+            <div class="stat-title"><i class='bx-fw bx bx-xs bxs-heart'></i>Ma'am Riche<i class='bx-fw bx bx-xs bxs-heart'></i></div>
+            <div class="stat-value text-primary">100000%</div>
+            <div class="stat-desc text-success">Ultimate rating achieved</div>
         </div>
-    </div>
-    <div class="stats shadow-lg border-l-4 border-green-600 m-5">
-        <div class="stat">
+        
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
             <div class="stat-title">Total Page Views</div>
             <div class="stat-value">89,400</div>
-            <div class="stat-desc">21% more than last month</div>
+            <div class="stat-desc text-success">21% more than last month</div>
+        </div>
+        
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
+            <div class="stat-title">New Users</div>
+            <div class="stat-value">1,200</div>
+            <div class="stat-desc text-success">15% increase from previous</div>
+        </div>
+        
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
+            <div class="stat-title">Revenue</div>
+            <div class="stat-value">$45,230</div>
+            <div class="stat-desc text-success">8% growth YTD</div>
+        </div>
+        
+        <!-- Row 2: Cards 5-8 -->
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
+            <div class="stat-title">Active Sessions</div>
+            <div class="stat-value">2,500</div>
+            <div class="stat-desc text-success">Up 12% today</div>
+        </div>
+        
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
+            <div class="stat-title">Error Rate</div>
+            <div class="stat-value">0.5%</div>
+            <div class="stat-desc text-error">Below target threshold</div>
+        </div>
+        
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
+            <div class="stat-title">Bounce Rate</div>
+            <div class="stat-value">32%</div>
+            <div class="stat-desc text-warning">Monitor closely</div>
+        </div>
+        
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
+            <div class="stat-title">Conversion Rate</div>
+            <div class="stat-value">4.2%</div>
+            <div class="stat-desc text-success">On track for Q4 goals</div>
         </div>
     </div>
-        <div class="stats shadow-lg border-l-4 border-green-600 m-5">
-        <div class="stat">
-            <div class="stat-title">Total Page Views</div>
-            <div class="stat-value">89,400</div>
-            <div class="stat-desc">21% more than last month</div>
-        </div>
-    </div>
-        <div class="stats shadow-lg border-l-4 border-green-600 m-5">
-        <div class="stat">
-            <div class="stat-title">Total Page Views</div>
-            <div class="stat-value">89,400</div>
-            <div class="stat-desc">21% more than last month</div>
-        </div>
-    </div>
- </div>
 
+    <div class="border-b border-green-900 p-1 mb-5"></div>
 
     <!-- Role-based visibility -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="role-based-panels">
@@ -101,27 +123,6 @@
                 <li>Inventory Updates</li>
                 <li>Vendor Reports</li>
             </ul>
-        </div>
-    </div>
-
-    <!-- Quick Stats Section (Visible to all roles) -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="stat bg-primary text-primary-content">
-            <div class="stat-title">Total Tasks</div>
-            <div class="stat-value" id="total-tasks">0</div>
-            <div class="stat-desc">Your assigned tasks</div>
-        </div>
-        
-        <div class="stat bg-secondary text-secondary-content">
-            <div class="stat-title">Pending Items</div>
-            <div class="stat-value" id="pending-items">0</div>
-            <div class="stat-desc">Awaiting your action</div>
-        </div>
-        
-        <div class="stat bg-accent text-accent-content">
-            <div class="stat-title">Completed</div>
-            <div class="stat-value" id="completed-items">0</div>
-            <div class="stat-desc">This month</div>
         </div>
     </div>
 

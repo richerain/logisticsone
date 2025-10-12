@@ -24,6 +24,7 @@
         <div class="modal-box">
             <h3 class="font-bold text-lg mb-4">Place Order</h3>
             <form id="orderForm" class="space-y-4">
+                @csrf
                 <input type="hidden" id="orderProductId">
                 <div class="form-control">
                     <label class="label">
@@ -45,10 +46,13 @@
                 </div>
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text font-semibold">Quantity</span>
+                        <span class="label-text font-semibold">Quantity *</span>
                     </label>
                     <input type="number" name="quantity" id="orderQuantity" class="input input-bordered w-full" 
                            min="1" value="1" required>
+                    <label class="label">
+                        <span class="label-text-alt text-warning" id="quantityWarning"></span>
+                    </label>
                 </div>
                 <div class="form-control">
                     <label class="label">
@@ -83,19 +87,47 @@
 
         async function loadProducts() {
             try {
+                showProductsLoading();
                 const response = await fetch(`${API_BASE_URL}/market/products`);
-                const data = await response.json();
                 
-                if (response.ok) {
-                    products = data;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    products = result.data || [];
                     renderProducts(products);
                 } else {
-                    throw new Error(data.message || 'Failed to load products');
+                    throw new Error(result.message || 'Failed to load products');
                 }
             } catch (error) {
                 console.error('Error loading products:', error);
-                Swal.fire('Error', 'Failed to load products: ' + error.message, 'error');
+                showProductsError('Failed to load products: ' + error.message);
             }
+        }
+
+        function showProductsLoading() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <div class="loading loading-spinner loading-lg"></div>
+                    <p class="text-gray-500 mt-2">Loading products...</p>
+                </div>
+            `;
+        }
+
+        function showProductsError(message) {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i class="bx bx-error text-6xl text-red-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-red-600 mb-2">Error Loading Products</h3>
+                    <p class="text-red-500 mb-4">${message}</p>
+                    <button class="btn btn-outline" onclick="loadProducts()">Retry</button>
+                </div>
+            `;
         }
 
         function renderProducts(productsToRender) {
@@ -117,31 +149,36 @@
                     <figure class="px-4 pt-4">
                         <img src="${product.prod_img || '/images/placeholder-product.jpg'}" 
                              alt="${product.prod_name}" 
-                             class="rounded-xl h-48 w-full object-cover">
+                             class="rounded-xl h-48 w-full object-cover bg-gray-100">
+                        ${product.prod_stock <= 0 ? `
+                            <div class="absolute inset-0 bg-black bg-opacity-50 rounded-xl flex items-center justify-center">
+                                <span class="badge badge-error badge-lg text-white">Out of Stock</span>
+                            </div>
+                        ` : ''}
                     </figure>
                     <div class="card-body">
-                        <h3 class="card-title text-lg">${product.prod_name}</h3>
+                        <h3 class="card-title text-lg">${product.prod_name || 'Unnamed Product'}</h3>
                         <p class="text-gray-600 text-sm">${product.prod_category || 'Uncategorized'}</p>
-                        <p class="text-gray-500 text-sm line-clamp-2">${product.prod_desc || 'No description'}</p>
+                        <p class="text-gray-500 text-sm line-clamp-2">${product.prod_desc || 'No description available'}</p>
                         
                         <div class="flex justify-between items-center mt-2">
-                            <span class="text-2xl font-bold text-primary">₱${parseFloat(product.prod_price).toFixed(2)}</span>
+                            <span class="text-2xl font-bold text-primary">₱${parseFloat(product.prod_price || 0).toFixed(2)}</span>
                             <span class="badge ${getStockBadgeClass(product.prod_stock_status)}">
-                                ${product.prod_stock_status}
+                                ${(product.prod_stock_status || 'onstock').replace('onstock', 'In Stock').replace('lowstock', 'Low Stock').replace('outofstock', 'Out of Stock')}
                             </span>
                         </div>
                         
                         <div class="flex justify-between items-center text-sm text-gray-500">
-                            <span>Stock: ${product.prod_stock}</span>
-                            <span>${product.shop?.shop_name || 'Unknown Shop'}</span>
+                            <span>Stock: ${product.prod_stock || 0}</span>
+                            <span class="text-right">${product.shop?.shop_name || 'Unknown Shop'}</span>
                         </div>
                         
                         <div class="card-actions justify-end mt-4">
                             <button class="btn btn-primary btn-sm flex-1" 
                                     onclick="openOrderModal(${product.prod_id})"
-                                    ${product.prod_stock <= 0 ? 'disabled' : ''}>
+                                    ${(product.prod_stock || 0) <= 0 ? 'disabled' : ''}>
                                 <i class="bx bx-cart mr-1"></i>
-                                ${product.prod_stock <= 0 ? 'Out of Stock' : 'Order Now'}
+                                ${(product.prod_stock || 0) <= 0 ? 'Out of Stock' : 'Order Now'}
                             </button>
                         </div>
                     </div>
@@ -160,9 +197,10 @@
 
         function filterProducts(searchTerm) {
             const filtered = products.filter(product => 
-                product.prod_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.prod_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.prod_category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.shop?.shop_name.toLowerCase().includes(searchTerm.toLowerCase())
+                product.shop?.shop_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.prod_desc?.toLowerCase().includes(searchTerm.toLowerCase())
             );
             renderProducts(filtered);
         }
@@ -172,20 +210,47 @@
             if (!product) return;
 
             document.getElementById('orderProductId').value = product.prod_id;
-            document.getElementById('orderProductName').value = product.prod_name;
-            document.getElementById('orderProductPrice').value = `₱${parseFloat(product.prod_price).toFixed(2)}`;
-            document.getElementById('orderProductStock').value = product.prod_stock;
-            document.getElementById('orderQuantity').max = product.prod_stock;
-            document.getElementById('orderQuantity').value = 1;
+            document.getElementById('orderProductName').value = product.prod_name || 'Unknown Product';
+            document.getElementById('orderProductPrice').value = `₱${parseFloat(product.prod_price || 0).toFixed(2)}`;
+            document.getElementById('orderProductStock').value = product.prod_stock || 0;
+            
+            const quantityInput = document.getElementById('orderQuantity');
+            quantityInput.max = product.prod_stock || 1;
+            quantityInput.value = 1;
+            
+            updateQuantityWarning(product.prod_stock || 0);
 
             document.getElementById('orderModal').classList.add('modal-open');
+        }
+
+        function updateQuantityWarning(availableStock) {
+            const warningElement = document.getElementById('quantityWarning');
+            if (availableStock < 10) {
+                warningElement.textContent = `Only ${availableStock} items left in stock!`;
+            } else {
+                warningElement.textContent = '';
+            }
         }
 
         function closeOrderModal() {
             document.getElementById('orderModal').classList.remove('modal-open');
             document.getElementById('orderForm').reset();
+            document.getElementById('quantityWarning').textContent = '';
         }
 
+        // Quantity input validation
+        document.getElementById('orderQuantity').addEventListener('input', function(e) {
+            const maxStock = parseInt(document.getElementById('orderProductStock').value) || 1;
+            const currentValue = parseInt(e.target.value) || 0;
+            
+            if (currentValue > maxStock) {
+                e.target.value = maxStock;
+            }
+            
+            updateQuantityWarning(maxStock - currentValue);
+        });
+
+        // Order Form Submission
         document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -193,13 +258,24 @@
             const productId = document.getElementById('orderProductId').value;
             const product = products.find(p => p.prod_id == productId);
             
+            if (!product) {
+                Swal.fire('Error', 'Product not found!', 'error');
+                return;
+            }
+
             const orderData = {
                 shop_id: product.shop_id,
-                prod_id: productId,
+                prod_id: parseInt(productId),
                 quantity: parseInt(formData.get('quantity')),
-                order_price: parseFloat(product.prod_price),
-                order_desc: formData.get('order_desc')
+                order_price: parseFloat(product.prod_price || 0),
+                order_desc: formData.get('order_desc') || `Order for ${product.prod_name}`
             };
+
+            // Validate quantity
+            if (orderData.quantity > (product.prod_stock || 0)) {
+                Swal.fire('Error', 'Requested quantity exceeds available stock!', 'error');
+                return;
+            }
 
             try {
                 const response = await fetch(`${API_BASE_URL}/orders`, {
@@ -213,8 +289,13 @@
 
                 const result = await response.json();
 
-                if (response.ok) {
-                    Swal.fire('Success', 'Order placed successfully!', 'success');
+                if (response.ok && result.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: result.message || 'Order placed successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
                     closeOrderModal();
                     loadProducts(); // Refresh products to update stock
                 } else {
@@ -232,6 +313,14 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
         }
     </style>
 @endsection

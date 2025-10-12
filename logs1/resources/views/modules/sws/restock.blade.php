@@ -321,14 +321,14 @@ function displayRestockData(data) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                    <button onclick="viewRestock('${restock.restock_id}')" class="btn btn-sm btn-circle btn-info" title="View full Detail">
-                        <i class="bx bxs-show"></i>
+                    <button onclick="viewRestock('${restock.restock_id}')" class="btn btn-sm btn-circle bg-blue-300btn-info" title="View full Detail">
+                        <i class="bx bx-show-alt"></i>
                     </button>
-                    <button onclick="editRestock('${restock.restock_id}')" class="btn btn-sm btn-circle btn-warning" title="Edit">
-                        <i class="bx bxs-edit"></i>
+                    <button onclick="editRestock('${restock.restock_id}')" class="btn btn-sm btn-circle bg-yellow-300" title="Edit">
+                        <i class="bx bx-edit"></i>
                     </button>
-                    <button onclick="deleteRestock('${restock.restock_id}')" class="btn btn-sm btn-circle btn-error" title="Delete">
-                        <i class="bx bxs-trash"></i>
+                    <button onclick="deleteRestock('${restock.restock_id}')" class="btn btn-sm btn-circle bg-red-300" title="Delete">
+                        <i class="bx bx-trash"></i>
                     </button>
                 </div>
             </td>

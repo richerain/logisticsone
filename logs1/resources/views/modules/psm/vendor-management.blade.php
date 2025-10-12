@@ -59,15 +59,16 @@
         <div class="modal-box">
             <h3 class="font-bold text-lg mb-4">Add New Vendor</h3>
             <form id="addVendorForm" class="space-y-4">
+                @csrf
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text font-semibold">Vendor Name</span>
+                        <span class="label-text font-semibold">Vendor Name *</span>
                     </label>
                     <input type="text" name="ven_name" class="input input-bordered w-full" required>
                 </div>
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text font-semibold">Email</span>
+                        <span class="label-text font-semibold">Email *</span>
                     </label>
                     <input type="email" name="ven_email" class="input input-bordered w-full" required>
                 </div>
@@ -99,11 +100,137 @@
         </div>
     </div>
 
+    <!-- Edit Vendor Modal -->
+    <div id="editVendorModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Edit Vendor</h3>
+            <form id="editVendorForm" class="space-y-4">
+                @csrf
+                @method('PUT')
+                <input type="hidden" id="editVendorId" name="ven_id">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Vendor Name *</span>
+                    </label>
+                    <input type="text" id="editVendorName" name="ven_name" class="input input-bordered w-full" required>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Email *</span>
+                    </label>
+                    <input type="email" id="editVendorEmail" name="ven_email" class="input input-bordered w-full" required>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Contact</span>
+                    </label>
+                    <input type="text" id="editVendorContacts" name="ven_contacts" class="input input-bordered w-full" placeholder="Phone number">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Address</span>
+                    </label>
+                    <textarea id="editVendorAddress" name="ven_address" class="textarea textarea-bordered h-24" placeholder="Vendor address"></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Rating</span>
+                    </label>
+                    <input type="number" id="editVendorRating" name="ven_rating" step="0.1" min="0" max="5" class="input input-bordered w-full">
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Status</span>
+                    </label>
+                    <select id="editVendorStatus" name="ven_status" class="select select-bordered w-full">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="modal-action">
+                    <button type="button" class="btn btn-ghost" onclick="closeEditVendorModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bx bx-save mr-2"></i>Update Vendor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 <script>
     let vendors = [];
 
     // ==================== CONFIGURATION ====================
     const API_BASE_URL = 'http://localhost:8001/api/psm';
+
+    // Utility function to safely convert to number
+    function safeNumber(value, defaultValue = 0) {
+        if (value === null || value === undefined) return defaultValue;
+        const num = parseFloat(value);
+        return isNaN(num) ? defaultValue : num;
+    }
+
+    // Utility function to safely format rating
+    function formatRating(rating) {
+        const num = safeNumber(rating, 0);
+        return num.toFixed(1);
+    }
+
+    // Function to generate accurate star rating HTML
+    function generateStarRating(rating) {
+        const numRating = safeNumber(rating, 0);
+        let starsHTML = '';
+        
+        // For DaisyUI rating, we need to set the value attribute on the container
+        // and use the correct approach for displaying stars
+        for (let i = 1; i <= 5; i++) {
+            const isChecked = i <= numRating;
+            starsHTML += `<input type="radio" name="rating-${vendor.ven_id}" class="mask mask-star-2 bg-orange-400" ${isChecked ? 'checked' : ''} />`;
+        }
+        
+        return starsHTML;
+    }
+
+    // Alternative approach using DaisyUI's rating system
+    function generateDaisyUIRating(rating) {
+        const numRating = Math.round(safeNumber(rating, 0)); // Round to nearest whole number for star display
+        let starsHTML = '';
+        
+        for (let i = 1; i <= 5; i++) {
+            if (i <= numRating) {
+                starsHTML += `<input type="radio" name="rating-${vendor.ven_id}" class="mask mask-star-2 bg-orange-400" checked disabled />`;
+            } else {
+                starsHTML += `<input type="radio" name="rating-${vendor.ven_id}" class="mask mask-star-2 bg-orange-400" disabled />`;
+            }
+        }
+        
+        return starsHTML;
+    }
+
+    // Simple star display without DaisyUI complications
+    function generateSimpleStarRating(rating) {
+        const numRating = safeNumber(rating, 0);
+        let starsHTML = '';
+        
+        for (let i = 1; i <= 5; i++) {
+            if (i <= numRating) {
+                starsHTML += `<span class="text-orange-400">★</span>`;
+            } else {
+                starsHTML += `<span class="text-gray-300">★</span>`;
+            }
+        }
+        
+        return starsHTML;
+    }
+
+    // Sort vendors by creation date (newest first)
+    function sortVendorsByDate(vendorsArray) {
+        return vendorsArray.sort((a, b) => {
+            const dateA = new Date(a.created_at || 0);
+            const dateB = new Date(b.created_at || 0);
+            return dateB - dateA; // Descending order (newest first)
+        });
+    }
 
     // Load vendors on page load
     document.addEventListener('DOMContentLoaded', function() {
@@ -112,20 +239,52 @@
 
     async function loadVendors() {
         try {
+            showLoadingState();
             const response = await fetch(`${API_BASE_URL}/vendors`);
-            const data = await response.json();
             
-            if (response.ok) {
-                vendors = data;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Sort vendors by creation date (newest first)
+                vendors = sortVendorsByDate(result.data || []);
                 renderVendors();
                 updateStats();
             } else {
-                throw new Error(data.message || 'Failed to load vendors');
+                throw new Error(result.message || 'Failed to load vendors');
             }
         } catch (error) {
             console.error('Error loading vendors:', error);
-            Swal.fire('Error', 'Failed to load vendors: ' + error.message, 'error');
+            showErrorState('Failed to load vendors: ' + error.message);
         }
+    }
+
+    function showLoadingState() {
+        const tbody = document.getElementById('vendors-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-8">
+                    <div class="loading loading-spinner loading-lg"></div>
+                    <p class="text-gray-500 mt-2">Loading vendors...</p>
+                </td>
+            </tr>
+        `;
+    }
+
+    function showErrorState(message) {
+        const tbody = document.getElementById('vendors-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-8">
+                    <i class="bx bx-error text-4xl text-red-400 mb-2"></i>
+                    <p class="text-red-500">${message}</p>
+                    <button class="btn btn-sm btn-outline mt-2" onclick="loadVendors()">Retry</button>
+                </td>
+            </tr>
+        `;
     }
 
     function renderVendors() {
@@ -137,33 +296,42 @@
                     <td colspan="6" class="text-center py-8">
                         <i class="bx bx-package text-4xl text-gray-400 mb-2"></i>
                         <p class="text-gray-500">No vendors found</p>
+                        <button class="btn btn-sm btn-primary mt-2" onclick="openAddVendorModal()">Add First Vendor</button>
                     </td>
                 </tr>
             `;
             return;
         }
 
-        tbody.innerHTML = vendors.map(vendor => `
+        tbody.innerHTML = vendors.map(vendor => {
+            const rating = safeNumber(vendor.ven_rating, 0);
+            const displayRating = formatRating(rating);
+            // Use the simple star rating to avoid DaisyUI complications
+            const starRatingHTML = generateSimpleStarRating(rating);
+            
+            return `
             <tr>
                 <td>
-                    <div class="font-semibold">${vendor.ven_name}</div>
+                    <div class="font-semibold">${vendor.ven_name || 'N/A'}</div>
+                    ${vendor.created_at ? `
+                    <div class="text-xs text-gray-500 mt-1">
+                        Added: ${new Date(vendor.created_at).toLocaleDateString()}
+                    </div>
+                    ` : ''}
                 </td>
-                <td>${vendor.ven_email}</td>
+                <td>${vendor.ven_email || 'N/A'}</td>
                 <td>${vendor.ven_contacts || 'N/A'}</td>
                 <td>
                     <div class="flex items-center">
-                        <div class="rating rating-sm">
-                            ${Array.from({length: 5}, (_, i) => `
-                                <input type="radio" class="mask mask-star-2" 
-                                       ${i < Math.floor(vendor.ven_rating) ? 'checked' : ''} disabled>
-                            `).join('')}
+                        <div class="text-lg rating rating-sm">
+                            ${starRatingHTML}
                         </div>
-                        <span class="ml-2 text-sm">${vendor.ven_rating}</span>
+                        <span class="ml-2 text-sm font-medium">${displayRating}</span>
                     </div>
                 </td>
                 <td>
                     <span class="badge ${vendor.ven_status === 'active' ? 'badge-success' : 'badge-error'}">
-                        ${vendor.ven_status}
+                        ${vendor.ven_status || 'unknown'}
                     </span>
                 </td>
                 <td>
@@ -177,7 +345,8 @@
                     </div>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function updateStats() {
@@ -195,25 +364,47 @@
         document.getElementById('addVendorForm').reset();
     }
 
+    function openEditVendorModal() {
+        document.getElementById('editVendorModal').classList.add('modal-open');
+    }
+
+    function closeEditVendorModal() {
+        document.getElementById('editVendorModal').classList.remove('modal-open');
+        document.getElementById('editVendorForm').reset();
+    }
+
+    // Add Vendor Form Submission
     document.getElementById('addVendorForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const formData = new FormData(this);
-        const vendorData = Object.fromEntries(formData);
+        const vendorData = {
+            ven_name: formData.get('ven_name'),
+            ven_email: formData.get('ven_email'),
+            ven_contacts: formData.get('ven_contacts'),
+            ven_address: formData.get('ven_address'),
+            ven_rating: safeNumber(formData.get('ven_rating'), 0.0)
+        };
         
         try {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin mr-2"></i>Saving...';
+            submitBtn.disabled = true;
+
             const response = await fetch(`${API_BASE_URL}/vendors`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(vendorData)
             });
 
             const result = await response.json();
 
-            if (response.ok) {
-                Swal.fire('Success', 'Vendor added successfully!', 'success');
+            if (response.ok && result.success) {
+                Swal.fire('Success', result.message || 'Vendor added successfully!', 'success');
                 closeAddVendorModal();
                 loadVendors();
             } else {
@@ -221,6 +412,78 @@
             }
         } catch (error) {
             Swal.fire('Error', 'Failed to add vendor: ' + error.message, 'error');
+        } finally {
+            const submitBtn = document.querySelector('#addVendorForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bx bx-save mr-2"></i>Save Vendor';
+                submitBtn.disabled = false;
+            }
+        }
+    });
+
+    // Edit Vendor Functionality
+    function editVendor(vendorId) {
+        const vendor = vendors.find(v => v.ven_id === vendorId);
+        if (!vendor) return;
+
+        document.getElementById('editVendorId').value = vendor.ven_id;
+        document.getElementById('editVendorName').value = vendor.ven_name || '';
+        document.getElementById('editVendorEmail').value = vendor.ven_email || '';
+        document.getElementById('editVendorContacts').value = vendor.ven_contacts || '';
+        document.getElementById('editVendorAddress').value = vendor.ven_address || '';
+        document.getElementById('editVendorRating').value = safeNumber(vendor.ven_rating, 0.0);
+        document.getElementById('editVendorStatus').value = vendor.ven_status || 'active';
+
+        openEditVendorModal();
+    }
+
+    // Edit Vendor Form Submission
+    document.getElementById('editVendorForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const vendorId = document.getElementById('editVendorId').value;
+        const formData = new FormData(this);
+        const vendorData = {
+            ven_name: formData.get('ven_name'),
+            ven_email: formData.get('ven_email'),
+            ven_contacts: formData.get('ven_contacts'),
+            ven_address: formData.get('ven_address'),
+            ven_rating: safeNumber(formData.get('ven_rating'), 0.0),
+            ven_status: formData.get('ven_status')
+        };
+        
+        try {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin mr-2"></i>Updating...';
+            submitBtn.disabled = true;
+
+            const response = await fetch(`${API_BASE_URL}/vendors/${vendorId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(vendorData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                Swal.fire('Success', result.message || 'Vendor updated successfully!', 'success');
+                closeEditVendorModal();
+                loadVendors();
+            } else {
+                throw new Error(result.message || 'Failed to update vendor');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'Failed to update vendor: ' + error.message, 'error');
+        } finally {
+            const submitBtn = document.querySelector('#editVendorForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bx bx-save mr-2"></i>Update Vendor';
+                submitBtn.disabled = false;
+            }
         }
     });
 
@@ -238,23 +501,33 @@
         if (result.isConfirmed) {
             try {
                 const response = await fetch(`${API_BASE_URL}/vendors/${vendorId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
 
-                if (response.ok) {
-                    Swal.fire('Deleted!', 'Vendor has been deleted.', 'success');
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    Swal.fire('Deleted!', result.message || 'Vendor has been deleted.', 'success');
                     loadVendors();
                 } else {
-                    throw new Error('Failed to delete vendor');
+                    throw new Error(result.message || 'Failed to delete vendor');
                 }
             } catch (error) {
                 Swal.fire('Error', 'Failed to delete vendor: ' + error.message, 'error');
             }
         }
     }
-
-    function editVendor(vendorId) {
-        Swal.fire('Info', 'Edit functionality will be implemented soon!', 'info');
-    }
 </script>
+
+<style>
+    .rating input {
+        cursor: default !important;
+    }
+    .rating input:checked ~ input {
+        color: #d1d5db !important;
+    }
+</style>
 @endsection

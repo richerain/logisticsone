@@ -322,14 +322,14 @@ function displayStorageData(data) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                    <button onclick="viewStorage('${storage.storage_id}')" class="btn btn-sm btn-circle btn-info" title="View full Detail">
-                        <i class="bx bxs-show"></i>
+                    <button onclick="viewStorage('${storage.storage_id}')" class="btn btn-sm btn-circle bg-blue-300" title="View full Detail">
+                        <i class="bx bx-show-alt"></i>
                     </button>
-                    <button onclick="editStorage('${storage.storage_id}')" class="btn btn-sm btn-circle btn-warning" title="Edit">
-                        <i class="bx bxs-edit"></i>
+                    <button onclick="editStorage('${storage.storage_id}')" class="btn btn-sm btn-circle bg-yellow-300" title="Edit">
+                        <i class="bx bx-edit"></i>
                     </button>
-                    <button onclick="deleteStorage('${storage.storage_id}')" class="btn btn-sm btn-circle btn-error" title="Delete">
-                        <i class="bx bxs-trash"></i>
+                    <button onclick="deleteStorage('${storage.storage_id}')" class="btn btn-sm btn-circle bg-red-300" title="Delete">
+                        <i class="bx bx-trash"></i>
                     </button>
                 </div>
             </td>

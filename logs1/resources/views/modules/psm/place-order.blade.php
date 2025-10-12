@@ -13,28 +13,28 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
                 <div class="stat-figure text-primary">
                     <i class="bx bx-cart text-3xl"></i>
                 </div>
                 <div class="stat-title">Approved Orders</div>
                 <div class="stat-value text-primary" id="approved-orders">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-blue-400">
                 <div class="stat-figure text-info">
                     <i class="bx bx-send text-3xl"></i>
                 </div>
                 <div class="stat-title">Issued</div>
                 <div class="stat-value text-info" id="issued-orders">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
                 <div class="stat-figure text-success">
                     <i class="bx bx-package text-3xl"></i>
                 </div>
                 <div class="stat-title">Received</div>
                 <div class="stat-value text-success" id="received-orders">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
                 <div class="stat-figure text-warning">
                     <i class="bx bx-time text-3xl"></i>
                 </div>
@@ -125,12 +125,13 @@
 
     async function loadProcessOrders() {
         try {
+            showLoadingState();
             const response = await fetch(`${API_BASE_URL}/orders`);
             const data = await response.json();
             
-            if (response.ok) {
+            if (response.ok && data.success) {
                 // Filter only approved orders that are not settled or cancelled
-                processOrders = data.filter(order => 
+                processOrders = (data.data || []).filter(order => 
                     order.budget_approval_status === 'approved' && 
                     !['settled', 'cancelled'].includes(order.order_status)
                 );
@@ -141,8 +142,34 @@
             }
         } catch (error) {
             console.error('Error loading process orders:', error);
-            Swal.fire('Error', 'Failed to load orders: ' + error.message, 'error');
+            showErrorState('Failed to load orders: ' + error.message);
         }
+    }
+
+    function showLoadingState() {
+        const tbody = document.getElementById('process-orders-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8">
+                    <div class="loading loading-spinner loading-lg"></div>
+                    <p class="text-gray-500 mt-2">Loading orders...</p>
+                </td>
+            </tr>
+        `;
+    }
+
+    function showErrorState(message) {
+        const tbody = document.getElementById('process-orders-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8">
+                    <i class="bx bx-error text-4xl text-red-400 mb-2"></i>
+                    <p class="text-red-500">${message}</p>
+                    <button class="btn btn-sm btn-outline mt-2" onclick="loadProcessOrders()">Retry</button>
+                </td>
+            </tr>
+        `;
+        Swal.fire('Error', message, 'error');
     }
 
     function renderProcessOrders() {
@@ -166,20 +193,20 @@
                 <td class="font-mono font-semibold">#${order.order_id.toString().padStart(6, '0')}</td>
                 <td>
                     <div class="font-semibold">${order.product?.prod_name || 'N/A'}</div>
-                    <div class="text-sm text-gray-500">₱${parseFloat(order.order_price).toFixed(2)} each</div>
+                    <div class="text-sm text-gray-500">₱${parseFloat(order.order_price || 0).toFixed(2)} each</div>
                 </td>
                 <td>
                     <div>${order.shop?.vendor?.ven_name || 'N/A'}</div>
                     <div class="text-sm text-gray-500">${order.shop?.shop_name || 'N/A'}</div>
                 </td>
-                <td>${order.quantity}</td>
-                <td class="font-semibold">₱${parseFloat(order.total_amount).toFixed(2)}</td>
+                <td>${order.quantity || 0}</td>
+                <td class="font-semibold">₱${parseFloat(order.total_amount || 0).toFixed(2)}</td>
                 <td>
                     <span class="badge ${getProcessStatusBadgeClass(order.order_status)}">
-                        ${order.order_status}
+                        ${order.order_status || 'pending'}
                     </span>
                 </td>
-                <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                <td>${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</td>
                 <td>
                     <div class="flex space-x-1">
                         <button class="btn btn-xs btn-outline btn-info" onclick="viewProcessOrderDetails(${order.order_id})">
@@ -228,13 +255,13 @@
                     <p><strong>Product:</strong> ${order.product?.prod_name || 'N/A'}</p>
                     <p><strong>Vendor:</strong> ${order.shop?.vendor?.ven_name || 'N/A'}</p>
                     <p><strong>Shop:</strong> ${order.shop?.shop_name || 'N/A'}</p>
-                    <p><strong>Quantity:</strong> ${order.quantity}</p>
-                    <p><strong>Unit Price:</strong> ₱${parseFloat(order.order_price).toFixed(2)}</p>
-                    <p><strong>Total Amount:</strong> ₱${parseFloat(order.total_amount).toFixed(2)}</p>
-                    <p><strong>Budget Status:</strong> <span class="badge badge-success">${order.budget_approval_status}</span></p>
-                    <p><strong>Order Status:</strong> <span class="badge ${getProcessStatusBadgeClass(order.order_status)}">${order.order_status}</span></p>
+                    <p><strong>Quantity:</strong> ${order.quantity || 0}</p>
+                    <p><strong>Unit Price:</strong> ₱${parseFloat(order.order_price || 0).toFixed(2)}</p>
+                    <p><strong>Total Amount:</strong> ₱${parseFloat(order.total_amount || 0).toFixed(2)}</p>
+                    <p><strong>Budget Status:</strong> <span class="badge badge-success">${order.budget_approval_status || 'pending'}</span></p>
+                    <p><strong>Order Status:</strong> <span class="badge ${getProcessStatusBadgeClass(order.order_status)}">${order.order_status || 'pending'}</span></p>
                     <p><strong>Description:</strong> ${order.order_desc || 'No description'}</p>
-                    <p><strong>Created:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                    <p><strong>Created:</strong> ${order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}</p>
                 </div>
             `,
             icon: 'info',
@@ -254,12 +281,12 @@
                 <p><strong>Order:</strong> #${order.order_id.toString().padStart(6, '0')}</p>
                 <p><strong>Product:</strong> ${order.product?.prod_name || 'N/A'}</p>
                 <p><strong>Vendor:</strong> ${order.shop?.vendor?.ven_name || 'N/A'}</p>
-                <p><strong>Current Status:</strong> <span class="badge ${getProcessStatusBadgeClass(order.order_status)}">${order.order_status}</span></p>
+                <p><strong>Current Status:</strong> <span class="badge ${getProcessStatusBadgeClass(order.order_status)}">${order.order_status || 'pending'}</span></p>
             </div>
         `;
 
         // Set current status as selected
-        document.getElementById('statusSelect').value = order.order_status;
+        document.getElementById('statusSelect').value = order.order_status || 'pending';
         document.getElementById('statusModal').classList.add('modal-open');
     }
 
@@ -292,12 +319,14 @@
                 body: JSON.stringify(updateData)
             });
 
-            if (response.ok) {
+            const result = await response.json();
+
+            if (response.ok && result.success) {
                 Swal.fire('Success', 'Order status updated successfully!', 'success');
                 closeStatusModal();
                 loadProcessOrders();
             } else {
-                throw new Error('Failed to update order status');
+                throw new Error(result.message || 'Failed to update order status');
             }
         } catch (error) {
             Swal.fire('Error', 'Failed to update order status: ' + error.message, 'error');

@@ -9,13 +9,12 @@
     <div class="flex items-center space-x-4 relative">
         <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="relative p-2 transition duration-200 focus:outline-none cursor-pointer" title="Notification" id="notification-toggle"> 
-                <i class="bx bxs-bell bx-tada-hover text-lg mr-2"></i>
-                <span class="absolute top-1 right-1 bg-red-500 text-xs text-white rounded-full m-1">+3</span>
+                <i class="bx bxs-bell bx-tada-hover text-lg"></i>
             </div>
             <ul tabindex="0" class="dropdown-content menu text-gray-500 bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg hidden" id="notification-dropdown">
                 <li>
                     <a class="dropdown-item" onclick="openModal('messages-modal')">
-                        <i class="bx bxs-message-dots"></i>Messages<span class="badge badge-error text-white">+3</span>
+                        <i class="bx bxs-message-dots"></i>Messages
                     </a>
                 </li>
                 <li>

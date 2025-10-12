@@ -198,4 +198,87 @@ class GatewayController extends Controller
             ], 503);
         }
     }
+
+    // method for file uploads - FIXED: Handle PUT method properly
+    public function proxyUpload(Request $request, $url)
+    {
+        $client = new Client();
+        Log::info('Gateway upload called for URL: ' . $url);
+
+        try {
+            $options = [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'timeout' => 30,
+            ];
+
+            // Determine the method from the URL structure
+            $method = (strpos($url, '/products/') !== false && !str_ends_with($url, '/products')) ? 'PUT' : 'POST';
+
+            // Handle multipart form data for file uploads
+            if ($request->hasFile('prod_img')) {
+                Log::info('File detected in upload request, method: ' . $method);
+                $options['multipart'] = [];
+                
+                // Add all form fields except the file and _method
+                foreach ($request->all() as $name => $value) {
+                    if ($name !== 'prod_img' && $name !== '_method') {
+                        $options['multipart'][] = [
+                            'name' => $name,
+                            'contents' => $value
+                        ];
+                    }
+                }
+                
+                // Add the file
+                $options['multipart'][] = [
+                    'name' => 'prod_img',
+                    'contents' => fopen($request->file('prod_img')->getPathname(), 'r'),
+                    'filename' => $request->file('prod_img')->getClientOriginalName(),
+                    'headers' => [
+                        'Content-Type' => $request->file('prod_img')->getMimeType()
+                    ]
+                ];
+
+                Log::info('Sending multipart ' . $method . ' request with file');
+            } else {
+                Log::info('No file detected, sending JSON ' . $method . ' request');
+                $options['json'] = $request->except(['_method']);
+            }
+
+            $response = $client->request($method, $url, $options);
+            $body = json_decode($response->getBody()->getContents(), true);
+
+            Log::info('Upload response received', ['status' => $response->getStatusCode(), 'body' => $body]);
+
+            return response()->json($body, $response->getStatusCode());
+
+        } catch (RequestException $e) {
+            Log::error('Gateway upload error: ' . $e->getMessage());
+
+            if ($e->hasResponse()) {
+                $statusCode = $e->getResponse()->getStatusCode();
+                $responseBody = $e->getResponse()->getBody()->getContents();
+                Log::error('Service response: ' . $responseBody);
+                
+                // Try to parse as JSON, if fails return raw response
+                $body = json_decode($responseBody, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Service error: ' . $responseBody
+                    ], $statusCode);
+                }
+                
+                return response()->json($body ?? ['success' => false, 'message' => 'Service error'], $statusCode);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Service unavailable: ' . $e->getMessage()
+            ], 503);
+        }
+    }
+
 }

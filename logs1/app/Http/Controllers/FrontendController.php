@@ -72,36 +72,66 @@ class FrontendController extends Controller
     }
     // psm methods end
     // plt methods start
-    public function pltShipment()
+    public function pltProjects()
     {
-        return view('modules.plt.shipment', ['title' => 'PLT Shipment']);
+        return view('modules.plt.projects');
     }
 
-    public function pltRoute()
+    public function pltDispatches()
     {
-        return view('modules.plt.route', ['title' => 'PLT Route']);
+        return view('modules.plt.dispatches');
+    }
+
+    public function pltResources()
+    {
+        return view('modules.plt.resources');
+    }
+
+    public function pltAllocations()
+    {
+        return view('modules.plt.allocations');
+    }
+
+    public function pltMilestones()
+    {
+        return view('modules.plt.milestones');
+    }
+
+    public function pltTrackingLogs()
+    {
+        return view('modules.plt.tracking-logs');
     }
     // plt methods end
     // alms methods start
     public function almsRegistration()
     {
-        return view('modules.alms.registration', ['title' => 'ALMS Registration']);
+        return view('modules.alms.registration');
     }
 
     public function almsScheduling()
     {
-        return view('modules.alms.scheduling', ['title' => 'ALMS Scheduling']);
+        return view('modules.alms.scheduling');
     }
     // alms methods end
     // dtlr methods start
     public function dtlrUpload()
     {
-        return view('modules.dtlr.upload', ['title' => 'DTLR Upload']);
+        return view('modules.dtlr.upload');
+    }
+
+    public function dtlrDocuments()
+    {
+        return view('modules.dtlr.documents');
     }
 
     public function dtlrLogs()
     {
-        return view('modules.dtlr.logs', ['title' => 'DTLR Logs']);
+        return view('modules.dtlr.logs');
+    }
+
+    public function dtlrReviews()
+    {
+        return view('modules.dtlr.reviews');
     }
     // dtlr methods end
     // usermngt methods start
@@ -120,6 +150,8 @@ class FrontendController extends Controller
                 'email' => $request->email,
                 'password' => $request->password
             ]);
+
+            Log::info('Gateway response status: ' . $response->status());
 
             $data = $response->json();
 
@@ -187,6 +219,50 @@ class FrontendController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Service unavailable. Please try again later.'
+            ], 503);
+        }
+    }
+
+    // PLT Proxy Methods
+    public function pltProxyGet($endpoint, Request $request)
+    {
+        return $this->proxyRequest('GET', $endpoint, $request);
+    }
+
+    public function pltProxyPost($endpoint, Request $request)
+    {
+        return $this->proxyRequest('POST', $endpoint, $request);
+    }
+
+    public function pltProxyPut($endpoint, Request $request)
+    {
+        return $this->proxyRequest('PUT', $endpoint, $request);
+    }
+
+    public function pltProxyDelete($endpoint, Request $request)
+    {
+        return $this->proxyRequest('DELETE', $endpoint, $request);
+    }
+
+    private function proxyRequest($method, $endpoint, Request $request)
+    {
+        try {
+            $url = 'http://localhost:8001/api/plt/' . $endpoint;
+            
+            Log::info("Proxying {$method} request to: {$url}", $request->all());
+
+            $response = Http::timeout(30)->{$method}($url, $request->all());
+
+            $data = $response->json();
+
+            return response()->json($data, $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('PLT Proxy error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLT Service unavailable. Please try again later.'
             ], 503);
         }
     }
