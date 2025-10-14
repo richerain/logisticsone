@@ -435,7 +435,7 @@
   <div class="modal-overlay" id="termsModal">
     <div class="terms-modal">
       <div class="modal-header">
-        <i class='bx bxs-notepad text-xl'></i>
+        <i class='bx bx-check-shield text-xl'></i>
         <h2>Terms and Conditions</h2>
         <button class="close-modal" id="closeModal">
           <i class='bx bx-x'></i>
