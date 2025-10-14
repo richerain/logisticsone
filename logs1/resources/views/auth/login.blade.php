@@ -359,7 +359,7 @@
         // Show loading alert
         Swal.fire({
             title: 'Verifying Credentials',
-            text: 'Please wait while we secure your access...',
+            text: 'Please wait...',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
