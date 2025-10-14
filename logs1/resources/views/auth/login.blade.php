@@ -11,176 +11,6 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
   <style>
-    body {
-      background: linear-gradient(135deg, #2f855a, #48bb78, #38a169);
-      font-family: 'Inter', Arial, sans-serif;
-      min-height: 100vh;
-      margin: 0;
-      display: flex;
-      overflow: hidden;
-    }
-    .container {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      min-height: 100vh;
-    }
-    .section-1 {
-      width: 60%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
-    .section-2 {
-      width: 40%;
-      background: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin-right: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      font-family: 'Inter', Arial, sans-serif;
-      padding: 2rem;
-      box-sizing: border-box;
-    }
-    .company-content {
-      position: relative;
-      text-align: center;
-      z-index: 1;
-      width: 100%;
-    }
-    .company-logo {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 2rem;
-    }
-    .company-logo img {
-      width: 320px;
-      height: auto;
-      opacity: 1;
-      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
-    }
-    .company-text h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem;
-    }
-    .company-text p {
-      font-size: 1.25rem;
-      color: #374151;
-      font-weight: 500;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 420px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      border: 1px solid #e5e7eb;
-      overflow: hidden;
-    }
-    .btn-green {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      border: none;
-      font-weight: 600;
-      font-size: 1rem;
-      height: 3.5rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-    .btn-green:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-    }
-    .input-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6b7280;
-      z-index: 10;
-      transition: color 0.3s ease;
-    }
-    .password-toggle {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6b7280;
-      cursor: pointer;
-      z-index: 10;
-      transition: color 0.3s ease;
-    }
-    .input:focus ~ .input-icon,
-    .input:focus ~ .password-toggle {
-      color: #10b981;
-    }
-    .form-input {
-      background: #f9fafb;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      padding-left: 3rem;
-      padding-right: 3rem;
-      height: 3.5rem;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-    .form-input:focus {
-      background: white;
-      border-color: #10b981;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    }
-    .form-input:hover {
-      border-color: #d1d5db;
-    }
-    .error-message {
-      color: #ef4444;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-      display: none;
-      font-weight: 500;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .input-error {
-      border-color: #ef4444 !important;
-      background-color: #fef2f2;
-    }
-    .input-error:focus {
-      border-color: #ef4444 !important;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-    }
-    /* Custom alert styles */
-    .custom-login-alert {
-      border-left: 4px solid #ef4444;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      animation: slideIn 0.3s ease-out;
-    }
-    .custom-login-alert i {
-      color: #ef4444;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-    .custom-login-alert span {
-      color: #7f1d1d;
-      font-size: 0.9rem;
-      font-weight: 500;
-      line-height: 1.4;
-    }
     @keyframes slideIn {
       from {
         opacity: 0;
@@ -191,239 +21,93 @@
         transform: translateY(0);
       }
     }
-    .welcome-text {
-      background: linear-gradient(135deg, #374151, #6b7280);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 700;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .welcome-subtitle {
-      color: #9ca3af;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-      font-weight: 500;
-    }
-    .form-label {
-      color: #374151;
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-    .card-divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
-      margin: 1.5rem 0;
-    }
-    /* Terms and Conditions Link Styles */
-    .terms-text {
-      text-align: center;
-      margin-top: 1.5rem;
-      color: #6b7280;
-      font-size: 0.875rem;
-    }
-    .terms-link {
-      color: #10b981;
-      text-decoration: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: color 0.3s ease;
-    }
-    .terms-link:hover {
-      color: #059669;
-      text-decoration: underline;
-    }
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    .terms-modal {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-      width: 90%;
-      max-width: 700px;
-      max-height: 80vh;
-      overflow: hidden;
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    .modal-overlay.active .terms-modal {
-      transform: scale(1);
-    }
-    .modal-header {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-shrink: 0;
-    }
-    .modal-header h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin: 0;
-    }
-    .close-modal {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 4px;
-      margin-left: auto;
-    }
-    .modal-content {
-      padding: 2rem;
-      overflow-y: auto;
-      flex: 1;
-    }
-    .terms-section {
-      margin-bottom: 1.5rem;
-    }
-    .terms-section:last-child {
-      margin-bottom: 0;
-    }
-    .terms-section h3 {
-      color: #374151;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .terms-section h3 i {
-      color: #10b981;
-      font-size: 1.125rem;
-    }
-    .terms-section p {
-      color: #6b7280;
-      line-height: 1.6;
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-    }
-    .terms-section ul {
-      color: #6b7280;
-      line-height: 1.6;
-      padding-left: 1.5rem;
-      font-size: 0.9rem;
-    }
-    .terms-section li {
-      margin-bottom: 0.5rem;
-    }
-    .modal-footer {
-      padding: 1rem 2rem;
-      background-color: #f9fafb;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: flex-end;
-      flex-shrink: 0;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: none;
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    .animate-slideIn {
+      animation: slideIn 0.3s ease-out;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="section-1">
-      <div class="company-content ml-4">
-        <div class="company-logo">
-          <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
+<body class="bg-green-600 font-inter min-h-screen flex overflow-hidden">
+  <div class="container flex flex-row w-full m-10 bg-white rounded-2xl shadow-xl overflow-hidden">
+    <!-- Section 1: Branding -->
+    <div class="section-1 w-3/5 flex justify-center items-center bg-black">
+      <div class="company-content text-center w-full">
+        <div class="company-logo flex justify-center items-center">
+          <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo" class="w-96 h-auto opacity-100 filter drop-shadow-lg">
         </div>
         <div class="company-text uppercase">
-          <h1 class="bg-gray-800">Microfinancial</h1>
-          <p>Logistics I Department</p>
+          <h1 class="text-5xl font-extrabold bg-green-500 bg-clip-text text-transparent mb-2">Microfinancial</h1>
+          <p class="text-2xl text-green-600 font-medium">Logistics I Department</p>
         </div>
       </div>
     </div>
 
-    <div class="section-2">
-      <div class="login-card">
+    <!-- Section 2: Login Form -->
+    <div class="section-2 w-2/5 flex justify-center items-center bg-white p-8">
+      <div class="login-card w-full max-w-full">
         <div class="card-body p-8"> 
           <!-- Header Section -->
-          <div class="text-center mb-1">
-            <div class="welcome-text">Welcome to Logistics I</div>
-            <div class="welcome-subtitle">Sign in to access your account</div>
+          <div class="text-center">
+            <div class="welcome-text text-2xl font-bold bg-gradient-to-r from-gray-700 to-gray-600 bg-clip-text text-transparent">Welcome to Login</div>
+            <div class="welcome-subtitle text-gray-500 text-sm font-medium">Sign in to access your account</div>
           </div>
 
           <!-- Error Alert -->
-          <div id="loginErrorAlert" class="custom-login-alert bg-red-100 hidden">
-            <i class='bx bx-x-circle'></i>
-            <span id="loginErrorMessage">Invalid email or password.</span>
+          <div id="loginErrorAlert" class="custom-login-alert hidden flex items-center border-l-4 border-red-500 rounded-xl p-4 bg-red-50 animate-slideIn text-sm overflow-hidden h-0">
+            <i class="bx bx-fw bx-x-circle text-red-500 shrink-0 mr-2"></i>
+            <span id="loginErrorMessage" class="flex-1">Invalid email or password.</span>
           </div>
 
-          <form id="loginForm" class="space-y-5">
+          <form id="loginForm" class="space-y-6">
             <!-- Email Input -->
             <div class="form-control">
-              <label class="form-label">Email</label>
-              <div class="relative">
-                <input type="email" id="email" name="email" placeholder="Enter your email" class="form-input input-lg w-full">
-                <i class='bx bxs-envelope input-icon text-lg'></i>
+              <div class="flex justify-between items-center mb-2">
+                <label class="form-label text-gray-700 font-semibold text-sm">Email</label>
+                <div class="error-message text-red-500 text-sm font-medium items-center gap-2 hidden" id="emailError">
+                  <i class='bx bx-error-circle'></i>
+                  <span>The email is required</span>
+                </div>
               </div>
-              <div class="error-message" id="emailError">
-                <i class='bx bx-error-circle'></i>
-                <span>The email is required</span>
+              <div class="relative">
+                <input type="email" id="email" name="email" placeholder="Enter your email" class="form-input bg-gray-50 border-2 border-gray-200 rounded-xl pl-12 pr-4 h-14 w-full text-base transition-all duration-300 focus:bg-white focus:border-green-500 focus:ring-3 focus:ring-green-100 hover:border-gray-300">
+                <i class='bx bxs-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg transition-colors duration-300'></i>
               </div>
             </div>
 
             <!-- Password Input -->
             <div class="form-control">
-              <label class="form-label">Password</label>
-              <div class="relative">
-                <input type="password" id="password" name="password" placeholder="Enter your password" class="form-input input-lg w-full">
-                <i class='bx bxs-lock-alt input-icon text-lg'></i>
-                <i class='bx bx-show password-toggle text-lg' id="togglePassword"></i>
+              <div class="flex justify-between items-center mb-2">
+                <label class="form-label text-gray-700 font-semibold text-sm">Password</label>
+                <div class="error-message text-red-500 text-sm font-medium items-center gap-2 hidden" id="passwordError">
+                  <i class='bx bx-error-circle'></i>
+                  <span>The password is required</span>
+                </div>
               </div>
-              <div class="error-message" id="passwordError">
-                <i class='bx bx-error-circle'></i>
-                <span>The password is required</span>
+              <div class="relative">
+                <input type="password" id="password" name="password" placeholder="Enter your password" class="form-input bg-gray-50 border-2 border-gray-200 rounded-xl pl-12 pr-12 h-14 w-full text-base transition-all duration-300 focus:bg-white focus:border-green-500 focus:ring-3 focus:ring-green-100 hover:border-gray-300">
+                <i class='bx bxs-lock-alt absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg transition-colors duration-300'></i>
+                <i class='bx bx-show absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg cursor-pointer transition-colors duration-300' id="togglePassword"></i>
               </div>
             </div>
 
             <!-- Login Button -->
             <div class="form-control mt-8">
-              <button type="submit" class="btn btn-green btn-lg w-full">
+              <button type="submit" class="btn bg-green-600 text-white border-none font-semibold text-base h-14 w-full transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none" id="loginButton" disabled>
                 Sign In
               </button>
             </div>
 
-            <!-- Terms and Conditions Text -->
-            <div class="terms-text">
-              By signing in you agree to our <span class="terms-link" id="termsLink">Terms and Conditions</span>.
+            <!-- Terms and Conditions Checkbox -->
+            <div class="terms-checkbox-container mt-6 p-4 rounded-xl">
+              <div class="checkbox-wrapper flex items-start gap-3">
+                <input type="checkbox" id="termsCheckbox" class="checkbox-input w-4 h-4 border-2 border-gray-300 rounded bg-white cursor-pointer mt-0.5 transition-all duration-300 checked:bg-green-500 checked:border-green-500">
+                <label for="termsCheckbox" class="checkbox-label text-gray-700 text-sm leading-relaxed cursor-pointer select-none">
+                  I have read and agree to the <span class="terms-link text-green-500 font-medium cursor-pointer no-underline hover:text-green-600 hover:underline transition-colors duration-300" id="termsLink">Terms and Conditions</span>
+                </label>
+              </div>
+              <div class="checkbox-error text-red-500 text-xs mt-2 items-center gap-2 hidden" id="termsError">
+                <i class='bx bx-error-circle'></i>
+                <span>You must accept the Terms and Conditions to sign in</span>
+              </div>
             </div>
           </form>
         </div>
@@ -432,83 +116,84 @@
   </div>
 
   <!-- Terms and Conditions Modal -->
-  <div class="modal-overlay" id="termsModal">
-    <div class="terms-modal">
-      <div class="modal-header">
+  <div class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 opacity-0 invisible transition-all duration-300" id="termsModal">
+    <div class="terms-modal bg-white rounded-2xl shadow-2xl w-11/12 max-w-4xl max-h-[80vh] overflow-hidden transform scale-90 transition-transform duration-300 flex flex-col">
+      <div class="modal-header bg-green-600 text-white px-8 py-4 flex items-center gap-3 flex-shrink-0">
         <i class='bx bx-check-shield text-xl'></i>
-        <h2>Terms and Conditions</h2>
-        <button class="close-modal" id="closeModal">
+        <h2 class="text-xl font-bold m-0">Terms and Conditions</h2>
+        <button class="close-modal bg-transparent border-none text-white text-xl cursor-pointer p-1 rounded ml-auto" id="closeModal">
           <i class='bx bx-x'></i>
         </button>
       </div>
-      <div class="modal-content">
-        <div class="terms-section">
-          <h3><i class='bx bx-user-check'></i> Acceptance of Terms</h3>
-          <p>By accessing and using the Microfinancial Logistics I System, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.</p>
-          <p>Your continued use of the system constitutes acceptance of any modifications or updates to these terms.</p>
+      <div class="modal-content p-8 overflow-y-auto flex-1">
+        <!-- Terms content remains the same -->
+        <div class="terms-section mb-6">
+          <h3 class="text-gray-700 text-base font-semibold mb-2 flex items-center gap-2"><i class='bx bx-user-check text-green-500 text-lg'></i> Acceptance of Terms</h3>
+          <p class="text-gray-500 leading-relaxed text-sm mb-3">By accessing and using the Microfinancial Logistics I System, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.</p>
+          <p class="text-gray-500 leading-relaxed text-sm">Your continued use of the system constitutes acceptance of any modifications or updates to these terms.</p>
         </div>
 
-        <div class="terms-section">
-          <h3><i class='bx bx-shield-alt-2'></i> User Responsibilities</h3>
-          <p>As an authorized user of this system, you are responsible for:</p>
-          <ul>
-            <li>Maintaining the confidentiality and security of your login credentials</li>
-            <li>All activities and transactions performed under your account</li>
-            <li>Ensuring the accuracy and completeness of information provided</li>
-            <li>Complying with all company policies and applicable regulations</li>
+        <div class="terms-section mb-6">
+          <h3 class="text-gray-700 text-base font-semibold mb-2 flex items-center gap-2"><i class='bx bx-shield-alt-2 text-green-500 text-lg'></i> User Responsibilities</h3>
+          <p class="text-gray-500 leading-relaxed text-sm mb-2">As an authorized user of this system, you are responsible for:</p>
+          <ul class="text-gray-500 leading-relaxed text-sm pl-6">
+            <li class="mb-1">Maintaining the confidentiality and security of your login credentials</li>
+            <li class="mb-1">All activities and transactions performed under your account</li>
+            <li class="mb-1">Ensuring the accuracy and completeness of information provided</li>
+            <li class="mb-1">Complying with all company policies and applicable regulations</li>
             <li>Immediately reporting any suspicious activity or security breaches</li>
           </ul>
         </div>
 
-        <div class="terms-section">
-          <h3><i class='bx bx-lock-alt'></i> Data Privacy and Security</h3>
-          <p>Microfinancial is committed to protecting your privacy and securing sensitive information:</p>
-          <ul>
-            <li>We collect only necessary personal and operational data required for system functionality</li>
-            <li>Industry-standard encryption protocols protect data during transmission and storage</li>
-            <li>Regular security audits and monitoring systems are in place</li>
-            <li>Access to sensitive information is strictly role-based and monitored</li>
+        <div class="terms-section mb-6">
+          <h3 class="text-gray-700 text-base font-semibold mb-2 flex items-center gap-2"><i class='bx bx-lock-alt text-green-500 text-lg'></i> Data Privacy and Security</h3>
+          <p class="text-gray-500 leading-relaxed text-sm mb-2">Microfinancial is committed to protecting your privacy and securing sensitive information:</p>
+          <ul class="text-gray-500 leading-relaxed text-sm pl-6">
+            <li class="mb-1">We collect only necessary personal and operational data required for system functionality</li>
+            <li class="mb-1">Industry-standard encryption protocols protect data during transmission and storage</li>
+            <li class="mb-1">Regular security audits and monitoring systems are in place</li>
+            <li class="mb-1">Access to sensitive information is strictly role-based and monitored</li>
             <li>We comply with all applicable data protection and privacy regulations</li>
           </ul>
         </div>
 
-        <div class="terms-section">
-          <h3><i class='bx bx-cog'></i> System Usage Guidelines</h3>
-          <p><strong>Permitted Activities:</strong></p>
-          <ul>
-            <li>Access authorized modules based on your assigned permissions</li>
-            <li>Process legitimate logistics and financial transactions</li>
-            <li>Generate and export reports for business purposes</li>
-            <li>Collaborate with other authorized system users</li>
+        <div class="terms-section mb-6">
+          <h3 class="text-gray-700 text-base font-semibold mb-2 flex items-center gap-2"><i class='bx bx-cog text-green-500 text-lg'></i> System Usage Guidelines</h3>
+          <p class="text-gray-500 leading-relaxed text-sm mb-2 font-semibold">Permitted Activities:</p>
+          <ul class="text-gray-500 leading-relaxed text-sm pl-6 mb-3">
+            <li class="mb-1">Access authorized modules/submodules based on your assigned roles</li>
+            <li class="mb-1">Process legitimate logistics and financial transactions</li>
+            <li class="mb-1">Generate and export reports for business purposes</li>
+            <li class="mb-1">Collaborate with other authorized system users</li>
           </ul>
-          <p><strong>Strictly Prohibited:</strong></p>
-          <ul>
-            <li>Unauthorized access to other users' data or restricted system areas</li>
-            <li>Attempting to breach, test, or circumvent system security measures</li>
-            <li>Sharing, lending, or transferring your login credentials to others</li>
-            <li>Using the system for any illegal, fraudulent, or unauthorized purposes</li>
+          <p class="text-gray-500 leading-relaxed text-sm mb-2 font-semibold">Strictly Prohibited:</p>
+          <ul class="text-gray-500 leading-relaxed text-sm pl-6">
+            <li class="mb-1">Unauthorized access to other users' data or restricted system areas</li>
+            <li class="mb-1">Attempting to breach, test, or circumvent system security measures</li>
+            <li class="mb-1">Sharing, lending, or transferring your login credentials to others</li>
+            <li class="mb-1">Using the system for any illegal, fraudulent, or unauthorized purposes</li>
             <li>Introducing malicious code, viruses, or harmful components</li>
           </ul>
         </div>
 
-        <div class="terms-section">
-          <h3><i class='bx bx-time'></i> System Availability and Maintenance</h3>
-          <p>The system is designed for high availability, but may experience temporary unavailability during:</p>
-          <ul>
-            <li>Planned maintenance windows (typically announced in advance)</li>
-            <li>Emergency security updates and patches</li>
-            <li>Infrastructure upgrades and improvements</li>
+        <div class="terms-section mb-6">
+          <h3 class="text-gray-700 text-base font-semibold mb-2 flex items-center gap-2"><i class='bx bx-time text-green-500 text-lg'></i> System Availability and Maintenance</h3>
+          <p class="text-gray-500 leading-relaxed text-sm mb-2">The system is designed for high availability, but may experience temporary unavailability during:</p>
+          <ul class="text-gray-500 leading-relaxed text-sm pl-6">
+            <li class="mb-1">Planned maintenance windows (typically announced in advance)</li>
+            <li class="mb-1">Emergency security updates and patches</li>
+            <li class="mb-1">Infrastructure upgrades and improvements</li>
             <li>Unforeseen technical issues or force majeure events</li>
           </ul>
         </div>
 
         <div class="terms-section">
-          <h3><i class='bx bx-revision'></i> Terms Modification</h3>
-          <p>Microfinancial reserves the right to modify these Terms and Conditions at any time. Users will be notified of significant changes through system notifications or email. Continued use of the system after modifications constitutes acceptance of the updated terms.</p>
+          <h3 class="text-gray-700 text-base font-semibold mb-2 flex items-center gap-2"><i class='bx bx-revision text-green-500 text-lg'></i> Terms Modification</h3>
+          <p class="text-gray-500 leading-relaxed text-sm">Microfinancial reserves the right to modify these Terms and Conditions at any time. Users will be notified of significant changes through system notifications or email. Continued use of the system after modifications constitutes acceptance of the updated terms.</p>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-primary" id="agreeButton">
+      <div class="modal-footer px-8 py-4 bg-gray-50 border-t border-gray-200 flex justify-end flex-shrink-0">
+        <button class="btn-primary bg-green-600 text-white px-6 py-3 rounded-lg font-semibold cursor-pointer border-none transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg" id="agreeButton">
           I Understand and Agree
         </button>
       </div>
@@ -522,6 +207,32 @@
         password.setAttribute('type', type);
         this.classList.toggle('bx-show');
         this.classList.toggle('bxs-hide');
+    });
+
+    // Terms and Conditions Checkbox Functionality
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    const loginButton = document.getElementById('loginButton');
+    const termsError = document.getElementById('termsError');
+    const termsLink = document.getElementById('termsLink');
+
+    // Prevent label from checking the checkbox
+    const checkboxLabel = document.querySelector('.checkbox-label');
+    checkboxLabel.addEventListener('click', function(event) {
+        event.preventDefault();
+        // Only open modal when clicking the link text, not the entire label
+        if (event.target === termsLink || event.target.parentElement === termsLink) {
+            openTermsModal();
+        }
+    });
+
+    // Checkbox change handler
+    termsCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            loginButton.disabled = false;
+            termsError.classList.add('hidden');
+        } else {
+            loginButton.disabled = true;
+        }
     });
 
     function showErrorAlert(message) {
@@ -544,20 +255,43 @@
     // Terms and Conditions Modal Functions
     function openTermsModal() {
         const modal = document.getElementById('termsModal');
-        modal.classList.add('active');
+        modal.classList.remove('opacity-0', 'invisible');
+        modal.classList.add('opacity-100', 'visible');
         document.body.style.overflow = 'hidden';
+        
+        // Also activate the modal content
+        const modalContent = modal.querySelector('.terms-modal');
+        modalContent.classList.remove('scale-90');
+        modalContent.classList.add('scale-100');
     }
 
     function closeTermsModal() {
         const modal = document.getElementById('termsModal');
-        modal.classList.remove('active');
+        modal.classList.remove('opacity-100', 'visible');
+        modal.classList.add('opacity-0', 'invisible');
         document.body.style.overflow = 'auto';
+        
+        // Also deactivate the modal content
+        const modalContent = modal.querySelector('.terms-modal');
+        modalContent.classList.remove('scale-100');
+        modalContent.classList.add('scale-90');
+    }
+
+    // Function to check the terms checkbox (only called by agree button)
+    function acceptTermsAndConditions() {
+        termsCheckbox.checked = true;
+        termsCheckbox.dispatchEvent(new Event('change'));
+        closeTermsModal();
     }
 
     // Event listeners for terms modal
-    document.getElementById('termsLink').addEventListener('click', openTermsModal);
+    termsLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        openTermsModal();
+    });
+    
     document.getElementById('closeModal').addEventListener('click', closeTermsModal);
-    document.getElementById('agreeButton').addEventListener('click', closeTermsModal);
+    document.getElementById('agreeButton').addEventListener('click', acceptTermsAndConditions);
 
     // Close modal when clicking outside the modal content
     document.getElementById('termsModal').addEventListener('click', function(event) {
@@ -575,37 +309,44 @@
 
     // Add input event listeners to remove error styling when user starts typing
     document.getElementById('email').addEventListener('input', function() {
-        this.classList.remove('input-error');
-        document.getElementById('emailError').style.display = 'none';
+        this.classList.remove('border-red-500', 'bg-red-50');
+        document.getElementById('emailError').classList.add('hidden');
     });
 
     document.getElementById('password').addEventListener('input', function() {
-        this.classList.remove('input-error');
-        document.getElementById('passwordError').style.display = 'none';
+        this.classList.remove('border-red-500', 'bg-red-50');
+        document.getElementById('passwordError').classList.add('hidden');
     });
 
     async function handleLogin(event) {
         event.preventDefault();
+        
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
+        const termsAccepted = termsCheckbox.checked;
 
         // Clear previous errors
         hideErrorAlert();
-        document.getElementById('emailError').style.display = 'none';
-        document.getElementById('passwordError').style.display = 'none';
-        document.getElementById('email').classList.remove('input-error');
-        document.getElementById('password').classList.remove('input-error');
+        document.getElementById('emailError').classList.add('hidden');
+        document.getElementById('passwordError').classList.add('hidden');
+        document.getElementById('email').classList.remove('border-red-500', 'bg-red-50');
+        document.getElementById('password').classList.remove('border-red-500', 'bg-red-50');
+        termsError.classList.add('hidden');
 
         // Basic validation
         let hasError = false;
         if (!email) {
-            document.getElementById('emailError').style.display = 'flex';
-            document.getElementById('email').classList.add('input-error');
+            document.getElementById('emailError').classList.remove('hidden');
+            document.getElementById('email').classList.add('border-red-500', 'bg-red-50');
             hasError = true;
         }
         if (!password) {
-            document.getElementById('passwordError').style.display = 'flex';
-            document.getElementById('password').classList.add('input-error');
+            document.getElementById('passwordError').classList.remove('hidden');
+            document.getElementById('password').classList.add('border-red-500', 'bg-red-50');
+            hasError = true;
+        }
+        if (!termsAccepted) {
+            termsError.classList.remove('hidden');
             hasError = true;
         }
         
