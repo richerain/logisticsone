@@ -26,7 +26,7 @@
     }
   </style>
 </head>
-<body class="bg-green-600 font-inter min-h-screen flex overflow-hidden">
+<body class="bg-green-700 font-inter min-h-screen flex overflow-hidden">
   <div class="container flex flex-row w-full m-10 bg-white rounded-2xl shadow-xl overflow-hidden">
     <!-- Section 1: Branding -->
     <div class="section-1 w-3/5 flex justify-center items-center bg-black">
@@ -52,7 +52,7 @@
           </div>
 
           <!-- Error Alert -->
-          <div id="loginErrorAlert" class="custom-login-alert hidden flex items-center border-l-4 border-red-500 rounded-xl p-4 bg-red-50 animate-slideIn text-sm overflow-hidden h-0">
+          <div id="loginErrorAlert" class="custom-login-alert hidden items-center border-2 border-dotted border-red-100 rounded-xl p-4 bg-red-50 animate-slideIn text-sm overflow-hidden h-0">
             <i class="bx bx-fw bx-x-circle text-red-500 shrink-0 mr-2"></i>
             <span id="loginErrorMessage" class="flex-1">Invalid email or password.</span>
           </div>
@@ -101,7 +101,7 @@
               <div class="checkbox-wrapper flex items-start gap-3">
                 <input type="checkbox" id="termsCheckbox" class="checkbox-input w-4 h-4 border-2 border-gray-300 rounded bg-white cursor-pointer mt-0.5 transition-all duration-300 checked:bg-green-500 checked:border-green-500">
                 <label for="termsCheckbox" class="checkbox-label text-gray-700 text-sm leading-relaxed cursor-pointer select-none">
-                  I have read and agree to the <span class="terms-link text-green-500 font-medium cursor-pointer no-underline hover:text-green-600 hover:underline transition-colors duration-300" id="termsLink">Terms and Conditions</span>
+                  I have read and agree to the <span class="terms-link text-green-500 font-medium cursor-pointer no-underline hover:text-green-600 hover:underline transition-colors duration-300" id="termsLink">Terms and Conditions.</span>
                 </label>
               </div>
               <div class="checkbox-error text-red-500 text-xs mt-2 items-center gap-2 hidden" id="termsError">
@@ -240,6 +240,7 @@
         const messageSpan = document.getElementById('loginErrorMessage');
         messageSpan.textContent = message;
         alert.classList.remove('hidden');
+        alert.classList.add('flex');
         
         // Auto-hide after 5 seconds
         setTimeout(() => {
@@ -250,6 +251,7 @@
     function hideErrorAlert() {
         const alert = document.getElementById('loginErrorAlert');
         alert.classList.add('hidden');
+        alert.classList.remove('flex');
     }
 
     // Terms and Conditions Modal Functions
