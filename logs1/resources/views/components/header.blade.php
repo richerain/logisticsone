@@ -35,7 +35,7 @@
             <ul tabindex="0" class="dropdown-content menu text-gray-500 bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg hidden" id="profile-dropdown">
                 <li><a class="dropdown-item" onclick="openModal('profile-modal')"><i class="bx bxs-user-circle"></i>Profile</a></li>
                 <li><a class="dropdown-item" onclick="openModal('settings-modal')"><i class="bx bxs-cog"></i>Settings</a></li>
-                <li><a class="dropdown-item" onclick="openModal('logout-modal')"><i class="bx bx-log-out"></i>Logout</a></li>
+                <li><a class="dropdown-item" onclick="handleLogoutWithSweetAlert()"><i class="bx bx-log-out"></i>Logout</a></li>
             </ul>
         </div>
     </div>
@@ -54,144 +54,188 @@
 
 <!-- Enhanced Profile Modal -->
 <div id="profile-modal" class="modal">
-    <div class="modal-box max-w-4xl w-11/12">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-2xl text-gray-800">My Profile</h3>
-            <!-- Removed the X close button as requested -->
+    <div class="modal-box max-w-5xl w-11/12 p-0">
+        <div class="bg-gradient-to-r from-primary to-primary/90 text-white p-6 rounded-t-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-2xl">My Profile</h3>
+                <div class="flex items-center space-x-2">
+                    <span id="modal-status-badge" class="badge badge-success badge-lg">Active</span>
+                    <span class="badge badge-info badge-lg flex items-center gap-1">
+                        <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        Online
+                    </span>
+                </div>
+            </div>
+            <p class="text-primary-content/80 mt-1">Manage your personal information and preferences</p>
         </div>
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Profile Picture Section -->
-            <div class="lg:col-span-1">
-                <div class="bg-base-200 rounded-xl p-6 text-center">
-                    <div class="avatar mb-4">
-                        <div class="w-32 h-32 rounded-full mx-auto ring ring-primary ring-offset-2 ring-offset-base-100">
-                            <img id="modal-profile-picture" src="{{ asset('images/pfp.jpg') }}" alt="Profile Picture" />
+        <div class="p-6">
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <!-- Profile Picture & Basic Info Section -->
+                <div class="xl:col-span-1 space-y-6">
+                    <div class="bg-base-100 rounded-xl p-6 text-center border border-base-300 shadow-sm">
+                        <div class="avatar mb-4">
+                            <div class="w-32 h-32 rounded-full mx-auto ring ring-primary ring-offset-2 ring-offset-base-100 shadow-lg">
+                                <img id="modal-profile-picture" src="{{ asset('images/pfp.jpg') }}" alt="Profile Picture" class="object-cover" />
+                            </div>
+                        </div>
+                        <div class="form-control">
+                            <input type="file" id="profile-picture-input" accept="image/*" class="file-input file-input-bordered file-input-sm w-full max-w-xs hidden" />
+                            <button onclick="document.getElementById('profile-picture-input').click()" class="btn btn-outline btn-primary btn-sm w-full">
+                                <i class="bx bx-upload mr-2"></i>Change Photo
+                            </button>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <h4 class="font-semibold text-lg text-gray-800" id="modal-fullname">Full Name</h4>
+                            <p class="text-sm text-gray-600" id="modal-role">Role</p>
+                            <div class="text-xs text-gray-500 mt-2">
+                                <i class="bx bx-id-card mr-1"></i>
+                                <span id="modal-empid">Employee ID</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-control">
-                        <input type="file" id="profile-picture-input" accept="image/*" class="file-input file-input-bordered file-input-sm w-full max-w-xs hidden" />
-                        <button onclick="document.getElementById('profile-picture-input').click()" class="btn btn-outline btn-primary btn-sm w-full">
-                            <i class="bx bx-upload mr-2"></i>Change Photo
-                        </button>
-                    </div>
-                    <div class="mt-4">
-                        <h4 class="font-semibold text-lg" id="modal-fullname">Full Name</h4>
-                        <p class="text-sm text-gray-600" id="modal-role">Role</p>
-                        <!-- Added status and online indicators -->
-                        <div class="mt-2 flex flex-col gap-2">
-                            <span id="modal-status-badge" class="badge badge-success badge-sm text-white">Active</span>
-                            <span class="badge badge-info badge-sm text-white flex items-center gap-1">
-                                <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                Online
-                            </span>
+
+                    <!-- Quick Stats Card -->
+                    <div class="bg-base-100 rounded-xl p-4 border border-base-300 shadow-sm">
+                        <h5 class="font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="bx bx-stats mr-2 text-primary"></i>
+                            Account Overview
+                        </h5>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Member Since</span>
+                                <span class="font-medium" id="member-since">2024</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Last Updated</span>
+                                <span class="font-medium" id="last-updated">Recently</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Profile Complete</span>
+                                <span class="badge badge-success badge-sm">100%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Profile Details Section -->
-            <div class="lg:col-span-2">
-                <div class="bg-base-100 rounded-xl p-6">
-                    <h4 class="font-bold text-lg mb-4 text-gray-800">Personal Information</h4>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Personal Details -->
-                        <div class="space-y-4">
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-semibold">Employee ID</span>
-                                </label>
-                                <input type="text" id="profile-empid" class="input input-bordered bg-gray-100" readonly disabled />
-                            </div>
-                            
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-semibold">First Name</span>
-                                </label>
-                                <input type="text" id="profile-firstname" class="input input-bordered" placeholder="Enter first name" />
-                            </div>
-                            
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-semibold">Last Name</span>
-                                </label>
-                                <input type="text" id="profile-lastname" class="input input-bordered" placeholder="Enter last name" />
-                            </div>
-                            
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-semibold">Middle Name</span>
-                                </label>
-                                <input type="text" id="profile-middlename" class="input input-bordered" placeholder="Enter middle name" />
+                <!-- Profile Details Section -->
+                <div class="xl:col-span-3">
+                    <div class="bg-base-100 rounded-xl p-6 border border-base-300 shadow-sm">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-bold text-xl text-gray-800 flex items-center">
+                                <i class="bx bx-user-circle mr-2 text-primary"></i>
+                                Personal Information
+                            </h4>
+                            <div class="text-sm text-gray-500">
+                                <i class="bx bx-info-circle mr-1"></i>
+                                All fields marked with * are required
                             </div>
                         </div>
-
-                        <!-- Contact & System Info -->
-                        <div class="space-y-4">
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-semibold">Email</span>
-                                </label>
-                                <input type="email" id="profile-email" class="input input-bordered" placeholder="Enter email" />
-                            </div>
-                            
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-semibold">Contact Number</span>
-                                </label>
-                                <input type="text" id="profile-contact" class="input input-bordered" placeholder="Enter contact number" />
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2">
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Personal Details Column -->
+                            <div class="space-y-4">
                                 <div class="form-control">
                                     <label class="label">
-                                        <span class="label-text font-semibold">Sex</span>
+                                        <span class="label-text font-semibold flex items-center">
+                                            Employee ID
+                                            <span class="text-gray-400 ml-1">(Auto-generated)</span>
+                                        </span>
                                     </label>
-                                    <select id="profile-sex" class="select select-bordered">
-                                        <option value="M">Male</option>
-                                        <option value="F">Female</option>
-                                    </select>
+                                    <input type="text" id="profile-empid" class="input input-bordered bg-gray-50 text-gray-600" readonly disabled />
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold">First Name *</span>
+                                        </label>
+                                        <input type="text" id="profile-firstname" class="input input-bordered focus:input-primary" placeholder="Enter first name" />
+                                    </div>
+                                    
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold">Last Name *</span>
+                                        </label>
+                                        <input type="text" id="profile-lastname" class="input input-bordered focus:input-primary" placeholder="Enter last name" />
+                                    </div>
                                 </div>
                                 
                                 <div class="form-control">
                                     <label class="label">
-                                        <span class="label-text font-semibold">Age</span>
+                                        <span class="label-text font-semibold">Middle Name</span>
                                     </label>
-                                    <input type="number" id="profile-age" class="input input-bordered" min="1" max="120" />
+                                    <input type="text" id="profile-middlename" class="input input-bordered focus:input-primary" placeholder="Enter middle name" />
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold">Sex *</span>
+                                        </label>
+                                        <select id="profile-sex" class="select select-bordered focus:select-primary">
+                                            <option value="M">Male</option>
+                                            <option value="F">Female</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold">Age *</span>
+                                        </label>
+                                        <input type="number" id="profile-age" class="input input-bordered focus:input-primary" min="1" max="120" placeholder="Age" />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text font-semibold">Birthdate</span>
-                                </label>
-                                <input type="date" id="profile-birthdate" class="input input-bordered" />
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2">
+                            <!-- Contact & System Info Column -->
+                            <div class="space-y-4">
                                 <div class="form-control">
                                     <label class="label">
-                                        <span class="label-text font-semibold">System Role</span>
+                                        <span class="label-text font-semibold">Email Address *</span>
                                     </label>
-                                    <input type="text" id="profile-role" class="input input-bordered bg-gray-100" readonly disabled />
+                                    <input type="email" id="profile-email" class="input input-bordered focus:input-primary" placeholder="Enter email address" />
                                 </div>
                                 
                                 <div class="form-control">
                                     <label class="label">
-                                        <span class="label-text font-semibold">Status</span>
+                                        <span class="label-text font-semibold">Contact Number *</span>
                                     </label>
-                                    <input type="text" id="profile-status" class="input input-bordered bg-gray-100" readonly disabled />
+                                    <input type="text" id="profile-contact" class="input input-bordered focus:input-primary" placeholder="Enter contact number" />
+                                </div>
+
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Birthdate *</span>
+                                    </label>
+                                    <input type="date" id="profile-birthdate" class="input input-bordered focus:input-primary" />
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold">System Role</span>
+                                        </label>
+                                        <input type="text" id="profile-role" class="input input-bordered bg-gray-50 text-gray-600" readonly disabled />
+                                    </div>
+                                    
+                                    <div class="form-control">
+                                        <label class="label">
+                                            <span class="label-text font-semibold">Status</span>
+                                        </label>
+                                        <input type="text" id="profile-status" class="input input-bordered bg-gray-50 text-gray-600" readonly disabled />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="modal-action mt-6">
-                        <button class="btn btn-ghost" onclick="closeModal('profile-modal')">Cancel</button>
-                        <button class="btn btn-primary" onclick="updateProfile()">
-                            <i class="bx bxs-save mr-2"></i>Save Changes
-                        </button>
+                        <!-- Action Buttons -->
+                        <div class="modal-action mt-8 pt-6 border-t border-base-300">
+                            <button class="btn btn-ghost hover:bg-base-200" onclick="closeModal('profile-modal')">Cancel</button>
+                            <button class="btn btn-primary shadow-lg hover:shadow-xl transition-all" onclick="updateProfile()">
+                                <i class="bx bxs-save mr-2"></i>Save Changes
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -226,16 +270,6 @@
         </div>
     </div>
 </div>
-<div id="logout-modal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg">Logout</h3>
-        <p class="py-4">Are you sure you want to logout?</p>
-        <div class="modal-action">
-            <button class="btn" onclick="closeModal('logout-modal')">Cancel</button>
-            <button class="btn btn-primary" onclick="handleLogout()">Logout</button>
-        </div>
-    </div>
-</div>
 
 <script>
     // Global modal functions
@@ -267,6 +301,65 @@
             const button = dropdown.querySelector('[tabindex="0"]');
             if (button) {
                 button.blur();
+            }
+        });
+    }
+
+    // SweetAlert Logout Function
+    function handleLogoutWithSweetAlert() {
+        closeAllDropdowns();
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will be logged out of your account.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, logout!',
+            cancelButtonText: 'Cancel',
+            background: '#fff',
+            color: '#333',
+            customClass: {
+                confirmButton: 'btn btn-error',
+                cancelButton: 'btn btn-ghost'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading alert
+                Swal.fire({
+                    title: 'Logging out...',
+                    text: 'Please wait while we secure your session',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Clear all authentication data
+                localStorage.removeItem('user');
+                localStorage.removeItem('isAuthenticated');
+                
+                document.cookie = 'isAuthenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                
+                // Show success alert after 1 second, then redirect
+                setTimeout(() => {
+                    Swal.close(); // Close the loading alert
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Successfully Logged Out!',
+                        text: 'You have been successfully logged out.',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: '#f0fdf4',
+                        color: '#065f46'
+                    }).then(() => {
+                        // Redirect to logout splash after success alert
+                        window.location.href = '/logout-splash';
+                    });
+                }, 1000);
             }
         });
     }
@@ -355,18 +448,19 @@
         document.getElementById('profile-age').value = user.age || '';
         document.getElementById('profile-birthdate').value = formattedBirthdate;
         
-        // Update profile picture
+        // Update profile picture and additional info
         updateProfilePicture(user);
         
         // Update full name and role in modal
         document.getElementById('modal-fullname').textContent = `${user.firstname || ''} ${user.lastname || ''}`.trim();
         document.getElementById('modal-role').textContent = user.roles || '';
+        document.getElementById('modal-empid').textContent = user.employee_id || '';
         
         // Update status badge
         const statusBadge = document.getElementById('modal-status-badge');
         if (statusBadge) {
             statusBadge.textContent = user.status === 'active' ? 'Active' : 'Inactive';
-            statusBadge.className = user.status === 'active' ? 'badge badge-success badge-sm text-white' : 'badge badge-error badge-sm text-white';
+            statusBadge.className = user.status === 'active' ? 'badge badge-success badge-lg' : 'badge badge-error badge-lg';
         }
     }
 
@@ -378,12 +472,36 @@
             if (user.profile_picture.startsWith('http')) {
                 profilePictureUrl = user.profile_picture;
             } else {
-                profilePictureUrl = `http://localhost:8002/storage/${user.profile_picture}`;
+                // Fix: Use the correct path for profile pictures
+                // If profile_picture is stored as a relative path in the database
+                if (user.profile_picture.startsWith('profile-pictures/')) {
+                    profilePictureUrl = `http://localhost:8002/storage/${user.profile_picture}`;
+                } else {
+                    // If it's just a filename, assume it's in profile-pictures directory
+                    profilePictureUrl = `http://localhost:8002/storage/profile-pictures/${user.profile_picture}`;
+                }
             }
         }
         
-        document.getElementById('modal-profile-picture').src = profilePictureUrl;
-        document.getElementById('header-profile-picture').src = profilePictureUrl;
+        console.log('Profile picture URL:', profilePictureUrl);
+        
+        // Set the src and add error handling for broken images
+        const modalImg = document.getElementById('modal-profile-picture');
+        const headerImg = document.getElementById('header-profile-picture');
+        
+        modalImg.src = profilePictureUrl;
+        headerImg.src = profilePictureUrl;
+        
+        // Add error handling in case image fails to load
+        modalImg.onerror = function() {
+            console.warn('Failed to load modal profile picture, using default');
+            this.src = '{{ asset('images/pfp.jpg') }}';
+        };
+        
+        headerImg.onerror = function() {
+            console.warn('Failed to load header profile picture, using default');
+            this.src = '{{ asset('images/default.jpg') }}';
+        };
     }
 
     function updateHeaderWithUserInfo() {
@@ -455,22 +573,14 @@
         }
 
         try {
-            // Show loading toast
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer);
-                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+            // Show loading alert (normal alert, not toast)
+            Swal.fire({
+                title: 'Updating Profile',
+                text: 'Please wait while we update your information...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
-            });
-
-            Toast.fire({
-                icon: 'info',
-                title: 'Updating profile...'
             });
 
             const response = await fetch('/api/profile/update', {
@@ -490,16 +600,31 @@
                 localStorage.setItem('user', JSON.stringify(data.user));
                 updateHeaderWithUserInfo();
 
-                // Show success toast
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Profile updated successfully!',
-                    timer: 2000
+                // Close the loading alert and show success TOAST
+                Swal.close();
+                
+                // Success toast alert
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
                 });
 
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Profile updated successfully!'
+                });
+
+                // Close modal after toast
                 setTimeout(() => {
                     closeModal('profile-modal');
-                }, 2000);
+                }, 3000);
 
             } else {
                 // Handle validation errors from backend
@@ -510,6 +635,7 @@
                 throw new Error(errorMessage);
             }
         } catch (error) {
+            Swal.close(); // Close the loading alert
             Swal.fire({
                 icon: 'error',
                 title: 'Update Failed',
@@ -551,17 +677,14 @@
                 formData.append('profile_picture', file);
 
                 try {
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                    });
-
-                    Toast.fire({
-                        icon: 'info',
-                        title: 'Uploading picture...'
+                    // Show loading alert (normal alert, not toast)
+                    Swal.fire({
+                        title: 'Uploading Picture',
+                        text: 'Please wait while we upload your profile picture...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
 
                     const response = await fetch('http://localhost:8001/api/profile/upload-picture', {
@@ -579,6 +702,16 @@
                         // Update user data in localStorage
                         localStorage.setItem('user', JSON.stringify(data.user));
 
+                        // Close loading and show success TOAST
+                        Swal.close();
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                        });
+
                         Toast.fire({
                             icon: 'success',
                             title: 'Profile picture updated!'
@@ -587,6 +720,7 @@
                         throw new Error(data.message || 'Failed to upload picture');
                     }
                 } catch (error) {
+                    Swal.close(); // Close the loading alert
                     Swal.fire({
                         icon: 'error',
                         title: 'Upload Failed',
@@ -595,33 +729,8 @@
                 }
             });
         }
-    });
 
-    function handleLogout() {
-        closeModal('logout-modal');
-        
-        Swal.fire({
-            title: 'Logging out...',
-            text: 'Please wait',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        localStorage.removeItem('user');
-        localStorage.removeItem('isAuthenticated');
-        
-        document.cookie = 'isAuthenticated=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        
-        setTimeout(() => {
-            window.location.href = '/logout-splash';
-        }, 1000);
-    }
-
-    // Initialize everything when DOM is ready
-    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize everything when DOM is ready
         console.log('Header initialized');
         
         // Update header with current user info

@@ -161,7 +161,6 @@
     }
     /* Custom alert styles */
     .custom-login-alert {
-      background: linear-gradient(135deg, #fef2f2, #fecaca);
       border-left: 4px solid #ef4444;
       border-radius: 12px;
       padding: 1rem 1.25rem;
@@ -169,7 +168,6 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
       animation: slideIn 0.3s ease-out;
     }
     .custom-login-alert i {
@@ -204,7 +202,7 @@
     .welcome-subtitle {
       color: #9ca3af;
       font-size: 0.9rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       font-weight: 500;
     }
     .form-label {
@@ -218,12 +216,151 @@
       background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
       margin: 1.5rem 0;
     }
+    /* Terms and Conditions Link Styles */
+    .terms-text {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+    .terms-link {
+      color: #10b981;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .terms-link:hover {
+      color: #059669;
+      text-decoration: underline;
+    }
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .terms-modal {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      width: 90%;
+      max-width: 700px;
+      max-height: 80vh;
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-overlay.active .terms-modal {
+      transform: scale(1);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+    .modal-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+    .modal-content {
+      padding: 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .terms-section {
+      margin-bottom: 1.5rem;
+    }
+    .terms-section:last-child {
+      margin-bottom: 0;
+    }
+    .terms-section h3 {
+      color: #374151;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .terms-section h3 i {
+      color: #10b981;
+      font-size: 1.125rem;
+    }
+    .terms-section p {
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+    .terms-section ul {
+      color: #6b7280;
+      line-height: 1.6;
+      padding-left: 1.5rem;
+      font-size: 0.9rem;
+    }
+    .terms-section li {
+      margin-bottom: 0.5rem;
+    }
+    .modal-footer {
+      padding: 1rem 2rem;
+      background-color: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="section-1">
-      <div class="company-content">
+      <div class="company-content ml-4">
         <div class="company-logo">
           <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo">
         </div>
@@ -238,13 +375,13 @@
       <div class="login-card">
         <div class="card-body p-8"> 
           <!-- Header Section -->
-          <div class="text-center mb-6">
+          <div class="text-center mb-1">
             <div class="welcome-text">Welcome to Logistics I</div>
             <div class="welcome-subtitle">Sign in to access your account</div>
           </div>
 
           <!-- Error Alert -->
-          <div id="loginErrorAlert" class="custom-login-alert hidden">
+          <div id="loginErrorAlert" class="custom-login-alert bg-red-100 hidden">
             <i class='bx bx-x-circle'></i>
             <span id="loginErrorMessage">Invalid email or password.</span>
           </div>
@@ -252,9 +389,9 @@
           <form id="loginForm" class="space-y-5">
             <!-- Email Input -->
             <div class="form-control">
-              <label class="form-label">Email Address</label>
+              <label class="form-label">Email</label>
               <div class="relative">
-                <input type="email" id="email" name="email" placeholder="Enter your email address" class="form-input input-lg w-full">
+                <input type="email" id="email" name="email" placeholder="Enter your email" class="form-input input-lg w-full">
                 <i class='bx bxs-envelope input-icon text-lg'></i>
               </div>
               <div class="error-message" id="emailError">
@@ -283,8 +420,97 @@
                 Sign In
               </button>
             </div>
+
+            <!-- Terms and Conditions Text -->
+            <div class="terms-text">
+              By signing in you agree to our <span class="terms-link" id="termsLink">Terms and Conditions</span>.
+            </div>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms and Conditions Modal -->
+  <div class="modal-overlay" id="termsModal">
+    <div class="terms-modal">
+      <div class="modal-header">
+        <i class='bx bxs-notepad text-xl'></i>
+        <h2>Terms and Conditions</h2>
+        <button class="close-modal" id="closeModal">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <div class="modal-content">
+        <div class="terms-section">
+          <h3><i class='bx bx-user-check'></i> Acceptance of Terms</h3>
+          <p>By accessing and using the Microfinancial Logistics I System, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions.</p>
+          <p>Your continued use of the system constitutes acceptance of any modifications or updates to these terms.</p>
+        </div>
+
+        <div class="terms-section">
+          <h3><i class='bx bx-shield-alt-2'></i> User Responsibilities</h3>
+          <p>As an authorized user of this system, you are responsible for:</p>
+          <ul>
+            <li>Maintaining the confidentiality and security of your login credentials</li>
+            <li>All activities and transactions performed under your account</li>
+            <li>Ensuring the accuracy and completeness of information provided</li>
+            <li>Complying with all company policies and applicable regulations</li>
+            <li>Immediately reporting any suspicious activity or security breaches</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h3><i class='bx bx-lock-alt'></i> Data Privacy and Security</h3>
+          <p>Microfinancial is committed to protecting your privacy and securing sensitive information:</p>
+          <ul>
+            <li>We collect only necessary personal and operational data required for system functionality</li>
+            <li>Industry-standard encryption protocols protect data during transmission and storage</li>
+            <li>Regular security audits and monitoring systems are in place</li>
+            <li>Access to sensitive information is strictly role-based and monitored</li>
+            <li>We comply with all applicable data protection and privacy regulations</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h3><i class='bx bx-cog'></i> System Usage Guidelines</h3>
+          <p><strong>Permitted Activities:</strong></p>
+          <ul>
+            <li>Access authorized modules based on your assigned permissions</li>
+            <li>Process legitimate logistics and financial transactions</li>
+            <li>Generate and export reports for business purposes</li>
+            <li>Collaborate with other authorized system users</li>
+          </ul>
+          <p><strong>Strictly Prohibited:</strong></p>
+          <ul>
+            <li>Unauthorized access to other users' data or restricted system areas</li>
+            <li>Attempting to breach, test, or circumvent system security measures</li>
+            <li>Sharing, lending, or transferring your login credentials to others</li>
+            <li>Using the system for any illegal, fraudulent, or unauthorized purposes</li>
+            <li>Introducing malicious code, viruses, or harmful components</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h3><i class='bx bx-time'></i> System Availability and Maintenance</h3>
+          <p>The system is designed for high availability, but may experience temporary unavailability during:</p>
+          <ul>
+            <li>Planned maintenance windows (typically announced in advance)</li>
+            <li>Emergency security updates and patches</li>
+            <li>Infrastructure upgrades and improvements</li>
+            <li>Unforeseen technical issues or force majeure events</li>
+          </ul>
+        </div>
+
+        <div class="terms-section">
+          <h3><i class='bx bx-revision'></i> Terms Modification</h3>
+          <p>Microfinancial reserves the right to modify these Terms and Conditions at any time. Users will be notified of significant changes through system notifications or email. Continued use of the system after modifications constitutes acceptance of the updated terms.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="agreeButton">
+          I Understand and Agree
+        </button>
       </div>
     </div>
   </div>
@@ -314,6 +540,38 @@
         const alert = document.getElementById('loginErrorAlert');
         alert.classList.add('hidden');
     }
+
+    // Terms and Conditions Modal Functions
+    function openTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTermsModal() {
+        const modal = document.getElementById('termsModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Event listeners for terms modal
+    document.getElementById('termsLink').addEventListener('click', openTermsModal);
+    document.getElementById('closeModal').addEventListener('click', closeTermsModal);
+    document.getElementById('agreeButton').addEventListener('click', closeTermsModal);
+
+    // Close modal when clicking outside the modal content
+    document.getElementById('termsModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeTermsModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeTermsModal();
+        }
+    });
 
     // Add input event listeners to remove error styling when user starts typing
     document.getElementById('email').addEventListener('input', function() {
@@ -391,14 +649,14 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Access Granted!',
-                    text: 'Welcome back! Redirecting to your dashboard...',
-                    timer: 2000,
+                    text: 'Welcome back! Redirecting to Logistics System...',
+                    timer: 1500,
                     showConfirmButton: false,
                     background: '#f0fdf4',
                     color: '#065f46'
                 }).then(() => {
-                    // Redirect to dashboard directly
-                    window.location.href = '/dashboard';
+                    // Redirect to login splash first, then it will auto-redirect to dashboard
+                    window.location.href = '/login-splash';
                 });
             } else {
                 throw new Error(data.message || 'Invalid email or password.');
@@ -431,6 +689,7 @@
                             cookieUser ? JSON.parse(decodeURIComponent(cookieUser.split('=')[1])) : null;
                 
                 if (user && user.id) {
+                    // If already authenticated, go directly to dashboard
                     window.location.href = '/dashboard';
                 }
             } catch (e) {
