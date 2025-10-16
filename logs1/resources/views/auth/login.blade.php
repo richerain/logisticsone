@@ -381,26 +381,47 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Store in both localStorage and cookies for redundancy
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('user', JSON.stringify(data.user));
-                
-                // Set cookie that expires in 1 day
-                document.cookie = `isAuthenticated=true; path=/; max-age=${24 * 60 * 60}`;
-                document.cookie = `user=${encodeURIComponent(JSON.stringify(data.user))}; path=/; max-age=${24 * 60 * 60}`;
+                if (data.requires_otp) {
+                    Swal.close();
+                    
+                    // Store OTP session data
+                    localStorage.setItem('otpSessionId', data.session_id);
+                    localStorage.setItem('otpUserEmail', email);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'OTP Sent!',
+                        html: 'We\'ve sent a 6-digit verification code to:<br><strong>' + email + '</strong>',
+                        timer: 3000,
+                        showConfirmButton: false,
+                        background: '#f0fdf4',
+                        color: '#065f46'
+                    }).then(() => {
+                        // Redirect to OTP verification page
+                        window.location.href = '/otp-verification';
+                    });
+                } else {
+                    // Direct login without OTP (fallback)
+                    localStorage.setItem('isAuthenticated', 'true');
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('lastActivity', Date.now().toString());
+                    
+                    document.cookie = `isAuthenticated=true; path=/; max-age=${24 * 60 * 60}`;
+                    document.cookie = `user=${encodeURIComponent(JSON.stringify(data.user))}; path=/; max-age=${24 * 60 * 60}`;
+                    document.cookie = `lastActivity=${Date.now()}; path=/; max-age=${24 * 60 * 60}`;
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Access Granted!',
-                    text: 'Welcome back! Redirecting to Logistics System...',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    background: '#f0fdf4',
-                    color: '#065f46'
-                }).then(() => {
-                    // Redirect to login splash first, then it will auto-redirect to dashboard
-                    window.location.href = '/login-splash';
-                });
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Access Granted!',
+                        text: 'Welcome back! Redirecting to Logistics System...',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: '#f0fdf4',
+                        color: '#065f46'
+                    }).then(() => {
+                        window.location.href = '/login-splash';
+                    });
+                }
             } else {
                 throw new Error(data.message || 'Invalid email or password.');
             }
@@ -412,37 +433,20 @@
 
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
 
-    // Check if user is already logged in - BUT ONLY REDIRECT IF ACTUALLY AUTHENTICATED
+    // FIXED: Remove the automatic redirect logic that was causing constant refreshing
+    // Only check authentication status without automatic redirects
     document.addEventListener('DOMContentLoaded', function() {
-        // Check if we have valid authentication data, not just the existence of items
+        console.log('Login page loaded - authentication check disabled to prevent refreshing');
+        
+        // Optional: Just log the current auth status for debugging
         const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
         const hasUser = localStorage.getItem('user');
         
-        // Also check cookies as backup
-        const cookieAuth = document.cookie.split('; ').find(row => row.startsWith('isAuthenticated='));
-        const cookieUser = document.cookie.split('; ').find(row => row.startsWith('user='));
-        
-        const isReallyAuthenticated = isAuthenticated && hasUser || 
-                                   (cookieAuth && cookieAuth.split('=')[1] === 'true' && cookieUser);
-
-        // Only redirect if we have valid authentication
-        if (isReallyAuthenticated) {
-            try {
-                const user = hasUser ? JSON.parse(hasUser) : 
-                            cookieUser ? JSON.parse(decodeURIComponent(cookieUser.split('=')[1])) : null;
-                
-                if (user && user.id) {
-                    // If already authenticated, go directly to dashboard
-                    window.location.href = '/dashboard';
-                }
-            } catch (e) {
-                // If user data is invalid, stay on login page
-                console.error('Invalid user data:', e);
-                // Clear invalid data
-                localStorage.removeItem('isAuthenticated');
-                localStorage.removeItem('user');
-            }
-        }
+        console.log('Current auth status:', {
+            isAuthenticated: isAuthenticated,
+            hasUser: !!hasUser,
+            shouldStayOnLogin: true // We always stay on login page until manual login
+        });
     });
 </script>
 </body>

@@ -10,6 +10,37 @@ Route::put('/profile/update', [GatewayController::class, 'updateProfile']);
 Route::post('/profile/upload-picture', [GatewayController::class, 'uploadProfilePicture']);
 // login routes end
 
+//otp routes start
+Route::post('/auth/generate-otp', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/auth/generate-otp');
+});
+
+Route::post('/auth/verify-otp', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/auth/verify-otp');
+});
+
+Route::post('/auth/resend-otp', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/auth/resend-otp');
+});
+
+Route::post('/auth/check-otp-session', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/auth/check-otp-session');
+});
+
+Route::post('/auth/test-email', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/auth/test-email');
+});
+
+Route::post('/auth/test-real-email', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/auth/test-real-email');
+});
+
+// Debug route
+Route::get('/debug/email-config', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/debug/email-config');
+});
+//otp routes end
+
 // module1-sws entire routes start
 // SWS Inventory routes
 Route::get('/sws/inventory', function (Request $request) {

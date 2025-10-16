@@ -1,36 +1,25 @@
 <?php
 
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 // Splash on root (fresh run) - changed to login for initial load
 Route::view('/', 'auth.login')->name('root');
 
 // Custom auth views/routes (no real auth checks)
 Route::get('/login', function () {
-    // Check if user is already logged in via multiple methods
-    $isAuthenticated = false;
-    
-    // Check cookie
-    if (isset($_COOKIE['isAuthenticated']) && $_COOKIE['isAuthenticated'] === 'true') {
-        $isAuthenticated = true;
-    }
-    
-    // Check if we have valid user data
-    $userCookie = isset($_COOKIE['user']) ? json_decode($_COOKIE['user'], true) : null;
-    if ($userCookie && isset($userCookie['id'])) {
-        $isAuthenticated = true;
-    }
-    
-    if ($isAuthenticated) {
-        return redirect()->route('dashboard');
-    }
     return view('auth.login');
 })->name('login');
 
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
+
+// OTP Verification Route
+Route::get('/otp-verification', [FrontendController::class, 'showOtpVerification'])->name('otp.verification');
 
 // Splash pages (standalone) - with authentication check
 Route::get('/login-splash', function () {
@@ -42,16 +31,43 @@ Route::get('/login-splash', function () {
     return view('auth.login-splash');
 })->name('login.splash');
 
-Route::view('/logout-splash', 'auth.logout-splash')->name('logout.splash');
+Route::get('/logout-splash', function (Request $request) {
+    $timeoutReason = $request->get('timeout', 'normal');
+    $message = 'You have been logged out successfully.';
+    
+    return view('auth.logout-splash', [
+        'message' => $message,
+        'timeout_reason' => $timeoutReason
+    ]);
+})->name('logout.splash');
 
 // Logout route - direct to logout splash
-Route::get('/logout', function () {
-    // Clear all authentication data
-    setcookie('isAuthenticated', '', time() - 3600, '/');
-    setcookie('user', '', time() - 3600, '/');
+Route::get('/logout', function (Request $request) {
+    $user = null;
+    $userCookie = isset($_COOKIE['user']) ? json_decode($_COOKIE['user'], true) : null;
     
+    if ($userCookie) {
+        Log::info('User logout', ['user_id' => $userCookie['id'], 'email' => $userCookie['Email']]);
+    }
+
+    // Clear all authentication data
+    $cookies = ['isAuthenticated', 'user', 'lastActivity', 'sessionStart', 'browserSession'];
+    foreach ($cookies as $cookie) {
+        setcookie($cookie, '', time() - 3600, '/');
+    }
+
+    // Clear session storage
+    session()->flush();
+
     return redirect()->route('logout.splash');
 })->name('logout');
+
+// Session routes (kept for compatibility but timeout disabled)
+Route::get('/api/session/check', [SessionController::class, 'checkSession'])->name('api.session.check');
+Route::post('/api/session/extend', [SessionController::class, 'extendSession'])->name('api.session.extend');
+Route::get('/api/session/info', [SessionController::class, 'getSessionInfo'])->name('api.session.info');
+Route::post('/api/session/initialize', [SessionController::class, 'initializeSession'])->name('api.session.initialize');
+Route::post('/api/session/handle-timeout', [SessionController::class, 'handleTimeout'])->name('api.session.handle-timeout');
 
 // Redirect /home to dashboard (default post-login)
 Route::get('/home', function () {
@@ -60,6 +76,10 @@ Route::get('/home', function () {
 
 // Login processing route
 Route::post('/process-login', [FrontendController::class, 'processLogin'])->name('process.login');
+
+// OTP routes
+Route::post('/api/auth/verify-otp', [FrontendController::class, 'verifyOtp'])->name('api.auth.verify-otp');
+Route::post('/api/auth/resend-otp', [FrontendController::class, 'resendOtp'])->name('api.auth.resend-otp');
 
 // Protected routes - with authentication middleware
 Route::middleware(['web.auth'])->group(function () {
@@ -97,9 +117,6 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/modules/dtlr/documents', [FrontendController::class, 'dtlrDocuments'])->name('modules.dtlr.documents');
     Route::get('/modules/dtlr/logs', [FrontendController::class, 'dtlrLogs'])->name('modules.dtlr.logs');
     Route::get('/modules/dtlr/reviews', [FrontendController::class, 'dtlrReviews'])->name('modules.dtlr.reviews');
-
-    // User Management
-    Route::get('/modules/user-management', [FrontendController::class, 'userManagement'])->name('modules.user-management');
 });
 
 // profile-route

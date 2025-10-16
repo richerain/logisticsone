@@ -10,40 +10,40 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <div class="stat bg-primary text-primary-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-primary-content rounded-lg p-4 shadow-lg border-l-4 border-primary">
+            <div class="stat-figure text-primary">
                 <i class="bx bxs-notepad text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Total Logs</div>
-            <div class="stat-value text-white text-2xl" id="statTotal">0</div>
+            <div class="stat-title text-primary">Total Logs</div>
+            <div class="stat-value text-primary text-2xl" id="statTotal">0</div>
         </div>
-        <div class="stat bg-info text-info-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-info-content rounded-lg p-4 shadow-lg border-l-4 border-info">
+            <div class="stat-figure text-info">
                 <i class="bx bxs-show text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Accessed</div>
-            <div class="stat-value text-white text-2xl" id="statAccessed">0</div>
+            <div class="stat-title text-info">Accessed</div>
+            <div class="stat-value text-info text-2xl" id="statAccessed">0</div>
         </div>
-        <div class="stat bg-warning text-warning-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-warning-content rounded-lg p-4 shadow-lg border-l-4 border-warning">
+            <div class="stat-figure text-warning">
                 <i class="bx bxs-printer text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Printed</div>
-            <div class="stat-value text-white text-2xl" id="statPrinted">0</div>
+            <div class="stat-title text-warning">Printed</div>
+            <div class="stat-value text-warning text-2xl" id="statPrinted">0</div>
         </div>
-        <div class="stat bg-success text-success-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-success-content rounded-lg p-4 shadow-lg border-l-4 border-success">
+            <div class="stat-figure text-success">
                 <i class="bx bxs-transfer text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Transferred</div>
-            <div class="stat-value text-white text-2xl" id="statTransferred">0</div>
+            <div class="stat-title text-success">Transferred</div>
+            <div class="stat-value text-success text-2xl" id="statTransferred">0</div>
         </div>
-        <div class="stat bg-secondary text-secondary-content rounded-lg p-4">
+        <div class="stat text-secondary-content rounded-lg p-4 shadow-lg border-l-4 border-secondary">
             <div class="stat-figure text-secondary">
                 <i class="bx bxs-check-shield text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Reviewed</div>
-            <div class="stat-value text-white text-2xl" id="statReviewed">0</div>
+            <div class="stat-title text-secondary">Reviewed</div>
+            <div class="stat-value text-secondary text-2xl" id="statReviewed">0</div>
         </div>
     </div>
 

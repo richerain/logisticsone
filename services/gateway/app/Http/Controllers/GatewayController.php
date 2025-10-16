@@ -47,6 +47,25 @@ class GatewayController extends Controller
         }
     }
 
+    // Enhanced OTP methods
+    public function generateOtp(Request $request)
+    {
+        Log::info('Gateway generate OTP hit', $request->all());
+        return $this->proxyRequest($request, 'http://localhost:8002/api/auth/generate-otp', 'POST');
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        Log::info('Gateway verify OTP hit', $request->all());
+        return $this->proxyRequest($request, 'http://localhost:8002/api/auth/verify-otp', 'POST');
+    }
+
+    public function resendOtp(Request $request)
+    {
+        Log::info('Gateway resend OTP hit', $request->all());
+        return $this->proxyRequest($request, 'http://localhost:8002/api/auth/resend-otp', 'POST');
+    }
+
     public function updateProfile(Request $request)
     {
         Log::info('Gateway profile update hit', $request->all());
@@ -135,7 +154,7 @@ class GatewayController extends Controller
         }
     }
 
-    // Proxy methods for SWS module
+    // Enhanced proxy methods with better error handling
     public function proxyGet(Request $request, $url)
     {
         return $this->proxyRequest($request, $url, 'GET');
@@ -158,6 +177,8 @@ class GatewayController extends Controller
 
     private function proxyRequest(Request $request, $url, $method = 'GET')
     {
+        Log::info("Gateway {$method} request to: {$url}", $request->all());
+
         $client = new Client();
 
         try {
@@ -167,6 +188,7 @@ class GatewayController extends Controller
                     'Content-Type' => 'application/json',
                 ],
                 'timeout' => 30,
+                'connect_timeout' => 10,
             ];
 
             if ($method !== 'GET') {
@@ -179,27 +201,57 @@ class GatewayController extends Controller
 
             $body = json_decode($response->getBody()->getContents(), true);
 
+            Log::info("Gateway {$method} response from {$url}", [
+                'status' => $response->getStatusCode(),
+                'body' => $body
+            ]);
+
             return response()->json($body, $response->getStatusCode());
 
         } catch (RequestException $e) {
-            Log::error('Gateway proxy error: ' . $e->getMessage());
+            Log::error("Gateway {$method} error for {$url}: " . $e->getMessage());
 
             if ($e->hasResponse()) {
                 $statusCode = $e->getResponse()->getStatusCode();
                 $responseBody = $e->getResponse()->getBody()->getContents();
-                $body = json_decode($responseBody, true) ?? ['success' => false, 'message' => 'Service error'];
+                Log::error("Service response: {$responseBody}");
+                
+                $body = json_decode($responseBody, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Service error: ' . $responseBody
+                    ], $statusCode);
+                }
+                
+                return response()->json($body ?? ['success' => false, 'message' => 'Service error'], $statusCode);
+            }
 
-                return response()->json($body, $statusCode);
+            // Check if it's a connection error
+            if (str_contains($e->getMessage(), 'cURL error 7') || 
+                str_contains($e->getMessage(), 'Failed to connect')) {
+                Log::error("Connection failed to service: {$url}");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Service temporarily unavailable. Please try again.'
+                ], 503);
             }
 
             return response()->json([
                 'success' => false,
-                'message' => 'Service unavailable'
+                'message' => 'Service unavailable: ' . $e->getMessage()
             ], 503);
+        } catch (\Exception $e) {
+            Log::error("Gateway general error for {$url}: " . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Unexpected error: ' . $e->getMessage()
+            ], 500);
         }
     }
 
-    // method for file uploads - FIXED: Handle PUT method properly
+    // method for file uploads
     public function proxyUpload(Request $request, $url)
     {
         $client = new Client();
@@ -280,5 +332,4 @@ class GatewayController extends Controller
             ], 503);
         }
     }
-
 }

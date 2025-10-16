@@ -10,26 +10,26 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="stat bg-primary text-primary-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-primary-content rounded-lg p-4 shadow-lg border-l-4 border-primary">
+            <div class="stat-figure text-primary">
                 <i class="bx bxs-cloud-upload text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Today's Uploads</div>
-            <div class="stat-value text-white" id="statToday">0</div>
+            <div class="stat-title text-primary">Today's Uploads</div>
+            <div class="stat-value text-primary" id="statToday">0</div>
         </div>
-        <div class="stat bg-info text-info-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-info-content rounded-lg p-4 shadow-lg border-l-4 border-info">
+            <div class="stat-figure text-info">
                 <i class="bx bxs-file-find text-3xl"></i>
             </div>
-            <div class="stat-title text-white">OCR Processed</div>
-            <div class="stat-value text-white" id="statOcr">0</div>
+            <div class="stat-title text-info">OCR Processed</div>
+            <div class="stat-value text-info" id="statOcr">0</div>
         </div>
-        <div class="stat bg-success text-success-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-success-content rounded-lg p-4 shadow-lg border-l-4 border-success">
+            <div class="stat-figure text-success">
                 <i class="bx bxs-check-circle text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Success Rate</div>
-            <div class="stat-value text-white" id="statSuccess">100%</div>
+            <div class="stat-title text-success">Success Rate</div>
+            <div class="stat-value text-success" id="statSuccess">100%</div>
         </div>
     </div>
 

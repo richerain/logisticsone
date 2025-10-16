@@ -19,7 +19,7 @@
                 <i class="bx bx-cube text-3xl"></i>
             </div>
             <div class="stat-title text-primary">Total Assets</div>
-            <div class="stat-value" id="totalAssets">0</div>
+            <div class="stat-value text-primary" id="totalAssets">0</div>
         </div>
         
         <div class="stat text-success-content rounded-lg  shadow-lg border-l-4 border-success">
@@ -27,7 +27,7 @@
                 <i class="bx bx-check-circle text-3xl"></i>
             </div>
             <div class="stat-title text-success">Active</div>
-            <div class="stat-value" id="activeAssets">0</div>
+            <div class="stat-value text-success" id="activeAssets">0</div>
         </div>
         
         <div class="stat text-warning-content rounded-lg shadow-lg border-l-4 border-warning">
@@ -35,7 +35,7 @@
                 <i class="bx bx-wrench text-3xl"></i>
             </div>
             <div class="stat-title text-warning">In Maintenance</div>
-            <div class="stat-value" id="maintenanceAssets">0</div>
+            <div class="stat-value text-warning" id="maintenanceAssets">0</div>
         </div>
         
         <div class="stat text-error-content rounded-lg shadow-lg border-l-4 border-error">
@@ -43,7 +43,7 @@
                 <i class="bx bx-trash text-3xl"></i>
             </div>
             <div class="stat-title text-error">Disposed</div>
-            <div class="stat-value" id="disposedAssets">0</div>
+            <div class="stat-value text-error" id="disposedAssets">0</div>
         </div>
 
         <div class="stat text-info-content rounded-lg shadow-lg border-l-4 border-info">
@@ -51,7 +51,7 @@
                 <i class="bx bx-time text-3xl"></i>
             </div>
             <div class="stat-title text-info">Overdue</div>
-            <div class="stat-value" id="overdueMaintenance">0</div>
+            <div class="stat-value text-info" id="overdueMaintenance">0</div>
         </div>
     </div>
 

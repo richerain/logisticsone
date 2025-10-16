@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Log;
 
 class WebAuthMiddleware
 {
@@ -21,6 +22,9 @@ class WebAuthMiddleware
             $request->is('logout') || 
             $request->is('logout-splash') ||
             $request->is('login-splash') ||
+            $request->is('otp-verification') ||
+            $request->is('api/auth/*') ||
+            $request->is('api/session/*') ||
             $request->is('api/*')) {
             return $next($request);
         }
@@ -38,10 +42,36 @@ class WebAuthMiddleware
             $isAuthenticated = true;
         }
 
+        // SESSION TIMEOUT DISABLED - No timeout checks
+
         if (!$isAuthenticated) {
-            return redirect()->route('login');
+            // Store intended URL for redirect after login
+            if ($request->isMethod('get')) {
+                $request->session()->put('url.intended', $request->fullUrl());
+            }
+            
+            return redirect()->route('login')->with('error', 'Please login to access this page.');
         }
 
         return $next($request);
+    }
+
+    /**
+     * Clear all session data
+     */
+    private function clearSessionData()
+    {
+        // Clear cookies
+        setcookie('isAuthenticated', '', time() - 3600, '/');
+        setcookie('user', '', time() - 3600, '/');
+        setcookie('lastActivity', '', time() - 3600, '/');
+        setcookie('sessionStart', '', time() - 3600, '/');
+        setcookie('browserSession', '', time() - 3600, '/');
+        
+        // Clear session storage
+        if (isset($_SESSION)) {
+            session_unset();
+            session_destroy();
+        }
     }
 }

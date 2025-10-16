@@ -14,28 +14,28 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="stat text-primary-content rounded-lg p-4 shadow-lg border-l-4 border-primary">
-            <div class="stat-figure text-secondary">
+            <div class="stat-figure text-primary">
                 <i class="bx bxs-file text-3xl"></i>
             </div>
             <div class="stat-title text-primary">Total Documents</div>
             <div class="stat-value text-primary" id="statTotal">0</div>
         </div>
         <div class="stat text-info-content rounded-lg p-4 shadow-lg border-l-4 border-info">
-            <div class="stat-figure text-secondary">
+            <div class="stat-figure text-info">
                 <i class="bx bxs-time text-3xl"></i>
             </div>
             <div class="stat-title text-info">Pending</div>
             <div class="stat-value text-info" id="statPending">0</div>
         </div>
         <div class="stat text-success-content rounded-lg p-4 shadow-lg border-l-4 border-success">
-            <div class="stat-figure text-secondary">
+            <div class="stat-figure text-success">
                 <i class="bx bxs-check-circle text-3xl"></i>
             </div>
             <div class="stat-title text-success">Approved</div>
             <div class="stat-value text-success" id="statApproved">0</div>
         </div>
         <div class="stat text-warning-content rounded-lg p-4 shadow-lg border-l-4 border-warning">
-            <div class="stat-figure text-secondary">
+            <div class="stat-figure text-warning">
                 <i class="bx bxs-archive text-3xl"></i>
             </div>
             <div class="stat-title text-warning">Processed</div>

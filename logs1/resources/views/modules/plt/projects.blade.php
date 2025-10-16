@@ -9,7 +9,7 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="stats">
-                <div class="stat shadow-lg border-l-4 border-primary">
+                <div class="stat bg-base-100 shadow-lg rounded-lg border-l-4 border-primary">
                     <div class="stat-figure text-primary">
                         <i class="bx bxs-briefcase text-3xl"></i>
                     </div>
@@ -19,17 +19,17 @@
             </div>
             
             <div class="stats">
-                <div class="stat shadow-lg border-l-4 border-blue-400">
-                    <div class="stat-figure text-secondary">
+                <div class="stat shadow-lg rounded-lg border-l-4 border-info">
+                    <div class="stat-figure text-info">
                         <i class="bx bxs-rocket text-3xl"></i>
                     </div>
                     <div class="stat-title">Active Projects</div>
-                    <div class="stat-value text-secondary" id="active-projects">0</div>
+                    <div class="stat-value text-info" id="active-projects">0</div>
                 </div>
             </div>
             
             <div class="stats">
-                <div class="stat shadow-lg border-l-4 border-warning">
+                <div class="stat shadow-lg rounded-lgborder-l-4 border-warning">
                     <div class="stat-figure text-warning">
                         <i class="bx bxs-time text-3xl"></i>
                     </div>
@@ -39,7 +39,7 @@
             </div>
             
             <div class="stats">
-                <div class="stat shadow-lg border-l-4 border-success">
+                <div class="stat shadow-lg rounded-lg border-l-4 border-success">
                     <div class="stat-figure text-success">
                         <i class="bx bxs-check-circle text-3xl"></i>
                     </div>

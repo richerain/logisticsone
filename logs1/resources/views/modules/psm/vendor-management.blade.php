@@ -13,14 +13,14 @@
 
         <div class="bg-base-100 rounded-lg p-1 mb-6">
             <div class="gap-4 grid grid-cols-2">
-                <div class="stat shadow-lg border-l-4 border-primary rounded">
+                <div class="stat shadow-lg border-l-4 border-primary rounded-lg">
                     <div class="stat-figure text-primary">
                         <i class="bx bx-store text-3xl"></i>
                     </div>
                     <div class="stat-title">Total Vendors</div>
                     <div class="stat-value text-primary" id="total-vendors">0</div>
                 </div>
-                <div class="stat shadow-lg border-l-4 border-success rounded">
+                <div class="stat shadow-lg border-l-4 border-success rounded-lg">
                     <div class="stat-figure text-success">
                         <i class="bx bx-check-circle text-3xl"></i>
                     </div>

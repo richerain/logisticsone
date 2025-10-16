@@ -14,12 +14,12 @@
 
     <!-- Stats Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="stat text-primary-content rounded-lg  shadow-lg border-l-4 border-primary">
+        <div class="stat text-primary-content rounded-lg shadow-lg border-l-4 border-primary">
             <div class="stat-figure text-primary">
                 <i class="bx bx-calendar text-3xl"></i>
             </div>
             <div class="stat-title text-primary">Total Schedules</div>
-            <div class="stat-value" id="totalSchedules">0</div>
+            <div class="stat-value text-primary" id="totalSchedules">0</div>
         </div>
         
         <div class="stat text-warning-content rounded-lg shadow-lg border-l-4 border-warning">
@@ -27,15 +27,15 @@
                 <i class="bx bx-time-five text-3xl"></i>
             </div>
             <div class="stat-title text-warning">Pending</div>
-            <div class="stat-value" id="pendingSchedules">0</div>
+            <div class="stat-value text-warning" id="pendingSchedules">0</div>
         </div>
         
-        <div class="stat text-error-content rounded-lg shadow-lg border-l-4 borde-error">
+        <div class="stat text-error-content rounded-lg shadow-lg border-l-4 border-error">
             <div class="stat-figure text-error">
                 <i class="bx bx-alarm-exclamation text-3xl"></i>
             </div>
             <div class="stat-title text-error">Overdue</div>
-            <div class="stat-value" id="overdueSchedules">0</div>
+            <div class="stat-value text-error" id="overdueSchedules">0</div>
         </div>
         
         <div class="stat text-success-content rounded-lg shadow-lg border-l-4 border-success">
@@ -43,7 +43,7 @@
                 <i class="bx bx-check-double text-3xl"></i>
             </div>
             <div class="stat-title text-success">Completed This Month</div>
-            <div class="stat-value" id="completedThisMonth">0</div>
+            <div class="stat-value text-success" id="completedThisMonth">0</div>
         </div>
     </div>
 

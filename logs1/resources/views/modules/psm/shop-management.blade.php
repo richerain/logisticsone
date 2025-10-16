@@ -13,7 +13,7 @@
 
         <!-- Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded- shadow-lg border-l-4 border-primary">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
                 <div class="stat-figure text-primary">
                     <i class="bx bx-store text-3xl"></i>
                 </div>

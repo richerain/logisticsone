@@ -10,33 +10,33 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat bg-primary text-primary-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-primary-content rounded-lg p-4 shadow-lg border-l-4 border-primary">
+            <div class="stat-figure text-primary">
                 <i class="bx bxs-notepad text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Total Reviews</div>
-            <div class="stat-value text-white" id="statTotal">0</div>
+            <div class="stat-title text-primary">Total Reviews</div>
+            <div class="stat-value text-primary" id="statTotal">0</div>
         </div>
-        <div class="stat bg-warning text-warning-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-warning-content rounded-lg p-4 shadow-lg border-l-4 border-warning">
+            <div class="stat-figure text-warning">
                 <i class="bx bxs-time text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Pending</div>
-            <div class="stat-value text-white" id="statPending">0</div>
+            <div class="stat-title text-warning">Pending</div>
+            <div class="stat-value text-warning" id="statPending">0</div>
         </div>
-        <div class="stat bg-success text-success-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-success-content rounded-lg p-4 shadow-lg border-l-4 border-success">
+            <div class="stat-figure text-success">
                 <i class="bx bxs-check-circle text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Approved</div>
-            <div class="stat-value text-white" id="statApproved">0</div>
+            <div class="stat-title text-success">Approved</div>
+            <div class="stat-value text-success" id="statApproved">0</div>
         </div>
-        <div class="stat bg-error text-error-content rounded-lg p-4">
-            <div class="stat-figure text-secondary">
+        <div class="stat text-error-content rounded-lg p-4 shadow-lg border-l-4 border-error">
+            <div class="stat-figure text-error">
                 <i class="bx bxs-x-circle text-3xl"></i>
             </div>
-            <div class="stat-title text-white">Rejected</div>
-            <div class="stat-value text-white" id="statRejected">0</div>
+            <div class="stat-title text-error">Rejected</div>
+            <div class="stat-value text-error" id="statRejected">0</div>
         </div>
     </div>
 

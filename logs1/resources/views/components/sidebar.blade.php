@@ -222,14 +222,6 @@
                     </li>
                 </ul>
             </li>
-
-            <!-- User Management - Visible to superadmin and admin only -->
-            <li data-roles="superadmin,admin">
-                <a href="{{ route('modules.user-management') }}" title="User Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.user-management') ? 'bg-white/30' : '' }}">
-                    <i class="bx bxs-user mr-2"></i>
-                    <span class="module-text">User Management</span>
-                </a>
-            </li>
         </ul>
     </div>
     <hr class="my-4 flex-shrink-0" />

@@ -54,7 +54,28 @@ window.roleBasedVisibility = {
     }
 };
 
+// Session timeout monitoring DISABLED
+// No automatic session checks or timeouts
 
+console.log('🛡️ Session timeout features disabled - sessions will not expire automatically');
+
+// Simple function to check if user is authenticated (for other components)
+window.isUserAuthenticated = function() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+    return isAuth && user.id;
+};
+
+// Optional: Keep session API endpoints available for other components that might call them
+window.sessionManager = {
+    manualSessionCheck: async function() {
+        console.log('Session check called - timeout disabled');
+        return { session_valid: true };
+    },
+    getSessionInfo: async function() {
+        return { session_active: true, minutes_remaining: 999 };
+    }
+};
 </script>
 </body>
 </html>

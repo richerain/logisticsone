@@ -11,34 +11,53 @@
   <div class="text-center text-white">
     <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Logo" class="mx-auto h-32 mb-4">
     <h2 class="text-3xl font-bold mb-2">Microfinancial</h2>
-    <p class="text-lg">Welcome back, <span id="userName"></span>!</p>
+    <p class="text-lg">Welcome back, <span id="userName">{{ $user['firstname'] ?? 'User' }}</span>!</p>
     <p class="text-sm mt-2">You are now redirecting to the dashboard...</p>
+    <div class="mt-4">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+    </div>
   </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Get user data from cookie or localStorage
-        let user = null;
+        console.log('Login splash page loaded - initializing session');
         
-        // Try to get from cookie first
-        const userCookie = document.cookie.split('; ').find(row => row.startsWith('user='));
-        if (userCookie) {
-            try {
-                user = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
-            } catch (e) {
-                console.error('Error parsing user cookie:', e);
-            }
-        }
-        
-        // Fallback to localStorage
-        if (!user) {
-            user = JSON.parse(localStorage.getItem('user') || '{}');
-        }
-        
-        const userName = user.firstname || 'User';
-        document.getElementById('userName').textContent = userName;
+        // Get user data from PHP variable or cookie
+        const userName = document.getElementById('userName').textContent;
+        console.log('Welcome message for:', userName);
 
+        // Update last activity timestamp to ensure fresh session
+        const currentTime = Date.now();
+        
+        // Update localStorage
+        localStorage.setItem('lastActivity', currentTime.toString());
+        localStorage.setItem('isAuthenticated', 'true');
+        
+        // Update cookies
+        document.cookie = `lastActivity=${currentTime}; path=/; max-age=${30 * 24 * 60 * 60}`;
+        document.cookie = `isAuthenticated=true; path=/; max-age=${30 * 24 * 60 * 60}`;
+        
+        console.log('Session refreshed with timestamp:', currentTime);
+
+        // Initialize session with backend
+        fetch('/api/session/initialize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        }).then(response => response.json())
+          .then(data => {
+              console.log('Session initialized:', data);
+          })
+          .catch(error => {
+              console.error('Session initialization error:', error);
+          });
+
+        // Redirect to dashboard after 2 seconds
         setTimeout(() => {
+            console.log('Redirecting to dashboard...');
             window.location.href = '/dashboard';
         }, 2000);
     });
