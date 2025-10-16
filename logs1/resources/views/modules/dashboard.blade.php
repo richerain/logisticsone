@@ -7,69 +7,92 @@
     <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
     
     <!-- Welcome message with user data -->
-    <div class="mb-6 p-4 bg-green-50 rounded-lg">
-        <h2 class="text-xl font-semibold">Welcome back, <span id="welcome-user">User</span>!</h2>
-        <p class="text-gray-600">You are successfully logged in to the Microfinancial Logistics System.</p>
-        <p class="text-sm text-gray-500 mt-2">Your Role: <span id="user-role" class="font-semibold"></span></p>
+    <div class="mb-2 p-2 bg-green-50 rounded-lg border-2 border-green-200 border-dotted hidden">
+        <h2 class="text-md font-semibold">Welcome back <span id="user-role" class="font-semibold"></span>, <span id="welcome-user">User</span> !</h2>
     </div>
 
-    <!-- Stats Grid: 4 Columns x 2 Rows (8 Cards Total) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5">
+<!-- stats metrics section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5 bg-green-100 rounded-lg mb-5">
         <!-- Row 1: Cards 1-4 -->
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title"><i class='bx-fw bx bx-xs bxs-heart'></i>Ma'am Riche<i class='bx-fw bx bx-xs bxs-heart'></i></div>
-            <div class="stat-value text-primary">100000%</div>
-            <div class="stat-desc text-success">Ultimate rating achieved</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-primary">
+            <div class="stat-title font-bold">Module Services</div>
+            <div class="stat-value text-primary">6</div>
+            <div class="stat-desc font-bold">Active modules</div>
         </div>
         
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title">Total Page Views</div>
-            <div class="stat-value">89,400</div>
-            <div class="stat-desc text-success">21% more than last month</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-secondary">
+            <div class="stat-title font-bold">Total Page Views</div>
+            <div class="stat-value text-secondary">89,400</div>
+            <div class="stat-desc font-bold">21% more than last month</div>
         </div>
         
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title">New Users</div>
-            <div class="stat-value">1,200</div>
-            <div class="stat-desc text-success">15% increase from previous</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-accent">
+            <div class="stat-title font-bold">New Users</div>
+            <div class="stat-value text-accent">1,200</div>
+            <div class="stat-desc font-bold">15% increase from previous</div>
         </div>
         
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title">Revenue</div>
-            <div class="stat-value">$45,230</div>
-            <div class="stat-desc text-success">8% growth YTD</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-info">
+            <div class="stat-title font-bold">Revenue</div>
+            <div class="stat-value text-info">₱45,230</div>
+            <div class="stat-desc font-bold">8% growth YTD</div>
         </div>
         
         <!-- Row 2: Cards 5-8 -->
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title">Active Sessions</div>
-            <div class="stat-value">2,500</div>
-            <div class="stat-desc text-success">Up 12% today</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-success">
+            <div class="stat-title font-bold">Active Sessions</div>
+            <div class="stat-value text-success">2,500</div>
+            <div class="stat-desc font-bold">Up 12% today</div>
         </div>
         
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title">Error Rate</div>
-            <div class="stat-value">0.5%</div>
-            <div class="stat-desc text-error">Below target threshold</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-warning">
+            <div class="stat-title font-bold">Error Rate</div>
+            <div class="stat-value text-warning">0.5%</div>
+            <div class="stat-desc font-bold">Below target threshold</div>
         </div>
         
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title">Bounce Rate</div>
-            <div class="stat-value">32%</div>
-            <div class="stat-desc text-warning">Monitor closely</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-error">
+            <div class="stat-title font-bold">Bounce Rate</div>
+            <div class="stat-value text-error">32%</div>
+            <div class="stat-desc font-bold">Monitor closely</div>
         </div>
         
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-green-600">
-            <div class="stat-title">Conversion Rate</div>
-            <div class="stat-value">4.2%</div>
-            <div class="stat-desc text-success">On track for Q4 goals</div>
+        <div class="stat card bg-base-100 shadow-lg border-l-4 border-yellow-700">
+            <div class="stat-title font-bold">Conversion Rate</div>
+            <div class="stat-value text-yellow-700">4.2%</div>
+            <div class="stat-desc font-bold">On track for Q4 goals</div>
         </div>
     </div>
 
-    <div class="border-b border-green-900 p-1 mb-5"></div>
+<!-- statistics charts section -->
+    <div class="bg-green-100 rounded-lg p-5 mb-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+        <!-- Box 1: Bar Chart (Market Share by Provider) -->
+        <div class="p-4 bg-white rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">Market Share by Vendors</h3>
+            <canvas id="barChart" width="400" height="200"></canvas>
+        </div>
 
-    <!-- Role-based visibility -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="role-based-panels">
+        <!-- Box 2: Line Chart (Market Growth Projection) -->
+        <div class="p-4 bg-white rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">Vendor Market Growth (2025-2026)</h3>
+            <canvas id="lineChart" width="400" height="200"></canvas>
+        </div>
+        
+        <!-- Box 3: Pie Chart (Key Segments) -->
+        <div class="p-4 bg-white rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">Vendors Share</h3>
+            <canvas id="pieChart" width="100" height="100"></canvas>
+        </div>
+        
+        <!-- Box 4: Doughnut Chart (PoP Distribution Example) -->
+        <div class="p-4 bg-white rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">Inventory Items</h3>
+            <canvas id="doughnutChart" width="100" height="100"></canvas>
+        </div>
+    </div>
+
+<!-- role-based visibility section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-lg bg-green-100" id="role-based-panels">
         <!-- Super Admin Panel -->
         <div class="p-4 bg-green-900 text-white rounded-lg hidden" data-roles="superadmin">
             <h3 class="font-bold">Super Admin Panel</h3>
@@ -184,6 +207,87 @@
             
             // Update dashboard content based on role
             updateDashboardContent(user.roles);
+        }
+    });
+
+    // Bar Chart: Market Share by Provider
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['market1', 'market2', 'market3'],
+            datasets: [{
+                label: 'Market Share (%)',
+                data: [34, 28, 22],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                borderColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 40
+                }
+            }
+        }
+    });
+
+    // Pie Chart: Key Segments
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['vendor1', 'vendor2'],
+            datasets: [{
+                data: [42.7, 71.2],  // Note: These are approximate shares; adjust for full 100% if needed
+                backgroundColor: ['#FF6384', '#36A2EB']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    // Line Chart: Market Growth Projection
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['2025', '2030', '2035'],
+            datasets: [{
+                label: 'Vendors Market Value (₱ PHP)',
+                data: [24.25, 50, 103.4],
+                borderColor: '#36A2EB',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Doughnut Chart: PoP Count by Top Providers
+    const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+    new Chart(doughnutCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Equiptment', 'Document', 'Supplies'],
+            datasets: [{
+                data: [1400, 2000, 1200],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        },
+        options: {
+            responsive: true
         }
     });
 </script>

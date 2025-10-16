@@ -6,6 +6,7 @@
     <title>Microfinancial Logistics - @yield('title', 'Dashboard')</title>
     <link rel="icon" type="image/png" href="{{ asset('images/micrologo.png') }}" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.js"></script>
 </head>
 <body class="bg-gray-100 font-sans">
     <x-header />
