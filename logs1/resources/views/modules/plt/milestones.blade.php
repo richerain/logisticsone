@@ -80,8 +80,6 @@
                         <th>Milestone ID</th>
                         <th>Project</th>
                         <th>Milestone Name</th>
-                        <th>Due Date</th>
-                        <th>Actual Date</th>
                         <th>Status</th>
                         <th>Delay Alert</th>
                         <th>Actions</th>
@@ -190,75 +188,92 @@
     </dialog>
 
     <script>
-        let currentPage = 1;
-        let editingId = null;
-        let deleteId = null;
+        // ==================== CONFIGURATION ====================
+        const API_BASE_URL = 'http://localhost:8001/api/plt';
 
-        // Load milestones on page load
+        // ==================== STATE MANAGEMENT ====================
+        let currentPage = 1;
+        let totalPages = 1;
+        let searchTerm = '';
+        let statusFilter = '';
+
+        // ==================== DOM ELEMENTS ====================
+        const milestonesTableBody = document.getElementById('milestones-table-body');
+        const pagination = document.getElementById('pagination');
+        const searchInput = document.getElementById('search-input');
+        const statusFilterSelect = document.getElementById('status-filter');
+        const milestoneModal = document.getElementById('milestone-modal');
+        const milestoneForm = document.getElementById('milestone-form');
+        const modalTitle = document.getElementById('modal-title');
+        const milestoneIdInput = document.getElementById('milestone-id');
+        const projectSelect = document.getElementById('project-select');
+        const dispatchSelect = document.getElementById('dispatch-select');
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+        // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
             loadMilestones();
-            loadStats();
             loadProjectsForSelect();
             loadDispatchesForSelect();
+            setupEventListeners();
         });
 
-        // Load milestones with pagination and filters
-        async function loadMilestones(page = 1) {
-            currentPage = page;
-            const search = document.getElementById('search-input').value;
-            const status = document.getElementById('status-filter').value;
+        function setupEventListeners() {
+            searchInput.addEventListener('input', debounce(() => {
+                searchTerm = searchInput.value;
+                currentPage = 1;
+                loadMilestones();
+            }, 500));
 
+            statusFilterSelect.addEventListener('change', () => {
+                statusFilter = statusFilterSelect.value;
+                currentPage = 1;
+                loadMilestones();
+            });
+
+            milestoneForm.addEventListener('submit', handleMilestoneSubmit);
+        }
+
+        // ==================== API FUNCTIONS ====================
+        async function loadMilestones() {
             try {
                 showLoading();
-                const response = await fetch(`/api/plt/milestones?page=${page}&search=${search}&status=${status}`);
-                const data = await response.json();
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    search: searchTerm,
+                    status: statusFilter
+                });
 
-                if (data.success) {
-                    renderMilestonesTable(data.data.data);
-                    renderPagination(data.data);
+                const response = await fetch(`${API_BASE_URL}/milestones?${params}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayMilestones(result.data);
+                    updateStats();
                 } else {
-                    showToast('Error loading milestones', 'error');
+                    throw new Error(result.message || 'Failed to load milestones');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error loading milestones', 'error');
+                console.error('Error loading milestones:', error);
+                showError('Failed to load milestones: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
-        // Load stats
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/plt/milestones/stats');
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('total-milestones').textContent = data.data.total_milestones;
-                    document.getElementById('pending').textContent = data.data.pending;
-                    document.getElementById('completed').textContent = data.data.completed;
-                    document.getElementById('delayed').textContent = data.data.delayed;
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        // Load projects for select dropdown
         async function loadProjectsForSelect() {
             try {
-                const response = await fetch('/api/plt/projects?per_page=100');
-                const data = await response.json();
+                const response = await fetch(`${API_BASE_URL}/projects`);
+                const result = await response.json();
 
-                if (data.success) {
-                    const select = document.getElementById('project-select');
-                    select.innerHTML = '<option value="">Select Project</option>';
-                    
-                    data.data.data.forEach(project => {
+                if (result.success) {
+                    projectSelect.innerHTML = '<option value="">Select Project</option>';
+                    result.data.data.forEach(project => {
                         const option = document.createElement('option');
                         option.value = project.id;
                         option.textContent = project.name;
-                        select.appendChild(option);
+                        projectSelect.appendChild(option);
                     });
                 }
             } catch (error) {
@@ -266,21 +281,18 @@
             }
         }
 
-        // Load dispatches for select dropdown
         async function loadDispatchesForSelect() {
             try {
-                const response = await fetch('/api/plt/dispatches?per_page=100');
-                const data = await response.json();
+                const response = await fetch(`${API_BASE_URL}/dispatches`);
+                const result = await response.json();
 
-                if (data.success) {
-                    const select = document.getElementById('dispatch-select');
-                    select.innerHTML = '<option value="">Select Dispatch</option>';
-                    
-                    data.data.data.forEach(dispatch => {
+                if (result.success) {
+                    dispatchSelect.innerHTML = '<option value="">Select Dispatch</option>';
+                    result.data.data.forEach(dispatch => {
                         const option = document.createElement('option');
                         option.value = dispatch.id;
-                        option.textContent = `DSP${String(dispatch.id).padStart(5, '0')} - ${dispatch.material_type}`;
-                        select.appendChild(option);
+                        option.textContent = `DSP${String(dispatch.id).padStart(5, '0')} - ${getMaterialTypeText(dispatch.material_type)}`;
+                        dispatchSelect.appendChild(option);
                     });
                 }
             } catch (error) {
@@ -288,220 +300,459 @@
             }
         }
 
-        // Render milestones table
-        function renderMilestonesTable(milestones) {
-            const tbody = document.getElementById('milestones-table-body');
-            tbody.innerHTML = '';
+        async function updateStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/milestones/stats`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('total-milestones').textContent = stats.total_milestones;
+                    document.getElementById('pending').textContent = stats.pending;
+                    document.getElementById('completed').textContent = stats.completed;
+                    document.getElementById('delayed').textContent = stats.delayed;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function createMilestone(milestoneData) {
+            const response = await fetch(`${API_BASE_URL}/milestones`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(milestoneData)
+            });
+            return await response.json();
+        }
+
+        async function updateMilestone(id, milestoneData) {
+            const response = await fetch(`${API_BASE_URL}/milestones/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(milestoneData)
+            });
+            return await response.json();
+        }
+
+        async function deleteMilestone(id) {
+            const response = await fetch(`${API_BASE_URL}/milestones/${id}`, {
+                method: 'DELETE'
+            });
+            return await response.json();
+        }
+
+        // ==================== UI FUNCTIONS ====================
+        function displayMilestones(milestonesData) {
+            const milestones = milestonesData.data;
+            totalPages = milestonesData.last_page;
+
+            milestonesTableBody.innerHTML = '';
 
             if (milestones.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">No milestones found</td></tr>';
+                milestonesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-500">
+                            <i class="bx bx-flag text-4xl mb-2"></i>
+                            <p>No milestones found</p>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
             milestones.forEach(milestone => {
-                const statusBadge = getStatusBadge(milestone.status);
-                const delayAlert = milestone.delay_alert ? 
-                    '<span class="badge badge-warning">Delayed</span>' : 
-                    '<span class="badge badge-success">On Time</span>';
-
-                const row = `
-                    <tr>
-                        <td class="font-mono">MST${String(milestone.id).padStart(5, '0')}</td>
-                        <td>${milestone.project?.name || 'N/A'}</td>
-                        <td>${milestone.name}</td>
-                        <td>${formatDate(milestone.due_date)}</td>
-                        <td>${milestone.actual_date ? formatDate(milestone.actual_date) : 'Not completed'}</td>
-                        <td>${statusBadge}</td>
-                        <td>${delayAlert}</td>
-                        <td>
-                            <div class="flex gap-1">
-                                <button class="btn btn-sm btn-circle btn-info" title="Edit" onclick="editMilestone(${milestone.id})">
-                                    <i class="bx bx-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-circle btn-error" title="Delete" onclick="confirmDelete(${milestone.id})">
-                                    <i class="bx bx-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                const isOverdue = new Date(milestone.due_date) < new Date() && milestone.status !== 'completed';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="font-mono">MIL${String(milestone.id).padStart(5, '0')}</td>
+                    <td>${milestone.project ? escapeHtml(milestone.project.name) : 'N/A'}</td>
+                    <td class="font-semibold">${escapeHtml(milestone.name)}</td>
+                    <td>
+                        <span class="badge ${getStatusBadgeClass(milestone.status)}">
+                            ${getStatusText(milestone.status)}
+                        </span>
+                    </td>
+                    <td>
+                        ${milestone.delay_alert ? 
+                            '<span class="badge badge-warning"><i class="bx bx-alarm-exclamation mr-1"></i>Delayed</span>' : 
+                            '<span class="text-gray-400">-</span>'
+                        }
+                    </td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-sm btn-circle btn-outline btn-info" onclick="viewMilestone(${milestone.id})">
+                                <i class="bx bx-show"></i>
+                            </button>
+                            <button class="btn btn-sm btn-circle btn-outline btn-warning" onclick="editMilestone(${milestone.id})">
+                                <i class="bx bx-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-circle btn-outline btn-error" onclick="openDeleteModal(${milestone.id})">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 `;
-                tbody.innerHTML += row;
+                milestonesTableBody.appendChild(row);
             });
+
+            updatePagination();
         }
 
-        // Render pagination
-        function renderPagination(pagination) {
-            const paginationDiv = document.getElementById('pagination');
-            paginationDiv.innerHTML = '';
-
-            const totalPages = pagination.last_page;
-            const currentPage = pagination.current_page;
+        function updatePagination() {
+            pagination.innerHTML = '';
 
             // Previous button
-            if (currentPage > 1) {
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn" onclick="loadMilestones(${currentPage - 1})">«</button>
-                `;
-            }
+            const prevButton = document.createElement('button');
+            prevButton.className = `join-item btn ${currentPage === 1 ? 'btn-disabled' : ''}`;
+            prevButton.innerHTML = '<i class="bx bx-chevron-left"></i>';
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadMilestones();
+                }
+            };
+            pagination.appendChild(prevButton);
 
             // Page numbers
             for (let i = 1; i <= totalPages; i++) {
-                const activeClass = i === currentPage ? 'btn-active' : '';
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn ${activeClass}" onclick="loadMilestones(${i})">${i}</button>
-                `;
+                const pageButton = document.createElement('button');
+                pageButton.className = `join-item btn ${currentPage === i ? 'btn-active' : ''}`;
+                pageButton.textContent = i;
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    loadMilestones();
+                };
+                pagination.appendChild(pageButton);
             }
 
             // Next button
-            if (currentPage < totalPages) {
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn" onclick="loadMilestones(${currentPage + 1})">»</button>
-                `;
+            const nextButton = document.createElement('button');
+            nextButton.className = `join-item btn ${currentPage === totalPages ? 'btn-disabled' : ''}`;
+            nextButton.innerHTML = '<i class="bx bx-chevron-right"></i>';
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadMilestones();
+                }
+            };
+            pagination.appendChild(nextButton);
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+        function openAddModal() {
+            modalTitle.textContent = 'Add New Milestone';
+            milestoneForm.reset();
+            milestoneIdInput.value = '';
+            milestoneModal.showModal();
+        }
+
+        async function viewMilestone(id) {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE_URL}/milestones/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const milestone = result.data;
+                    const isOverdue = new Date(milestone.due_date) < new Date() && milestone.status !== 'completed';
+                    
+                    // Create and show view modal
+                    const viewModal = document.createElement('dialog');
+                    viewModal.className = 'modal modal-middle';
+                    viewModal.innerHTML = `
+                        <div class="modal-box max-w-2xl">
+                            <h3 class="font-bold text-lg mb-4">Milestone Details - MIL${String(milestone.id).padStart(5, '0')}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Project</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${milestone.project ? escapeHtml(milestone.project.name) : 'N/A'}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Dispatch</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${milestone.dispatch ? `DSP${String(milestone.dispatch.id).padStart(5, '0')}` : 'Not linked'}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Milestone Name</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded font-semibold">${escapeHtml(milestone.name)}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Status</span>
+                                    </label>
+                                    <div class="p-2">
+                                        <span class="badge ${getStatusBadgeClass(milestone.status)}">
+                                            ${getStatusText(milestone.status)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Due Date</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded ${isOverdue ? 'bg-warning text-warning-content' : ''}">
+                                        ${formatDate(milestone.due_date)}
+                                        ${isOverdue ? '<span class="badge badge-error ml-2">Overdue</span>' : ''}
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Actual Date</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${milestone.actual_date ? formatDate(milestone.actual_date) : 'Not completed'}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Delay Alert</span>
+                                    </label>
+                                    <div class="p-2">
+                                        ${milestone.delay_alert ? 
+                                            '<span class="badge badge-warning"><i class="bx bx-alarm-exclamation mr-1"></i>Delayed</span>' : 
+                                            '<span class="badge badge-success"><i class="bx bx-check mr-1"></i>On Track</span>'
+                                        }
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Days Status</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded text-center">
+                                        ${calculateDaysStatus(milestone.due_date, milestone.actual_date, milestone.status)}
+                                    </div>
+                                </div>
+                                <div class="form-control md:col-span-2">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Description</span>
+                                    </label>
+                                    <div class="p-3 bg-base-200 rounded min-h-20">${milestone.description ? escapeHtml(milestone.description) : 'No description provided'}</div>
+                                </div>
+                            </div>
+                            <div class="modal-action">
+                                <button class="btn btn-ghost" onclick="this.closest('dialog').close()">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(viewModal);
+                    viewModal.showModal();
+                } else {
+                    throw new Error(result.message || 'Failed to load milestone');
+                }
+            } catch (error) {
+                console.error('Error loading milestone:', error);
+                showError('Failed to load milestone: ' + error.message);
+            } finally {
+                hideLoading();
             }
         }
 
-        // Open add modal
-        function openAddModal() {
-            editingId = null;
-            document.getElementById('modal-title').textContent = 'Add New Milestone';
-            document.getElementById('milestone-form').reset();
-            document.getElementById('milestone-id').value = '';
-            document.getElementById('milestone-modal').showModal();
-        }
-
-        // Edit milestone
         async function editMilestone(id) {
             try {
                 showLoading();
-                const response = await fetch(`/api/plt/milestones/${id}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const milestone = data.data;
-                    editingId = id;
-                    
-                    document.getElementById('modal-title').textContent = 'Edit Milestone';
-                    document.getElementById('milestone-id').value = milestone.id;
-                    document.getElementById('milestone-form').project_id.value = milestone.project_id;
-                    document.getElementById('milestone-form').dispatch_id.value = milestone.dispatch_id || '';
-                    document.getElementById('milestone-form').name.value = milestone.name;
-                    document.getElementById('milestone-form').status.value = milestone.status;
-                    document.getElementById('milestone-form').due_date.value = milestone.due_date;
-                    document.getElementById('milestone-form').actual_date.value = milestone.actual_date || '';
-                    document.getElementById('milestone-form').description.value = milestone.description || '';
-                    document.getElementById('milestone-form').delay_alert.checked = milestone.delay_alert;
-                    
-                    document.getElementById('milestone-modal').showModal();
-                } else {
-                    showToast('Error loading milestone', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error loading milestone', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Handle form submission
-        document.getElementById('milestone-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await saveMilestone();
-        });
-
-        // Save milestone
-        async function saveMilestone() {
-            const formData = new FormData(document.getElementById('milestone-form'));
-            const data = Object.fromEntries(formData);
-            data.delay_alert = document.getElementById('milestone-form').delay_alert.checked;
-            
-            const url = editingId ? `/api/plt/milestones/${editingId}` : '/api/plt/milestones';
-            const method = editingId ? 'PUT' : 'POST';
-
-            try {
-                showLoading();
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
+                const response = await fetch(`${API_BASE_URL}/milestones/${id}`);
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast(`Milestone ${editingId ? 'updated' : 'created'} successfully`, 'success');
-                    closeModal();
-                    loadMilestones();
-                    loadStats();
+                    const milestone = result.data;
+                    modalTitle.textContent = 'Edit Milestone';
+                    milestoneIdInput.value = milestone.id;
+                    
+                    // Fill form with milestone data
+                    Object.keys(milestone).forEach(key => {
+                        const input = milestoneForm.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            if (input.type === 'date') {
+                                input.value = milestone[key] ? milestone[key].split('T')[0] : '';
+                            } else if (input.type === 'checkbox') {
+                                input.checked = milestone[key] || false;
+                            } else {
+                                input.value = milestone[key] || '';
+                            }
+                        }
+                    });
+
+                    milestoneModal.showModal();
                 } else {
-                    showToast(result.message || 'Error saving milestone', 'error');
+                    throw new Error(result.message || 'Failed to load milestone');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error saving milestone', 'error');
+                console.error('Error loading milestone:', error);
+                showError('Failed to load milestone: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
-        // Confirm delete
-        function confirmDelete(id) {
-            deleteId = id;
-            document.getElementById('delete-modal').showModal();
-        }
-
-        // Delete milestone
-        document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
-            try {
-                showLoading();
-                const response = await fetch(`/api/plt/milestones/${deleteId}`, {
-                    method: 'DELETE'
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('Milestone deleted successfully', 'success');
-                    closeDeleteModal();
-                    loadMilestones();
-                    loadStats();
-                } else {
-                    showToast(result.message || 'Error deleting milestone', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error deleting milestone', 'error');
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // Close modals
         function closeModal() {
-            document.getElementById('milestone-modal').close();
+            milestoneModal.close();
+        }
+
+        let milestoneToDelete = null;
+
+        function openDeleteModal(id) {
+            milestoneToDelete = id;
+            deleteModal.showModal();
         }
 
         function closeDeleteModal() {
-            document.getElementById('delete-modal').close();
-            deleteId = null;
+            milestoneToDelete = null;
+            deleteModal.close();
         }
 
-        // Utility functions
-        function getStatusBadge(status) {
-            const statusMap = {
+        async function confirmDelete() {
+            if (!milestoneToDelete) return;
+
+            try {
+                showLoading();
+                const result = await deleteMilestone(milestoneToDelete);
+
+                if (result.success) {
+                    showSuccess('Milestone deleted successfully');
+                    closeDeleteModal();
+                    loadMilestones();
+                } else {
+                    throw new Error(result.message || 'Failed to delete milestone');
+                }
+            } catch (error) {
+                console.error('Error deleting milestone:', error);
+                showError('Failed to delete milestone: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ==================== FORM HANDLING ====================
+        async function handleMilestoneSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(milestoneForm);
+            const milestoneData = Object.fromEntries(formData);
+            
+            // Convert delay_alert to boolean
+            milestoneData.delay_alert = milestoneData.delay_alert === 'on';
+
+            try {
+                showLoading();
+                let result;
+
+                if (milestoneIdInput.value) {
+                    result = await updateMilestone(milestoneIdInput.value, milestoneData);
+                } else {
+                    result = await createMilestone(milestoneData);
+                }
+
+                if (result.success) {
+                    showSuccess(`Milestone ${milestoneIdInput.value ? 'updated' : 'created'} successfully`);
+                    closeModal();
+                    loadMilestones();
+                } else {
+                    throw new Error(result.message || `Failed to ${milestoneIdInput.value ? 'update' : 'create'} milestone`);
+                }
+            } catch (error) {
+                console.error('Error saving milestone:', error);
+                showError('Failed to save milestone: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function calculateDaysStatus(dueDate, actualDate, status) {
+            const due = new Date(dueDate);
+            const now = new Date();
+            
+            if (status === 'completed' && actualDate) {
+                const actual = new Date(actualDate);
+                const diffTime = actual - due;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0) {
+                    return `<span class="text-success">Completed ${Math.abs(diffDays)} days early</span>`;
+                } else if (diffDays > 0) {
+                    return `<span class="text-warning">Completed ${diffDays} days late</span>`;
+                } else {
+                    return `<span class="text-success">Completed on time</span>`;
+                }
+            } else {
+                const diffTime = due - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0) {
+                    return `<span class="text-error">Overdue by ${Math.abs(diffDays)} days</span>`;
+                } else if (diffDays === 0) {
+                    return `<span class="text-warning">Due today</span>`;
+                } else {
+                    return `<span class="text-success">Due in ${diffDays} days</span>`;
+                }
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            const statusClasses = {
                 'pending': 'badge-info',
                 'in_progress': 'badge-primary',
                 'completed': 'badge-success',
                 'delayed': 'badge-warning'
             };
-            return `<span class="badge ${statusMap[status]}">${status.replace('_', ' ')}</span>`;
+            return statusClasses[status] || 'badge-info';
         }
 
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString();
+        function getStatusText(status) {
+            const statusTexts = {
+                'pending': 'Pending',
+                'in_progress': 'In Progress',
+                'completed': 'Completed',
+                'delayed': 'Delayed'
+            };
+            return statusTexts[status] || status;
+        }
+
+        function getMaterialTypeText(type) {
+            const typeTexts = {
+                'equipment': 'Equipment',
+                'document': 'Document',
+                'supplies': 'Supplies',
+                'furniture': 'Furniture'
+            };
+            return typeTexts[type] || type;
         }
 
         function showLoading() {
@@ -514,19 +765,23 @@
             console.log('Loading complete');
         }
 
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-top toast-end`;
-            toast.innerHTML = `
-                <div class="alert alert-${type}">
-                    <span>${message}</span>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                timer: 5000
+            });
         }
     </script>
 @endsection

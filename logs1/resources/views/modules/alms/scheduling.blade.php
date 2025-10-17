@@ -52,10 +52,7 @@
         <div class="flex-1">
             <div class="form-control">
                 <div class="input-group">
-                    <input type="text" id="searchInput" placeholder="Search by schedule ID, asset..." class="input input-bordered w-full" />
-                    <button class="btn btn-square" onclick="loadSchedules()">
-                        <i class="bx bx-search"></i>
-                    </button>
+                    <input type="text" id="searchInput" placeholder="Search by schedule ID, asset..." class="input input-bordered w-full" onkeyup="loadSchedules()" />
                 </div>
             </div>
         </div>
@@ -113,7 +110,16 @@
         <h3 class="font-bold text-lg mb-4" id="modalTitle">Schedule Maintenance</h3>
         
         <form id="scheduleForm" class="space-y-4">
+            <input type="hidden" name="id" id="scheduleId">
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Schedule ID</span>
+                    </label>
+                    <input type="text" id="scheduleIdDisplay" class="input input-bordered" readonly disabled />
+                </div>
+                
                 <div class="form-control">
                     <label class="label">
                         <span class="label-text">Asset *</span>
@@ -155,6 +161,24 @@
     </div>
 </dialog>
 
+<!-- View Schedule Modal -->
+<dialog id="viewScheduleModal" class="modal">
+    <div class="modal-box w-11/12 max-w-2xl">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 class="font-bold text-lg mb-4">Schedule Details</h3>
+        
+        <div id="scheduleDetails" class="space-y-4">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+        
+        <div class="modal-action">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('viewScheduleModal').close()">Close</button>
+        </div>
+    </div>
+</dialog>
+
 <!-- Complete Maintenance Modal -->
 <dialog id="completeModal" class="modal">
     <div class="modal-box w-11/12 max-w-2xl">
@@ -164,14 +188,17 @@
         <h3 class="font-bold text-lg mb-4">Complete Maintenance</h3>
         
         <form id="completeForm" class="space-y-4">
-            <input type="hidden" name="schedule_id" />
+            <input type="hidden" name="schedule_id" id="completeScheduleId">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="form-control">
                     <label class="label">
                         <span class="label-text">Actual Cost</span>
                     </label>
-                    <input type="number" step="0.01" name="cost" class="input input-bordered" placeholder="0.00" />
+                    <div class="input-group">
+                        <span class="bg-gray-200 px-3 py-2 border border-r-0 rounded-l-lg">₱</span>
+                        <input type="number" step="0.01" name="cost" class="input input-bordered rounded-l-none w-full" placeholder="0.00" />
+                    </div>
                 </div>
                 
                 <div class="form-control">
@@ -198,7 +225,7 @@
 </dialog>
 
 <!-- Loading Toast -->
-<div id="loadingToast" class="toast toast-top toast-center hidden">
+<div id="loadingToast" class="toast toast-middle toast-center hidden">
     <div class="alert alert-info">
         <span>Loading...</span>
     </div>
@@ -207,63 +234,43 @@
 <script>
 // ==================== CONFIGURATION ====================
 const API_BASE_URL = 'http://localhost:8001/api/alms';
-
 let currentPage = 1;
-let currentScheduleId = null;
+let totalPages = 1;
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
-    loadStats();
     loadSchedules();
+    loadMaintenanceStats();
     loadSupportingData();
 });
 
-// ==================== STATS FUNCTIONS ====================
-async function loadStats() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/maintenance-schedules/stats`);
-        const result = await response.json();
-        
-        if (result.success) {
-            const stats = result.data;
-            document.getElementById('totalSchedules').textContent = stats.total_schedules;
-            document.getElementById('pendingSchedules').textContent = stats.pending_schedules;
-            document.getElementById('overdueSchedules').textContent = stats.overdue_schedules;
-            document.getElementById('completedThisMonth').textContent = stats.completed_this_month;
-        }
-    } catch (error) {
-        console.error('Error loading stats:', error);
-        showToast('Error loading statistics', 'error');
-    }
-}
-
-// ==================== SCHEDULE FUNCTIONS ====================
-async function loadSchedules(page = 1) {
+// ==================== SCHEDULE MANAGEMENT ====================
+async function loadSchedules() {
     showLoading();
+    
+    const search = document.getElementById('searchInput').value;
+    const status = document.getElementById('statusFilter').value;
+    const overdue = document.getElementById('overdueFilter').value;
+    
+    const params = new URLSearchParams({
+        page: currentPage,
+        search: search,
+        status: status,
+        is_overdue: overdue
+    });
+    
     try {
-        const search = document.getElementById('searchInput').value;
-        const status = document.getElementById('statusFilter').value;
-        const overdue = document.getElementById('overdueFilter').value;
+        const response = await fetch(`${API_BASE_URL}/maintenance-schedules?${params}`);
+        const data = await response.json();
         
-        let url = `${API_BASE_URL}/maintenance-schedules?page=${page}`;
-        if (search) url += `&search=${encodeURIComponent(search)}`;
-        if (status) url += `&status=${status}`;
-        if (overdue) url += `&is_overdue=${overdue}`;
-        
-        const response = await fetch(url);
-        const result = await response.json();
-        
-        if (result.success) {
-            displaySchedules(result.data.data);
-            setupPagination(result.data);
-            currentPage = page;
+        if (data.success) {
+            displaySchedules(data.data.data);
+            setupPagination(data.data);
         } else {
-            throw new Error(result.message);
+            showError('Failed to load maintenance schedules');
         }
     } catch (error) {
-        console.error('Error loading schedules:', error);
-        showToast('Error loading maintenance schedules', 'error');
-        document.getElementById('schedulesTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-error">Failed to load schedules</td></tr>';
+        showError('Error loading schedules: ' + error.message);
     } finally {
         hideLoading();
     }
@@ -271,219 +278,330 @@ async function loadSchedules(page = 1) {
 
 function displaySchedules(schedules) {
     const tbody = document.getElementById('schedulesTableBody');
+    tbody.innerHTML = '';
     
     if (schedules.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No maintenance schedules found</td></tr>';
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-8 text-gray-500">
+                    <i class="bx bx-calendar text-4xl mb-2"></i>
+                    <p>No maintenance schedules found</p>
+                </td>
+            </tr>
+        `;
         return;
     }
     
-    tbody.innerHTML = schedules.map(schedule => `
-        <tr class="${schedule.is_overdue ? 'bg-error/10' : ''}">
-            <td class="font-mono font-bold">${schedule.schedule_id}</td>
-            <td>
-                <div>
-                    <div class="font-semibold">${schedule.asset.alms_id}</div>
-                    <div class="text-sm text-gray-600">${schedule.asset.name}</div>
-                </div>
-            </td>
-            <td>${schedule.maintenance_type.name}</td>
-            <td>
-                <div class="flex items-center gap-2">
-                    ${schedule.due_date}
-                    ${schedule.is_overdue ? '<i class="bx bx-alarm-exclamation text-error" title="Overdue"></i>' : ''}
-                </div>
-            </td>
-            <td>
-                <span class="badge ${getScheduleStatusBadgeClass(schedule.status)}">${schedule.status.replace('_', ' ').toUpperCase()}</span>
-            </td>
-            <td>
-                ${schedule.is_overdue ? 
-                    '<span class="badge badge-error">OVERDUE</span>' : 
-                    '<span class="badge badge-success">On Time</span>'
-                }
-            </td>
-            <td>
-                <div class="flex gap-1">
-                    ${schedule.status === 'pending' || schedule.status === 'in_progress' ? `
-                        <button class="btn btn-sm btn-circle btn-success" title="Complete" onclick="completeMaintenance(${schedule.id})">
-                            <i class="bx bx-check"></i>
+    // Sort by due date (newest first)
+    schedules.sort((a, b) => new Date(b.due_date) - new Date(a.due_date));
+    
+    schedules.forEach(schedule => {
+        const statusBadge = getScheduleStatusBadge(schedule.status);
+        const overdueBadge = schedule.is_overdue ? 
+            '<span class="badge badge-error">Overdue</span>' : 
+            '<span class="badge badge-success">On Time</span>';
+        
+        const dueDate = new Date(schedule.due_date).toLocaleDateString();
+        const isOverdue = new Date(schedule.due_date) < new Date() && schedule.status !== 'completed';
+        
+        tbody.innerHTML += `
+            <tr class="${isOverdue ? 'bg-error/10' : ''}">
+                <td class="font-mono">${schedule.schedule_id}</td>
+                <td>
+                    <div class="font-semibold">${schedule.asset.name}</div>
+                    <div class="text-sm text-gray-500">${schedule.asset.alms_id}</div>
+                </td>
+                <td>${schedule.maintenance_type.name}</td>
+                <td>
+                    <div class="font-semibold ${isOverdue ? 'text-error' : ''}">${dueDate}</div>
+                    ${isOverdue ? '<div class="text-xs text-error">Overdue!</div>' : ''}
+                </td>
+                <td>${statusBadge}</td>
+                <td>${overdueBadge}</td>
+                <td>
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-circle btn-outline btn-info" onclick="viewSchedule(${schedule.id})">
+                            <i class="bx bx-show"></i>
                         </button>
-                    ` : ''}
-                    <button class="btn btn-sm btn-circle btn-warning" title="Edit" onclick="editSchedule(${schedule.id})">
-                        <i class="bx bx-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-circle btn-info" title="View Details" onclick="viewSchedule(${schedule.id})">
-                        <i class="bx bx-show"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+                        ${schedule.status === 'pending' || schedule.status === 'in_progress' ? `
+                            <button class="btn btn-sm btn-circle btn-outline btn-success" onclick="openCompleteModal(${schedule.id})">
+                                <i class="bx bx-check"></i>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-sm btn-circle btn-outline btn-warning" onclick="editSchedule(${schedule.id})">
+                            <i class="bx bx-edit"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
 }
 
-function getScheduleStatusBadgeClass(status) {
-    const classes = {
-        'pending': 'badge-warning',
-        'in_progress': 'badge-info',
-        'completed': 'badge-success',
-        'cancelled': 'badge-error'
+function getScheduleStatusBadge(status) {
+    const statusConfig = {
+        'pending': { class: 'badge-warning', text: 'Pending' },
+        'in_progress': { class: 'badge-info', text: 'In Progress' },
+        'completed': { class: 'badge-success', text: 'Completed' },
+        'cancelled': { class: 'badge-error', text: 'Cancelled' }
     };
-    return classes[status] || 'badge-info';
+    
+    const config = statusConfig[status] || { class: 'badge-neutral', text: status };
+    return `<span class="badge ${config.class}">${config.text}</span>`;
 }
 
-// ==================== MODAL FUNCTIONS ====================
+// ==================== MODAL MANAGEMENT ====================
 function openCreateScheduleModal() {
     document.getElementById('modalTitle').textContent = 'Schedule Maintenance';
     document.getElementById('scheduleForm').reset();
+    document.getElementById('scheduleId').value = '';
+    generateScheduleId();
     document.getElementById('scheduleModal').showModal();
 }
 
-async function editSchedule(id) {
+function generateScheduleId() {
+    document.getElementById('scheduleIdDisplay').value = 'Auto-generated upon save';
+}
+
+async function viewSchedule(id) {
     showLoading();
+    
     try {
         const response = await fetch(`${API_BASE_URL}/maintenance-schedules/${id}`);
-        const result = await response.json();
+        const data = await response.json();
         
-        if (result.success) {
-            const schedule = result.data;
-            currentScheduleId = id;
-            
-            // Populate form
-            const form = document.getElementById('scheduleForm');
-            form.asset_id.value = schedule.asset_id;
-            form.maintenance_type_id.value = schedule.maintenance_type_id;
-            form.due_date.value = schedule.due_date;
-            form.frequency_value.value = schedule.frequency_value;
-            
-            document.getElementById('modalTitle').textContent = 'Edit Maintenance Schedule';
-            document.getElementById('scheduleModal').showModal();
+        if (data.success) {
+            displayScheduleDetails(data.data);
+            document.getElementById('viewScheduleModal').showModal();
+        } else {
+            showError('Failed to load schedule data');
         }
     } catch (error) {
-        console.error('Error loading schedule:', error);
-        showToast('Error loading schedule details', 'error');
+        showError('Error loading schedule: ' + error.message);
     } finally {
         hideLoading();
     }
 }
 
-function completeMaintenance(id) {
-    document.getElementById('completeForm').schedule_id.value = id;
+function displayScheduleDetails(schedule) {
+    const detailsDiv = document.getElementById('scheduleDetails');
+    const dueDate = new Date(schedule.due_date).toLocaleDateString();
+    const lastMaintained = schedule.last_maintained_date ? 
+        new Date(schedule.last_maintained_date).toLocaleDateString() : 'Never';
+    
+    detailsDiv.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Schedule ID</span>
+                </label>
+                <div class="text-lg font-mono">${schedule.schedule_id}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Due Date</span>
+                </label>
+                <div class="text-lg">${dueDate}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Asset</span>
+                </label>
+                <div class="text-lg">${schedule.asset.name}</div>
+                <div class="text-sm text-gray-500">${schedule.asset.alms_id} - ${schedule.asset.serial_number}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Category</span>
+                </label>
+                <div class="text-lg">${schedule.asset.category.name}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Maintenance Type</span>
+                </label>
+                <div class="text-lg">${schedule.maintenance_type.name}</div>
+                <div class="text-sm text-gray-500">${schedule.maintenance_type.frequency_unit}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Frequency Value</span>
+                </label>
+                <div class="text-lg">${schedule.frequency_value}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Status</span>
+                </label>
+                <div class="text-lg">${getScheduleStatusText(schedule.status)}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Last Maintained</span>
+                </label>
+                <div class="text-lg">${lastMaintained}</div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Overdue</span>
+                </label>
+                <div class="text-lg">${schedule.is_overdue ? 'Yes' : 'No'}</div>
+            </div>
+        </div>
+    `;
+}
+
+function getScheduleStatusText(status) {
+    const statusTexts = {
+        'pending': 'Pending',
+        'in_progress': 'In Progress',
+        'completed': 'Completed',
+        'cancelled': 'Cancelled'
+    };
+    return statusTexts[status] || status;
+}
+
+async function editSchedule(id) {
+    showLoading();
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/maintenance-schedules/${id}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const schedule = data.data;
+            document.getElementById('modalTitle').textContent = 'Edit Maintenance Schedule';
+            document.getElementById('scheduleId').value = schedule.id;
+            document.getElementById('scheduleIdDisplay').value = schedule.schedule_id;
+            document.getElementById('scheduleForm').asset_id.value = schedule.asset_id;
+            document.getElementById('scheduleForm').maintenance_type_id.value = schedule.maintenance_type_id;
+            document.getElementById('scheduleForm').due_date.value = schedule.due_date;
+            document.getElementById('scheduleForm').frequency_value.value = schedule.frequency_value;
+            
+            document.getElementById('scheduleModal').showModal();
+        } else {
+            showError('Failed to load schedule data');
+        }
+    } catch (error) {
+        showError('Error loading schedule: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function openCompleteModal(scheduleId) {
+    document.getElementById('completeScheduleId').value = scheduleId;
+    document.getElementById('completeForm').reset();
     document.getElementById('completeModal').showModal();
 }
 
 // ==================== FORM HANDLING ====================
 document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    await saveSchedule();
-});
-
-document.getElementById('completeForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await completeSchedule();
-});
-
-async function saveSchedule() {
+    
+    const formData = new FormData(this);
+    const scheduleId = document.getElementById('scheduleId').value;
+    const isEdit = !!scheduleId;
+    
     showLoading();
+    
     try {
-        const formData = new FormData(document.getElementById('scheduleForm'));
-        const data = Object.fromEntries(formData);
-        
-        // Convert numeric field
-        data.frequency_value = parseInt(data.frequency_value);
-        
-        const url = currentScheduleId ? 
-            `${API_BASE_URL}/maintenance-schedules/${currentScheduleId}` : 
-            `${API_BASE_URL}/maintenance-schedules`;
-        const method = currentScheduleId ? 'PUT' : 'POST';
+        const url = isEdit ? `${API_BASE_URL}/maintenance-schedules/${scheduleId}` : `${API_BASE_URL}/maintenance-schedules`;
+        const method = isEdit ? 'PUT' : 'POST';
         
         const response = await fetch(url, {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(Object.fromEntries(formData))
         });
         
-        const result = await response.json();
+        const data = await response.json();
         
-        if (result.success) {
-            showToast(currentScheduleId ? 'Schedule updated successfully!' : 'Maintenance scheduled successfully!', 'success');
+        if (data.success) {
             document.getElementById('scheduleModal').close();
-            loadSchedules(currentPage);
-            loadStats();
+            showSuccess(isEdit ? 'Schedule updated successfully' : 'Maintenance scheduled successfully');
+            loadSchedules();
+            loadMaintenanceStats();
         } else {
-            throw new Error(result.message);
+            showError(data.message || 'Operation failed');
         }
     } catch (error) {
-        console.error('Error saving schedule:', error);
-        showToast('Error saving schedule: ' + error.message, 'error');
+        showError('Error saving schedule: ' + error.message);
     } finally {
         hideLoading();
-        currentScheduleId = null;
     }
-}
+});
 
-async function completeSchedule() {
+document.getElementById('completeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const scheduleId = document.getElementById('completeScheduleId').value;
+    
     showLoading();
+    
     try {
-        const formData = new FormData(document.getElementById('completeForm'));
-        const data = Object.fromEntries(formData);
-        const scheduleId = data.schedule_id;
-        
-        // Convert cost to float if provided
-        if (data.cost) {
-            data.cost = parseFloat(data.cost);
-        }
-        
         const response = await fetch(`${API_BASE_URL}/maintenance-schedules/${scheduleId}/complete`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(Object.fromEntries(formData))
         });
         
-        const result = await response.json();
+        const data = await response.json();
         
-        if (result.success) {
-            showToast('Maintenance completed successfully!', 'success');
+        if (data.success) {
             document.getElementById('completeModal').close();
-            document.getElementById('completeForm').reset();
-            loadSchedules(currentPage);
-            loadStats();
+            showSuccess('Maintenance completed successfully');
+            loadSchedules();
+            loadMaintenanceStats();
         } else {
-            throw new Error(result.message);
+            showError(data.message || 'Completion failed');
         }
     } catch (error) {
-        console.error('Error completing maintenance:', error);
-        showToast('Error completing maintenance: ' + error.message, 'error');
+        showError('Error completing maintenance: ' + error.message);
     } finally {
         hideLoading();
     }
-}
+});
 
 // ==================== SUPPORTING DATA ====================
 async function loadSupportingData() {
     try {
-        // Load assets
-        const assetsResponse = await fetch(`${API_BASE_URL}/assets`);
-        const assetsResult = await assetsResponse.json();
-        if (assetsResult.success) {
+        const [assetsRes, typesRes] = await Promise.all([
+            fetch(`${API_BASE_URL}/assets`),
+            fetch(`${API_BASE_URL}/maintenance-types`)
+        ]);
+        
+        const assetsData = await assetsRes.json();
+        const typesData = await typesRes.json();
+        
+        if (assetsData.success) {
             const assetSelect = document.querySelector('select[name="asset_id"]');
-            assetsResult.data.data.forEach(asset => {
+            assetSelect.innerHTML = '<option value="">Select Asset</option>';
+            assetsData.data.data.forEach(asset => {
                 if (asset.status === 'active') {
                     assetSelect.innerHTML += `<option value="${asset.id}">${asset.alms_id} - ${asset.name}</option>`;
                 }
             });
         }
         
-        // Load maintenance types
-        const typesResponse = await fetch(`${API_BASE_URL}/maintenance-types`);
-        const typesResult = await typesResponse.json();
-        if (typesResult.success) {
+        if (typesData.success) {
             const typeSelect = document.querySelector('select[name="maintenance_type_id"]');
-            typesResult.data.forEach(type => {
-                typeSelect.innerHTML += `<option value="${type.id}">${type.name}</option>`;
+            typeSelect.innerHTML = '<option value="">Select Type</option>';
+            typesData.data.forEach(type => {
+                typeSelect.innerHTML += `<option value="${type.id}">${type.name} (${type.frequency_unit})</option>`;
             });
         }
     } catch (error) {
@@ -491,38 +609,62 @@ async function loadSupportingData() {
     }
 }
 
+// ==================== STATS ====================
+async function loadMaintenanceStats() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/maintenance-schedules/stats`);
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('totalSchedules').textContent = data.data.total_schedules;
+            document.getElementById('pendingSchedules').textContent = data.data.pending_schedules;
+            document.getElementById('overdueSchedules').textContent = data.data.overdue_schedules;
+            document.getElementById('completedThisMonth').textContent = data.data.completed_this_month;
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
 // ==================== PAGINATION ====================
-function setupPagination(paginationData) {
-    const infoDiv = document.getElementById('paginationInfo');
-    const controlsDiv = document.getElementById('paginationControls');
+function setupPagination(pagination) {
+    totalPages = pagination.last_page;
+    currentPage = pagination.current_page;
     
-    if (!paginationData) return;
+    document.getElementById('paginationInfo').textContent = 
+        `Showing ${pagination.from || 0} to ${pagination.to || 0} of ${pagination.total} entries`;
     
-    const { current_page, last_page, total, from, to } = paginationData;
-    infoDiv.textContent = `Showing ${from} to ${to} of ${total} entries`;
-    
-    let paginationHTML = '';
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
     
     // Previous button
-    if (current_page > 1) {
-        paginationHTML += `<button class="join-item btn btn-sm" onclick="loadSchedules(${current_page - 1})">«</button>`;
-    }
+    const prevButton = document.createElement('button');
+    prevButton.className = `join-item btn ${currentPage === 1 ? 'btn-disabled' : ''}`;
+    prevButton.innerHTML = '«';
+    prevButton.onclick = () => changePage(currentPage - 1);
+    paginationControls.appendChild(prevButton);
     
-    // Page numbers
-    for (let i = 1; i <= last_page; i++) {
-        if (i === current_page) {
-            paginationHTML += `<button class="join-item btn btn-sm btn-active">${i}</button>`;
-        } else {
-            paginationHTML += `<button class="join-item btn btn-sm" onclick="loadSchedules(${i})">${i}</button>`;
-        }
+    // Page buttons
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.className = `join-item btn ${currentPage === i ? 'btn-active' : ''}`;
+        pageButton.textContent = i;
+        pageButton.onclick = () => changePage(i);
+        paginationControls.appendChild(pageButton);
     }
     
     // Next button
-    if (current_page < last_page) {
-        paginationHTML += `<button class="join-item btn btn-sm" onclick="loadSchedules(${current_page + 1})">»</button>`;
-    }
-    
-    controlsDiv.innerHTML = paginationHTML;
+    const nextButton = document.createElement('button');
+    nextButton.className = `join-item btn ${currentPage === totalPages ? 'btn-disabled' : ''}`;
+    nextButton.innerHTML = '»';
+    nextButton.onclick = () => changePage(currentPage + 1);
+    paginationControls.appendChild(nextButton);
+}
+
+function changePage(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    loadSchedules();
 }
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -534,35 +676,22 @@ function hideLoading() {
     document.getElementById('loadingToast').classList.add('hidden');
 }
 
-function showToast(message, type = 'info') {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.onmouseenter = Swal.stopTimer;
-            toast.onmouseleave = Swal.resumeTimer;
-        }
-    });
-    
-    Toast.fire({
-        icon: type,
-        title: message
+function showSuccess(message) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: message,
+        timer: 2000,
+        showConfirmButton: false
     });
 }
 
-// Placeholder functions for future implementation
-function viewSchedule(id) {
-    showToast('View schedule details feature coming soon!', 'info');
+function showError(message) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: message
+    });
 }
-
-// Search on Enter key
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        loadSchedules();
-    }
-});
 </script>
 @endsection

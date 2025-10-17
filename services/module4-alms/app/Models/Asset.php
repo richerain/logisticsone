@@ -2,56 +2,68 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Asset extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
+    protected $table = 'alms_assets';
+    
     protected $fillable = [
-        'asset_code',
-        'category_id',
-        'branch_id',
-        'name',
+        'alms_id',
         'serial_number',
-        'purchase_date',
-        'purchase_cost',
-        'warranty_period',
+        'name',
+        'category_id',
+        'acquisition_date',
+        'acquisition_cost',
+        'current_branch_id',
         'assigned_employee_id',
-        'specifications',
-        'image_path',
-        'status'
+        'status',
+        'description'
     ];
 
     protected $casts = [
-        'purchase_date' => 'date',
-        'purchase_cost' => 'decimal:2'
+        'acquisition_date' => 'date',
+        'acquisition_cost' => 'decimal:2'
     ];
 
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(AssetCategory::class, 'category_id');
     }
 
-    public function branch()
+    public function currentBranch(): BelongsTo
     {
-        return $this->belongsTo(Branch::class, 'branch_id');
+        return $this->belongsTo(Branch::class, 'current_branch_id');
     }
 
-    public function assignedEmployee()
+    public function assignedEmployee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'assigned_employee_id');
     }
 
-    public function maintenances()
+    public function maintenanceSchedules(): HasMany
     {
-        return $this->hasMany(Maintenance::class, 'asset_id');
+        return $this->hasMany(MaintenanceSchedule::class, 'asset_id');
     }
 
-    public function depreciations()
+    public function maintenanceRecords(): HasMany
     {
-        return $this->hasMany(Depreciation::class, 'asset_id');
+        return $this->hasMany(MaintenanceRecord::class, 'asset_id');
+    }
+
+    public function transfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class, 'asset_id');
+    }
+
+    public function disposal(): HasOne
+    {
+        return $this->hasOne(Disposal::class, 'asset_id');
     }
 }

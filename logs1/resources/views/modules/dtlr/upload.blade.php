@@ -139,6 +139,22 @@
     </div>
 </div>
 
+<!-- Success Modal -->
+<div id="successModal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4 text-success">Upload Successful!</h3>
+        <div class="text-center">
+            <i class="bx bx-check-circle text-6xl text-success mb-4"></i>
+            <p class="text-lg font-semibold" id="successTrackingNumber"></p>
+            <p class="text-sm text-gray-600 mt-2" id="successTitle"></p>
+            <div class="mt-4 flex gap-2 justify-center">
+                <button class="btn btn-primary" onclick="closeSuccessModal()">Upload Another</button>
+                <button class="btn btn-ghost" onclick="viewAllDocuments()">View All Documents</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // ==================== CONFIGURATION ====================
 const API_BASE_URL = 'http://localhost:8001/api/dtlr';
@@ -169,6 +185,7 @@ async function loadDocumentTypes() {
 
         if (result.success) {
             const typeSelect = document.querySelector('select[name="document_type_id"]');
+            typeSelect.innerHTML = '<option value="">Select Document Type</option>';
             
             result.data.forEach(type => {
                 typeSelect.innerHTML += `<option value="${type.id}">${type.name}</option>`;
@@ -176,6 +193,7 @@ async function loadDocumentTypes() {
         }
     } catch (error) {
         console.error('Failed to load document types:', error);
+        showToast('error', 'Failed to load document types');
     }
 }
 
@@ -186,6 +204,7 @@ async function loadBranches() {
 
         if (result.success) {
             const branchSelect = document.querySelector('select[name="current_branch_id"]');
+            branchSelect.innerHTML = '<option value="">Select Branch</option>';
             
             result.data.forEach(branch => {
                 branchSelect.innerHTML += `<option value="${branch.id}">${branch.name}</option>`;
@@ -193,6 +212,7 @@ async function loadBranches() {
         }
     } catch (error) {
         console.error('Failed to load branches:', error);
+        showToast('error', 'Failed to load branches');
     }
 }
 
@@ -250,12 +270,9 @@ async function uploadDocument(formData) {
         processingModal.close();
         
         if (result.success) {
-            showToast('success', 'Document uploaded and processed successfully!');
+            showUploadSuccess(result.data);
             document.getElementById('uploadForm').reset();
             loadRecentUploads();
-            
-            // Show success details
-            showUploadSuccess(result.data);
         } else {
             throw new Error(result.message);
         }
@@ -290,15 +307,20 @@ function populateRecentUploads(documents) {
                     <span class="font-medium truncate max-w-xs">${doc.title}</span>
                 </div>
             </td>
-            <td>${doc.document_type.name}</td>
+            <td>${doc.document_type?.name || 'N/A'}</td>
             <td>
                 <span class="badge badge-${getStatusBadgeClass(doc.status)}">${doc.status}</span>
             </td>
             <td>${new Date(doc.created_at).toLocaleTimeString()}</td>
             <td>
-                <button class="btn btn-sm btn-circle btn-outline" title="View" onclick="viewUploadedDocument('${doc.tracking_number}')">
+                <button class="btn btn-sm btn-circle btn-outline" title="View" onclick="viewUploadedDocument(${doc.id})">
                     <i class="bx bx-show"></i>
                 </button>
+                ${doc.status === 'pending' ? `
+                <button class="btn btn-sm btn-circle btn-outline btn-info" title="Process OCR" onclick="processOCR(${doc.id})">
+                    <i class="bx bx-cog"></i>
+                </button>
+                ` : ''}
             </td>
         </tr>
     `).join('');
@@ -328,6 +350,7 @@ function updateFilePreview(file) {
 }
 
 function getFileIcon(filePath) {
+    if (!filePath) return 'bxs-file';
     const ext = filePath.split('.').pop().toLowerCase();
     if (ext === 'pdf') return 'bxs-file-pdf';
     if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'bxs-file-image';
@@ -346,22 +369,71 @@ function getStatusBadgeClass(status) {
 }
 
 function showUploadSuccess(document) {
-    // You can show a success modal with document details
-    console.log('Upload successful:', document);
-    
-    showToast('success', `
-        Document uploaded successfully!
-        Tracking Number: ${document.tracking_number}
-    `);
+    document.getElementById('successTrackingNumber').textContent = document.tracking_number;
+    document.getElementById('successTitle').textContent = document.title;
+    document.getElementById('successModal').showModal();
 }
 
-function viewUploadedDocument(trackingNumber) {
-    // Implement view functionality
-    showToast('info', `Viewing document: ${trackingNumber}`);
-    // You can redirect to documents management page or show in modal
+function closeSuccessModal() {
+    document.getElementById('successModal').close();
+}
+
+function viewAllDocuments() {
+    window.location.href = "{{ route('modules.dtlr.documents') }}";
+}
+
+// ==================== DOCUMENT ACTIONS ====================
+async function viewUploadedDocument(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/documents/${id}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('info', `Viewing document: ${result.data.tracking_number}`);
+            // You can implement a detailed view modal here
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showToast('error', 'Failed to load document: ' + error.message);
+    }
+}
+
+async function processOCR(id) {
+    if (!confirm('Process this document with OCR? This will extract text data from the document.')) {
+        return;
+    }
+
+    try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/documents/${id}/process-ocr`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('success', 'OCR processing completed successfully!');
+            loadRecentUploads();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showToast('error', 'OCR processing failed: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
 // ==================== UTILITY FUNCTIONS ====================
+function showLoading() {
+    document.body.style.cursor = 'wait';
+}
+
+function hideLoading() {
+    document.body.style.cursor = 'default';
+}
+
 function showToast(type, message) {
     const toast = document.createElement('div');
     toast.className = `toast toast-top toast-end`;

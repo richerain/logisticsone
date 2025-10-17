@@ -62,6 +62,7 @@
                         <option value="transferred">Transferred</option>
                         <option value="reviewed">Reviewed</option>
                         <option value="status_changed">Status Changed</option>
+                        <option value="processed">Processed</option>
                     </select>
                     <button class="btn btn-outline" onclick="resetFilters()">
                         <i class="bx bx-reset"></i>
@@ -197,8 +198,8 @@ function populateLogsTable(logs) {
                 <div class="flex items-center gap-2">
                     <i class="bx bxs-file text-primary"></i>
                     <div>
-                        <div class="font-medium">${log.document.title}</div>
-                        <div class="text-xs text-gray-500 font-mono">${log.document.tracking_number}</div>
+                        <div class="font-medium">${log.document?.title || 'N/A'}</div>
+                        <div class="text-xs text-gray-500 font-mono">${log.document?.tracking_number || 'N/A'}</div>
                     </div>
                 </div>
             </td>
@@ -211,17 +212,17 @@ function populateLogsTable(logs) {
                 <div class="flex items-center gap-2">
                     <div class="avatar placeholder">
                         <div class="bg-neutral text-neutral-content rounded-full w-8">
-                            <span class="text-xs">${log.performer.username.charAt(0).toUpperCase()}</span>
+                            <span class="text-xs">${log.performer?.username?.charAt(0).toUpperCase() || 'U'}</span>
                         </div>
                     </div>
-                    <span>${log.performer.username}</span>
+                    <span>${log.performer?.username || 'Unknown'}</span>
                 </div>
             </td>
             <td>
                 ${log.action === 'transferred' ? `
                     <div class="text-xs">
-                        <div>From: ${log.from_branch.name}</div>
-                        <div>To: ${log.to_branch.name}</div>
+                        <div>From: ${log.from_branch?.name || 'N/A'}</div>
+                        <div>To: ${log.to_branch?.name || 'N/A'}</div>
                     </div>
                 ` : log.from_branch ? `
                     <div class="text-xs">${log.from_branch.name}</div>
@@ -249,7 +250,8 @@ function getActionBadgeClass(action) {
         'printed': 'warning',
         'transferred': 'success',
         'reviewed': 'secondary',
-        'status_changed': 'primary'
+        'status_changed': 'primary',
+        'processed': 'accent'
     };
     return classes[action] || 'neutral';
 }
@@ -260,7 +262,8 @@ function getActionIcon(action) {
         'printed': 'bx-printer',
         'transferred': 'bx-transfer',
         'reviewed': 'bx-check-shield',
-        'status_changed': 'bx-edit'
+        'status_changed': 'bx-edit',
+        'processed': 'bx-cog'
     };
     return `<i class="bx ${icons[action] || 'bx-notepad'}"></i>`;
 }
@@ -293,19 +296,19 @@ async function viewLogDetails(logId) {
                             <div class="grid grid-cols-2 gap-2 text-sm">
                                 <div>
                                     <span class="font-medium">Tracking No:</span>
-                                    <p class="font-mono">${log.document.tracking_number}</p>
+                                    <p class="font-mono">${log.document?.tracking_number || 'N/A'}</p>
                                 </div>
                                 <div>
                                     <span class="font-medium">Title:</span>
-                                    <p>${log.document.title}</p>
+                                    <p>${log.document?.title || 'N/A'}</p>
                                 </div>
                                 <div>
                                     <span class="font-medium">Type:</span>
-                                    <p>${log.document.document_type.name}</p>
+                                    <p>${log.document?.document_type?.name || 'N/A'}</p>
                                 </div>
                                 <div>
                                     <span class="font-medium">Status:</span>
-                                    <p><span class="badge badge-${getStatusBadgeClass(log.document.status)}">${log.document.status}</span></p>
+                                    <p><span class="badge badge-${getStatusBadgeClass(log.document?.status)}">${log.document?.status || 'N/A'}</span></p>
                                 </div>
                             </div>
                         </div>
@@ -317,12 +320,12 @@ async function viewLogDetails(logId) {
                             <div class="flex items-center gap-2 mt-1">
                                 <div class="avatar placeholder">
                                     <div class="bg-neutral text-neutral-content rounded-full w-8">
-                                        <span class="text-xs">${log.performer.username.charAt(0).toUpperCase()}</span>
+                                        <span class="text-xs">${log.performer?.username?.charAt(0).toUpperCase() || 'U'}</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <p>${log.performer.username}</p>
-                                    <p class="text-xs text-gray-500">${log.performer.role}</p>
+                                    <p>${log.performer?.username || 'Unknown'}</p>
+                                    <p class="text-xs text-gray-500">${log.performer?.role || 'N/A'}</p>
                                 </div>
                             </div>
                         </div>

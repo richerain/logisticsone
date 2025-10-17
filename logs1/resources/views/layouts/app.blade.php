@@ -16,7 +16,6 @@
     </main>
     <x-footer />
     
-
 <script>
 // Global role-based visibility functions
 window.roleBasedVisibility = {

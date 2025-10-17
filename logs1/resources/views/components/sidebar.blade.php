@@ -168,19 +168,19 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" title="Asset Transfers" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.transfers') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.alms.transfers') }}" title="Asset Transfers" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.transfers') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-truck mr-2"></i>
                             <span class="module-text">Asset Transfers</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" title="Disposal Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.disposals') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.alms.disposals') }}" title="Disposal Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.disposals') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-trash-alt mr-2"></i>
                             <span class="module-text">Disposal Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" title="Reports & Analytics" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.reports') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.alms.reports') }}" title="Reports & Analytics" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.reports') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-report mr-2"></i>
                             <span class="module-text">Reports & Analytics</span>
                         </a>

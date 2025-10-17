@@ -80,7 +80,6 @@
                         <th>Resource Name</th>
                         <th>Type</th>
                         <th>Quantity Available</th>
-                        <th>Location</th>
                         <th>Allocations</th>
                         <th>Actions</th>
                     </tr>
@@ -162,258 +161,469 @@
     </dialog>
 
     <script>
-        let currentPage = 1;
-        let editingId = null;
-        let deleteId = null;
+        // ==================== CONFIGURATION ====================
+        const API_BASE_URL = 'http://localhost:8001/api/plt';
 
-        // Load resources on page load
+        // ==================== STATE MANAGEMENT ====================
+        let currentPage = 1;
+        let totalPages = 1;
+        let searchTerm = '';
+        let typeFilter = '';
+
+        // ==================== DOM ELEMENTS ====================
+        const resourcesTableBody = document.getElementById('resources-table-body');
+        const pagination = document.getElementById('pagination');
+        const searchInput = document.getElementById('search-input');
+        const typeFilterSelect = document.getElementById('type-filter');
+        const resourceModal = document.getElementById('resource-modal');
+        const resourceForm = document.getElementById('resource-form');
+        const modalTitle = document.getElementById('modal-title');
+        const resourceIdInput = document.getElementById('resource-id');
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+        // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
             loadResources();
-            loadStats();
+            setupEventListeners();
         });
 
-        // Load resources with pagination and filters
-        async function loadResources(page = 1) {
-            currentPage = page;
-            const search = document.getElementById('search-input').value;
-            const type = document.getElementById('type-filter').value;
+        function setupEventListeners() {
+            searchInput.addEventListener('input', debounce(() => {
+                searchTerm = searchInput.value;
+                currentPage = 1;
+                loadResources();
+            }, 500));
 
+            typeFilterSelect.addEventListener('change', () => {
+                typeFilter = typeFilterSelect.value;
+                currentPage = 1;
+                loadResources();
+            });
+
+            resourceForm.addEventListener('submit', handleResourceSubmit);
+        }
+
+        // ==================== API FUNCTIONS ====================
+        async function loadResources() {
             try {
                 showLoading();
-                const response = await fetch(`/api/plt/resources?page=${page}&search=${search}&type=${type}`);
-                const data = await response.json();
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    search: searchTerm,
+                    type: typeFilter
+                });
 
-                if (data.success) {
-                    renderResourcesTable(data.data.data);
-                    renderPagination(data.data);
+                const response = await fetch(`${API_BASE_URL}/resources?${params}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResources(result.data);
+                    updateStats();
                 } else {
-                    showToast('Error loading resources', 'error');
+                    throw new Error(result.message || 'Failed to load resources');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error loading resources', 'error');
+                console.error('Error loading resources:', error);
+                showError('Failed to load resources: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
-        // Load stats
-        async function loadStats() {
+        async function updateStats() {
             try {
-                const response = await fetch('/api/plt/resources/stats');
-                const data = await response.json();
+                const response = await fetch(`${API_BASE_URL}/resources/stats`);
+                const result = await response.json();
 
-                if (data.success) {
-                    document.getElementById('total-resources').textContent = data.data.total_resources;
-                    document.getElementById('assets').textContent = data.data.assets;
-                    document.getElementById('supplies').textContent = data.data.supplies;
-                    document.getElementById('personnel').textContent = data.data.personnel;
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('total-resources').textContent = stats.total_resources;
+                    document.getElementById('assets').textContent = stats.assets;
+                    document.getElementById('supplies').textContent = stats.supplies;
+                    document.getElementById('personnel').textContent = stats.personnel;
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
         }
 
-        // Render resources table
-        function renderResourcesTable(resources) {
-            const tbody = document.getElementById('resources-table-body');
-            tbody.innerHTML = '';
+        async function createResource(resourceData) {
+            const response = await fetch(`${API_BASE_URL}/resources`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(resourceData)
+            });
+            return await response.json();
+        }
+
+        async function updateResource(id, resourceData) {
+            const response = await fetch(`${API_BASE_URL}/resources/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(resourceData)
+            });
+            return await response.json();
+        }
+
+        async function deleteResource(id) {
+            const response = await fetch(`${API_BASE_URL}/resources/${id}`, {
+                method: 'DELETE'
+            });
+            return await response.json();
+        }
+
+        // ==================== UI FUNCTIONS ====================
+        function displayResources(resourcesData) {
+            const resources = resourcesData.data;
+            totalPages = resourcesData.last_page;
+
+            resourcesTableBody.innerHTML = '';
 
             if (resources.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No resources found</td></tr>';
+                resourcesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-500">
+                            <i class="bx bx-cube text-4xl mb-2"></i>
+                            <p>No resources found</p>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
             resources.forEach(resource => {
-                const typeBadge = getTypeBadge(resource.type);
-
-                const row = `
-                    <tr>
-                        <td class="font-mono">RES${String(resource.id).padStart(5, '0')}</td>
-                        <td>${resource.name}</td>
-                        <td>${typeBadge}</td>
-                        <td>${resource.quantity_available}</td>
-                        <td>${resource.location || 'N/A'}</td>
-                        <td>${resource.allocations_count || 0}</td>
-                        <td>
-                            <div class="flex gap-1">
-                                <button class="btn btn-sm btn-circle btn-info" title="Edit" onclick="editResource(${resource.id})">
-                                    <i class="bx bx-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-circle btn-error" title="Delete" onclick="confirmDelete(${resource.id})">
-                                    <i class="bx bx-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="font-mono">RES${String(resource.id).padStart(5, '0')}</td>
+                    <td class="font-semibold">${escapeHtml(resource.name)}</td>
+                    <td>
+                        <span class="badge ${getTypeBadgeClass(resource.type)}">
+                            ${getTypeText(resource.type)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold">${resource.quantity_available}</span>
+                            <span class="text-sm text-gray-500">Unit${resource.quantity_available !== 1 ? 's' : ''}</span>
+                            ${resource.quantity_available < 10 ? '<span class="badge badge-warning badge-xs">Low</span>' : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-outline">
+                            ${resource.allocations_count || 0} allocation${resource.allocations_count !== 1 ? 's' : ''}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-sm btn-circle btn-outline btn-info" onclick="viewResource(${resource.id})">
+                                <i class="bx bx-show"></i>
+                            </button>
+                            <button class="btn btn-sm btn-circle btn-outline btn-warning" onclick="editResource(${resource.id})">
+                                <i class="bx bx-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-circle btn-outline btn-error" onclick="openDeleteModal(${resource.id})">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 `;
-                tbody.innerHTML += row;
+                resourcesTableBody.appendChild(row);
             });
+
+            updatePagination();
         }
 
-        // Render pagination
-        function renderPagination(pagination) {
-            const paginationDiv = document.getElementById('pagination');
-            paginationDiv.innerHTML = '';
-
-            const totalPages = pagination.last_page;
-            const currentPage = pagination.current_page;
+        function updatePagination() {
+            pagination.innerHTML = '';
 
             // Previous button
-            if (currentPage > 1) {
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn" onclick="loadResources(${currentPage - 1})">«</button>
-                `;
-            }
+            const prevButton = document.createElement('button');
+            prevButton.className = `join-item btn ${currentPage === 1 ? 'btn-disabled' : ''}`;
+            prevButton.innerHTML = '<i class="bx bx-chevron-left"></i>';
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadResources();
+                }
+            };
+            pagination.appendChild(prevButton);
 
             // Page numbers
             for (let i = 1; i <= totalPages; i++) {
-                const activeClass = i === currentPage ? 'btn-active' : '';
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn ${activeClass}" onclick="loadResources(${i})">${i}</button>
-                `;
+                const pageButton = document.createElement('button');
+                pageButton.className = `join-item btn ${currentPage === i ? 'btn-active' : ''}`;
+                pageButton.textContent = i;
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    loadResources();
+                };
+                pagination.appendChild(pageButton);
             }
 
             // Next button
-            if (currentPage < totalPages) {
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn" onclick="loadResources(${currentPage + 1})">»</button>
-                `;
+            const nextButton = document.createElement('button');
+            nextButton.className = `join-item btn ${currentPage === totalPages ? 'btn-disabled' : ''}`;
+            nextButton.innerHTML = '<i class="bx bx-chevron-right"></i>';
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadResources();
+                }
+            };
+            pagination.appendChild(nextButton);
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+        function openAddModal() {
+            modalTitle.textContent = 'Add New Resource';
+            resourceForm.reset();
+            resourceIdInput.value = '';
+            resourceModal.showModal();
+        }
+
+        async function viewResource(id) {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE_URL}/resources/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const resource = result.data;
+                    
+                    // Create and show view modal
+                    const viewModal = document.createElement('dialog');
+                    viewModal.className = 'modal modal-middle';
+                    viewModal.innerHTML = `
+                        <div class="modal-box max-w-2xl">
+                            <h3 class="font-bold text-lg mb-4">Resource Details - RES${String(resource.id).padStart(5, '0')}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Resource Name</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${escapeHtml(resource.name)}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Type</span>
+                                    </label>
+                                    <div class="p-2">
+                                        <span class="badge ${getTypeBadgeClass(resource.type)}">
+                                            ${getTypeText(resource.type)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Unit Available</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">
+                                        <span class="font-semibold">${resource.quantity_available}</span>
+                                        <span class="text-sm text-gray-500 ml-2">Unit${resource.quantity_available !== 1 ? 's' : ''}</span>
+                                        ${resource.quantity_available < 10 ? '<span class="badge badge-warning ml-2">Low Stock</span>' : ''}
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Location</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${resource.location || 'Not specified'}</div>
+                                </div>
+                                <div class="form-control md:col-span-2">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Description</span>
+                                    </label>
+                                    <div class="p-3 bg-base-200 rounded min-h-20">${resource.description ? escapeHtml(resource.description) : 'No description provided'}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Active Allocations</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded text-center">
+                                        <span class="text-2xl font-bold text-primary">${resource.allocations_count || 0}</span>
+                                        <div class="text-sm text-gray-500">allocation${resource.allocations_count !== 1 ? 's' : ''}</div>
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Created Date</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${formatDate(resource.created_at)}</div>
+                                </div>
+                            </div>
+                            <div class="modal-action">
+                                <button class="btn btn-ghost" onclick="this.closest('dialog').close()">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(viewModal);
+                    viewModal.showModal();
+                } else {
+                    throw new Error(result.message || 'Failed to load resource');
+                }
+            } catch (error) {
+                console.error('Error loading resource:', error);
+                showError('Failed to load resource: ' + error.message);
+            } finally {
+                hideLoading();
             }
         }
 
-        // Open add modal
-        function openAddModal() {
-            editingId = null;
-            document.getElementById('modal-title').textContent = 'Add New Resource';
-            document.getElementById('resource-form').reset();
-            document.getElementById('resource-id').value = '';
-            document.getElementById('resource-modal').showModal();
-        }
-
-        // Edit resource
         async function editResource(id) {
             try {
                 showLoading();
-                const response = await fetch(`/api/plt/resources/${id}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const resource = data.data;
-                    editingId = id;
-                    
-                    document.getElementById('modal-title').textContent = 'Edit Resource';
-                    document.getElementById('resource-id').value = resource.id;
-                    document.getElementById('resource-form').name.value = resource.name;
-                    document.getElementById('resource-form').type.value = resource.type;
-                    document.getElementById('resource-form').quantity_available.value = resource.quantity_available;
-                    document.getElementById('resource-form').location.value = resource.location || '';
-                    document.getElementById('resource-form').description.value = resource.description || '';
-                    
-                    document.getElementById('resource-modal').showModal();
-                } else {
-                    showToast('Error loading resource', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error loading resource', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Handle form submission
-        document.getElementById('resource-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await saveResource();
-        });
-
-        // Save resource
-        async function saveResource() {
-            const formData = new FormData(document.getElementById('resource-form'));
-            const data = Object.fromEntries(formData);
-            const url = editingId ? `/api/plt/resources/${editingId}` : '/api/plt/resources';
-            const method = editingId ? 'PUT' : 'POST';
-
-            try {
-                showLoading();
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
+                const response = await fetch(`${API_BASE_URL}/resources/${id}`);
                 const result = await response.json();
 
                 if (result.success) {
-                    showToast(`Resource ${editingId ? 'updated' : 'created'} successfully`, 'success');
-                    closeModal();
-                    loadResources();
-                    loadStats();
+                    const resource = result.data;
+                    modalTitle.textContent = 'Edit Resource';
+                    resourceIdInput.value = resource.id;
+                    
+                    // Fill form with resource data
+                    Object.keys(resource).forEach(key => {
+                        const input = resourceForm.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            input.value = resource[key] || '';
+                        }
+                    });
+
+                    resourceModal.showModal();
                 } else {
-                    showToast(result.message || 'Error saving resource', 'error');
+                    throw new Error(result.message || 'Failed to load resource');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error saving resource', 'error');
+                console.error('Error loading resource:', error);
+                showError('Failed to load resource: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
-        // Confirm delete
-        function confirmDelete(id) {
-            deleteId = id;
-            document.getElementById('delete-modal').showModal();
-        }
-
-        // Delete resource
-        document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
-            try {
-                showLoading();
-                const response = await fetch(`/api/plt/resources/${deleteId}`, {
-                    method: 'DELETE'
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('Resource deleted successfully', 'success');
-                    closeDeleteModal();
-                    loadResources();
-                    loadStats();
-                } else {
-                    showToast(result.message || 'Error deleting resource', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error deleting resource', 'error');
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // Close modals
         function closeModal() {
-            document.getElementById('resource-modal').close();
+            resourceModal.close();
+        }
+
+        let resourceToDelete = null;
+
+        function openDeleteModal(id) {
+            resourceToDelete = id;
+            deleteModal.showModal();
         }
 
         function closeDeleteModal() {
-            document.getElementById('delete-modal').close();
-            deleteId = null;
+            resourceToDelete = null;
+            deleteModal.close();
         }
 
-        // Utility functions
-        function getTypeBadge(type) {
-            const typeMap = {
-                'asset': 'badge-info',
+        async function confirmDelete() {
+            if (!resourceToDelete) return;
+
+            try {
+                showLoading();
+                const result = await deleteResource(resourceToDelete);
+
+                if (result.success) {
+                    showSuccess('Resource deleted successfully');
+                    closeDeleteModal();
+                    loadResources();
+                } else {
+                    throw new Error(result.message || 'Failed to delete resource');
+                }
+            } catch (error) {
+                console.error('Error deleting resource:', error);
+                showError('Failed to delete resource: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ==================== FORM HANDLING ====================
+        async function handleResourceSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(resourceForm);
+            const resourceData = Object.fromEntries(formData);
+            
+            // Convert quantity_available to number
+            resourceData.quantity_available = parseInt(resourceData.quantity_available);
+
+            try {
+                showLoading();
+                let result;
+
+                if (resourceIdInput.value) {
+                    result = await updateResource(resourceIdInput.value, resourceData);
+                } else {
+                    result = await createResource(resourceData);
+                }
+
+                if (result.success) {
+                    showSuccess(`Resource ${resourceIdInput.value ? 'updated' : 'created'} successfully`);
+                    closeModal();
+                    loadResources();
+                } else {
+                    throw new Error(result.message || `Failed to ${resourceIdInput.value ? 'update' : 'create'} resource`);
+                }
+            } catch (error) {
+                console.error('Error saving resource:', error);
+                showError('Failed to save resource: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function getTypeBadgeClass(type) {
+            const typeClasses = {
+                'asset': 'badge-primary',
                 'supply': 'badge-success',
                 'personnel': 'badge-warning'
             };
-            return `<span class="badge ${typeMap[type]}">${type}</span>`;
+            return typeClasses[type] || 'badge-info';
+        }
+
+        function getTypeText(type) {
+            const typeTexts = {
+                'asset': 'Asset',
+                'supply': 'Supply',
+                'personnel': 'Personnel'
+            };
+            return typeTexts[type] || type;
         }
 
         function showLoading() {
@@ -426,19 +636,23 @@
             console.log('Loading complete');
         }
 
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-top toast-end`;
-            toast.innerHTML = `
-                <div class="alert alert-${type}">
-                    <span>${message}</span>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                timer: 5000
+            });
         }
     </script>
 @endsection

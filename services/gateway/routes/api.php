@@ -291,7 +291,7 @@ Route::get('/alms/assets', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/assets');
 });
 Route::post('/alms/assets', function (Request $request) {
-    return app(GatewayController::class)->proxyUpload($request, 'http://localhost:8005/api/assets');
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/assets');
 });
 Route::get('/alms/assets/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyGet($request, "http://localhost:8005/api/assets/{$id}");
@@ -306,6 +306,48 @@ Route::get('/alms/assets/stats', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/assets/stats');
 });
 
+// Maintenance Schedule routes
+Route::get('/alms/maintenance-schedules', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/maintenance-schedules');
+});
+Route::post('/alms/maintenance-schedules', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/maintenance-schedules');
+});
+Route::get('/alms/maintenance-schedules/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8005/api/maintenance-schedules/{$id}");
+});
+Route::put('/alms/maintenance-schedules/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8005/api/maintenance-schedules/{$id}");
+});
+Route::post('/alms/maintenance-schedules/{id}/complete', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPost($request, "http://localhost:8005/api/maintenance-schedules/{$id}/complete");
+});
+Route::get('/alms/maintenance-schedules/stats', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/maintenance-schedules/stats');
+});
+
+// Asset Transfer routes
+Route::get('/alms/asset-transfers', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/asset-transfers');
+});
+Route::post('/alms/asset-transfers', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/asset-transfers');
+});
+Route::get('/alms/asset-transfers/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8005/api/asset-transfers/{$id}");
+});
+
+// Disposal routes
+Route::get('/alms/disposals', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/disposals');
+});
+Route::post('/alms/disposals', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/disposals');
+});
+Route::get('/alms/disposals/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8005/api/disposals/{$id}");
+});
+
 // Asset Category routes
 Route::get('/alms/asset-categories', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/asset-categories');
@@ -318,6 +360,9 @@ Route::post('/alms/asset-categories', function (Request $request) {
 Route::get('/alms/branches', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/branches');
 });
+Route::post('/alms/branches', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/branches');
+});
 
 // Employee routes
 Route::get('/alms/employees', function (Request $request) {
@@ -327,23 +372,17 @@ Route::post('/alms/employees', function (Request $request) {
     return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/employees');
 });
 
-// Maintenance routes
-Route::get('/alms/maintenances', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/maintenances');
+// Maintenance Type routes
+Route::get('/alms/maintenance-types', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/maintenance-types');
 });
-Route::post('/alms/maintenances', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/maintenances');
-});
-Route::put('/alms/maintenances/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8005/api/maintenances/{$id}");
+Route::post('/alms/maintenance-types', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/maintenance-types');
 });
 
-// Depreciation routes
-Route::get('/alms/depreciations', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/depreciations');
-});
-Route::post('/alms/depreciations', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/depreciations');
+// Reports routes
+Route::get('/alms/reports', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/reports');
 });
 // module4-alms entire routes end
 
@@ -366,6 +405,9 @@ Route::delete('/dtlr/documents/{id}', function (Request $request, $id) {
 });
 Route::post('/dtlr/documents/{id}/transfer', function (Request $request, $id) {
     return app(GatewayController::class)->proxyPost($request, "http://localhost:8006/api/documents/{$id}/transfer");
+});
+Route::post('/dtlr/documents/{id}/process-ocr', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPost($request, "http://localhost:8006/api/documents/{$id}/process-ocr");
 });
 
 // Document log routes
@@ -396,5 +438,13 @@ Route::get('/dtlr/branches', function (Request $request) {
 });
 Route::get('/dtlr/stats/overview', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/stats/overview');
+});
+Route::get('/dtlr/search', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/search');
+});
+
+// Health check
+Route::get('/dtlr/health', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/health');
 });
 // module5-dtlr entire routes end

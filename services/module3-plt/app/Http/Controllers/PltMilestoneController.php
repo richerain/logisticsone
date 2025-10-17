@@ -127,21 +127,28 @@ class PltMilestoneController extends Controller
 
     public function stats()
     {
-        $totalMilestones = PltMilestone::count();
-        $pending = PltMilestone::where('status', 'pending')->count();
-        $inProgress = PltMilestone::where('status', 'in_progress')->count();
-        $completed = PltMilestone::where('status', 'completed')->count();
-        $delayed = PltMilestone::where('delay_alert', true)->count();
+        try {
+            $totalMilestones = PltMilestone::count();
+            $pending = PltMilestone::where('status', 'pending')->count();
+            $inProgress = PltMilestone::where('status', 'in_progress')->count();
+            $completed = PltMilestone::where('status', 'completed')->count();
+            $delayed = PltMilestone::where('delay_alert', true)->count();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'total_milestones' => $totalMilestones,
-                'pending' => $pending,
-                'in_progress' => $inProgress,
-                'completed' => $completed,
-                'delayed' => $delayed
-            ]
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_milestones' => $totalMilestones,
+                    'pending' => $pending,
+                    'in_progress' => $inProgress,
+                    'completed' => $completed,
+                    'delayed' => $delayed
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error calculating milestone statistics: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

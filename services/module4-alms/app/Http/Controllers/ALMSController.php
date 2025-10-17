@@ -13,6 +13,7 @@ use App\Models\AssetTransfer;
 use App\Models\Disposal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
 
 class ALMSController extends Controller
@@ -79,6 +80,7 @@ class ALMSController extends Controller
                 'description' => 'nullable|string'
             ]);
 
+            // Generate ALMS ID: ALMS00001 format
             $almsId = IdGenerator::generate([
                 'table' => 'alms_assets',
                 'field' => 'alms_id',
@@ -255,6 +257,7 @@ class ALMSController extends Controller
                 'frequency_value' => 'required|integer|min:1'
             ]);
 
+            // Generate Schedule ID: MS00001 format
             $scheduleId = IdGenerator::generate([
                 'table' => 'alms_maintenance_schedules',
                 'field' => 'schedule_id',
@@ -330,6 +333,8 @@ class ALMSController extends Controller
             DB::beginTransaction();
 
             $schedule = MaintenanceSchedule::findOrFail($id);
+            
+            // Generate Record ID: MR00001 format
             $recordId = IdGenerator::generate([
                 'table' => 'alms_maintenance_records',
                 'field' => 'record_id',
@@ -404,39 +409,188 @@ class ALMSController extends Controller
         }
     }
 
-    // ==================== SUPPORTING DATA ====================
+    // ==================== ASSET TRANSFERS ====================
 
-    public function getBranches()
+    public function getAssetTransfers(Request $request)
     {
         try {
-            $branches = Branch::orderBy('name')->get();
+            $query = AssetTransfer::with(['asset', 'fromBranch', 'toBranch'])
+                ->orderBy('transfer_date', 'desc');
+
+            // Search
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('transfer_id', 'like', "%{$search}%")
+                      ->orWhereHas('asset', function($q) use ($search) {
+                          $q->where('alms_id', 'like', "%{$search}%")
+                            ->orWhere('serial_number', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $transfers = $query->paginate(10);
+
             return response()->json([
                 'success' => true,
-                'data' => $branches
+                'data' => $transfers,
+                'message' => 'Asset transfers retrieved successfully'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve branches'
+                'message' => 'Failed to retrieve asset transfers: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function getEmployees()
+    public function createAssetTransfer(Request $request)
     {
         try {
-            $employees = Employee::with('branch')->orderBy('name')->get();
+            DB::beginTransaction();
+
+            $request->validate([
+                'asset_id' => 'required|exists:alms_assets,id',
+                'from_branch_id' => 'required|exists:alms_branches,id',
+                'to_branch_id' => 'required|exists:alms_branches,id|different:from_branch_id',
+                'transfer_date' => 'required|date',
+                'reason' => 'required|string',
+                'notes' => 'nullable|string'
+            ]);
+
+            // Generate Transfer ID: AT00001 format
+            $transferId = IdGenerator::generate([
+                'table' => 'alms_asset_transfers',
+                'field' => 'transfer_id',
+                'length' => 6,
+                'prefix' => 'AT'
+            ]);
+
+            $transfer = AssetTransfer::create([
+                'transfer_id' => $transferId,
+                'asset_id' => $request->asset_id,
+                'from_branch_id' => $request->from_branch_id,
+                'to_branch_id' => $request->to_branch_id,
+                'transfer_date' => $request->transfer_date,
+                'reason' => $request->reason,
+                'notes' => $request->notes
+            ]);
+
+            // Update asset's current branch
+            $asset = Asset::find($request->asset_id);
+            $asset->update(['current_branch_id' => $request->to_branch_id]);
+
+            DB::commit();
+
             return response()->json([
                 'success' => true,
-                'data' => $employees
+                'data' => $transfer->load(['asset', 'fromBranch', 'toBranch']),
+                'message' => 'Asset transfer created successfully'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create asset transfer: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ==================== DISPOSAL MANAGEMENT ====================
+
+    public function getDisposals(Request $request)
+    {
+        try {
+            $query = Disposal::with(['asset', 'asset.currentBranch'])
+                ->orderBy('disposal_date', 'desc');
+
+            // Search
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('disposal_id', 'like', "%{$search}%")
+                      ->orWhereHas('asset', function($q) use ($search) {
+                          $q->where('alms_id', 'like', "%{$search}%")
+                            ->orWhere('serial_number', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            // Filter by method
+            if ($request->has('method') && $request->method != '') {
+                $query->where('method', $request->method);
+            }
+
+            $disposals = $query->paginate(10);
+
+            return response()->json([
+                'success' => true,
+                'data' => $disposals,
+                'message' => 'Disposals retrieved successfully'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve employees'
+                'message' => 'Failed to retrieve disposals: ' . $e->getMessage()
             ], 500);
         }
     }
+
+    public function createDisposal(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $request->validate([
+                'asset_id' => 'required|exists:alms_assets,id|unique:alms_disposals,asset_id',
+                'disposal_date' => 'required|date',
+                'method' => 'required|in:decommission,disposal,resale',
+                'disposal_value' => 'nullable|numeric|min:0',
+                'reason' => 'required|string',
+                'compliance_notes' => 'nullable|string'
+            ]);
+
+            // Generate Disposal ID: DS00001 format
+            $disposalId = IdGenerator::generate([
+                'table' => 'alms_disposals',
+                'field' => 'disposal_id',
+                'length' => 6,
+                'prefix' => 'DS'
+            ]);
+
+            $disposal = Disposal::create([
+                'disposal_id' => $disposalId,
+                'asset_id' => $request->asset_id,
+                'disposal_date' => $request->disposal_date,
+                'method' => $request->method,
+                'disposal_value' => $request->disposal_value,
+                'reason' => $request->reason,
+                'compliance_notes' => $request->compliance_notes
+            ]);
+
+            // Update asset status to disposed
+            $asset = Asset::find($request->asset_id);
+            $asset->update(['status' => 'disposed']);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'data' => $disposal->load(['asset']),
+                'message' => 'Asset disposal recorded successfully'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create disposal record: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ==================== ASSET CATEGORIES ====================
 
     public function getAssetCategories()
     {
@@ -454,6 +608,133 @@ class ALMSController extends Controller
         }
     }
 
+    public function createAssetCategory(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255|unique:alms_asset_categories,name',
+                'description' => 'nullable|string',
+                'maintenance_frequency' => 'nullable|in:monthly,yearly,km_based'
+            ]);
+
+            $category = AssetCategory::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'maintenance_frequency' => $request->maintenance_frequency
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Asset category created successfully',
+                'data' => $category
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create asset category: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ==================== BRANCHES ====================
+
+    public function getBranches()
+    {
+        try {
+            $branches = Branch::orderBy('name')->get();
+            return response()->json([
+                'success' => true,
+                'data' => $branches
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve branches'
+            ], 500);
+        }
+    }
+
+    public function createBranch(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255|unique:alms_branches,name',
+                'address' => 'nullable|string',
+                'code' => 'required|string|max:50|unique:alms_branches,code'
+            ]);
+
+            $branch = Branch::create([
+                'name' => $request->name,
+                'address' => $request->address,
+                'code' => $request->code
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Branch created successfully',
+                'data' => $branch
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create branch: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ==================== EMPLOYEES ====================
+
+    public function getEmployees()
+    {
+        try {
+            $employees = Employee::with('branch')->orderBy('name')->get();
+            return response()->json([
+                'success' => true,
+                'data' => $employees
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve employees'
+            ], 500);
+        }
+    }
+
+    public function createEmployee(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:alms_employees,email',
+                'position' => 'nullable|string|max:100',
+                'branch_id' => 'required|exists:alms_branches,id'
+            ]);
+
+            $employee = Employee::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'position' => $request->position,
+                'branch_id' => $request->branch_id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee created successfully',
+                'data' => $employee->load('branch')
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create employee: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ==================== MAINTENANCE TYPES ====================
+
     public function getMaintenanceTypes()
     {
         try {
@@ -468,5 +749,175 @@ class ALMSController extends Controller
                 'message' => 'Failed to retrieve maintenance types'
             ], 500);
         }
+    }
+
+    public function createMaintenanceType(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255|unique:alms_maintenance_types,name',
+                'frequency_unit' => 'required|string|max:20',
+                'estimated_cost' => 'nullable|numeric|min:0'
+            ]);
+
+            $maintenanceType = MaintenanceType::create([
+                'name' => $request->name,
+                'frequency_unit' => $request->frequency_unit,
+                'estimated_cost' => $request->estimated_cost
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Maintenance type created successfully',
+                'data' => $maintenanceType
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create maintenance type: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ==================== REPORTS & ANALYTICS ====================
+
+    public function getReports(Request $request)
+    {
+        try {
+            $reportType = $request->get('type', 'overview');
+            
+            switch ($reportType) {
+                case 'asset_status':
+                    $data = $this->getAssetStatusReport();
+                    break;
+                case 'maintenance_analytics':
+                    $data = $this->getMaintenanceAnalytics();
+                    break;
+                case 'cost_analysis':
+                    $data = $this->getCostAnalysis();
+                    break;
+                case 'branch_assets':
+                    $data = $this->getBranchAssetsReport();
+                    break;
+                default:
+                    $data = $this->getOverviewReport();
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'message' => 'Report generated successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate report: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function getOverviewReport()
+    {
+        $totalAssets = Asset::count();
+        $totalValue = Asset::sum('acquisition_cost');
+        $activeAssets = Asset::where('status', 'active')->count();
+        $maintenanceAssets = Asset::where('status', 'in_maintenance')->count();
+        $disposedAssets = Asset::where('status', 'disposed')->count();
+        
+        $assetsByCategory = Asset::with('category')
+            ->selectRaw('category_id, COUNT(*) as count')
+            ->groupBy('category_id')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'category' => $item->category->name,
+                    'count' => $item->count
+                ];
+            });
+
+        $recentMaintenance = MaintenanceRecord::with(['asset', 'schedule'])
+            ->orderBy('performed_date', 'desc')
+            ->limit(10)
+            ->get();
+
+        return [
+            'total_assets' => $totalAssets,
+            'total_value' => $totalValue,
+            'active_assets' => $activeAssets,
+            'maintenance_assets' => $maintenanceAssets,
+            'disposed_assets' => $disposedAssets,
+            'assets_by_category' => $assetsByCategory,
+            'recent_maintenance' => $recentMaintenance
+        ];
+    }
+
+    private function getAssetStatusReport()
+    {
+        return Asset::with(['category', 'currentBranch'])
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->get();
+    }
+
+    private function getMaintenanceAnalytics()
+    {
+        $totalMaintenance = MaintenanceRecord::count();
+        $totalMaintenanceCost = MaintenanceRecord::sum('cost');
+        $avgMaintenanceCost = MaintenanceRecord::avg('cost');
+        
+        $maintenanceByMonth = MaintenanceRecord::selectRaw('YEAR(performed_date) as year, MONTH(performed_date) as month, COUNT(*) as count, SUM(cost) as total_cost')
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->limit(12)
+            ->get();
+
+        return [
+            'total_maintenance' => $totalMaintenance,
+            'total_maintenance_cost' => $totalMaintenanceCost,
+            'avg_maintenance_cost' => $avgMaintenanceCost,
+            'maintenance_by_month' => $maintenanceByMonth
+        ];
+    }
+
+    private function getCostAnalysis()
+    {
+        $totalAcquisitionCost = Asset::sum('acquisition_cost');
+        $totalMaintenanceCost = MaintenanceRecord::sum('cost');
+        $totalDisposalValue = Disposal::sum('disposal_value');
+        
+        $costByCategory = Asset::with('category')
+            ->selectRaw('category_id, SUM(acquisition_cost) as total_cost')
+            ->groupBy('category_id')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'category' => $item->category->name,
+                    'total_cost' => $item->total_cost
+                ];
+            });
+
+        return [
+            'total_acquisition_cost' => $totalAcquisitionCost,
+            'total_maintenance_cost' => $totalMaintenanceCost,
+            'total_disposal_value' => $totalDisposalValue,
+            'cost_by_category' => $costByCategory
+        ];
+    }
+
+    private function getBranchAssetsReport()
+    {
+        return Asset::with('currentBranch')
+            ->selectRaw('current_branch_id, COUNT(*) as asset_count, SUM(acquisition_cost) as total_value')
+            ->groupBy('current_branch_id')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'branch' => $item->currentBranch->name,
+                    'asset_count' => $item->asset_count,
+                    'total_value' => $item->total_value
+                ];
+            });
     }
 }

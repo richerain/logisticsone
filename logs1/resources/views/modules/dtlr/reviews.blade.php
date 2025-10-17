@@ -6,6 +6,9 @@
 <div class="module-content bg-white rounded-xl p-6 shadow block">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Document Reviews</h2>
+        <button class="btn btn-primary" onclick="openReviewModal()">
+            <i class="bx bx-plus mr-2"></i>Create Review
+        </button>
     </div>
 
     <!-- Stats Cards -->
@@ -93,7 +96,7 @@
 <!-- Review Modal -->
 <div id="reviewModal" class="modal modal-bottom sm:modal-middle">
     <div class="modal-box max-w-2xl">
-        <h3 class="font-bold text-lg mb-4">Document Review</h3>
+        <h3 class="font-bold text-lg mb-4" id="reviewModalTitle">Create Document Review</h3>
         <form id="reviewForm">
             @csrf
             <input type="hidden" name="review_id" id="reviewId">
@@ -102,6 +105,15 @@
             <div class="space-y-4">
                 <div id="reviewDocumentInfo">
                     <!-- Document info will be populated by JavaScript -->
+                </div>
+                
+                <div>
+                    <label class="label">
+                        <span class="label-text">Document *</span>
+                    </label>
+                    <select name="document_id" id="documentSelect" class="select select-bordered w-full" required>
+                        <option value="">Select Document</option>
+                    </select>
                 </div>
                 
                 <div>
@@ -131,6 +143,19 @@
     </div>
 </div>
 
+<!-- Review Details Modal -->
+<div id="reviewDetailsModal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">Review Details</h3>
+        <div id="reviewDetailsContent">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+        <div class="modal-action">
+            <button class="btn btn-ghost" onclick="closeReviewDetailsModal()">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
 // ==================== CONFIGURATION ====================
 const API_BASE_URL = 'http://localhost:8001/api/dtlr';
@@ -143,6 +168,7 @@ let currentFilters = {
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', function() {
     loadDocumentReviews();
+    loadDocumentsForReview();
     setupEventListeners();
 });
 
@@ -163,6 +189,13 @@ function setupEventListeners() {
         currentFilters.review_status = e.target.value;
         currentPage = 1;
         loadDocumentReviews();
+    });
+
+    // Document selection change
+    document.getElementById('documentSelect').addEventListener('change', function(e) {
+        if (e.target.value) {
+            loadDocumentInfo(e.target.value);
+        }
     });
 }
 
@@ -192,6 +225,61 @@ async function loadDocumentReviews() {
     }
 }
 
+async function loadDocumentsForReview() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/documents?per_page=100`);
+        const result = await response.json();
+
+        if (result.success) {
+            const documentSelect = document.getElementById('documentSelect');
+            documentSelect.innerHTML = '<option value="">Select Document</option>';
+            
+            result.data.data.forEach(doc => {
+                documentSelect.innerHTML += `<option value="${doc.id}">${doc.tracking_number} - ${doc.title}</option>`;
+            });
+        }
+    } catch (error) {
+        console.error('Failed to load documents:', error);
+        showToast('error', 'Failed to load documents');
+    }
+}
+
+async function loadDocumentInfo(documentId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/documents/${documentId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const doc = result.data;
+            document.getElementById('reviewDocumentInfo').innerHTML = `
+                <div class="bg-base-200 p-3 rounded">
+                    <h4 class="font-semibold mb-2">Document Information</h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span class="font-medium">Tracking No:</span>
+                            <p class="font-mono">${doc.tracking_number}</p>
+                        </div>
+                        <div>
+                            <span class="font-medium">Title:</span>
+                            <p>${doc.title}</p>
+                        </div>
+                        <div>
+                            <span class="font-medium">Type:</span>
+                            <p>${doc.document_type?.name || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <span class="font-medium">Current Status:</span>
+                            <p><span class="badge badge-${getDocumentStatusBadgeClass(doc.status)}">${doc.status}</span></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load document info:', error);
+    }
+}
+
 // ==================== TABLE MANAGEMENT ====================
 function populateReviewsTable(reviews) {
     const tbody = document.getElementById('reviewsTableBody');
@@ -215,8 +303,8 @@ function populateReviewsTable(reviews) {
                 <div class="flex items-center gap-2">
                     <i class="bx bxs-file text-primary"></i>
                     <div>
-                        <div class="font-medium">${review.document.title}</div>
-                        <div class="text-xs text-gray-500 font-mono">${review.document.tracking_number}</div>
+                        <div class="font-medium">${review.document?.title || 'N/A'}</div>
+                        <div class="text-xs text-gray-500 font-mono">${review.document?.tracking_number || 'N/A'}</div>
                     </div>
                 </div>
             </td>
@@ -224,10 +312,10 @@ function populateReviewsTable(reviews) {
                 <div class="flex items-center gap-2">
                     <div class="avatar placeholder">
                         <div class="bg-neutral text-neutral-content rounded-full w-8">
-                            <span class="text-xs">${review.reviewer.username.charAt(0).toUpperCase()}</span>
+                            <span class="text-xs">${review.reviewer?.username?.charAt(0).toUpperCase() || 'U'}</span>
                         </div>
                     </div>
-                    <span>${review.reviewer.username}</span>
+                    <span>${review.reviewer?.username || 'Unknown'}</span>
                 </div>
             </td>
             <td>
@@ -272,65 +360,26 @@ function getReviewStatusBadgeClass(status) {
 }
 
 // ==================== MODAL MANAGEMENT ====================
-async function openReviewModal(reviewId = null) {
+function openReviewModal(reviewId = null) {
     const modal = document.getElementById('reviewModal');
     const form = document.getElementById('reviewForm');
-    const documentInfo = document.getElementById('reviewDocumentInfo');
+    const title = document.getElementById('reviewModalTitle');
     
     if (reviewId) {
         // Edit existing review
-        try {
-            showLoading();
-            const response = await fetch(`${API_BASE_URL}/document-reviews/${reviewId}`);
-            const result = await response.json();
-            
-            if (result.success) {
-                const review = result.data;
-                document.getElementById('reviewId').value = review.id;
-                
-                documentInfo.innerHTML = `
-                    <div class="bg-base-200 p-3 rounded">
-                        <h4 class="font-semibold mb-2">Document Information</h4>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                                <span class="font-medium">Tracking No:</span>
-                                <p class="font-mono">${review.document.tracking_number}</p>
-                            </div>
-                            <div>
-                                <span class="font-medium">Title:</span>
-                                <p>${review.document.title}</p>
-                            </div>
-                            <div>
-                                <span class="font-medium">Type:</span>
-                                <p>${review.document.document_type.name}</p>
-                            </div>
-                            <div>
-                                <span class="font-medium">Current Status:</span>
-                                <p><span class="badge badge-${getDocumentStatusBadgeClass(review.document.status)}">${review.document.status}</span></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                form.review_status.value = review.review_status;
-                form.comments.value = review.comments || '';
-            }
-        } catch (error) {
-            showToast('error', 'Failed to load review: ' + error.message);
-            return;
-        } finally {
-            hideLoading();
-        }
+        title.textContent = 'Edit Document Review';
+        loadReviewForEdit(reviewId);
     } else {
-        // Create new review - you might want to pre-select a document
-        documentInfo.innerHTML = `
-            <div class="alert alert-info">
-                <i class="bx bx-info-circle"></i>
-                <span>Select a document to review from the main table</span>
-            </div>
-        `;
+        // Create new review
+        title.textContent = 'Create Document Review';
         form.reset();
         document.getElementById('reviewId').value = '';
+        document.getElementById('reviewDocumentInfo').innerHTML = `
+            <div class="alert alert-info">
+                <i class="bx bx-info-circle"></i>
+                <span>Select a document to review</span>
+            </div>
+        `;
     }
     
     modal.showModal();
@@ -338,6 +387,35 @@ async function openReviewModal(reviewId = null) {
 
 function closeReviewModal() {
     document.getElementById('reviewModal').close();
+}
+
+function closeReviewDetailsModal() {
+    document.getElementById('reviewDetailsModal').close();
+}
+
+async function loadReviewForEdit(reviewId) {
+    try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/document-reviews/${reviewId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const review = result.data;
+            document.getElementById('reviewId').value = review.id;
+            document.getElementById('documentSelect').value = review.document_id;
+            document.querySelector('select[name="review_status"]').value = review.review_status;
+            document.querySelector('textarea[name="comments"]').value = review.comments || '';
+            
+            // Load document info
+            loadDocumentInfo(review.document_id);
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showToast('error', 'Failed to load review: ' + error.message);
+    } finally {
+        hideLoading();
+    }
 }
 
 async function viewReviewDetails(reviewId) {
@@ -348,15 +426,73 @@ async function viewReviewDetails(reviewId) {
         
         if (result.success) {
             const review = result.data;
-            
-            // You can implement a detailed view modal here
-            showToast('info', `
-                Review Details:
-                Document: ${review.document.title}
-                Status: ${review.review_status}
-                Reviewer: ${review.reviewer.username}
-                ${review.comments ? `Comments: ${review.comments}` : ''}
-            `);
+            document.getElementById('reviewDetailsContent').innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="font-semibold">Review ID:</label>
+                            <p class="font-mono">REV${String(review.id).padStart(5, '0')}</p>
+                        </div>
+                        <div>
+                            <label class="font-semibold">Status:</label>
+                            <p><span class="badge badge-${getReviewStatusBadgeClass(review.review_status)}">${review.review_status.toUpperCase()}</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-4">
+                        <label class="font-semibold">Document Information:</label>
+                        <div class="bg-base-200 p-3 rounded mt-2">
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <span class="font-medium">Tracking No:</span>
+                                    <p class="font-mono">${review.document?.tracking_number || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <span class="font-medium">Title:</span>
+                                    <p>${review.document?.title || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <span class="font-medium">Type:</span>
+                                    <p>${review.document?.document_type?.name || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <span class="font-medium">Current Status:</span>
+                                    <p><span class="badge badge-${getDocumentStatusBadgeClass(review.document?.status)}">${review.document?.status || 'N/A'}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="font-semibold">Reviewer:</label>
+                            <div class="flex items-center gap-2 mt-1">
+                                <div class="avatar placeholder">
+                                    <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                        <span class="text-xs">${review.reviewer?.username?.charAt(0).toUpperCase() || 'U'}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p>${review.reviewer?.username || 'Unknown'}</p>
+                                    <p class="text-xs text-gray-500">${review.reviewer?.role || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="font-semibold">Review Date:</label>
+                            <p>${review.reviewed_at ? new Date(review.reviewed_at).toLocaleString() : 'Not reviewed'}</p>
+                        </div>
+                    </div>
+                    
+                    ${review.comments ? `
+                    <div>
+                        <label class="font-semibold">Comments:</label>
+                        <p class="bg-base-200 p-3 rounded mt-1">${review.comments}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            document.getElementById('reviewDetailsModal').showModal();
         } else {
             throw new Error(result.message);
         }

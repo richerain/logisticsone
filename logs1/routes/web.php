@@ -108,9 +108,12 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/modules/plt/milestones', [FrontendController::class, 'pltMilestones'])->name('modules.plt.milestones');
     Route::get('/modules/plt/tracking-logs', [FrontendController::class, 'pltTrackingLogs'])->name('modules.plt.tracking-logs');
 
-    // ALMS
+    // ALMS - All submodules
     Route::get('/modules/alms/registration', [FrontendController::class, 'almsRegistration'])->name('modules.alms.registration');
     Route::get('/modules/alms/scheduling', [FrontendController::class, 'almsScheduling'])->name('modules.alms.scheduling');
+    Route::get('/modules/alms/transfers', [FrontendController::class, 'almsTransfers'])->name('modules.alms.transfers');
+    Route::get('/modules/alms/disposals', [FrontendController::class, 'almsDisposals'])->name('modules.alms.disposals');
+    Route::get('/modules/alms/reports', [FrontendController::class, 'almsReports'])->name('modules.alms.reports');
 
     // DTLR
     Route::get('/modules/dtlr/upload', [FrontendController::class, 'dtlrUpload'])->name('modules.dtlr.upload');

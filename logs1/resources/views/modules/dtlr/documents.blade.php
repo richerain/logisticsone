@@ -195,6 +195,48 @@
     </div>
 </div>
 
+<!-- Edit Modal -->
+<div id="editModal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Edit Document</h3>
+        <form id="editForm">
+            @csrf
+            <input type="hidden" name="document_id" id="editDocumentId">
+            <input type="hidden" name="updated_by" value="1">
+            <div class="space-y-4">
+                <div>
+                    <label class="label">
+                        <span class="label-text">Title</span>
+                    </label>
+                    <input type="text" name="title" id="editTitle" class="input input-bordered w-full" required>
+                </div>
+                <div>
+                    <label class="label">
+                        <span class="label-text">Description</span>
+                    </label>
+                    <textarea name="description" id="editDescription" class="textarea textarea-bordered w-full"></textarea>
+                </div>
+                <div>
+                    <label class="label">
+                        <span class="label-text">Status</span>
+                    </label>
+                    <select name="status" id="editStatus" class="select select-bordered w-full" required>
+                        <option value="pending">Pending</option>
+                        <option value="processed">Processed</option>
+                        <option value="approved">Approved</option>
+                        <option value="archived">Archived</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Document</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 // ==================== CONFIGURATION ====================
 const API_BASE_URL = 'http://localhost:8001/api/dtlr';
@@ -274,6 +316,9 @@ async function loadDocumentTypes() {
             const typeSelect = document.querySelector('select[name="document_type_id"]');
             const typeFilter = document.getElementById('typeFilter');
             
+            typeSelect.innerHTML = '<option value="">Select Document Type</option>';
+            typeFilter.innerHTML = '<option value="">All Types</option>';
+            
             result.data.forEach(type => {
                 typeSelect.innerHTML += `<option value="${type.id}">${type.name}</option>`;
                 typeFilter.innerHTML += `<option value="${type.id}">${type.name}</option>`;
@@ -281,6 +326,7 @@ async function loadDocumentTypes() {
         }
     } catch (error) {
         console.error('Failed to load document types:', error);
+        showToast('error', 'Failed to load document types');
     }
 }
 
@@ -293,6 +339,9 @@ async function loadBranches() {
             const branchSelect = document.querySelector('select[name="current_branch_id"]');
             const transferBranchSelect = document.querySelector('select[name="to_branch_id"]');
             
+            branchSelect.innerHTML = '<option value="">Select Branch</option>';
+            transferBranchSelect.innerHTML = '<option value="">Select Destination Branch</option>';
+            
             result.data.forEach(branch => {
                 branchSelect.innerHTML += `<option value="${branch.id}">${branch.name}</option>`;
                 transferBranchSelect.innerHTML += `<option value="${branch.id}">${branch.name}</option>`;
@@ -300,6 +349,7 @@ async function loadBranches() {
         }
     } catch (error) {
         console.error('Failed to load branches:', error);
+        showToast('error', 'Failed to load branches');
     }
 }
 
@@ -324,25 +374,33 @@ function populateDocumentsTable(documents) {
             <td class="font-mono">${doc.tracking_number}</td>
             <td>
                 <div class="flex items-center gap-2">
-                    <i class="bx bxs-file-pdf text-red-500"></i>
+                    <i class="bx ${getFileIcon(doc.file_path)} text-red-500"></i>
                     <span class="font-medium">${doc.title}</span>
                 </div>
             </td>
-            <td>${doc.document_type.name}</td>
+            <td>${doc.document_type?.name || 'N/A'}</td>
             <td>
                 <span class="badge badge-${getStatusBadgeClass(doc.status)}">${doc.status}</span>
             </td>
-            <td>${doc.current_branch.name}</td>
-            <td>${doc.creator.username}</td>
+            <td>${doc.current_branch?.name || 'N/A'}</td>
+            <td>${doc.creator?.username || 'N/A'}</td>
             <td>${new Date(doc.created_at).toLocaleDateString()}</td>
             <td>
                 <div class="flex gap-1">
                     <button class="btn btn-sm btn-circle btn-outline" title="View" onclick="viewDocument(${doc.id})">
                         <i class="bx bx-show"></i>
                     </button>
+                    <button class="btn btn-sm btn-circle btn-outline" title="Edit" onclick="openEditModal(${doc.id})">
+                        <i class="bx bx-edit"></i>
+                    </button>
                     <button class="btn btn-sm btn-circle btn-outline" title="Transfer" onclick="openTransferModal(${doc.id})">
                         <i class="bx bx-transfer"></i>
                     </button>
+                    ${doc.status === 'pending' ? `
+                    <button class="btn btn-sm btn-circle btn-outline btn-info" title="Process OCR" onclick="processOCR(${doc.id})">
+                        <i class="bx bx-cog"></i>
+                    </button>
+                    ` : ''}
                     <button class="btn btn-sm btn-circle btn-outline btn-error" title="Delete" onclick="deleteDocument(${doc.id})">
                         <i class="bx bx-trash"></i>
                     </button>
@@ -361,6 +419,14 @@ function getStatusBadgeClass(status) {
         'rejected': 'error'
     };
     return classes[status] || 'neutral';
+}
+
+function getFileIcon(filePath) {
+    if (!filePath) return 'bxs-file';
+    const ext = filePath.split('.').pop().toLowerCase();
+    if (ext === 'pdf') return 'bxs-file-pdf';
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'bxs-file-image';
+    return 'bxs-file';
 }
 
 // ==================== MODAL MANAGEMENT ====================
@@ -385,6 +451,16 @@ function openTransferModal(documentId) {
 function closeTransferModal() {
     document.getElementById('transferModal').close();
     document.getElementById('transferForm').reset();
+}
+
+function openEditModal(documentId) {
+    loadDocumentForEdit(documentId);
+    document.getElementById('editModal').showModal();
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').close();
+    document.getElementById('editForm').reset();
 }
 
 // ==================== FORM HANDLING ====================
@@ -448,6 +524,38 @@ document.getElementById('transferForm').addEventListener('submit', async functio
     }
 });
 
+document.getElementById('editForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const documentId = formData.get('document_id');
+    
+    try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('success', 'Document updated successfully!');
+            closeEditModal();
+            loadDocuments();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showToast('error', 'Update failed: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+});
+
 // ==================== ACTIONS ====================
 async function viewDocument(id) {
     try {
@@ -480,23 +588,29 @@ async function viewDocument(id) {
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="font-semibold">Document Type:</label>
-                            <p>${doc.document_type.name}</p>
+                            <p>${doc.document_type?.name || 'N/A'}</p>
                         </div>
                         <div>
                             <label class="font-semibold">Current Branch:</label>
-                            <p>${doc.current_branch.name}</p>
+                            <p>${doc.current_branch?.name || 'N/A'}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="font-semibold">Uploaded By:</label>
-                            <p>${doc.creator.username}</p>
+                            <p>${doc.creator?.username || 'N/A'}</p>
                         </div>
                         <div>
                             <label class="font-semibold">Upload Date:</label>
                             <p>${new Date(doc.created_at).toLocaleString()}</p>
                         </div>
                     </div>
+                    ${doc.ocr_processed_at ? `
+                    <div>
+                        <label class="font-semibold">OCR Processed:</label>
+                        <p>${new Date(doc.ocr_processed_at).toLocaleString()}</p>
+                    </div>
+                    ` : ''}
                     ${doc.extracted_data ? `
                     <div>
                         <label class="font-semibold">Extracted Data (OCR):</label>
@@ -511,6 +625,51 @@ async function viewDocument(id) {
         }
     } catch (error) {
         showToast('error', 'Failed to load document details: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function loadDocumentForEdit(id) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/documents/${id}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const doc = result.data;
+            document.getElementById('editDocumentId').value = doc.id;
+            document.getElementById('editTitle').value = doc.title;
+            document.getElementById('editDescription').value = doc.description || '';
+            document.getElementById('editStatus').value = doc.status;
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showToast('error', 'Failed to load document for editing: ' + error.message);
+    }
+}
+
+async function processOCR(id) {
+    if (!confirm('Process this document with OCR? This will extract text data from the document.')) {
+        return;
+    }
+
+    try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/documents/${id}/process-ocr`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('success', 'OCR processing completed successfully!');
+            loadDocuments();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showToast('error', 'OCR processing failed: ' + error.message);
     } finally {
         hideLoading();
     }
@@ -604,7 +763,6 @@ function resetFilters() {
 }
 
 function showLoading() {
-    // You can implement a loading spinner here
     document.body.style.cursor = 'wait';
 }
 

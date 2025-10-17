@@ -14,6 +14,7 @@ class FrontendController extends Controller
         return view('modules.dashboard', ['title' => 'Dashboard']);
     }   
     // dashboard methods end
+    
     // sws methods start
     public function swsInventory()
     {
@@ -30,6 +31,7 @@ class FrontendController extends Controller
         return view('modules.sws.restock', ['title' => 'SWS Restock Management']);
     }
     // sws methods end
+    
     // psm methods start 
     public function psmVendorManagement()
     {
@@ -71,6 +73,7 @@ class FrontendController extends Controller
         return view('modules.psm.shop-management');
     }
     // psm methods end
+    
     // plt methods start
     public function pltProjects()
     {
@@ -102,17 +105,34 @@ class FrontendController extends Controller
         return view('modules.plt.tracking-logs');
     }
     // plt methods end
+    
     // alms methods start
     public function almsRegistration()
     {
-        return view('modules.alms.registration');
+        return view('modules.alms.registration', ['title' => 'Asset Registration - ALMS']);
     }
 
     public function almsScheduling()
     {
-        return view('modules.alms.scheduling');
+        return view('modules.alms.scheduling', ['title' => 'Maintenance Scheduling - ALMS']);
+    }
+
+    public function almsTransfers()
+    {
+        return view('modules.alms.transfers', ['title' => 'Asset Transfers - ALMS']);
+    }
+
+    public function almsDisposals()
+    {
+        return view('modules.alms.disposals', ['title' => 'Disposal Management - ALMS']);
+    }
+
+    public function almsReports()
+    {
+        return view('modules.alms.reports', ['title' => 'Reports & Analytics - ALMS']);
     }
     // alms methods end
+    
     // dtlr methods start
     public function dtlrUpload()
     {
@@ -199,67 +219,67 @@ class FrontendController extends Controller
         return view('auth.otp-verification');
     }
 
-public function verifyOtp(Request $request)
-{
-    Log::info('Frontend OTP verification started', $request->all());
+    public function verifyOtp(Request $request)
+    {
+        Log::info('Frontend OTP verification started', $request->all());
 
-    try {
-        $response = Http::post('http://localhost:8001/api/auth/verify-otp', [
-            'session_id' => $request->session_id,
-            'otp_code' => $request->otp_code,
-            'email' => $request->email
-        ]);
-
-        Log::info('Gateway OTP verification response status: ' . $response->status());
-        Log::info('Gateway OTP verification response data:', $response->json());
-
-        $data = $response->json();
-
-        if ($response->successful() && $data['success']) {
-            $currentTime = time();
-            
-            // Set basic authentication cookies only (no session timeout cookies)
-            setcookie('isAuthenticated', 'true', [
-                'expires' => 0, // Session cookie (browser session)
-                'path' => '/',
-                'secure' => false,
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]);
-            
-            setcookie('user', json_encode($data['user']), [
-                'expires' => time() + (86400 * 30), // 30 days
-                'path' => '/',
-                'secure' => false,
-                'httponly' => true,
-                'samesite' => 'Lax'
+        try {
+            $response = Http::post('http://localhost:8001/api/auth/verify-otp', [
+                'session_id' => $request->session_id,
+                'otp_code' => $request->otp_code,
+                'email' => $request->email
             ]);
 
-            Log::info('User logged in successfully - session timeout disabled', [
-                'user_id' => $data['user']['id']
-            ]);
+            Log::info('Gateway OTP verification response status: ' . $response->status());
+            Log::info('Gateway OTP verification response data:', $response->json());
 
-            return response()->json([
-                'success' => true,
-                'user' => $data['user'],
-                'redirect_to' => 'login-splash'
-            ]);
-        } else {
-            Log::error('OTP verification failed', ['response' => $data]);
+            $data = $response->json();
+
+            if ($response->successful() && $data['success']) {
+                $currentTime = time();
+                
+                // Set basic authentication cookies only (no session timeout cookies)
+                setcookie('isAuthenticated', 'true', [
+                    'expires' => 0, // Session cookie (browser session)
+                    'path' => '/',
+                    'secure' => false,
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]);
+                
+                setcookie('user', json_encode($data['user']), [
+                    'expires' => time() + (86400 * 30), // 30 days
+                    'path' => '/',
+                    'secure' => false,
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]);
+
+                Log::info('User logged in successfully - session timeout disabled', [
+                    'user_id' => $data['user']['id']
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'user' => $data['user'],
+                    'redirect_to' => 'login-splash'
+                ]);
+            } else {
+                Log::error('OTP verification failed', ['response' => $data]);
+                return response()->json([
+                    'success' => false,
+                    'message' => $data['message'] ?? 'OTP verification failed'
+                ], 401);
+            }
+        } catch (\Exception $e) {
+            Log::error('OTP verification error: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => $data['message'] ?? 'OTP verification failed'
-            ], 401);
+                'message' => 'Service unavailable. Please try again later.'
+            ], 503);
         }
-    } catch (\Exception $e) {
-        Log::error('OTP verification error: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Service unavailable. Please try again later.'
-        ], 503);
     }
-}
 
     public function resendOtp(Request $request)
     {

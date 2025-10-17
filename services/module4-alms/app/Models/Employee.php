@@ -2,29 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
 {
     use HasFactory;
 
+    protected $table = 'alms_employees';
+    
     protected $fillable = [
-        'employee_id',
         'name',
         'email',
-        'phone',
-        'department',
         'position',
         'branch_id'
     ];
 
-    public function branch()
+    public function branch(): BelongsTo
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
-    public function assignedAssets()
+    public function assignedAssets(): HasMany
     {
         return $this->hasMany(Asset::class, 'assigned_employee_id');
     }

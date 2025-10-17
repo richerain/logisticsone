@@ -465,7 +465,7 @@
     }
 
     function updateProfilePicture(user) {
-        let profilePictureUrl = '{{ asset('images/pfp.jpg') }}';
+        let profilePictureUrl = '{{ asset('images/default.jpg') }}';
         
         if (user.profile_picture) {
             // Check if it's already a full URL or just a path
@@ -495,7 +495,7 @@
         // Add error handling in case image fails to load
         modalImg.onerror = function() {
             console.warn('Failed to load modal profile picture, using default');
-            this.src = '{{ asset('images/pfp.jpg') }}';
+            this.src = '{{ asset('images/default.jpg') }}';
         };
         
         headerImg.onerror = function() {

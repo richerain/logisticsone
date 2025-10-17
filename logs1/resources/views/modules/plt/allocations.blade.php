@@ -79,11 +79,8 @@
                     <tr>
                         <th>Allocation ID</th>
                         <th>Project</th>
-                        <th>Resource</th>
-                        <th>Type</th>
+                        <th>Resource Type</th>
                         <th>Quantity</th>
-                        <th>Assigned Date</th>
-                        <th>Return Date</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -179,75 +176,97 @@
     </dialog>
 
     <script>
-        let currentPage = 1;
-        let editingId = null;
-        let deleteId = null;
+        // ==================== CONFIGURATION ====================
+        const API_BASE_URL = 'http://localhost:8001/api/plt';
 
-        // Load allocations on page load
+        // ==================== STATE MANAGEMENT ====================
+        let currentPage = 1;
+        let totalPages = 1;
+        let searchTerm = '';
+        let statusFilter = '';
+
+        // ==================== DOM ELEMENTS ====================
+        const allocationsTableBody = document.getElementById('allocations-table-body');
+        const pagination = document.getElementById('pagination');
+        const searchInput = document.getElementById('search-input');
+        const statusFilterSelect = document.getElementById('status-filter');
+        const allocationModal = document.getElementById('allocation-modal');
+        const allocationForm = document.getElementById('allocation-form');
+        const modalTitle = document.getElementById('modal-title');
+        const allocationIdInput = document.getElementById('allocation-id');
+        const projectSelect = document.getElementById('project-select');
+        const resourceSelect = document.getElementById('resource-select');
+        const quantityInput = document.getElementById('quantity-input');
+        const quantityAvailable = document.getElementById('quantity-available');
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+        // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
             loadAllocations();
-            loadStats();
             loadProjectsForSelect();
             loadResourcesForSelect();
+            setupEventListeners();
         });
 
-        // Load allocations with pagination and filters
-        async function loadAllocations(page = 1) {
-            currentPage = page;
-            const search = document.getElementById('search-input').value;
-            const status = document.getElementById('status-filter').value;
+        function setupEventListeners() {
+            searchInput.addEventListener('input', debounce(() => {
+                searchTerm = searchInput.value;
+                currentPage = 1;
+                loadAllocations();
+            }, 500));
 
+            statusFilterSelect.addEventListener('change', () => {
+                statusFilter = statusFilterSelect.value;
+                currentPage = 1;
+                loadAllocations();
+            });
+
+            resourceSelect.addEventListener('change', updateQuantityAvailable);
+            quantityInput.addEventListener('input', validateQuantity);
+
+            allocationForm.addEventListener('submit', handleAllocationSubmit);
+        }
+
+        // ==================== API FUNCTIONS ====================
+        async function loadAllocations() {
             try {
                 showLoading();
-                const response = await fetch(`/api/plt/allocations?page=${page}&search=${search}&status=${status}`);
-                const data = await response.json();
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    search: searchTerm,
+                    status: statusFilter
+                });
 
-                if (data.success) {
-                    renderAllocationsTable(data.data.data);
-                    renderPagination(data.data);
+                const response = await fetch(`${API_BASE_URL}/allocations?${params}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayAllocations(result.data);
+                    updateStats();
                 } else {
-                    showToast('Error loading allocations', 'error');
+                    throw new Error(result.message || 'Failed to load allocations');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error loading allocations', 'error');
+                console.error('Error loading allocations:', error);
+                showError('Failed to load allocations: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
-        // Load stats
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/plt/allocations/stats');
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('total-allocations').textContent = data.data.total_allocations;
-                    document.getElementById('assigned').textContent = data.data.assigned;
-                    document.getElementById('in-use').textContent = data.data.in_use;
-                    document.getElementById('returned').textContent = data.data.returned;
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        // Load projects for select dropdown
         async function loadProjectsForSelect() {
             try {
-                const response = await fetch('/api/plt/projects?per_page=100');
-                const data = await response.json();
+                const response = await fetch(`${API_BASE_URL}/projects`);
+                const result = await response.json();
 
-                if (data.success) {
-                    const select = document.getElementById('project-select');
-                    select.innerHTML = '<option value="">Select Project</option>';
-                    
-                    data.data.data.forEach(project => {
+                if (result.success) {
+                    projectSelect.innerHTML = '<option value="">Select Project</option>';
+                    result.data.data.forEach(project => {
                         const option = document.createElement('option');
                         option.value = project.id;
                         option.textContent = project.name;
-                        select.appendChild(option);
+                        projectSelect.appendChild(option);
                     });
                 }
             } catch (error) {
@@ -255,22 +274,19 @@
             }
         }
 
-        // Load resources for select dropdown
         async function loadResourcesForSelect() {
             try {
-                const response = await fetch('/api/plt/resources?per_page=100');
-                const data = await response.json();
+                const response = await fetch(`${API_BASE_URL}/resources`);
+                const result = await response.json();
 
-                if (data.success) {
-                    const select = document.getElementById('resource-select');
-                    select.innerHTML = '<option value="">Select Resource</option>';
-                    
-                    data.data.data.forEach(resource => {
+                if (result.success) {
+                    resourceSelect.innerHTML = '<option value="">Select Resource</option>';
+                    result.data.data.forEach(resource => {
                         const option = document.createElement('option');
                         option.value = resource.id;
-                        option.textContent = `${resource.name} (${resource.quantity_available} available)`;
+                        option.textContent = `${resource.name} (${resource.type}) - Available: ${resource.quantity_available}`;
                         option.dataset.quantity = resource.quantity_available;
-                        select.appendChild(option);
+                        resourceSelect.appendChild(option);
                     });
                 }
             } catch (error) {
@@ -278,231 +294,454 @@
             }
         }
 
-        // Update quantity available when resource is selected
-        document.getElementById('resource-select').addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const availableQuantity = selectedOption.dataset.quantity || 0;
-            document.getElementById('quantity-available').textContent = `Available: ${availableQuantity}`;
-            document.getElementById('quantity-input').max = availableQuantity;
-        });
+        async function updateStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/allocations/stats`);
+                const result = await response.json();
 
-        // Render allocations table
-        function renderAllocationsTable(allocations) {
-            const tbody = document.getElementById('allocations-table-body');
-            tbody.innerHTML = '';
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('total-allocations').textContent = stats.total_allocations;
+                    document.getElementById('assigned').textContent = stats.assigned;
+                    document.getElementById('in-use').textContent = stats.in_use;
+                    document.getElementById('returned').textContent = stats.returned;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function createAllocation(allocationData) {
+            const response = await fetch(`${API_BASE_URL}/allocations`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(allocationData)
+            });
+            return await response.json();
+        }
+
+        async function updateAllocation(id, allocationData) {
+            const response = await fetch(`${API_BASE_URL}/allocations/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(allocationData)
+            });
+            return await response.json();
+        }
+
+        async function deleteAllocation(id) {
+            const response = await fetch(`${API_BASE_URL}/allocations/${id}`, {
+                method: 'DELETE'
+            });
+            return await response.json();
+        }
+
+        // ==================== UI FUNCTIONS ====================
+        function displayAllocations(allocationsData) {
+            const allocations = allocationsData.data;
+            totalPages = allocationsData.last_page;
+
+            allocationsTableBody.innerHTML = '';
 
             if (allocations.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">No allocations found</td></tr>';
+                allocationsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-500">
+                            <i class="bx bx-user-check text-4xl mb-2"></i>
+                            <p>No allocations found</p>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
             allocations.forEach(allocation => {
-                const statusBadge = getStatusBadge(allocation.status);
-                const resourceType = allocation.resource?.type || 'N/A';
-
-                const row = `
-                    <tr>
-                        <td class="font-mono">ALC${String(allocation.id).padStart(5, '0')}</td>
-                        <td>${allocation.project?.name || 'N/A'}</td>
-                        <td>${allocation.resource?.name || 'N/A'}</td>
-                        <td>${resourceType}</td>
-                        <td>${allocation.quantity_assigned}</td>
-                        <td>${formatDate(allocation.assigned_date)}</td>
-                        <td>${allocation.return_date ? formatDate(allocation.return_date) : 'Not returned'}</td>
-                        <td>${statusBadge}</td>
-                        <td>
-                            <div class="flex gap-1">
-                                <button class="btn btn-sm btn-circle btn-info" title="Edit" onclick="editAllocation(${allocation.id})">
-                                    <i class="bx bx-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-circle btn-error" title="Delete" onclick="confirmDelete(${allocation.id})">
-                                    <i class="bx bx-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="font-mono">ALC${String(allocation.id).padStart(5, '0')}</td>
+                    <td>${allocation.project ? escapeHtml(allocation.project.name) : 'N/A'}</td>
+                    <td>
+                        <span class="badge ${getTypeBadgeClass(allocation.resource?.type)}">
+                            ${getTypeText(allocation.resource?.type)}
+                        </span>
+                    </td>
+                    <td>${allocation.quantity_assigned} Unit${allocation.quantity_assigned !== 1 ? 's' : ''}</td>
+                    <td>
+                        <span class="badge ${getStatusBadgeClass(allocation.status)}">
+                            ${getStatusText(allocation.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-sm btn-circle btn-outline btn-info" onclick="viewAllocation(${allocation.id})">
+                                <i class="bx bx-show"></i>
+                            </button>
+                            <button class="btn btn-sm btn-circle btn-outline btn-warning" onclick="editAllocation(${allocation.id})">
+                                <i class="bx bx-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-circle btn-outline btn-error" onclick="openDeleteModal(${allocation.id})">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 `;
-                tbody.innerHTML += row;
+                allocationsTableBody.appendChild(row);
             });
+
+            updatePagination();
         }
 
-        // Render pagination
-        function renderPagination(pagination) {
-            const paginationDiv = document.getElementById('pagination');
-            paginationDiv.innerHTML = '';
-
-            const totalPages = pagination.last_page;
-            const currentPage = pagination.current_page;
+        function updatePagination() {
+            pagination.innerHTML = '';
 
             // Previous button
-            if (currentPage > 1) {
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn" onclick="loadAllocations(${currentPage - 1})">«</button>
-                `;
-            }
+            const prevButton = document.createElement('button');
+            prevButton.className = `join-item btn ${currentPage === 1 ? 'btn-disabled' : ''}`;
+            prevButton.innerHTML = '<i class="bx bx-chevron-left"></i>';
+            prevButton.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadAllocations();
+                }
+            };
+            pagination.appendChild(prevButton);
 
             // Page numbers
             for (let i = 1; i <= totalPages; i++) {
-                const activeClass = i === currentPage ? 'btn-active' : '';
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn ${activeClass}" onclick="loadAllocations(${i})">${i}</button>
-                `;
+                const pageButton = document.createElement('button');
+                pageButton.className = `join-item btn ${currentPage === i ? 'btn-active' : ''}`;
+                pageButton.textContent = i;
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    loadAllocations();
+                };
+                pagination.appendChild(pageButton);
             }
 
             // Next button
-            if (currentPage < totalPages) {
-                paginationDiv.innerHTML += `
-                    <button class="join-item btn" onclick="loadAllocations(${currentPage + 1})">»</button>
-                `;
+            const nextButton = document.createElement('button');
+            nextButton.className = `join-item btn ${currentPage === totalPages ? 'btn-disabled' : ''}`;
+            nextButton.innerHTML = '<i class="bx bx-chevron-right"></i>';
+            nextButton.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadAllocations();
+                }
+            };
+            pagination.appendChild(nextButton);
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+        function openAddModal() {
+            modalTitle.textContent = 'Add New Allocation';
+            allocationForm.reset();
+            allocationIdInput.value = '';
+            quantityAvailable.textContent = 'Available: 0';
+            allocationModal.showModal();
+        }
+
+        async function viewAllocation(id) {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE_URL}/allocations/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const allocation = result.data;
+                    
+                    // Create and show view modal
+                    const viewModal = document.createElement('dialog');
+                    viewModal.className = 'modal modal-middle';
+                    viewModal.innerHTML = `
+                        <div class="modal-box max-w-2xl">
+                            <h3 class="font-bold text-lg mb-4">Allocation Details - ALC${String(allocation.id).padStart(5, '0')}</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Project</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${allocation.project ? escapeHtml(allocation.project.name) : 'N/A'}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Resource</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${allocation.resource ? escapeHtml(allocation.resource.name) : 'N/A'}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Resource Type</span>
+                                    </label>
+                                    <div class="p-2">
+                                        <span class="badge ${getTypeBadgeClass(allocation.resource?.type)}">
+                                            ${getTypeText(allocation.resource?.type)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Status</span>
+                                    </label>
+                                    <div class="p-2">
+                                        <span class="badge ${getStatusBadgeClass(allocation.status)}">
+                                            ${getStatusText(allocation.status)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Unit Allocated</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">
+                                        <span class="font-semibold">${allocation.quantity_assigned}</span>
+                                        <span class="text-sm text-gray-500 ml-2">Unit${allocation.quantity_assigned !== 1 ? 's' : ''}</span>
+                                    </div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Assigned Date</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${formatDate(allocation.assigned_date)}</div>
+                                </div>
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Return Date</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded">${allocation.return_date ? formatDate(allocation.return_date) : 'Not returned'}</div>
+                                </div>
+                                <div class="form-control md:col-span-2">
+                                    <label class="label">
+                                        <span class="label-text font-semibold">Allocation Period</span>
+                                    </label>
+                                    <div class="p-2 bg-base-200 rounded text-center">
+                                        <div class="text-sm text-gray-500">From ${formatDate(allocation.assigned_date)}</div>
+                                        <div class="text-sm text-gray-500">${allocation.return_date ? `To ${formatDate(allocation.return_date)}` : 'Ongoing'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-action">
+                                <button class="btn btn-ghost" onclick="this.closest('dialog').close()">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(viewModal);
+                    viewModal.showModal();
+                } else {
+                    throw new Error(result.message || 'Failed to load allocation');
+                }
+            } catch (error) {
+                console.error('Error loading allocation:', error);
+                showError('Failed to load allocation: ' + error.message);
+            } finally {
+                hideLoading();
             }
         }
 
-        // Open add modal
-        function openAddModal() {
-            editingId = null;
-            document.getElementById('modal-title').textContent = 'Add New Allocation';
-            document.getElementById('allocation-form').reset();
-            document.getElementById('allocation-id').value = '';
-            document.getElementById('quantity-available').textContent = 'Available: 0';
-            document.getElementById('allocation-modal').showModal();
-        }
-
-        // Edit allocation
         async function editAllocation(id) {
             try {
                 showLoading();
-                const response = await fetch(`/api/plt/allocations/${id}`);
-                const data = await response.json();
+                const response = await fetch(`${API_BASE_URL}/allocations/${id}`);
+                const result = await response.json();
 
-                if (data.success) {
-                    const allocation = data.data;
-                    editingId = id;
+                if (result.success) {
+                    const allocation = result.data;
+                    modalTitle.textContent = 'Edit Allocation';
+                    allocationIdInput.value = allocation.id;
                     
-                    document.getElementById('modal-title').textContent = 'Edit Allocation';
-                    document.getElementById('allocation-id').value = allocation.id;
-                    document.getElementById('allocation-form').project_id.value = allocation.project_id;
-                    document.getElementById('allocation-form').resource_id.value = allocation.resource_id;
-                    document.getElementById('allocation-form').quantity_assigned.value = allocation.quantity_assigned;
-                    document.getElementById('allocation-form').status.value = allocation.status;
-                    document.getElementById('allocation-form').assigned_date.value = allocation.assigned_date;
-                    document.getElementById('allocation-form').return_date.value = allocation.return_date || '';
-                    
-                    // Update quantity available display
-                    const resourceSelect = document.getElementById('resource-select');
-                    const selectedOption = resourceSelect.querySelector(`option[value="${allocation.resource_id}"]`);
-                    if (selectedOption) {
-                        document.getElementById('quantity-available').textContent = `Available: ${selectedOption.dataset.quantity || 0}`;
+                    // Fill form with allocation data
+                    Object.keys(allocation).forEach(key => {
+                        const input = allocationForm.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            if (input.type === 'date') {
+                                input.value = allocation[key] ? allocation[key].split('T')[0] : '';
+                            } else {
+                                input.value = allocation[key] || '';
+                            }
+                        }
+                    });
+
+                    // Update quantity available for the selected resource
+                    if (allocation.resource_id) {
+                        updateQuantityAvailable();
                     }
-                    
-                    document.getElementById('allocation-modal').showModal();
+
+                    allocationModal.showModal();
                 } else {
-                    showToast('Error loading allocation', 'error');
+                    throw new Error(result.message || 'Failed to load allocation');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error loading allocation', 'error');
+                console.error('Error loading allocation:', error);
+                showError('Failed to load allocation: ' + error.message);
             } finally {
                 hideLoading();
             }
         }
 
-        // Handle form submission
-        document.getElementById('allocation-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await saveAllocation();
-        });
-
-        // Save allocation
-        async function saveAllocation() {
-            const formData = new FormData(document.getElementById('allocation-form'));
-            const data = Object.fromEntries(formData);
-            const url = editingId ? `/api/plt/allocations/${editingId}` : '/api/plt/allocations';
-            const method = editingId ? 'PUT' : 'POST';
-
-            try {
-                showLoading();
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast(`Allocation ${editingId ? 'updated' : 'created'} successfully`, 'success');
-                    closeModal();
-                    loadAllocations();
-                    loadStats();
-                } else {
-                    showToast(result.message || 'Error saving allocation', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error saving allocation', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Confirm delete
-        function confirmDelete(id) {
-            deleteId = id;
-            document.getElementById('delete-modal').showModal();
-        }
-
-        // Delete allocation
-        document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
-            try {
-                showLoading();
-                const response = await fetch(`/api/plt/allocations/${deleteId}`, {
-                    method: 'DELETE'
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('Allocation deleted successfully', 'success');
-                    closeDeleteModal();
-                    loadAllocations();
-                    loadStats();
-                } else {
-                    showToast(result.message || 'Error deleting allocation', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error deleting allocation', 'error');
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // Close modals
         function closeModal() {
-            document.getElementById('allocation-modal').close();
+            allocationModal.close();
+        }
+
+        let allocationToDelete = null;
+
+        function openDeleteModal(id) {
+            allocationToDelete = id;
+            deleteModal.showModal();
         }
 
         function closeDeleteModal() {
-            document.getElementById('delete-modal').close();
-            deleteId = null;
+            allocationToDelete = null;
+            deleteModal.close();
         }
 
-        // Utility functions
-        function getStatusBadge(status) {
-            const statusMap = {
+        async function confirmDelete() {
+            if (!allocationToDelete) return;
+
+            try {
+                showLoading();
+                const result = await deleteAllocation(allocationToDelete);
+
+                if (result.success) {
+                    showSuccess('Allocation deleted successfully');
+                    closeDeleteModal();
+                    loadAllocations();
+                } else {
+                    throw new Error(result.message || 'Failed to delete allocation');
+                }
+            } catch (error) {
+                console.error('Error deleting allocation:', error);
+                showError('Failed to delete allocation: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ==================== FORM HANDLING ====================
+        async function handleAllocationSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(allocationForm);
+            const allocationData = Object.fromEntries(formData);
+            
+            // Convert quantity_assigned to number
+            allocationData.quantity_assigned = parseInt(allocationData.quantity_assigned);
+
+            try {
+                showLoading();
+                let result;
+
+                if (allocationIdInput.value) {
+                    result = await updateAllocation(allocationIdInput.value, allocationData);
+                } else {
+                    result = await createAllocation(allocationData);
+                }
+
+                if (result.success) {
+                    showSuccess(`Allocation ${allocationIdInput.value ? 'updated' : 'created'} successfully`);
+                    closeModal();
+                    loadAllocations();
+                } else {
+                    throw new Error(result.message || `Failed to ${allocationIdInput.value ? 'update' : 'create'} allocation`);
+                }
+            } catch (error) {
+                console.error('Error saving allocation:', error);
+                showError('Failed to save allocation: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ==================== VALIDATION FUNCTIONS ====================
+        function updateQuantityAvailable() {
+            const selectedOption = resourceSelect.options[resourceSelect.selectedIndex];
+            const available = selectedOption ? parseInt(selectedOption.dataset.quantity) || 0 : 0;
+            quantityAvailable.textContent = `Available: ${available}`;
+            validateQuantity();
+        }
+
+        function validateQuantity() {
+            const selectedOption = resourceSelect.options[resourceSelect.selectedIndex];
+            const available = selectedOption ? parseInt(selectedOption.dataset.quantity) || 0 : 0;
+            const requested = parseInt(quantityInput.value) || 0;
+
+            if (requested > available) {
+                quantityInput.setCustomValidity(`Cannot allocate more than ${available} units`);
+                quantityInput.classList.add('input-error');
+            } else {
+                quantityInput.setCustomValidity('');
+                quantityInput.classList.remove('input-error');
+            }
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function getStatusBadgeClass(status) {
+            const statusClasses = {
                 'assigned': 'badge-info',
                 'in_use': 'badge-primary',
                 'returned': 'badge-success',
                 'issue': 'badge-error'
             };
-            return `<span class="badge ${statusMap[status]}">${status.replace('_', ' ')}</span>`;
+            return statusClasses[status] || 'badge-info';
         }
 
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString();
+        function getStatusText(status) {
+            const statusTexts = {
+                'assigned': 'Assigned',
+                'in_use': 'In Use',
+                'returned': 'Returned',
+                'issue': 'Issue'
+            };
+            return statusTexts[status] || status;
+        }
+
+        function getTypeBadgeClass(type) {
+            const typeClasses = {
+                'asset': 'badge-primary',
+                'supply': 'badge-success',
+                'personnel': 'badge-warning'
+            };
+            return typeClasses[type] || 'badge-info';
+        }
+
+        function getTypeText(type) {
+            const typeTexts = {
+                'asset': 'Asset',
+                'supply': 'Supply',
+                'personnel': 'Personnel'
+            };
+            return typeTexts[type] || type;
         }
 
         function showLoading() {
@@ -515,19 +754,23 @@
             console.log('Loading complete');
         }
 
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-top toast-end`;
-            toast.innerHTML = `
-                <div class="alert alert-${type}">
-                    <span>${message}</span>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                timer: 5000
+            });
         }
     </script>
 @endsection

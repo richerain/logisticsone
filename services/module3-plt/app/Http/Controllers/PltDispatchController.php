@@ -132,19 +132,26 @@ class PltDispatchController extends Controller
 
     public function stats()
     {
-        $totalDispatches = PltDispatch::count();
-        $inTransit = PltDispatch::where('status', 'in_transit')->count();
-        $delivered = PltDispatch::where('status', 'delivered')->count();
-        $delayed = PltDispatch::where('status', 'delayed')->count();
+        try {
+            $totalDispatches = PltDispatch::count();
+            $inTransit = PltDispatch::where('status', 'in_transit')->count();
+            $delivered = PltDispatch::where('status', 'delivered')->count();
+            $delayed = PltDispatch::where('status', 'delayed')->count();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'total_dispatches' => $totalDispatches,
-                'in_transit' => $inTransit,
-                'delivered' => $delivered,
-                'delayed' => $delayed
-            ]
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_dispatches' => $totalDispatches,
+                    'in_transit' => $inTransit,
+                    'delivered' => $delivered,
+                    'delayed' => $delayed
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error calculating dispatch statistics: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

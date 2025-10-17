@@ -8,16 +8,19 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('asset_categories', function (Blueprint $table) {
+        Schema::create('alms_branches', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->text('description')->nullable();
+            $table->string('name', 255)->unique();
+            $table->text('address')->nullable();
+            $table->string('code', 50)->unique();
             $table->timestamps();
+            
+            $table->index(['code']);
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('asset_categories');
+        Schema::dropIfExists('alms_branches');
     }
 };

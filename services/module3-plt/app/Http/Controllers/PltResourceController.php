@@ -9,7 +9,8 @@ class PltResourceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PltResource::orderBy('created_at', 'desc');
+        $query = PltResource::withCount('allocations')
+            ->orderBy('created_at', 'desc');
 
         // Search
         if ($request->has('search') && $request->search != '') {
@@ -51,7 +52,7 @@ class PltResourceController extends Controller
 
     public function show($id)
     {
-        $resource = PltResource::find($id);
+        $resource = PltResource::withCount('allocations')->find($id);
 
         if (!$resource) {
             return response()->json([
@@ -105,6 +106,14 @@ class PltResourceController extends Controller
             ], 404);
         }
 
+        // Check if resource has allocations
+        if ($resource->allocations()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete resource with existing allocations'
+            ], 400);
+        }
+
         $resource->delete();
 
         return response()->json([
@@ -115,19 +124,26 @@ class PltResourceController extends Controller
 
     public function stats()
     {
-        $totalResources = PltResource::count();
-        $assets = PltResource::where('type', 'asset')->count();
-        $supplies = PltResource::where('type', 'supply')->count();
-        $personnel = PltResource::where('type', 'personnel')->count();
+        try {
+            $totalResources = PltResource::count();
+            $assets = PltResource::where('type', 'asset')->count();
+            $supplies = PltResource::where('type', 'supply')->count();
+            $personnel = PltResource::where('type', 'personnel')->count();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'total_resources' => $totalResources,
-                'assets' => $assets,
-                'supplies' => $supplies,
-                'personnel' => $personnel
-            ]
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_resources' => $totalResources,
+                    'assets' => $assets,
+                    'supplies' => $supplies,
+                    'personnel' => $personnel
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error calculating resource statistics: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

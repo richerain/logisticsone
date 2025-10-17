@@ -122,19 +122,26 @@ class PltProjectController extends Controller
 
     public function stats()
     {
-        $totalProjects = PltProject::count();
-        $activeProjects = PltProject::whereIn('status', ['planned', 'in_progress'])->count();
-        $delayedProjects = PltProject::where('status', 'delayed')->count();
-        $completedProjects = PltProject::where('status', 'completed')->count();
+        try {
+            $totalProjects = PltProject::count();
+            $activeProjects = PltProject::whereIn('status', ['planned', 'in_progress'])->count();
+            $delayedProjects = PltProject::where('status', 'delayed')->count();
+            $completedProjects = PltProject::where('status', 'completed')->count();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'total_projects' => $totalProjects,
-                'active_projects' => $activeProjects,
-                'delayed_projects' => $delayedProjects,
-                'completed_projects' => $completedProjects
-            ]
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_projects' => $totalProjects,
+                    'active_projects' => $activeProjects,
+                    'delayed_projects' => $delayedProjects,
+                    'completed_projects' => $completedProjects
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error calculating project statistics: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

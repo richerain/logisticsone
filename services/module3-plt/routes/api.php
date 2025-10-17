@@ -3,6 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PltProjectController;
+use App\Http\Controllers\PltDispatchController;
+use App\Http\Controllers\PltResourceController;
+use App\Http\Controllers\PltAllocationController;
+use App\Http\Controllers\PltMilestoneController;
+use App\Http\Controllers\PltTrackingLogController;
 
 // Test route to verify API is working
 Route::get('/test', function () {
@@ -22,43 +27,42 @@ Route::put('/projects/{id}', [PltProjectController::class, 'update']);
 Route::delete('/projects/{id}', [PltProjectController::class, 'destroy']);
 Route::get('/projects/stats', [PltProjectController::class, 'stats']);
 
-// Basic routes for other modules (you can expand these later)
-Route::get('/dispatches', function () {
-    return response()->json([
-        'success' => true,
-        'data' => [],
-        'message' => 'Dispatches endpoint - add controller later'
-    ]);
-});
+// Dispatch routes
+Route::get('/dispatches', [PltDispatchController::class, 'index']);
+Route::post('/dispatches', [PltDispatchController::class, 'store']);
+Route::get('/dispatches/{id}', [PltDispatchController::class, 'show']);
+Route::put('/dispatches/{id}', [PltDispatchController::class, 'update']);
+Route::delete('/dispatches/{id}', [PltDispatchController::class, 'destroy']);
+Route::get('/dispatches/stats', [PltDispatchController::class, 'stats']);
 
-Route::get('/resources', function () {
-    return response()->json([
-        'success' => true,
-        'data' => [],
-        'message' => 'Resources endpoint - add controller later'
-    ]);
-});
+// Resource routes
+Route::get('/resources', [PltResourceController::class, 'index']);
+Route::post('/resources', [PltResourceController::class, 'store']);
+Route::get('/resources/{id}', [PltResourceController::class, 'show']);
+Route::put('/resources/{id}', [PltResourceController::class, 'update']);
+Route::delete('/resources/{id}', [PltResourceController::class, 'destroy']);
+Route::get('/resources/stats', [PltResourceController::class, 'stats']);
 
-Route::get('/allocations', function () {
-    return response()->json([
-        'success' => true,
-        'data' => [],
-        'message' => 'Allocations endpoint - add controller later'
-    ]);
-});
+// Allocation routes
+Route::get('/allocations', [PltAllocationController::class, 'index']);
+Route::post('/allocations', [PltAllocationController::class, 'store']);
+Route::get('/allocations/{id}', [PltAllocationController::class, 'show']);
+Route::put('/allocations/{id}', [PltAllocationController::class, 'update']);
+Route::delete('/allocations/{id}', [PltAllocationController::class, 'destroy']);
+Route::get('/allocations/stats', [PltAllocationController::class, 'stats']);
 
-Route::get('/milestones', function () {
-    return response()->json([
-        'success' => true,
-        'data' => [],
-        'message' => 'Milestones endpoint - add controller later'
-    ]);
-});
+// Milestone routes
+Route::get('/milestones', [PltMilestoneController::class, 'index']);
+Route::post('/milestones', [PltMilestoneController::class, 'store']);
+Route::get('/milestones/{id}', [PltMilestoneController::class, 'show']);
+Route::put('/milestones/{id}', [PltMilestoneController::class, 'update']);
+Route::delete('/milestones/{id}', [PltMilestoneController::class, 'destroy']);
+Route::get('/milestones/stats', [PltMilestoneController::class, 'stats']);
 
-Route::get('/tracking-logs', function () {
-    return response()->json([
-        'success' => true,
-        'data' => [],
-        'message' => 'Tracking logs endpoint - add controller later'
-    ]);
-});
+// Tracking Log routes
+Route::get('/tracking-logs', [PltTrackingLogController::class, 'index']);
+Route::post('/tracking-logs', [PltTrackingLogController::class, 'store']);
+Route::get('/tracking-logs/{id}', [PltTrackingLogController::class, 'show']);
+Route::put('/tracking-logs/{id}', [PltTrackingLogController::class, 'update']);
+Route::delete('/tracking-logs/{id}', [PltTrackingLogController::class, 'destroy']);
+Route::get('/tracking-logs/dispatch/{dispatchId}', [PltTrackingLogController::class, 'getByDispatch']);

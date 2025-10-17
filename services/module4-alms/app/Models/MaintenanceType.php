@@ -18,6 +18,10 @@ class MaintenanceType extends Model
         'estimated_cost'
     ];
 
+    protected $casts = [
+        'estimated_cost' => 'decimal:2'
+    ];
+
     public function maintenanceSchedules(): HasMany
     {
         return $this->hasMany(MaintenanceSchedule::class, 'maintenance_type_id');
