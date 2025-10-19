@@ -176,6 +176,8 @@ class DTLRController extends Controller
         ], 500);
     }
     
+    }
+    
     public function updateDocument(Request $request, $id)
     {
         try {
