@@ -2,174 +2,227 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DtlrDocument;
-use App\Models\DtlrDocumentType;
-use App\Models\DtlrBranch;
-use App\Models\DtlrDocumentLog;
-use App\Models\DtlrDocumentReview;
-use App\Models\DtlrUser;
+use App\Models\Document;
+use App\Models\LogisticsRecord;
+use App\Models\DocumentReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class DTLRController extends Controller
 {
-    // ==================== DOCUMENT MANAGEMENT METHODS ====================
-
+    // ==================== DOCUMENT METHODS ====================
+    
     public function getDocuments(Request $request)
     {
-        $query = DtlrDocument::with(['documentType', 'currentBranch', 'creator'])
-            ->latest();
-
-        // Search
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('tracking_number', 'like', "%{$search}%")
-                  ->orWhere('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by document type
-        if ($request->has('document_type') && $request->document_type != '') {
-            $query->where('document_type_id', $request->document_type);
-        }
-
-        // Filter by status
-        if ($request->has('status') && $request->status != '') {
-            $query->where('status', $request->status);
-        }
-
-        $documents = $query->paginate($request->get('per_page', 10));
-
-        return response()->json([
-            'success' => true,
-            'data' => $documents,
-            'stats' => [
-                'total' => DtlrDocument::count(),
-                'pending' => DtlrDocument::where('status', 'pending')->count(),
-                'processed' => DtlrDocument::where('status', 'processed')->count(),
-                'approved' => DtlrDocument::where('status', 'approved')->count(),
-            ]
-        ]);
-    }
-
-    public function createDocument(Request $request)
-    {
-        $request->validate([
-            'document_type_id' => 'required|exists:dtlr_document_types,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'current_branch_id' => 'required|exists:dtlr_branches,id',
-            'created_by' => 'required|exists:dtlr_users,id'
-        ]);
-
         try {
-            // Generate tracking number
-            $trackingNumber = 'DTLR-' . date('Y') . '-' . str_pad(DtlrDocument::count() + 1, 5, '0', STR_PAD_LEFT);
-
-            // Handle file upload
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                $fileName = $trackingNumber . '_' . time() . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('documents', $fileName, 'public');
+            $query = Document::query();
+            
+            // Search functionality
+            if ($request->has('search') && $request->search) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('document_id', 'like', "%{$search}%")
+                      ->orWhere('linked_transaction', 'like', "%{$search}%")
+                      ->orWhere('extracted_fields', 'like', "%{$search}%")
+                      ->orWhere('uploaded_by', 'like', "%{$search}%");
+                });
             }
-
-            $document = DtlrDocument::create([
-                'tracking_number' => $trackingNumber,
-                'document_type_id' => $request->document_type_id,
-                'title' => $request->title,
-                'description' => $request->description,
-                'file_path' => $filePath,
-                'current_branch_id' => $request->current_branch_id,
-                'created_by' => $request->created_by,
-                'status' => 'pending'
-            ]);
-
-            // Log the upload action
-            DtlrDocumentLog::create([
-                'document_id' => $document->id,
-                'action' => 'accessed',
-                'from_branch_id' => $request->current_branch_id,
-                'performed_by' => $request->created_by,
-                'notes' => 'Document uploaded and digitized',
-                'ip_address' => $request->ip()
-            ]);
-
+            
+            // Filter by document type
+            if ($request->has('document_type') && $request->document_type) {
+                $query->where('document_type', $request->document_type);
+            }
+            
+            // Filter by status
+            if ($request->has('status') && $request->status) {
+                $query->where('status', $request->status);
+            }
+            
+            // Pagination
+            $perPage = $request->get('limit', 10);
+            $documents = $query->orderBy('created_at', 'desc')->paginate($perPage);
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Document uploaded successfully',
-                'data' => $document
-            ], 201);
-
+                'data' => [
+                    'documents' => $documents->items(),
+                    'total' => $documents->total(),
+                    'current_page' => $documents->currentPage(),
+                    'last_page' => $documents->lastPage(),
+                    'per_page' => $documents->perPage()
+                ]
+            ]);
+            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload document: ' . $e->getMessage()
+                'message' => 'Failed to fetch documents: ' . $e->getMessage()
             ], 500);
         }
     }
-
+    
     public function getDocument($id)
     {
-        $document = DtlrDocument::with(['documentType', 'currentBranch', 'creator', 'documentLogs.performer'])->find($id);
-
-        if (!$document) {
+        try {
+            $document = Document::with('review')->find($id);
+            
+            if (!$document) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Document not found'
+                ], 404);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $document
+            ]);
+            
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Document not found'
-            ], 404);
+                'message' => 'Failed to fetch document: ' . $e->getMessage()
+            ], 500);
         }
+    }
+    
+    public function createDocument(Request $request)
+{
+    try {
+        \Log::info('DTLR createDocument called', [
+            'has_file' => $request->hasFile('document_file'),
+            'all_data' => $request->all(),
+            'files' => $request->file() ? array_keys($request->file()) : 'no files',
+            'input_data' => $request->except('document_file')
+        ]);
+
+        // Log file details if present
+        if ($request->hasFile('document_file')) {
+            $file = $request->file('document_file');
+            \Log::info('File details', [
+                'name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime' => $file->getMimeType(),
+                'extension' => $file->getClientOriginalExtension()
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'document_type' => 'required|string|max:255',
+            'linked_transaction' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'uploaded_by' => 'required|string|max:255',
+            'uploaded_to' => 'required|string|max:255',
+            'document_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240' // 10MB max
+        ]);
+        
+        if ($validator->fails()) {
+            \Log::error('Validation failed', ['errors' => $validator->errors()->toArray()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Handle file upload
+        $file = $request->file('document_file');
+        $originalName = $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+        $storedFileName = time() . '_' . Str::random(8) . '.' . $extension;
+        $filePath = $file->storeAs('documents', $storedFileName, 'public');
+
+        // Create a new document record
+        $documentId = 'DOC-' . strtoupper(Str::random(8));
+        $document = Document::create([
+            'document_id' => $documentId,
+            'document_type' => $request->document_type,
+            'linked_transaction' => $request->linked_transaction,
+            'description' => $request->description,
+            'uploaded_by' => $request->uploaded_by,
+            'uploaded_to' => $request->uploaded_to,
+            'file_path' => $filePath,
+            'file_name' => $originalName,
+            'status' => 'pending',
+            'extracted_fields' => null,
+            'ocr_processed' => false,
+            'ocr_processed_at' => null,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Log the action
+        $this->createLogisticsRecord(
+            'created',
+            'Document Tracking',
+            "Created document {$documentId}",
+            $request->uploaded_by ?? 'System',
+            $documentId
+        );
 
         return response()->json([
             'success' => true,
+            'message' => 'Document created successfully',
             'data' => $document
-        ]);
+        ], 201);
+        
+    } catch (\Exception $e) {
+        \Log::error('Failed to create document: ' . $e->getMessage(), ['exception' => $e]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create document: ' . $e->getMessage()
+        ], 500);
     }
-
+    
     public function updateDocument(Request $request, $id)
     {
-        $document = DtlrDocument::find($id);
-
-        if (!$document) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Document not found'
-            ], 404);
-        }
-
-        $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'status' => 'sometimes|in:pending,processed,approved,archived,rejected',
-            'updated_by' => 'required|exists:dtlr_users,id'
-        ]);
-
         try {
-            $document->update($request->only(['title', 'description', 'status']) + [
-                'updated_by' => $request->updated_by
-            ]);
-
-            // Log status change if status was updated
-            if ($request->has('status')) {
-                DtlrDocumentLog::create([
-                    'document_id' => $document->id,
-                    'action' => 'status_changed',
-                    'from_branch_id' => $document->current_branch_id,
-                    'performed_by' => $request->updated_by,
-                    'notes' => 'Document status changed to: ' . $request->status,
-                    'ip_address' => $request->ip()
-                ]);
+            $document = Document::find($id);
+            
+            if (!$document) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Document not found'
+                ], 404);
             }
-
+            
+            $validator = Validator::make($request->all(), [
+                'document_id' => 'sometimes|string|max:255|unique:documents,document_id,' . $id,
+                'document_type' => 'sometimes|string|max:255',
+                'linked_transaction' => 'nullable|string|max:255',
+                'extracted_fields' => 'nullable|string',
+                'status' => 'sometimes|string|in:pending,review,indexed,archived',
+                'uploaded_by' => 'sometimes|string|max:255',
+                'description' => 'nullable|string'
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
+            $document->update($request->all());
+            
+            // Log the action
+            $this->createLogisticsRecord(
+                'updated',
+                'Document Tracking',
+                "Updated document {$document->document_id}",
+                $request->uploaded_by ?? 'System',
+                $document->document_id
+            );
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Document updated successfully',
                 'data' => $document
             ]);
-
+            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -177,29 +230,39 @@ class DTLRController extends Controller
             ], 500);
         }
     }
-
+    
     public function deleteDocument($id)
     {
-        $document = DtlrDocument::find($id);
-
-        if (!$document) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Document not found'
-            ], 404);
-        }
-
         try {
+            $document = Document::find($id);
+            
+            if (!$document) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Document not found'
+                ], 404);
+            }
+            
             // Delete associated file
             Storage::disk('public')->delete($document->file_path);
             
+            $documentId = $document->document_id;
             $document->delete();
-
+            
+            // Log the action
+            $this->createLogisticsRecord(
+                'deleted',
+                'Document Tracking',
+                "Deleted document {$documentId}",
+                'System',
+                $documentId
+            );
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Document deleted successfully'
             ]);
-
+            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -207,339 +270,45 @@ class DTLRController extends Controller
             ], 500);
         }
     }
-
-    public function transferDocument(Request $request, $id)
-    {
-        $document = DtlrDocument::find($id);
-
-        if (!$document) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Document not found'
-            ], 404);
-        }
-
-        $request->validate([
-            'to_branch_id' => 'required|exists:dtlr_branches,id',
-            'performed_by' => 'required|exists:dtlr_users,id',
-            'notes' => 'nullable|string'
-        ]);
-
-        try {
-            $oldBranchId = $document->current_branch_id;
-            
-            $document->update([
-                'current_branch_id' => $request->to_branch_id,
-                'updated_by' => $request->performed_by
-            ]);
-
-            // Log the transfer action
-            DtlrDocumentLog::create([
-                'document_id' => $document->id,
-                'action' => 'transferred',
-                'from_branch_id' => $oldBranchId,
-                'to_branch_id' => $request->to_branch_id,
-                'performed_by' => $request->performed_by,
-                'notes' => $request->notes ?? 'Document transferred between branches',
-                'ip_address' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Document transferred successfully',
-                'data' => $document
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to transfer document: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // ==================== DOCUMENT LOGS METHODS ====================
-
-    public function getDocumentLogs(Request $request)
-    {
-        $query = DtlrDocumentLog::with(['document', 'fromBranch', 'toBranch', 'performer'])
-            ->latest();
-
-        // Search
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('document', function($q2) use ($search) {
-                    $q2->where('tracking_number', 'like', "%{$search}%")
-                       ->orWhere('title', 'like', "%{$search}%");
-                })
-                ->orWhere('notes', 'like', "%{$search}%")
-                ->orWhere('action', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by action
-        if ($request->has('action') && $request->action != '') {
-            $query->where('action', $request->action);
-        }
-
-        $logs = $query->paginate($request->get('per_page', 10));
-
-        return response()->json([
-            'success' => true,
-            'data' => $logs,
-            'stats' => [
-                'total' => DtlrDocumentLog::count(),
-                'accessed' => DtlrDocumentLog::where('action', 'accessed')->count(),
-                'printed' => DtlrDocumentLog::where('action', 'printed')->count(),
-                'transferred' => DtlrDocumentLog::where('action', 'transferred')->count(),
-                'reviewed' => DtlrDocumentLog::where('action', 'reviewed')->count(),
-            ]
-        ]);
-    }
-
-    public function getDocumentLog($id)
-    {
-        $log = DtlrDocumentLog::with(['document', 'fromBranch', 'toBranch', 'performer'])->find($id);
-
-        if (!$log) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Log not found'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $log
-        ]);
-    }
-
-    // ==================== DOCUMENT REVIEWS METHODS ====================
-
-    public function getDocumentReviews(Request $request)
-    {
-        $query = DtlrDocumentReview::with(['document', 'reviewer'])
-            ->latest();
-
-        // Search
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('document', function($q2) use ($search) {
-                    $q2->where('tracking_number', 'like', "%{$search}%")
-                       ->orWhere('title', 'like', "%{$search}%");
-                })
-                ->orWhere('comments', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by review status
-        if ($request->has('review_status') && $request->review_status != '') {
-            $query->where('review_status', $request->review_status);
-        }
-
-        $reviews = $query->paginate($request->get('per_page', 10));
-
-        return response()->json([
-            'success' => true,
-            'data' => $reviews,
-            'stats' => [
-                'total' => DtlrDocumentReview::count(),
-                'pending' => DtlrDocumentReview::where('review_status', 'pending')->count(),
-                'approved' => DtlrDocumentReview::where('review_status', 'approved')->count(),
-                'rejected' => DtlrDocumentReview::where('review_status', 'rejected')->count(),
-            ]
-        ]);
-    }
-
-    public function createDocumentReview(Request $request)
-    {
-        $request->validate([
-            'document_id' => 'required|exists:dtlr_documents,id',
-            'reviewer_id' => 'required|exists:dtlr_users,id',
-            'review_status' => 'required|in:pending,approved,rejected',
-            'comments' => 'nullable|string'
-        ]);
-
-        try {
-            $review = DtlrDocumentReview::create([
-                'document_id' => $request->document_id,
-                'reviewer_id' => $request->reviewer_id,
-                'review_status' => $request->review_status,
-                'comments' => $request->comments,
-                'reviewed_at' => $request->review_status !== 'pending' ? now() : null
-            ]);
-
-            // Update document status based on review
-            $document = DtlrDocument::find($request->document_id);
-            if ($document && $request->review_status !== 'pending') {
-                $document->update([
-                    'status' => $request->review_status === 'approved' ? 'approved' : 'rejected',
-                    'updated_by' => $request->reviewer_id
-                ]);
-
-                // Log the review action
-                DtlrDocumentLog::create([
-                    'document_id' => $document->id,
-                    'action' => 'reviewed',
-                    'from_branch_id' => $document->current_branch_id,
-                    'performed_by' => $request->reviewer_id,
-                    'notes' => 'Document reviewed: ' . $request->review_status . '. Comments: ' . ($request->comments ?? 'None'),
-                    'ip_address' => $request->ip()
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Review submitted successfully',
-                'data' => $review
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to submit review: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function updateDocumentReview(Request $request, $id)
-    {
-        $review = DtlrDocumentReview::find($id);
-
-        if (!$review) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Review not found'
-            ], 404);
-        }
-
-        $request->validate([
-            'review_status' => 'required|in:pending,approved,rejected',
-            'comments' => 'nullable|string'
-        ]);
-
-        try {
-            $review->update([
-                'review_status' => $request->review_status,
-                'comments' => $request->comments,
-                'reviewed_at' => $request->review_status !== 'pending' ? now() : null
-            ]);
-
-            // Update document status based on review
-            $document = DtlrDocument::find($review->document_id);
-            if ($document && $request->review_status !== 'pending') {
-                $document->update([
-                    'status' => $request->review_status === 'approved' ? 'approved' : 'rejected',
-                    'updated_by' => $review->reviewer_id
-                ]);
-
-                // Log the review update action
-                DtlrDocumentLog::create([
-                    'document_id' => $document->id,
-                    'action' => 'reviewed',
-                    'from_branch_id' => $document->current_branch_id,
-                    'performed_by' => $review->reviewer_id,
-                    'notes' => 'Review updated: ' . $request->review_status . '. Comments: ' . ($request->comments ?? 'None'),
-                    'ip_address' => $request->ip()
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Review updated successfully',
-                'data' => $review
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update review: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // ==================== UTILITY METHODS ====================
-
-    public function getDocumentTypes()
-    {
-        $documentTypes = DtlrDocumentType::all();
-
-        return response()->json([
-            'success' => true,
-            'data' => $documentTypes
-        ]);
-    }
-
-    public function getBranches()
-    {
-        $branches = DtlrBranch::all();
-
-        return response()->json([
-            'success' => true,
-            'data' => $branches
-        ]);
-    }
-
-    public function getOverviewStats()
-    {
-        $stats = [
-            'total_documents' => DtlrDocument::count(),
-            'pending_documents' => DtlrDocument::where('status', 'pending')->count(),
-            'processed_documents' => DtlrDocument::where('status', 'processed')->count(),
-            'approved_documents' => DtlrDocument::where('status', 'approved')->count(),
-            'total_logs' => DtlrDocumentLog::count(),
-            'total_reviews' => DtlrDocumentReview::count(),
-            'today_uploads' => DtlrDocument::whereDate('created_at', today())->count(),
-            'ocr_processed' => DtlrDocument::whereNotNull('ocr_processed_at')->count(),
-        ];
-
-        return response()->json([
-            'success' => true,
-            'data' => $stats
-        ]);
-    }
-
-    // ==================== OCR PROCESSING METHODS ====================
-
+    
     public function processOCR($id)
     {
-        $document = DtlrDocument::find($id);
-
-        if (!$document) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Document not found'
-            ], 404);
-        }
-
         try {
-            // Simulate OCR processing
-            // In a real implementation, you would integrate with an OCR service like Tesseract, Google Vision, etc.
+            $document = Document::find($id);
+            
+            if (!$document) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Document not found'
+                ], 404);
+            }
+            
+            // Simulate OCR processing (Replace with actual MINDEE API integration)
             $extractedData = [
-                'pages' => 1,
-                'text_length' => rand(100, 1000),
-                'processed_at' => now()->toISOString(),
-                'confidence_score' => rand(80, 95) / 100
+                'po_number' => 'PO-' . rand(100, 999),
+                'vendor_name' => 'Vendor ' . Str::random(8),
+                'amount' => '$' . rand(1000, 10000) . '.00',
+                'date' => now()->format('Y-m-d'),
+                'raw_text' => 'Sample extracted text from ' . $document->file_name
             ];
-
+            
             $document->update([
-                'extracted_data' => $extractedData,
+                'extracted_fields' => json_encode($extractedData),
+                'ocr_processed' => true,
                 'ocr_processed_at' => now(),
-                'status' => 'processed'
+                'status' => 'indexed'
             ]);
-
-            // Log OCR processing
-            DtlrDocumentLog::create([
-                'document_id' => $document->id,
-                'action' => 'processed',
-                'from_branch_id' => $document->current_branch_id,
-                'performed_by' => 1, // System user
-                'notes' => 'Document processed with OCR',
-                'ip_address' => request()->ip()
-            ]);
-
+            
+            // Log the action
+            $this->createLogisticsRecord(
+                'processed',
+                'Document Tracking',
+                "OCR processed for document {$document->document_id}",
+                'System',
+                $document->document_id,
+                true
+            );
+            
             return response()->json([
                 'success' => true,
                 'message' => 'OCR processing completed',
@@ -548,7 +317,7 @@ class DTLRController extends Controller
                     'extracted_data' => $extractedData
                 ]
             ]);
-
+            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -556,27 +325,289 @@ class DTLRController extends Controller
             ], 500);
         }
     }
-
-    // ==================== SEARCH METHODS ====================
-
-    public function searchDocuments(Request $request)
+    
+    // ==================== LOGISTICS RECORDS METHODS ====================
+    
+    public function getLogisticsRecords(Request $request)
     {
-        $request->validate([
-            'query' => 'required|string|min:2'
-        ]);
-
-        $documents = DtlrDocument::with(['documentType', 'currentBranch'])
-            ->where(function($q) use ($request) {
-                $q->where('tracking_number', 'like', "%{$request->query}%")
-                  ->orWhere('title', 'like', "%{$request->query}%")
-                  ->orWhere('description', 'like', "%{$request->query}%");
-            })
-            ->limit(10)
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $documents
-        ]);
+        try {
+            $query = LogisticsRecord::query();
+            
+            // Search functionality
+            if ($request->has('search') && $request->search) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('log_id', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%")
+                      ->orWhere('performed_by', 'like', "%{$search}%")
+                      ->orWhere('related_reference', 'like', "%{$search}%");
+                });
+            }
+            
+            // Filter by action
+            if ($request->has('action') && $request->action) {
+                $query->where('action', $request->action);
+            }
+            
+            // Filter by module
+            if ($request->has('module') && $request->module) {
+                $query->where('module', $request->module);
+            }
+            
+            // Filter by AI/OCR usage
+            if ($request->has('ai_ocr_used')) {
+                $query->where('ai_ocr_used', $request->boolean('ai_ocr_used'));
+            }
+            
+            // Pagination
+            $perPage = $request->get('limit', 10);
+            $records = $query->orderBy('timestamp', 'desc')->paginate($perPage);
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'records' => $records->items(),
+                    'total' => $records->total(),
+                    'current_page' => $records->currentPage(),
+                    'last_page' => $records->lastPage(),
+                    'per_page' => $records->perPage()
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch logistics records: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function createLogisticsRecord($action, $module, $description, $performedBy, $relatedReference = null, $aiOcrUsed = false)
+    {
+        try {
+            $logId = 'LOG-' . strtoupper(Str::random(6));
+            
+            $record = LogisticsRecord::create([
+                'log_id' => $logId,
+                'action' => $action,
+                'module' => $module,
+                'description' => $description,
+                'performed_by' => $performedBy,
+                'timestamp' => now(),
+                'ai_ocr_used' => $aiOcrUsed,
+                'related_reference' => $relatedReference,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent()
+            ]);
+            
+            return $record;
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to create logistics record: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    public function addLogisticsRecord(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'action' => 'required|string|max:255',
+                'module' => 'required|string|max:255',
+                'description' => 'required|string',
+                'performed_by' => 'required|string|max:255',
+                'ai_ocr_used' => 'boolean',
+                'related_reference' => 'nullable|string|max:255'
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
+            $record = $this->createLogisticsRecord(
+                $request->action,
+                $request->module,
+                $request->description,
+                $request->performed_by,
+                $request->related_reference,
+                $request->boolean('ai_ocr_used')
+            );
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logistics record added successfully',
+                'data' => $record
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add logistics record: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function updateLogisticsRecord(Request $request, $id)
+    {
+        try {
+            $record = LogisticsRecord::find($id);
+            
+            if (!$record) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Logistics record not found'
+                ], 404);
+            }
+            
+            $validator = Validator::make($request->all(), [
+                'log_id' => 'sometimes|string|max:255|unique:logistics_records,log_id,' . $id,
+                'action' => 'sometimes|string|max:255',
+                'module' => 'sometimes|string|max:255',
+                'description' => 'sometimes|string',
+                'performed_by' => 'sometimes|string|max:255',
+                'ai_ocr_used' => 'boolean',
+                'related_reference' => 'nullable|string|max:255'
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
+            $record->update($request->all());
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logistics record updated successfully',
+                'data' => $record
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update logistics record: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function deleteLogisticsRecord($id)
+    {
+        try {
+            $record = LogisticsRecord::find($id);
+            
+            if (!$record) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Logistics record not found'
+                ], 404);
+            }
+            
+            $record->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logistics record deleted successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete logistics record: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    // ==================== STATISTICS METHODS ====================
+    
+    public function getOverviewStats()
+    {
+        try {
+            $documentStats = [
+                'total_documents' => Document::count(),
+                'indexed' => Document::indexed()->count(),
+                'pending' => Document::pending()->count(),
+                'under_review' => Document::underReview()->count(),
+                'archived' => Document::archived()->count(),
+                'ocr_processed' => Document::ocrProcessed()->count()
+            ];
+            
+            $logStats = [
+                'total_logs' => LogisticsRecord::count(),
+                'upload_actions' => LogisticsRecord::uploads()->count(),
+                'approved_actions' => LogisticsRecord::approvals()->count(),
+                'delivery_actions' => LogisticsRecord::deliveries()->count(),
+                'ai_used' => LogisticsRecord::aiUsed()->count()
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'documents' => $documentStats,
+                    'logs' => $logStats
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch statistics: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    // ==================== UTILITY METHODS ====================
+    
+    public function getDocumentTypes()
+    {
+        try {
+            $types = [
+                'PO' => 'Purchase Order',
+                'GRN' => 'Goods Received Note',
+                'Invoice' => 'Invoice',
+                'Delivery Note' => 'Delivery Note',
+                'Contract' => 'Contract',
+                'Quotation' => 'Quotation',
+                'Receipt' => 'Receipt',
+                'Other' => 'Other'
+            ];
+            
+            return response()->json([
+                'success' => true,
+                'data' => $types
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch document types: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function healthCheck()
+    {
+        try {
+            // Check database connection
+            \DB::connection()->getPdo();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'DTLR service is healthy',
+                'timestamp' => now()->toISOString()
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'DTLR service is unhealthy: ' . $e->getMessage()
+            ], 503);
+        }
     }
 }

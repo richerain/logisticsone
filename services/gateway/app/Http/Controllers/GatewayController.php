@@ -251,7 +251,93 @@ class GatewayController extends Controller
         }
     }
 
-    // method for file uploads
+    // Dedicated method for DTLR document uploads
+    public function uploadDocument(Request $request)
+    {
+        Log::info('Gateway document upload hit', [
+            'has_file' => $request->hasFile('document_file'),
+            'all_data' => $request->all()
+        ]);
+
+        $client = new Client();
+
+        try {
+            // Build multipart form data
+            $multipart = [];
+
+            // Add all form fields
+            foreach ($request->all() as $name => $value) {
+                if ($name !== 'document_file') {
+                    $multipart[] = [
+                        'name' => $name,
+                        'contents' => $value
+                    ];
+                }
+            }
+
+            // Add the document file if present
+            if ($request->hasFile('document_file')) {
+                $file = $request->file('document_file');
+                $multipart[] = [
+                    'name' => 'document_file',
+                    'contents' => fopen($file->getPathname(), 'r'),
+                    'filename' => $file->getClientOriginalName(),
+                    'headers' => [
+                        'Content-Type' => $file->getMimeType()
+                    ]
+                ];
+                Log::info('Added document file to multipart', [
+                    'filename' => $file->getClientOriginalName(),
+                    'size' => $file->getSize()
+                ]);
+            } else {
+                Log::warning('No document file found in request');
+            }
+
+            $response = $client->post('http://localhost:8006/api/documents', [
+                'headers' => [
+                    'Accept' => 'application/json',
+                ],
+                'multipart' => $multipart,
+                'timeout' => 30,
+            ]);
+
+            $body = json_decode($response->getBody()->getContents(), true);
+
+            Log::info('Document upload response', [
+                'status' => $response->getStatusCode(),
+                'success' => $body['success'] ?? false
+            ]);
+
+            return response()->json($body, $response->getStatusCode());
+
+        } catch (RequestException $e) {
+            Log::error('Gateway document upload error: ' . $e->getMessage());
+
+            if ($e->hasResponse()) {
+                $statusCode = $e->getResponse()->getStatusCode();
+                $responseBody = $e->getResponse()->getBody()->getContents();
+                Log::error('DTLR service response: ' . $responseBody);
+                
+                $body = json_decode($responseBody, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'DTLR Service error: ' . $responseBody
+                    ], $statusCode);
+                }
+                
+                return response()->json($body ?? ['success' => false, 'message' => 'DTLR Service error'], $statusCode);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'DTLR Service unavailable: ' . $e->getMessage()
+            ], 503);
+        }
+    }
+
+    // method for PSM product uploads
     public function proxyUpload(Request $request, $url)
     {
         $client = new Client();

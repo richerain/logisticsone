@@ -391,9 +391,7 @@ Route::get('/alms/reports', function (Request $request) {
 Route::get('/dtlr/documents', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/documents');
 });
-Route::post('/dtlr/documents', function (Request $request) {
-    return app(GatewayController::class)->proxyUpload($request, 'http://localhost:8006/api/documents');
-});
+Route::post('/dtlr/documents', [GatewayController::class, 'uploadDocument']);
 Route::get('/dtlr/documents/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyGet($request, "http://localhost:8006/api/documents/{$id}");
 });
@@ -418,15 +416,21 @@ Route::get('/dtlr/document-logs/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyGet($request, "http://localhost:8006/api/document-logs/{$id}");
 });
 
-// Document review routes
-Route::get('/dtlr/document-reviews', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/document-reviews');
+// Logistics Record routes
+Route::get('/dtlr/logistics-records', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/logistics-records');
 });
-Route::post('/dtlr/document-reviews', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8006/api/document-reviews');
+Route::post('/dtlr/logistics-records', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8006/api/logistics-records');
 });
-Route::put('/dtlr/document-reviews/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8006/api/document-reviews/{$id}");
+Route::get('/dtlr/logistics-records/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8006/api/logistics-records/{$id}");
+});
+Route::put('/dtlr/logistics-records/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8006/api/logistics-records/{$id}");
+});
+Route::delete('/dtlr/logistics-records/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8006/api/logistics-records/{$id}");
 });
 
 // Utility routes

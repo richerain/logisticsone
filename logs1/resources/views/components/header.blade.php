@@ -58,12 +58,8 @@
         <div class="bg-green-700 from-primary to-primary/90 text-white p-6 rounded-t-2xl">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-2xl">My Profile</h3>
-                <div class="flex items-center space-x-2">
-                    <span id="modal-status-badge" class="badge badge-primary badge-lg">Active</span>
-                    <span class="badge badge-warning badge-lg flex items-center gap-1">
-                        <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                        Online
-                    </span>
+                <div class="cursor-pointer text-white hover:text-gray-300" onclick="closeModal('profile-modal')">
+                    <i class='bx bx-md bx-x'></i>
                 </div>
             </div>
             <p class="text-white mt-1">Manage your personal information and preferences</p>

@@ -134,24 +134,14 @@ class FrontendController extends Controller
     // alms methods end
     
     // dtlr methods start
-    public function dtlrUpload()
-    {
-        return view('modules.dtlr.upload');
-    }
-
     public function dtlrDocuments()
     {
-        return view('modules.dtlr.documents');
+        return view('modules.dtlr.documents', ['title' => 'Document Tracker - DTLR']);
     }
 
-    public function dtlrLogs()
+    public function dtlrLogistics()
     {
-        return view('modules.dtlr.logs');
-    }
-
-    public function dtlrReviews()
-    {
-        return view('modules.dtlr.reviews');
+        return view('modules.dtlr.logistics', ['title' => 'Logistics Record - DTLR']);
     }
     // dtlr methods end
 
@@ -420,6 +410,50 @@ class FrontendController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'PLT Service unavailable. Please try again later.'
+            ], 503);
+        }
+    }
+
+    // DTLR Proxy Methods
+    public function dtlrProxyGet($endpoint, Request $request)
+    {
+        return $this->dtlrProxyRequest('GET', $endpoint, $request);
+    }
+
+    public function dtlrProxyPost($endpoint, Request $request)
+    {
+        return $this->dtlrProxyRequest('POST', $endpoint, $request);
+    }
+
+    public function dtlrProxyPut($endpoint, Request $request)
+    {
+        return $this->dtlrProxyRequest('PUT', $endpoint, $request);
+    }
+
+    public function dtlrProxyDelete($endpoint, Request $request)
+    {
+        return $this->dtlrProxyRequest('DELETE', $endpoint, $request);
+    }
+
+    private function dtlrProxyRequest($method, $endpoint, Request $request)
+    {
+        try {
+            $url = 'http://localhost:8001/api/dtlr/' . $endpoint;
+            
+            Log::info("DTLR Proxying {$method} request to: {$url}", $request->all());
+
+            $response = Http::timeout(30)->{$method}($url, $request->all());
+
+            $data = $response->json();
+
+            return response()->json($data, $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('DTLR Proxy error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'DTLR Service unavailable. Please try again later.'
             ], 503);
         }
     }

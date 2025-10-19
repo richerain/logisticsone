@@ -12,7 +12,12 @@
     </div>
 
 <!-- stats metrics section -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 p-5 bg-green-100 rounded-lg mb-5">
+ <div class="p-5 bg-green-100 rounded-lg mb-5">
+       <div class="flex items-center mb-4 space-x-2 text-gray-700">
+            <i class='bx bxs-bar-chart-alt-2' ></i>
+            <h2 class="text-lg font-semibold">Metrics Stat</h2>
+        </div> 
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <!-- Row 1: Cards 1-4 -->
         <div class="stat card bg-base-100 shadow-lg border-l-4 border-primary">
             <div class="stat-title font-bold">Module Services</div>
@@ -63,9 +68,38 @@
             <div class="stat-desc font-bold">On track for Q4 goals</div>
         </div>
     </div>
+ </div>
+ 
+
+<!-- announcement board section -->
+    <div class="bg-green-100 rounded-lg p-5 mb-5">
+        <div class="flex items-center mb-4 space-x-2 text-gray-700">
+            <i class='bx bxs-megaphone'></i>
+            <h2 class="text-lg font-semibold">Announcement Board</h2>
+        </div>
+        <div class="space-y-4 bg-gray-50 p-10 rounded-lg shadow">
+            <div class="p-4 bg-white rounded-lg shadow-md border-l-4 border-blue-500">
+                <h3 class="font-bold text-blue-600">System Maintenance - July 15, 2024</h3>
+                <p class="text-gray-700 mt-2">Scheduled maintenance will occur on July 15 from 1:00 AM to 5:00 AM. Please save your work accordingly.</p>
+            </div>
+            <div class="p-4 bg-white rounded-lg shadow-md border-l-4 border-green-500">
+                <h3 class="font-bold text-green-600">New Feature Release: Analytics Dashboard</h3>
+                <p class="text-gray-700 mt-2">We are excited to announce the launch of our new Analytics Dashboard, providing deeper insights into your logistics data. Check it out under the Reports section!</p>
+            </div>
+            <div class="p-4 bg-white rounded-lg shadow-md border-l-4 border-yellow-500">
+                <h3 class="font-bold text-yellow-600">Reminder: Update Your Profile Information</h3>
+                <p class="text-gray-700 mt-2">Please take a moment to review and update your profile information to ensure accurate records.</p>
+            </div>
+        </div>
+    </div>
 
 <!-- statistics charts section -->
-    <div class="bg-green-100 rounded-lg p-5 mb-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+ <div class="bg-green-100 rounded-lg p-5 mb-5">
+    <div class="flex items-center mb-4 space-x-2 text-gray-700">
+        <i class='bx bx-line-chart' ></i>
+        <h2 class="text-lg font-semibold">Statistics Charts</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
         <!-- Box 1: Bar Chart (Market Share by Provider) -->
         <div class="p-4 bg-white rounded-lg shadow-md">
             <h3 class="text-lg font-semibold mb-4 text-gray-800">Market Share by Vendors</h3>
@@ -90,6 +124,7 @@
             <canvas id="doughnutChart" width="100" height="100"></canvas>
         </div>
     </div>
+</div>
 
 <!-- role-based visibility section -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-lg bg-green-100" id="role-based-panels">

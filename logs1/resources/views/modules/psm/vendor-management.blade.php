@@ -330,16 +330,16 @@
                     </div>
                 </td>
                 <td>
-                    <span class="badge ${vendor.ven_status === 'active' ? 'badge-success' : 'badge-error'}">
+                    <span class="badge ${vendor.ven_status === 'active' ? 'badge-warning' : 'badge-error'}">
                         ${vendor.ven_status || 'unknown'}
                     </span>
                 </td>
                 <td>
                     <div class="flex space-x-2">
-                        <button class="btn btn-sm btn-outline btn-info" onclick="editVendor(${vendor.ven_id})">
+                        <button title="Edit" class="btn btn-sm btn-circle btn-info" onclick="editVendor(${vendor.ven_id})">
                             <i class="bx bx-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline btn-error" onclick="deleteVendor(${vendor.ven_id})">
+                        <button title="Delete" class="btn btn-sm btn-circle btn-error" onclick="deleteVendor(${vendor.ven_id})">
                             <i class="bx bx-trash"></i>
                         </button>
                     </div>

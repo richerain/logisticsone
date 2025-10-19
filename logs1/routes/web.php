@@ -41,7 +41,7 @@ Route::get('/logout-splash', function (Request $request) {
     ]);
 })->name('logout.splash');
 
-// Logout route - direct to logout splash
+// Logout route section start - direct to logout splash
 Route::get('/logout', function (Request $request) {
     $user = null;
     $userCookie = isset($_COOKIE['user']) ? json_decode($_COOKIE['user'], true) : null;
@@ -61,36 +61,46 @@ Route::get('/logout', function (Request $request) {
 
     return redirect()->route('logout.splash');
 })->name('logout');
+// Logout route section end
 
-// Session routes (kept for compatibility but timeout disabled)
+// Session section routes start (kept for compatibility but timeout disabled)
 Route::get('/api/session/check', [SessionController::class, 'checkSession'])->name('api.session.check');
 Route::post('/api/session/extend', [SessionController::class, 'extendSession'])->name('api.session.extend');
 Route::get('/api/session/info', [SessionController::class, 'getSessionInfo'])->name('api.session.info');
 Route::post('/api/session/initialize', [SessionController::class, 'initializeSession'])->name('api.session.initialize');
 Route::post('/api/session/handle-timeout', [SessionController::class, 'handleTimeout'])->name('api.session.handle-timeout');
+// Session section routes end
 
-// Redirect /home to dashboard (default post-login)
+// Redirect /home to dashboard section start (default post-login)
 Route::get('/home', function () {
     return redirect()->route('dashboard');
 });
+// Redirect /home to dashboard section end
 
-// Login processing route
+// Login processing route section start
 Route::post('/process-login', [FrontendController::class, 'processLogin'])->name('process.login');
+// Login processing route section end
 
-// OTP routes
+// OTP section routes start
 Route::post('/api/auth/verify-otp', [FrontendController::class, 'verifyOtp'])->name('api.auth.verify-otp');
 Route::post('/api/auth/resend-otp', [FrontendController::class, 'resendOtp'])->name('api.auth.resend-otp');
+// OTP section routes end
 
-// Protected routes - with authentication middleware
+// account-profile section route start
+Route::post('/api/profile/update', [FrontendController::class, 'updateProfile'])->name('api.profile.update');
+// account-profile section route end
+
+// Protected routes section - with authentication middleware start
 Route::middleware(['web.auth'])->group(function () {
     Route::get('/dashboard', [FrontendController::class, 'dashboard'])->name('dashboard');
 
-    // SWS
+    // SWS gateway route section start
     Route::get('/modules/sws/inventory', [FrontendController::class, 'swsInventory'])->name('modules.sws.inventory');
     Route::get('/modules/sws/storage', [FrontendController::class, 'swsStorage'])->name('modules.sws.storage');
     Route::get('/modules/sws/restock', [FrontendController::class, 'swsRestock'])->name('modules.sws.restock');
+    // SWS gateway route section end
 
-    // PSM
+    // PSM gateway route section start
     Route::get('/modules/psm/vendor-management', [FrontendController::class, 'psmVendorManagement'])->name('modules.psm.vendor-management');
     Route::get('/modules/psm/vendor-market', [FrontendController::class, 'psmVendorMarket'])->name('modules.psm.vendor-market');
     Route::get('/modules/psm/order-management', [FrontendController::class, 'psmOrderManagement'])->name('modules.psm.order-management');
@@ -99,28 +109,28 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/modules/psm/reorder-management', [FrontendController::class, 'psmReorderManagement'])->name('modules.psm.reorder-management');
     Route::get('/modules/psm/products-management', [FrontendController::class, 'psmProductsManagement'])->name('modules.psm.products-management');
     Route::get('/modules/psm/shop-management', [FrontendController::class, 'psmShopManagement'])->name('modules.psm.shop-management');
-    
-    // PLT
+    // PSM gateway route section end    
+
+    // PLT gateway route section start
     Route::get('/modules/plt/projects', [FrontendController::class, 'pltProjects'])->name('modules.plt.projects');
     Route::get('/modules/plt/dispatches', [FrontendController::class, 'pltDispatches'])->name('modules.plt.dispatches');
     Route::get('/modules/plt/resources', [FrontendController::class, 'pltResources'])->name('modules.plt.resources');
     Route::get('/modules/plt/allocations', [FrontendController::class, 'pltAllocations'])->name('modules.plt.allocations');
     Route::get('/modules/plt/milestones', [FrontendController::class, 'pltMilestones'])->name('modules.plt.milestones');
     Route::get('/modules/plt/tracking-logs', [FrontendController::class, 'pltTrackingLogs'])->name('modules.plt.tracking-logs');
+    // PLT gateway route section end
 
-    // ALMS - All submodules
+    // ALMS gateway route section start
     Route::get('/modules/alms/registration', [FrontendController::class, 'almsRegistration'])->name('modules.alms.registration');
     Route::get('/modules/alms/scheduling', [FrontendController::class, 'almsScheduling'])->name('modules.alms.scheduling');
     Route::get('/modules/alms/transfers', [FrontendController::class, 'almsTransfers'])->name('modules.alms.transfers');
     Route::get('/modules/alms/disposals', [FrontendController::class, 'almsDisposals'])->name('modules.alms.disposals');
     Route::get('/modules/alms/reports', [FrontendController::class, 'almsReports'])->name('modules.alms.reports');
+    // ALMS gateway route section end
 
-    // DTLR
-    Route::get('/modules/dtlr/upload', [FrontendController::class, 'dtlrUpload'])->name('modules.dtlr.upload');
+    // DTLR gateway route section start
     Route::get('/modules/dtlr/documents', [FrontendController::class, 'dtlrDocuments'])->name('modules.dtlr.documents');
-    Route::get('/modules/dtlr/logs', [FrontendController::class, 'dtlrLogs'])->name('modules.dtlr.logs');
-    Route::get('/modules/dtlr/reviews', [FrontendController::class, 'dtlrReviews'])->name('modules.dtlr.reviews');
+    Route::get('/modules/dtlr/logistics', [FrontendController::class, 'dtlrLogistics'])->name('modules.dtlr.logistics');
+    // DTLR gateway route section end
 });
-
-// profile-route
-Route::post('/api/profile/update', [FrontendController::class, 'updateProfile'])->name('api.profile.update');
+// Protected routes section - with authentication middleware end
