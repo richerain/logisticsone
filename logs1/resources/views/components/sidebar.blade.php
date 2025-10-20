@@ -62,12 +62,7 @@
                             <span class="module-text">Products Management</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('modules.psm.shop-management') }}" title="Shop Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.shop-management') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-store-alt mr-2"></i>
-                            <span class="module-text">Shop Management</span>
-                        </a>
-                    </li>
+                    <!-- Shop Management removed - functionality merged into Vendor Management -->
                 </ul>
             </li>
 

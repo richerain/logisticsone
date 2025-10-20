@@ -108,7 +108,7 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/modules/psm/place-order', [FrontendController::class, 'psmPlaceOrder'])->name('modules.psm.place-order');
     Route::get('/modules/psm/reorder-management', [FrontendController::class, 'psmReorderManagement'])->name('modules.psm.reorder-management');
     Route::get('/modules/psm/products-management', [FrontendController::class, 'psmProductsManagement'])->name('modules.psm.products-management');
-    Route::get('/modules/psm/shop-management', [FrontendController::class, 'psmShopManagement'])->name('modules.psm.shop-management');
+    // Shop Management removed - functionality merged into Vendor Management
     // PSM gateway route section end    
 
     // PLT gateway route section start

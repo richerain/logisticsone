@@ -68,10 +68,7 @@ class FrontendController extends Controller
         return view('modules.psm.products-management');
     }
 
-    public function psmShopManagement()
-    {
-        return view('modules.psm.shop-management');
-    }
+    // Shop Management removed - functionality merged into Vendor Management
     // psm methods end
     
     // plt methods start
