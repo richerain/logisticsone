@@ -114,6 +114,7 @@ Route::middleware(['web.auth'])->group(function () {
     // PSM gateway route section end    
 
     // PLT gateway route section start
+    Route::get('/modules/plt/logistics', [FrontendController::class, 'pltLogistics'])->name('modules.plt.logistics');
     Route::get('/modules/plt/projects', [FrontendController::class, 'pltProjects'])->name('modules.plt.projects');
     Route::get('/modules/plt/dispatches', [FrontendController::class, 'pltDispatches'])->name('modules.plt.dispatches');
     Route::get('/modules/plt/resources', [FrontendController::class, 'pltResources'])->name('modules.plt.resources');

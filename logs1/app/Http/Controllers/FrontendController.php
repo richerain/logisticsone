@@ -84,6 +84,11 @@ class FrontendController extends Controller
     // psm methods end
     
     // plt methods start
+        public function pltLogistics()
+    {
+        return view('modules.plt.logistics', ['title' => 'Logistics Projects - PLT']);
+    }
+
     public function pltProjects()
     {
         return view('modules.plt.projects');

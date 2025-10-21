@@ -224,124 +224,33 @@ Route::get('/psm/purchase/requests-for-quotes', function (Request $request) {
 // module2-psm entire routes end
 
 // module3-plt entire routes start
-// Project routes
-Route::get('/plt/projects', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/projects');
-});
-Route::post('/plt/projects', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8004/api/projects');
-});
-Route::get('/plt/projects/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/projects/{$id}");
-});
-Route::put('/plt/projects/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/projects/{$id}");
-});
-Route::delete('/plt/projects/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8004/api/projects/{$id}");
-});
-Route::get('/plt/projects/stats', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/projects/stats');
+// PLT Logistics Projects routes
+Route::get('/plt/logistics', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/logistics');
 });
 
-// Dispatch routes
-Route::get('/plt/dispatches', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/dispatches');
-});
-Route::post('/plt/dispatches', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8004/api/dispatches');
-});
-Route::get('/plt/dispatches/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/dispatches/{$id}");
-});
-Route::put('/plt/dispatches/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/dispatches/{$id}");
-});
-Route::delete('/plt/dispatches/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8004/api/dispatches/{$id}");
-});
-Route::get('/plt/dispatches/stats', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/dispatches/stats');
+Route::post('/plt/logistics', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8004/api/logistics');
 });
 
-// Tracking Log routes
-Route::get('/plt/tracking-logs', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/tracking-logs');
-});
-Route::post('/plt/tracking-logs', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8004/api/tracking-logs');
-});
-Route::get('/plt/tracking-logs/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/tracking-logs/{$id}");
-});
-Route::put('/plt/tracking-logs/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/tracking-logs/{$id}");
-});
-Route::delete('/plt/tracking-logs/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8004/api/tracking-logs/{$id}");
-});
-Route::get('/plt/tracking-logs/dispatch/{dispatchId}', function (Request $request, $dispatchId) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/tracking-logs/dispatch/{$dispatchId}");
+Route::get('/plt/logistics/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/logistics/{$id}");
 });
 
-// Resource routes
-Route::get('/plt/resources', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/resources');
-});
-Route::post('/plt/resources', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8004/api/resources');
-});
-Route::get('/plt/resources/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/resources/{$id}");
-});
-Route::put('/plt/resources/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/resources/{$id}");
-});
-Route::delete('/plt/resources/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8004/api/resources/{$id}");
-});
-Route::get('/plt/resources/stats', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/resources/stats');
+Route::put('/plt/logistics/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/logistics/{$id}");
 });
 
-// Allocation routes
-Route::get('/plt/allocations', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/allocations');
-});
-Route::post('/plt/allocations', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8004/api/allocations');
-});
-Route::get('/plt/allocations/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/allocations/{$id}");
-});
-Route::put('/plt/allocations/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/allocations/{$id}");
-});
-Route::delete('/plt/allocations/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8004/api/allocations/{$id}");
-});
-Route::get('/plt/allocations/stats', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/allocations/stats');
+Route::delete('/plt/logistics/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8004/api/logistics/{$id}");
 });
 
-// Milestone routes
-Route::get('/plt/milestones', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/milestones');
+Route::get('/plt/logistics/stats', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/logistics/stats');
 });
-Route::post('/plt/milestones', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8004/api/milestones');
-});
-Route::get('/plt/milestones/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8004/api/milestones/{$id}");
-});
-Route::put('/plt/milestones/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/milestones/{$id}");
-});
-Route::delete('/plt/milestones/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8004/api/milestones/{$id}");
-});
-Route::get('/plt/milestones/stats', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8004/api/milestones/stats');
+
+Route::put('/plt/logistics/{id}/status', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8004/api/logistics/{$id}/status");
 });
 // module3-plt entire routes end
 

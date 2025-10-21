@@ -122,37 +122,42 @@
                 </a>
                 <ul class="submodules hidden pl-4 space-y-2">
                     <li>
-                        <a href="{{ route('modules.plt.projects') }}" title="Project Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.projects') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.plt.logistics') }}" title="Logistics Projects" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.logistics') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-truck mr-2"></i>
+                            <span class="module-text">Logistics Projects</span>
+                        </a>
+                    </li>
+                        <a href="{{ route('modules.plt.projects') }}" title="Project Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.projects') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-briefcase mr-2"></i>
                             <span class="module-text">Project Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.plt.dispatches') }}" title="Dispatch Tracking" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.dispatches') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.plt.dispatches') }}" title="Dispatch Tracking" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.dispatches') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-truck mr-2"></i>
                             <span class="module-text">Dispatch Tracking</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.plt.resources') }}" title="Resource Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.resources') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.plt.resources') }}" title="Resource Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.resources') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-cube mr-2"></i>
                             <span class="module-text">Resource Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.plt.allocations') }}" title="Resource Allocation" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.allocations') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.plt.allocations') }}" title="Resource Allocation" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.allocations') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-user-check mr-2"></i>
                             <span class="module-text">Resource Allocation</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.plt.milestones') }}" title="Milestone Tracking" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.milestones') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.plt.milestones') }}" title="Milestone Tracking" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.milestones') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-flag mr-2"></i>
                             <span class="module-text">Milestone Tracking</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.plt.tracking-logs') }}" title="Tracking Logs" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.tracking-logs') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.plt.tracking-logs') }}" title="Tracking Logs" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.tracking-logs') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-notepad mr-2"></i>
                             <span class="module-text">Tracking Logs</span>
                         </a>
