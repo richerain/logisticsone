@@ -11,6 +11,7 @@ return new class extends Migration
         if (!Schema::hasTable('psm_vendors')) {
             Schema::create('psm_vendors', function (Blueprint $table) {
                 $table->id('ven_id');
+                $table->string('ven_code', 20)->unique(); // New field for VEN00001 format
                 $table->string('ven_name', 255);
                 $table->string('ven_contacts', 255)->nullable();
                 $table->string('ven_email', 255)->unique();
@@ -20,6 +21,7 @@ return new class extends Migration
                 $table->timestamps();
                 
                 $table->index('ven_status');
+                $table->index('ven_code'); // Add index for ven_code
             });
         }
     }

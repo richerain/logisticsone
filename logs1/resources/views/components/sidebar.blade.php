@@ -21,43 +21,55 @@
                 </a>
                 <ul class="submodules hidden pl-4 space-y-2">
                     <li>
+                        <a href="{{ route('modules.psm.purchase-management') }}" title="Purchase Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.purchase-management') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-purchase-tag-alt mr-2"></i>
+                            <span class="module-text">Purchase Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('modules.psm.vendor-quote') }}" title="Vendor Quote" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-quote') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-file-blank mr-2"></i>
+                            <span class="module-text">Vendor Quote</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ route('modules.psm.vendor-management') }}" title="Vendor Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-management') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-group mr-2"></i>
                             <span class="module-text">Vendor Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.psm.vendor-market') }}" title="Vendor Market" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-market') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.psm.vendor-market') }}" title="Vendor Market" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-market') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-store mr-2"></i>
                             <span class="module-text">Vendor Market</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.psm.order-management') }}" title="Order Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.order-management') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.psm.order-management') }}" title="Order Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.order-management') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-receipt mr-2"></i>
                             <span class="module-text">Order Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.psm.budget-approval') }}" title="Budget Approval" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.budget-approval') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.psm.budget-approval') }}" title="Budget Approval" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.budget-approval') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-credit-card mr-2"></i>
                             <span class="module-text">Budget Approval</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.psm.place-order') }}" title="Place Order Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.place-order') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.psm.place-order') }}" title="Place Order Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.place-order') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-package mr-2"></i>
                             <span class="module-text">Place Order Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.psm.reorder-management') }}" title="Re-Order Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.reorder-management') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.psm.reorder-management') }}" title="Re-Order Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.reorder-management') ? 'bg-white/30' : '' }}">
                             <i class="bx bx-refresh mr-2"></i>
                             <span class="module-text">Re-Order Management <p class="badge badge-xs badge-warning">#</p></span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.psm.products-management') }}" title="Products Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.products-management') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.psm.products-management') }}" title="Products Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.products-management') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-purchase-tag mr-2"></i>
                             <span class="module-text">Products Management</span>
                         </a>

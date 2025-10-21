@@ -67,8 +67,15 @@ class FrontendController extends Controller
     {
         return view('modules.psm.products-management');
     }
+    public function psmVendorQuote()
+    {
+    return view('modules.psm.vendor-quote', ['title' => 'Vendor Quote Management']);
+    }
 
-    // Shop Management removed - functionality merged into Vendor Management
+    public function psmPurchaseManagement()
+    {
+        return view('modules.psm.purchase-management', ['title' => 'Purchase Management']);
+    }
     // psm methods end
     
     // plt methods start
@@ -451,6 +458,50 @@ class FrontendController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'DTLR Service unavailable. Please try again later.'
+            ], 503);
+        }
+    }
+
+    // PSM Purchase Management Proxy Methods
+    public function psmPurchaseProxyGet($endpoint, Request $request)
+    {
+        return $this->psmPurchaseProxyRequest('GET', $endpoint, $request);
+    }
+
+    public function psmPurchaseProxyPost($endpoint, Request $request)
+    {
+        return $this->psmPurchaseProxyRequest('POST', $endpoint, $request);
+    }
+
+    public function psmPurchaseProxyPut($endpoint, Request $request)
+    {
+        return $this->psmPurchaseProxyRequest('PUT', $endpoint, $request);
+    }
+
+    public function psmPurchaseProxyDelete($endpoint, Request $request)
+    {
+        return $this->psmPurchaseProxyRequest('DELETE', $endpoint, $request);
+    }
+
+    private function psmPurchaseProxyRequest($method, $endpoint, Request $request)
+    {
+        try {
+            $url = 'http://localhost:8001/api/psm/purchase/' . $endpoint;
+            
+            Log::info("PSM Purchase Proxying {$method} request to: {$url}", $request->all());
+
+            $response = Http::timeout(30)->{$method}($url, $request->all());
+
+            $data = $response->json();
+
+            return response()->json($data, $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('PSM Purchase Proxy error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PSM Purchase Service unavailable. Please try again later.'
             ], 503);
         }
     }

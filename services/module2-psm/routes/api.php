@@ -36,6 +36,23 @@ Route::put('/budget-approvals/{id}', [PSMController::class, 'updateBudgetApprova
 Route::get('/reorders', [PSMController::class, 'getReorders']);
 Route::post('/reorders', [PSMController::class, 'createReorder']);
 
+// Vendor Quote Routes
+Route::get('/quotes', [PSMController::class, 'getQuotes']);
+Route::post('/quotes', [PSMController::class, 'createQuote']);
+Route::get('/quotes/{id}', [PSMController::class, 'getQuote']);
+Route::put('/quotes/{id}', [PSMController::class, 'updateQuote']);
+Route::delete('/quotes/{id}', [PSMController::class, 'deleteQuote']);
+
+// Purchase Management Routes
+Route::get('/purchase/requests', [PSMController::class, 'getPurchaseRequests']);
+Route::post('/purchase/requests', [PSMController::class, 'createPurchaseRequest']);
+Route::get('/purchase/requests/{id}', [PSMController::class, 'getPurchaseRequest']);
+Route::put('/purchase/requests/{id}', [PSMController::class, 'updatePurchaseRequest']);
+Route::delete('/purchase/requests/{id}', [PSMController::class, 'deletePurchaseRequest']);
+
+// Purchase requests for quotes dropdown
+Route::get('/purchase/requests-for-quotes', [PSMController::class, 'getPurchaseRequestsForQuotes']);
+
 // Health check
 Route::get('/health', function () {
     return response()->json(['status' => 'OK', 'service' => 'PSM Module']);

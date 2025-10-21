@@ -108,7 +108,8 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/modules/psm/place-order', [FrontendController::class, 'psmPlaceOrder'])->name('modules.psm.place-order');
     Route::get('/modules/psm/reorder-management', [FrontendController::class, 'psmReorderManagement'])->name('modules.psm.reorder-management');
     Route::get('/modules/psm/products-management', [FrontendController::class, 'psmProductsManagement'])->name('modules.psm.products-management');
-    // Shop Management removed - functionality merged into Vendor Management
+    Route::get('/modules/psm/vendor-quote', [FrontendController::class, 'psmVendorQuote'])->name('modules.psm.vendor-quote');
+    Route::get('/modules/psm/purchase-management', [FrontendController::class, 'psmPurchaseManagement'])->name('modules.psm.purchase-management');
     // PSM gateway route section end    
 
     // PLT gateway route section start
@@ -134,3 +135,11 @@ Route::middleware(['web.auth'])->group(function () {
     // DTLR gateway route section end
 });
 // Protected routes section - with authentication middleware end
+
+// PSM Purchase Management Proxy Routes
+Route::prefix('api/psm/purchase')->group(function () {
+    Route::get('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyGet'])->where('endpoint', '.*');
+    Route::post('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyPost'])->where('endpoint', '.*');
+    Route::put('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyPut'])->where('endpoint', '.*');
+    Route::delete('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyDelete'])->where('endpoint', '.*');
+});

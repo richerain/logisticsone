@@ -243,11 +243,6 @@
         </div>`;
     }
 
-    // Generate vendor ID in format VEN00001
-    function generateVendorId(sequence) {
-        return 'VEN' + sequence.toString().padStart(5, '0');
-    }
-
     // Show loading modal
     function showLoadingModal(title = 'Processing...', message = 'Please wait while we save your changes.') {
         document.getElementById('loadingTitle').textContent = title;
@@ -351,7 +346,8 @@
             
             return {
                 ...vendor,
-                vendor_id: generateVendorId(vendor.ven_id),
+                // Use ven_code as the vendor ID for display
+                vendor_id: vendor.ven_code || 'N/A',
                 shop_name: primaryShop.shop_name || 'No Shop',
                 shop_id: primaryShop.shop_id || null,
                 shop_prods: primaryShop.shop_prods || 0
@@ -414,7 +410,6 @@
                 <td class="text-sm">${vendor.ven_email || 'N/A'}</td>
                 <td>
                     <div class="text-sm">${vendor.shop_name}</div>
-                    <div class="text-xs text-gray-500">${vendor.shop_prods} products</div>
                 </td>
                 <td>${ratingDisplay}</td>
                 <td>
@@ -489,7 +484,7 @@
             
             return {
                 ...vendor,
-                vendor_id: generateVendorId(vendor.ven_id),
+                vendor_id: vendor.ven_code || 'N/A',
                 shop_name: primaryShop.shop_name || 'No Shop',
                 shop_id: primaryShop.shop_id || null,
                 shop_prods: primaryShop.shop_prods || 0
@@ -498,7 +493,8 @@
             const matchesSearch = searchTerm === '' || 
                 vendor.ven_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 vendor.ven_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                vendor.shop_name.toLowerCase().includes(searchTerm.toLowerCase());
+                vendor.shop_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                vendor.vendor_id.toLowerCase().includes(searchTerm.toLowerCase());
             
             const matchesStatus = statusFilter === '' || vendor.ven_status === statusFilter;
             
@@ -555,6 +551,10 @@
                     <!-- Row 1: Vendor Name, Email, Phone, Status -->
                     <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
                         <div>
+                            <strong class="text-gray-700 text-xs">Vendor ID:</strong>
+                            <p class="text-sm p-3 bg-gray-50 rounded-lg border mt-1 font-mono">${vendor.ven_code || 'N/A'}</p>
+                        </div>
+                        <div>
                             <strong class="text-gray-700 text-xs">Vendor Name:</strong>
                             <p class="text-sm p-3 bg-gray-50 rounded-lg border mt-1">${vendor.ven_name || 'N/A'}</p>
                         </div>
@@ -566,22 +566,24 @@
                             <strong class="text-gray-700 text-xs">Phone:</strong>
                             <p class="text-sm p-3 bg-gray-50 rounded-lg border mt-1">${vendor.ven_contacts || 'N/A'}</p>
                         </div>
+                    </div>
+
+                    <!-- Row 2: Address and Status -->
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                        <div>
+                            <strong class="text-gray-700 text-xs">Address:</strong>
+                            <p class="mt-1 p-3 bg-gray-50 rounded-lg border text-sm">${vendor.ven_address || 'No address provided'}</p>
+                        </div>
                         <div>
                             <strong class="text-gray-700 text-xs">Status:</strong>
                             <p class="mt-1 p-3"><span class="badge ${vendor.ven_status === 'active' ? 'bg-green-400' : 'bg-red-400'} text-white font-bold tracking-wider text-xs px-3 py-2 border-0">${(vendor.ven_status || 'unknown').toUpperCase()}</span></p>
                         </div>
                     </div>
-
-                    <!-- Row 2: Address -->
-                    <div>
-                        <strong class="text-gray-700 text-xs">Address:</strong>
-                        <p class="mt-1 p-3 bg-gray-50 rounded-lg border text-sm">${vendor.ven_address || 'No address provided'}</p>
-                    </div>
                 </div>
 
                 <!-- Shop Information -->
                 <div class="space-y-3">
-                    <!-- Row 1: Shop Name, Rating, Products -->
+                    <!-- Row 1: Shop Name, Rating -->
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
                         <div>
                             <strong class="text-gray-700 text-xs">Shop Name:</strong>
@@ -592,10 +594,6 @@
                             <div class="mt-1 p-3 bg-gray-50 rounded-lg border">
                                 ${generateStarRating(vendor.ven_rating)}
                             </div>
-                        </div>
-                        <div>
-                            <strong class="text-gray-700 text-xs">Products:</strong>
-                            <p class="text-sm p-3 bg-gray-50 rounded-lg border mt-1">${primaryShop.shop_prods || 0} products</p>
                         </div>
                     </div>
 

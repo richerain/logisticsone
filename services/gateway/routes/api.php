@@ -161,6 +161,43 @@ Route::get('/psm/reorders', function (Request $request) {
 Route::post('/psm/reorders', function (Request $request) {
     return app(GatewayController::class)->proxyPost($request, 'http://localhost:8003/api/reorders');
 });
+
+// PSM Quote routes
+Route::get('/psm/quotes', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/quotes');
+});
+Route::post('/psm/quotes', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8003/api/quotes');
+});
+Route::get('/psm/quotes/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8003/api/quotes/{$id}");
+});
+Route::put('/psm/quotes/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8003/api/quotes/{$id}");
+});
+Route::delete('/psm/quotes/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8003/api/quotes/{$id}");
+});
+
+// PSM Purchase Management routes
+Route::get('/psm/purchase/requests', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/purchase/requests');
+});
+Route::post('/psm/purchase/requests', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8003/api/purchase/requests');
+});
+Route::get('/psm/purchase/requests/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8003/api/purchase/requests/{$id}");
+});
+Route::put('/psm/purchase/requests/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8003/api/purchase/requests/{$id}");
+});
+Route::delete('/psm/purchase/requests/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8003/api/purchase/requests/{$id}");
+});
+Route::get('/psm/purchase/requests-for-quotes', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/purchase/requests-for-quotes');
+});
 // module2-psm entire routes end
 
 // module3-plt entire routes start
