@@ -16,6 +16,11 @@ class FrontendController extends Controller
     // dashboard methods end
     
     // sws methods start
+    public function swsWarehousing()
+    {
+        return view('modules.sws.warehousing', ['title' => 'SWS GRN Management']);
+    }
+
     public function swsInventory()
     {
         return view('modules.sws.inventory', ['title' => 'SWS Inventory Management']);
@@ -502,6 +507,50 @@ class FrontendController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'PSM Purchase Service unavailable. Please try again later.'
+            ], 503);
+        }
+    }
+
+    // SWS Warehousing Proxy Methods
+    public function swsWarehousingProxyGet($endpoint, Request $request)
+    {
+        return $this->swsWarehousingProxyRequest('GET', $endpoint, $request);
+    }
+
+    public function swsWarehousingProxyPost($endpoint, Request $request)
+    {
+        return $this->swsWarehousingProxyRequest('POST', $endpoint, $request);
+    }
+
+    public function swsWarehousingProxyPut($endpoint, Request $request)
+    {
+        return $this->swsWarehousingProxyRequest('PUT', $endpoint, $request);
+    }
+
+    public function swsWarehousingProxyDelete($endpoint, Request $request)
+    {
+        return $this->swsWarehousingProxyRequest('DELETE', $endpoint, $request);
+    }
+
+    private function swsWarehousingProxyRequest($method, $endpoint, Request $request)
+    {
+        try {
+            $url = 'http://localhost:8001/api/sws/warehousing/' . $endpoint;
+            
+            Log::info("SWS Warehousing Proxying {$method} request to: {$url}", $request->all());
+
+            $response = Http::timeout(30)->{$method}($url, $request->all());
+
+            $data = $response->json();
+
+            return response()->json($data, $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('SWS Warehousing Proxy error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'SWS Warehousing Service unavailable. Please try again later.'
             ], 503);
         }
     }

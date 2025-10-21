@@ -130,6 +130,29 @@ Route::delete('/psm/products/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyDelete($request, "http://localhost:8003/api/products/{$id}");
 });
 
+// SWS Warehousing routes - GRN Management
+Route::get('/sws/warehousing', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing');
+});
+Route::post('/sws/warehousing', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/warehousing');
+});
+Route::get('/sws/warehousing/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8002/api/warehousing/{$id}");
+});
+Route::put('/sws/warehousing/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8002/api/warehousing/{$id}");
+});
+Route::delete('/sws/warehousing/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8002/api/warehousing/{$id}");
+});
+Route::get('/sws/warehousing/stats/overview', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing/stats/overview');
+});
+Route::get('/sws/warehousing/search/filter', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing/search/filter');
+});
+
 // PSM Market routes
 Route::get('/psm/market/products', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/market/products');

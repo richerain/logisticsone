@@ -87,19 +87,25 @@
                 </a>
                 <ul class="submodules hidden pl-4 space-y-2">
                     <li>
-                        <a href="{{ route('modules.sws.inventory') }}" title="Inventory Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.inventory') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.sws.warehousing') }}" title="Warehouse Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.warehousing') ? 'bg-white/30' : '' }}">
+                            <i class="bx bxs-receipt mr-2"></i>
+                            <span class="module-text">Warehouse Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('modules.sws.inventory') }}" title="Inventory Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.inventory') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-package mr-2"></i>
                             <span class="module-text">Inventory Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.sws.storage') }}" title="Storage Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.storage') ? 'bg-white/30' : '' }}"> 
+                        <a href="{{ route('modules.sws.storage') }}" title="Storage Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.storage') ? 'bg-white/30' : '' }}"> 
                             <i class="bx bxs-archive mr-2"></i>
                             <span class="module-text">Storage Management</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.sws.restock') }}" title="Restock Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.restock') ? 'bg-white/30' : '' }}"> 
+                        <a href="{{ route('modules.sws.restock') }}" title="Restock Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.restock') ? 'bg-white/30' : '' }}"> 
                             <i class="bx bxs-truck mr-2"></i>
                             <span class="module-text">Restock Management</span>
                         </a>
@@ -264,4 +270,18 @@
             }
         });
     });
+
+    // Toggle submodules function
+    function toggleSubmodules(element) {
+        const submodules = element.nextElementSibling;
+        const chevron = element.querySelector('.chevron');
+        
+        if (submodules.classList.contains('hidden')) {
+            submodules.classList.remove('hidden');
+            chevron.classList.replace('bx-chevron-right', 'bx-chevron-down');
+        } else {
+            submodules.classList.add('hidden');
+            chevron.classList.replace('bx-chevron-down', 'bx-chevron-right');
+        }
+    }
 </script>

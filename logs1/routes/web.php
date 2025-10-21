@@ -95,6 +95,7 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/dashboard', [FrontendController::class, 'dashboard'])->name('dashboard');
 
     // SWS gateway route section start
+        Route::get('/modules/sws/warehousing', [FrontendController::class, 'swsWarehousing'])->name('modules.sws.warehousing');
     Route::get('/modules/sws/inventory', [FrontendController::class, 'swsInventory'])->name('modules.sws.inventory');
     Route::get('/modules/sws/storage', [FrontendController::class, 'swsStorage'])->name('modules.sws.storage');
     Route::get('/modules/sws/restock', [FrontendController::class, 'swsRestock'])->name('modules.sws.restock');
@@ -142,4 +143,12 @@ Route::prefix('api/psm/purchase')->group(function () {
     Route::post('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyPost'])->where('endpoint', '.*');
     Route::put('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyPut'])->where('endpoint', '.*');
     Route::delete('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyDelete'])->where('endpoint', '.*');
+});
+
+// SWS Warehousing Proxy Routes
+Route::prefix('api/sws/warehousing')->group(function () {
+    Route::get('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyGet'])->where('endpoint', '.*');
+    Route::post('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyPost'])->where('endpoint', '.*');
+    Route::put('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyPut'])->where('endpoint', '.*');
+    Route::delete('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyDelete'])->where('endpoint', '.*');
 });

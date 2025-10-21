@@ -5,9 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\OtpController;
-use App\Http\Controllers\Api\InventoryController;
-use App\Http\Controllers\Api\StorageController;
-use App\Http\Controllers\Api\RestockController;
+use App\Http\Controllers\SWSController;
 
 // Auth routes
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -23,26 +21,35 @@ Route::post('/auth/check-otp-session', [OtpController::class, 'checkOtpSession']
 Route::put('/profile/update', [ProfileController::class, 'update']);
 Route::post('/profile/upload-picture', [ProfileController::class, 'uploadPicture']);
 
-// Inventory routes - match gateway structure
-Route::get('/inventory', [InventoryController::class, 'index']);
-Route::post('/inventory', [InventoryController::class, 'store']);
-Route::get('/inventory/{id}', [InventoryController::class, 'show']);
-Route::put('/inventory/{id}', [InventoryController::class, 'update']);
-Route::delete('/inventory/{id}', [InventoryController::class, 'destroy']);
+// SWS Warehousing routes - GRN Management (Primary endpoints)
+Route::prefix('warehousing')->group(function () {
+    Route::get('/', [SWSController::class, 'index']);
+    Route::post('/', [SWSController::class, 'store']);
+    Route::get('/stats/overview', [SWSController::class, 'getStats']);
+    Route::get('/search/filter', [SWSController::class, 'search']);
+    Route::get('/{id}', [SWSController::class, 'show']);
+    Route::put('/{id}', [SWSController::class, 'update']);
+    Route::delete('/{id}', [SWSController::class, 'destroy']);
+});
 
-// Storage routes - match gateway structure
-Route::get('/storage', [StorageController::class, 'index']);
-Route::post('/storage', [StorageController::class, 'store']);
-Route::get('/storage/{id}', [StorageController::class, 'show']);
-Route::put('/storage/{id}', [StorageController::class, 'update']);
-Route::delete('/storage/{id}', [StorageController::class, 'destroy']);
+// Legacy routes for backward compatibility with gateway
+Route::get('/inventory', [SWSController::class, 'index']);
+Route::post('/inventory', [SWSController::class, 'store']);
+Route::get('/inventory/{id}', [SWSController::class, 'show']);
+Route::put('/inventory/{id}', [SWSController::class, 'update']);
+Route::delete('/inventory/{id}', [SWSController::class, 'destroy']);
 
-// Restock routes - match gateway structure
-Route::get('/restock', [RestockController::class, 'index']);
-Route::post('/restock', [RestockController::class, 'store']);
-Route::get('/restock/{id}', [RestockController::class, 'show']);
-Route::put('/restock/{id}', [RestockController::class, 'update']);
-Route::delete('/restock/{id}', [RestockController::class, 'destroy']);
+Route::get('/storage', [SWSController::class, 'index']);
+Route::post('/storage', [SWSController::class, 'store']);
+Route::get('/storage/{id}', [SWSController::class, 'show']);
+Route::put('/storage/{id}', [SWSController::class, 'update']);
+Route::delete('/storage/{id}', [SWSController::class, 'destroy']);
+
+Route::get('/restock', [SWSController::class, 'index']);
+Route::post('/restock', [SWSController::class, 'store']);
+Route::get('/restock/{id}', [SWSController::class, 'show']);
+Route::put('/restock/{id}', [SWSController::class, 'update']);
+Route::delete('/restock/{id}', [SWSController::class, 'destroy']);
 
 // Debug route to check email configuration
 Route::get('/debug/email-config', function() {
