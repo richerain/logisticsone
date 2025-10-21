@@ -124,11 +124,8 @@ Route::middleware(['web.auth'])->group(function () {
     // PLT gateway route section end
 
     // ALMS gateway route section start
-    Route::get('/modules/alms/registration', [FrontendController::class, 'almsRegistration'])->name('modules.alms.registration');
-    Route::get('/modules/alms/scheduling', [FrontendController::class, 'almsScheduling'])->name('modules.alms.scheduling');
-    Route::get('/modules/alms/transfers', [FrontendController::class, 'almsTransfers'])->name('modules.alms.transfers');
-    Route::get('/modules/alms/disposals', [FrontendController::class, 'almsDisposals'])->name('modules.alms.disposals');
-    Route::get('/modules/alms/reports', [FrontendController::class, 'almsReports'])->name('modules.alms.reports');
+    Route::get('/modules/alms/asset', [FrontendController::class, 'almsAsset'])->name('modules.alms.asset');
+    Route::get('/modules/alms/maintenance', [FrontendController::class, 'almsMaintenance'])->name('modules.alms.maintenance');
     // ALMS gateway route section end
 
     // DTLR gateway route section start

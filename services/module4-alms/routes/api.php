@@ -16,40 +16,31 @@ Route::get('/health', function () {
 // Asset routes
 Route::get('/assets', [ALMSController::class, 'getAssets']);
 Route::post('/assets', [ALMSController::class, 'createAsset']);
+Route::get('/assets/{id}', [ALMSController::class, 'getAsset']);
 Route::put('/assets/{id}', [ALMSController::class, 'updateAsset']);
 Route::delete('/assets/{id}', [ALMSController::class, 'deleteAsset']);
 Route::get('/assets/stats', [ALMSController::class, 'getAssetStats']);
 
-// Maintenance Schedule routes
+// Maintenance management routes
 Route::get('/maintenance-schedules', [ALMSController::class, 'getMaintenanceSchedules']);
 Route::post('/maintenance-schedules', [ALMSController::class, 'createMaintenanceSchedule']);
+Route::get('/maintenance-schedules/{id}', [ALMSController::class, 'getMaintenanceSchedule']);
 Route::put('/maintenance-schedules/{id}', [ALMSController::class, 'updateMaintenanceSchedule']);
 Route::post('/maintenance-schedules/{id}/complete', [ALMSController::class, 'completeMaintenance']);
+Route::delete('/maintenance-schedules/{id}', [ALMSController::class, 'deleteMaintenanceSchedule']);
 Route::get('/maintenance-schedules/stats', [ALMSController::class, 'getMaintenanceStats']);
 
-// Asset Transfer routes
-Route::get('/asset-transfers', [ALMSController::class, 'getAssetTransfers']);
-Route::post('/asset-transfers', [ALMSController::class, 'createAssetTransfer']);
+// Helper method for getting a single asset
+Route::get('/assets/{id}', function ($id) {
+    return app(ALMSController::class)->getAsset($id);
+});
 
-// Disposal routes
-Route::get('/disposals', [ALMSController::class, 'getDisposals']);
-Route::post('/disposals', [ALMSController::class, 'createDisposal']);
+// Helper method for getting a single maintenance schedule  
+Route::get('/maintenance-schedules/{id}', function ($id) {
+    return app(ALMSController::class)->getMaintenanceSchedule($id);
+});
 
-// Asset Category routes
-Route::get('/asset-categories', [ALMSController::class, 'getAssetCategories']);
-Route::post('/asset-categories', [ALMSController::class, 'createAssetCategory']);
-
-// Branch routes
-Route::get('/branches', [ALMSController::class, 'getBranches']);
-Route::post('/branches', [ALMSController::class, 'createBranch']);
-
-// Employee routes
-Route::get('/employees', [ALMSController::class, 'getEmployees']);
-Route::post('/employees', [ALMSController::class, 'createEmployee']);
-
-// Maintenance Type routes
-Route::get('/maintenance-types', [ALMSController::class, 'getMaintenanceTypes']);
-Route::post('/maintenance-types', [ALMSController::class, 'createMaintenanceType']);
-
-// Reports routes
-Route::get('/reports', [ALMSController::class, 'getReports']);
+// Helper method for deleting a maintenance schedule
+Route::delete('/maintenance-schedules/{id}', function ($id) {
+    return app(ALMSController::class)->deleteMaintenanceSchedule($id);
+});

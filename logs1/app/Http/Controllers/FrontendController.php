@@ -121,29 +121,14 @@ class FrontendController extends Controller
     // plt methods end
     
     // alms methods start
-    public function almsRegistration()
+    public function almsAsset()
     {
-        return view('modules.alms.registration', ['title' => 'Asset Registration - ALMS']);
+        return view('modules.alms.asset-management', ['title' => 'Asset Management - ALMS']);
     }
 
-    public function almsScheduling()
+    public function almsMaintenance()
     {
-        return view('modules.alms.scheduling', ['title' => 'Maintenance Scheduling - ALMS']);
-    }
-
-    public function almsTransfers()
-    {
-        return view('modules.alms.transfers', ['title' => 'Asset Transfers - ALMS']);
-    }
-
-    public function almsDisposals()
-    {
-        return view('modules.alms.disposals', ['title' => 'Disposal Management - ALMS']);
-    }
-
-    public function almsReports()
-    {
-        return view('modules.alms.reports', ['title' => 'Reports & Analytics - ALMS']);
+        return view('modules.alms.maintenance-management', ['title' => 'Maintenance Management - ALMS']);
     }
     // alms methods end
     
