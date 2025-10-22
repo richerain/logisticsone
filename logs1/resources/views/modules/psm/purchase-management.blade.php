@@ -6,11 +6,8 @@
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Purchase Management</h2>
-            <button class="btn btn-primary" id="addPurchaseBtn">
-                <i class="bx bx-plus mr-2"></i>Requisition Form
-            </button>
         </div>
-
+        
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
@@ -63,6 +60,19 @@
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
             </select>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex gap-2 mb-4">
+            <button class="btn btn-primary" id="procureRequisitionBtn">
+                <i class="bx bx-sm bxs-cart-download" title="Procure Requisition"></i>Procure Requisition
+            </button>
+            <button class="btn btn-primary" id="addPurchaseBtn">
+                <i class="bx bx-sm bxs-cart" title="Purchase Requisition"></i> Purchase Requisition
+            </button>
+            <button class="btn btn-success flex" id="viewEmailBtn">
+                <i class="bx bx-sm bxs-envelope" title="Email"></i> Requisition Email
+            </button>
         </div>
 
         <!-- Purchase Requests Table -->
@@ -263,6 +273,271 @@
         </div>
     </div>
 
+    <!-- Procure Requisition Modal -->
+    <div id="procureRequisitionModal" class="modal modal-lg">
+        <div class="modal-box max-w-4xl p-0 overflow-visible">
+            <div class="flex justify-between items-center bg-blue-700 p-4 rounded-t-lg">
+                <h3 class="font-bold text-white text-lg">Procure Requisition</h3>
+                <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeProcureRequisitionModalX">✕</button>
+            </div>
+            <div class="p-4 max-h-[70vh] overflow-y-auto">
+                <form id="procureRequisitionForm" class="space-y-4">
+                    @csrf
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Requisition ID</span>
+                            </label>
+                            <input type="text" id="procureRequisitionId" class="input input-bordered input-sm w-full bg-gray-100" 
+                                   readonly placeholder="Auto-generated">
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Department *</span>
+                            </label>
+                            <select id="procureDepartment" name="department" class="select select-bordered select-sm w-full" required>
+                                <option value="HR">Human Resources Department</option>
+                                <option value="Core">Core Department</option>
+                                <option value="Logs">Logistics Department</option>
+                                <option value="Finance">Financial Department</option>
+                                <option value="Admin">Administrative Department</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Item Description *</span>
+                        </label>
+                        <textarea id="procureItemDescription" name="item_description" class="textarea textarea-bordered textarea-sm h-20" 
+                                  placeholder="Describe the items to be procured..." required></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Priority Level *</span>
+                            </label>
+                            <select id="procurePriority" name="priority" class="select select-bordered select-sm w-full" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Required By Date *</span>
+                            </label>
+                            <input type="date" id="procureRequiredDate" name="required_date" class="input input-bordered input-sm w-full" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Estimated Budget (₱) *</span>
+                            </label>
+                            <input type="number" id="procureEstimatedBudget" name="estimated_budget" class="input input-bordered input-sm w-full" 
+                                   min="0" step="0.01" required>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Preferred Vendor</span>
+                            </label>
+                            <select id="procureVendor" name="vendor" class="select select-bordered select-sm w-full">
+                                <option value="">Select Preferred Vendor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Justification *</span>
+                        </label>
+                        <textarea id="procureJustification" name="justification" class="textarea textarea-bordered textarea-sm h-16" 
+                                  placeholder="Explain why this procurement is necessary..." required></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Additional Notes</span>
+                        </label>
+                        <textarea id="procureNotes" name="notes" class="textarea textarea-bordered textarea-sm h-12" 
+                                  placeholder="Any additional information..."></textarea>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="modal-action flex justify-end space-x-3 pt-4 border-t">
+                        <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeProcureRequisitionModal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg px-4">
+                            <i class="bx bx-send mr-1"></i>Submit Requisition
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="emailModal" class="modal modal-lg">
+        <div class="modal-box max-w-3xl p-0 overflow-visible">
+            <div class="flex justify-between items-center bg-purple-700 p-4 rounded-t-lg">
+                <h3 class="font-bold text-white text-lg">Received Request Emails</h3>
+                <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeEmailModalX">✕</button>
+            </div>
+            <div class="p-4 max-h-[70vh] overflow-y-auto">
+                <div class="space-y-4">
+                    <!-- Email List -->
+                    <div class="space-y-3" id="emailList">
+                        <!-- Equipment Requests -->
+                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Computer Equipment Request</h4>
+                                    <p class="text-xs text-gray-600 mb-1">From: IT Department</p>
+                                    <p class="text-xs text-gray-500">Date: 01/15/2024</p>
+                                </div>
+                            </div>
+                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
+                                <div class="flex items-center space-x-3">
+                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800">computer_equipment_request.pdf</p>
+                                        <p class="text-xs text-gray-500">1.2 MB</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-primary download-file" data-filename="computer_equipment_request.pdf">
+                                    <i class="bx bx-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Network Equipment Purchase</h4>
+                                    <p class="text-xs text-gray-600 mb-1">From: Network Team</p>
+                                    <p class="text-xs text-gray-500">Date: 01/14/2024</p>
+                                </div>
+                            </div>
+                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
+                                <div class="flex items-center space-x-3">
+                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800">network_equipment_quote.pdf</p>
+                                        <p class="text-xs text-gray-500">0.9 MB</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-primary download-file" data-filename="network_equipment_quote.pdf">
+                                    <i class="bx bx-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Supplies Requests -->
+                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Office Supplies Request</h4>
+                                    <p class="text-xs text-gray-600 mb-1">From: Admin Department</p>
+                                    <p class="text-xs text-gray-500">Date: 01/13/2024</p>
+                                </div>
+                            </div>
+                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
+                                <div class="flex items-center space-x-3">
+                                    <i class="bx bx-file-word text-blue-500 text-2xl"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800">office_supplies_list.docx</p>
+                                        <p class="text-xs text-gray-500">0.8 MB</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-primary download-file" data-filename="office_supplies_list.docx">
+                                    <i class="bx bx-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Cleaning Supplies Order</h4>
+                                    <p class="text-xs text-gray-600 mb-1">From: Facilities Management</p>
+                                    <p class="text-xs text-gray-500">Date: 01/12/2024</p>
+                                </div>
+                            </div>
+                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
+                                <div class="flex items-center space-x-3">
+                                    <i class="bx bx-file-excel text-green-500 text-2xl"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800">cleaning_supplies_order.xlsx</p>
+                                        <p class="text-xs text-gray-500">0.7 MB</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-primary download-file" data-filename="cleaning_supplies_order.xlsx">
+                                    <i class="bx bx-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Furniture Requests -->
+                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Office Furniture Purchase</h4>
+                                    <p class="text-xs text-gray-600 mb-1">From: HR Department</p>
+                                    <p class="text-xs text-gray-500">Date: 01/11/2024</p>
+                                </div>
+                            </div>
+                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
+                                <div class="flex items-center space-x-3">
+                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800">office_furniture_quotation.pdf</p>
+                                        <p class="text-xs text-gray-500">1.5 MB</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-primary download-file" data-filename="office_furniture_quotation.pdf">
+                                    <i class="bx bx-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Conference Room Furniture</h4>
+                                    <p class="text-xs text-gray-600 mb-1">From: Executive Office</p>
+                                    <p class="text-xs text-gray-500">Date: 01/10/2024</p>
+                                </div>
+                            </div>
+                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
+                                <div class="flex items-center space-x-3">
+                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-800">conference_furniture_specs.pdf</p>
+                                        <p class="text-xs text-gray-500">2.1 MB</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-primary download-file" data-filename="conference_furniture_specs.pdf">
+                                    <i class="bx bx-download mr-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-action flex justify-end pt-4 border-t">
+                    <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeEmailModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Modal -->
     <div id="loadingModal" class="modal">
         <div class="modal-box max-w-sm text-center p-4">
@@ -339,6 +614,13 @@
         });
     }
 
+    // Generate random ID
+    function generateRandomId(prefix = 'REQ') {
+        const timestamp = Date.now().toString().slice(-6);
+        const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+        return `${prefix}-${timestamp}-${random}`;
+    }
+
     // Load data on page load
     document.addEventListener('DOMContentLoaded', function() {
         initializeEventListeners();
@@ -349,15 +631,26 @@
     function initializeEventListeners() {
         // Add purchase button
         document.getElementById('addPurchaseBtn').addEventListener('click', openAddPurchaseModal);
+        
+        // Procure requisition button
+        document.getElementById('procureRequisitionBtn').addEventListener('click', openProcureRequisitionModal);
+        
+        // Email button
+        document.getElementById('viewEmailBtn').addEventListener('click', openEmailModal);
 
         // Close modal buttons
         document.getElementById('closePurchaseModal').addEventListener('click', closePurchaseModal);
         document.getElementById('closePurchaseModalX').addEventListener('click', closePurchaseModal);
         document.getElementById('closeViewPurchaseModal').addEventListener('click', closeViewPurchaseModal);
         document.getElementById('closeViewPurchaseModalX').addEventListener('click', closeViewPurchaseModal);
+        document.getElementById('closeProcureRequisitionModal').addEventListener('click', closeProcureRequisitionModal);
+        document.getElementById('closeProcureRequisitionModalX').addEventListener('click', closeProcureRequisitionModal);
+        document.getElementById('closeEmailModal').addEventListener('click', closeEmailModal);
+        document.getElementById('closeEmailModalX').addEventListener('click', closeEmailModal);
 
         // Form submission
         document.getElementById('purchaseForm').addEventListener('submit', handlePurchaseSubmit);
+        document.getElementById('procureRequisitionForm').addEventListener('submit', handleProcureRequisitionSubmit);
 
         // Auto-calculate total quote when units or unit price changes
         document.getElementById('units').addEventListener('input', calculatePurchaseTotals);
@@ -366,6 +659,14 @@
         // Search and filter
         document.getElementById('searchPurchases').addEventListener('input', filterPurchases);
         document.getElementById('statusFilter').addEventListener('change', filterPurchases);
+
+        // Email download buttons
+        document.querySelectorAll('.download-file').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filename = this.getAttribute('data-filename');
+                downloadFile(filename);
+            });
+        });
     }
 
     function calculatePurchaseTotals() {
@@ -378,6 +679,27 @@
         document.getElementById('totalQuote').value = formatCurrency(totalQuote);
     }
 
+    function downloadFile(filename) {
+        showLoadingModal('Downloading File...');
+        
+        // Simulate download process
+        setTimeout(() => {
+            hideLoadingModal();
+            
+            // Create a temporary link to trigger download
+            const link = document.createElement('a');
+            link.href = '#'; // In real implementation, this would be the actual file URL
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showSuccessToast(`Successfully Download`);
+            
+            console.log(`Downloading file...`);
+        }, 1000);
+    }
+
     async function loadVendors() {
         try {
             const response = await fetch('http://localhost:8001/api/psm/vendors');
@@ -386,6 +708,7 @@
             if (result.success) {
                 vendors = result.data || [];
                 populateVendorDropdown();
+                populateProcureVendorDropdown();
             }
         } catch (error) {
             console.error('Error loading vendors:', error);
@@ -395,6 +718,18 @@
     function populateVendorDropdown() {
         const vendorSelect = document.getElementById('vendor');
         vendorSelect.innerHTML = '<option value="">Select Vendor</option>';
+        
+        vendors.forEach(vendor => {
+            const option = document.createElement('option');
+            option.value = vendor.ven_name;
+            option.textContent = `${vendor.ven_name} (${vendor.ven_code || vendor.ven_email})`;
+            vendorSelect.appendChild(option);
+        });
+    }
+
+    function populateProcureVendorDropdown() {
+        const vendorSelect = document.getElementById('procureVendor');
+        vendorSelect.innerHTML = '<option value="">Select Preferred Vendor</option>';
         
         vendors.forEach(vendor => {
             const option = document.createElement('option');
@@ -586,6 +921,26 @@
         document.getElementById('viewPurchaseModal').classList.remove('modal-open');
     }
 
+    function openProcureRequisitionModal() {
+        document.getElementById('procureRequisitionForm').reset();
+        document.getElementById('procureRequisitionId').value = generateRandomId('PROC');
+        document.getElementById('procureRequiredDate').value = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        document.getElementById('procureRequisitionModal').classList.add('modal-open');
+    }
+
+    function closeProcureRequisitionModal() {
+        document.getElementById('procureRequisitionModal').classList.remove('modal-open');
+        document.getElementById('procureRequisitionForm').reset();
+    }
+
+    function openEmailModal() {
+        document.getElementById('emailModal').classList.add('modal-open');
+    }
+
+    function closeEmailModal() {
+        document.getElementById('emailModal').classList.remove('modal-open');
+    }
+
     // Purchase Actions
     function viewPurchase(purchaseId) {
         const purchase = purchases.find(p => p.purchase_id === purchaseId);
@@ -744,8 +1099,7 @@
         
         try {
             showLoadingModal(
-                isEdit ? 'Updating Request...' : 'Creating Request...',
-                isEdit ? 'Please wait while we update purchase request.' : 'Please wait while we create new purchase request.'
+                isEdit ? 'Updating Request...' : 'Creating Request...'
             );
 
             let response;
@@ -790,6 +1144,40 @@
         }
     }
 
+    async function handleProcureRequisitionSubmit(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        const procureData = {
+            requisition_id: formData.get('requisition_id'),
+            department: formData.get('department'),
+            item_description: formData.get('item_description'),
+            priority: formData.get('priority'),
+            required_date: formData.get('required_date'),
+            estimated_budget: parseFloat(formData.get('estimated_budget')) || 0,
+            vendor: formData.get('vendor'),
+            justification: formData.get('justification'),
+            notes: formData.get('notes')
+        };
+        
+        try {
+            showLoadingModal('Submitting Procure Requisition...');
+
+            // Simulate API call - replace with actual API endpoint
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            hideLoadingModal();
+            closeProcureRequisitionModal();
+            
+            showSuccessToast('Procure requisition submitted successfully!');
+            
+        } catch (error) {
+            hideLoadingModal();
+            Swal.fire('Error', 'Failed to submit procure requisition: ' + error.message, 'error');
+        }
+    }
+
     async function deletePurchase(purchaseId) {
         const result = await Swal.fire({
             title: 'Are you sure?',
@@ -804,7 +1192,7 @@
 
         if (result.isConfirmed) {
             try {
-                showLoadingModal('Deleting Request...', 'Please wait while we remove the purchase request.');
+                showLoadingModal('Deleting Request...');
 
                 const response = await fetch(`${API_BASE_URL}/requests/${purchaseId}`, {
                     method: 'DELETE',
@@ -846,6 +1234,16 @@
     }
     .table td {
         white-space: nowrap;
+    }
+    .checkbox:checked {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+    }
+    .email-item {
+        border-left: 4px solid #8b5cf6;
+    }
+    .email-item:hover {
+        border-left-color: #7c3aed;
     }
 </style>
 @endsection

@@ -10,6 +10,8 @@
                 <i class="bx bx-plus mr-2"></i>Schedule Maintenance
             </button>
         </div>
+        <p>remove resched</p>
+        <p>manager and admin can edit but only status</p>
 
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">

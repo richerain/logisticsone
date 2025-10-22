@@ -6,10 +6,18 @@
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Vendor Management</h2>
-            <button class="btn btn-primary" id="addVendorBtn">
+            <button class="btn btn-primary hidden" id="addVendorBtn">
                 <i class="bx bx-plus mr-2"></i>Add New Vendor
             </button>
         </div>
+        <p>s/admin manager can view</p>
+        <p>vendor name > company name</p>
+        <p>add seller name</p>
+        <p>shop name remove</p>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
 
         <!-- Combined Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

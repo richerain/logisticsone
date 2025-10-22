@@ -11,123 +11,21 @@
         <h2 class="text-md font-semibold">Welcome back <span id="user-role" class="font-semibold"></span>, <span id="welcome-user">User</span> !</h2>
     </div>
 
-<!-- stats metrics section -->
- <div class="p-5 bg-green-100 rounded-lg mb-5">
-       <div class="flex items-center mb-4 space-x-2 text-gray-700">
-            <i class='bx bxs-bar-chart-alt-2' ></i>
-            <h2 class="text-lg font-semibold">Metrics Stat</h2>
-        </div> 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Row 1: Cards 1-4 -->
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-primary">
-            <div class="stat-title font-bold">Module Services</div>
-            <div class="stat-value text-primary">6</div>
-            <div class="stat-desc font-bold">Active modules</div>
-        </div>
-        
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-secondary">
-            <div class="stat-title font-bold">Total Page Views</div>
-            <div class="stat-value text-secondary">89,400</div>
-            <div class="stat-desc font-bold">21% more than last month</div>
-        </div>
-        
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-accent">
-            <div class="stat-title font-bold">New Users</div>
-            <div class="stat-value text-accent">1,200</div>
-            <div class="stat-desc font-bold">15% increase from previous</div>
-        </div>
-        
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-info">
-            <div class="stat-title font-bold">Revenue</div>
-            <div class="stat-value text-info">₱45,230</div>
-            <div class="stat-desc font-bold">8% growth YTD</div>
-        </div>
-        
-        <!-- Row 2: Cards 5-8 -->
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-success">
-            <div class="stat-title font-bold">Active Sessions</div>
-            <div class="stat-value text-success">2,500</div>
-            <div class="stat-desc font-bold">Up 12% today</div>
-        </div>
-        
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-warning">
-            <div class="stat-title font-bold">Error Rate</div>
-            <div class="stat-value text-warning">0.5%</div>
-            <div class="stat-desc font-bold">Below target threshold</div>
-        </div>
-        
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-error">
-            <div class="stat-title font-bold">Bounce Rate</div>
-            <div class="stat-value text-error">32%</div>
-            <div class="stat-desc font-bold">Monitor closely</div>
-        </div>
-        
-        <div class="stat card bg-base-100 shadow-lg border-l-4 border-yellow-700">
-            <div class="stat-title font-bold">Conversion Rate</div>
-            <div class="stat-value text-yellow-700">4.2%</div>
-            <div class="stat-desc font-bold">On track for Q4 goals</div>
-        </div>
+<!-- Announcement Board Section -->
+<div class="bg-green-100 rounded-lg p-5 mb-5 min-h-[200px] flex flex-col">
+  <div class="flex items-center mb-4 space-x-2 text-gray-700">
+    <i class='bx bxs-megaphone'></i>
+    <h2 class="text-lg font-semibold">Announcement Board</h2>
+  </div>
+  <div class="flex-1 flex items-center justify-center">
+    <div class="stat card bg-gray-50 shadow-lg border-4 border-gray-200">
+        <div class="flex stat-title items-center justify-center italic pt-40 pb-40">No Announcement yet...</div>
     </div>
- </div>
- 
-
-<!-- announcement board section -->
-    <div class="bg-green-100 rounded-lg p-5 mb-5">
-        <div class="flex items-center mb-4 space-x-2 text-gray-700">
-            <i class='bx bxs-megaphone'></i>
-            <h2 class="text-lg font-semibold">Announcement Board</h2>
-        </div>
-        <div class="space-y-4 bg-gray-50 p-10 rounded-lg shadow">
-            <div class="p-4 bg-white rounded-lg shadow-md border-l-4 border-blue-500">
-                <h3 class="font-bold text-blue-600">System Maintenance - July 15, 2024</h3>
-                <p class="text-gray-700 mt-2">Scheduled maintenance will occur on July 15 from 1:00 AM to 5:00 AM. Please save your work accordingly.</p>
-            </div>
-            <div class="p-4 bg-white rounded-lg shadow-md border-l-4 border-green-500">
-                <h3 class="font-bold text-green-600">New Feature Release: Analytics Dashboard</h3>
-                <p class="text-gray-700 mt-2">We are excited to announce the launch of our new Analytics Dashboard, providing deeper insights into your logistics data. Check it out under the Reports section!</p>
-            </div>
-            <div class="p-4 bg-white rounded-lg shadow-md border-l-4 border-yellow-500">
-                <h3 class="font-bold text-yellow-600">Reminder: Update Your Profile Information</h3>
-                <p class="text-gray-700 mt-2">Please take a moment to review and update your profile information to ensure accurate records.</p>
-            </div>
-        </div>
-    </div>
-
-<!-- statistics charts section -->
- <div class="bg-green-100 rounded-lg p-5 mb-5">
-    <div class="flex items-center mb-4 space-x-2 text-gray-700">
-        <i class='bx bx-line-chart' ></i>
-        <h2 class="text-lg font-semibold">Statistics Charts</h2>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-        <!-- Box 1: Bar Chart (Market Share by Provider) -->
-        <div class="p-4 bg-white rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Market Share by Vendors</h3>
-            <canvas id="barChart" width="400" height="200"></canvas>
-        </div>
-
-        <!-- Box 2: Line Chart (Market Growth Projection) -->
-        <div class="p-4 bg-white rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Vendor Market Growth (2025-2026)</h3>
-            <canvas id="lineChart" width="400" height="200"></canvas>
-        </div>
-        
-        <!-- Box 3: Pie Chart (Key Segments) -->
-        <div class="p-4 bg-white rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Vendors Share</h3>
-            <canvas id="pieChart" width="100" height="100"></canvas>
-        </div>
-        
-        <!-- Box 4: Doughnut Chart (PoP Distribution Example) -->
-        <div class="p-4 bg-white rounded-lg shadow-md">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">Inventory Items</h3>
-            <canvas id="doughnutChart" width="100" height="100"></canvas>
-        </div>
-    </div>
+  </div>
 </div>
 
 <!-- role-based visibility section -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-lg bg-green-100" id="role-based-panels">
+    <div class="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-lg bg-green-100" id="role-based-panels">
         <!-- Super Admin Panel -->
         <div class="p-4 bg-green-900 text-white rounded-lg hidden" data-roles="superadmin">
             <h3 class="font-bold">Super Admin Panel</h3>

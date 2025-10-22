@@ -9,42 +9,92 @@ class LogisticsRecord extends Model
 {
     use HasFactory;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'dtlr_logistics_record';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'log_id',
         'action',
         'module',
-        'description',
         'performed_by',
         'timestamp',
         'ai_ocr_used',
-        'related_reference',
-        'ip_address',
-        'user_agent'
+        'details'
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
     protected $casts = [
         'timestamp' => 'datetime',
-        'ai_ocr_used' => 'boolean'
+        'ai_ocr_used' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
-    // Scope for different actions
-    public function scopeUploads($query)
+    /**
+     * Get AI/OCR usage status as text
+     */
+    public function getAiOcrUsedTextAttribute()
     {
-        return $query->where('action', 'uploaded');
+        return $this->ai_ocr_used ? 'Yes' : 'No';
     }
 
-    public function scopeApprovals($query)
+    /**
+     * Get formatted timestamp
+     */
+    public function getFormattedTimestampAttribute()
     {
-        return $query->where('action', 'approved');
+        return $this->timestamp->format('M j, Y g:i A');
     }
 
-    public function scopeDeliveries($query)
+    /**
+     * Get time ago format
+     */
+    public function getTimeAgoAttribute()
     {
-        return $query->where('action', 'delivered');
+        return $this->timestamp->diffForHumans();
     }
 
-    public function scopeAiUsed($query)
+    /**
+     * Scope for recent logs
+     */
+    public function scopeRecent($query, $days = 7)
+    {
+        return $query->where('timestamp', '>=', now()->subDays($days));
+    }
+
+    /**
+     * Scope for AI/OCR logs
+     */
+    public function scopeWithAI($query)
     {
         return $query->where('ai_ocr_used', true);
+    }
+
+    /**
+     * Scope for module specific logs
+     */
+    public function scopeForModule($query, $module)
+    {
+        return $query->where('module', $module);
     }
 }

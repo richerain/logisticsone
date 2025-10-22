@@ -356,64 +356,47 @@ Route::get('/alms/reports', function (Request $request) {
 // module4-alms entire routes end
 
 // module5-dtlr entire routes start
-// Document routes
+// Document tracker routes
 Route::get('/dtlr/documents', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/documents');
 });
-Route::post('/dtlr/documents', [GatewayController::class, 'uploadDocument']);
+
+Route::post('/dtlr/documents', function (Request $request) {
+    return app(GatewayController::class)->uploadDocument($request);
+});
+
 Route::get('/dtlr/documents/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyGet($request, "http://localhost:8006/api/documents/{$id}");
 });
+
 Route::put('/dtlr/documents/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyPut($request, "http://localhost:8006/api/documents/{$id}");
 });
+
 Route::delete('/dtlr/documents/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyDelete($request, "http://localhost:8006/api/documents/{$id}");
 });
-Route::post('/dtlr/documents/{id}/transfer', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPost($request, "http://localhost:8006/api/documents/{$id}/transfer");
-});
-Route::post('/dtlr/documents/{id}/process-ocr', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPost($request, "http://localhost:8006/api/documents/{$id}/process-ocr");
-});
 
-// Document log routes
-Route::get('/dtlr/document-logs', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/document-logs');
-});
-Route::get('/dtlr/document-logs/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8006/api/document-logs/{$id}");
+Route::get('/dtlr/documents/{id}/download', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8006/api/documents/{$id}/download");
 });
 
 // Logistics Record routes
 Route::get('/dtlr/logistics-records', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/logistics-records');
 });
-Route::post('/dtlr/logistics-records', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8006/api/logistics-records');
-});
+
 Route::get('/dtlr/logistics-records/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyGet($request, "http://localhost:8006/api/logistics-records/{$id}");
 });
-Route::put('/dtlr/logistics-records/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8006/api/logistics-records/{$id}");
-});
-Route::delete('/dtlr/logistics-records/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8006/api/logistics-records/{$id}");
+
+Route::post('/dtlr/logistics-records/export', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8006/api/logistics-records/export');
 });
 
-// Utility routes
-Route::get('/dtlr/document-types', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/document-types');
-});
-Route::get('/dtlr/branches', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/branches');
-});
-Route::get('/dtlr/stats/overview', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/stats/overview');
-});
-Route::get('/dtlr/search', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/search');
+// Stats route
+Route::get('/dtlr/stats', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8006/api/stats');
 });
 
 // Health check

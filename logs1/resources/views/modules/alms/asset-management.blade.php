@@ -10,6 +10,12 @@
                 <i class="bx bx-plus mr-2"></i>Add New Asset
             </button>
         </div>
+        <p>asset from good recienote</p>
+        <p>assetname into item</p>
+        <p>remove assigned location</p>
+        <p>Warranty Expiry should be fetching from grn</p>
+        <p>remove edit</p>
+        <p>active item should fetch to the digital inventory</p>
 
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">

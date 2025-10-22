@@ -10,6 +10,13 @@
                 <i class="bx bx-plus mr-2"></i>New Delivery
             </button>
         </div>
+        <p>user admin and manager</p>
+        <p>edit remove</p>
+        <p>delete sadmin</p>
+        <p>update only manager and admin</p>
+        <p>view staf</p>
+        <p></p>
+        <p></p>
 
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">

@@ -1,31 +1,36 @@
 <?php
 
-use App\Http\Controllers\DTLRController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DTLRController;
 
-Route::get('/health', [DTLRController::class, 'healthCheck']);
+// Health check endpoint
+Route::get('/health', [DTLRController::class, 'health']);
 
-// Document routes
+// Document Tracker Routes
 Route::prefix('documents')->group(function () {
     Route::get('/', [DTLRController::class, 'getDocuments']);
     Route::post('/', [DTLRController::class, 'createDocument']);
     Route::get('/{id}', [DTLRController::class, 'getDocument']);
     Route::put('/{id}', [DTLRController::class, 'updateDocument']);
     Route::delete('/{id}', [DTLRController::class, 'deleteDocument']);
-    Route::post('/{id}/process-ocr', [DTLRController::class, 'processOCR']);
+    Route::get('/{id}/download', [DTLRController::class, 'downloadDocument']);
 });
 
-// Logistics Records routes
+// Logistics Record Routes
 Route::prefix('logistics-records')->group(function () {
     Route::get('/', [DTLRController::class, 'getLogisticsRecords']);
-    Route::post('/', [DTLRController::class, 'addLogisticsRecord']);
-    Route::put('/{id}', [DTLRController::class, 'updateLogisticsRecord']);
-    Route::delete('/{id}', [DTLRController::class, 'deleteLogisticsRecord']);
+    Route::get('/{id}', [DTLRController::class, 'getLogisticsRecord']);
+    Route::post('/export', [DTLRController::class, 'exportLogisticsRecords']);
 });
 
-// Utility routes
-Route::get('/document-types', [DTLRController::class, 'getDocumentTypes']);
-Route::get('/stats/overview', [DTLRController::class, 'getOverviewStats']);
+// Statistics and Dashboard Routes
+Route::get('/stats', [DTLRController::class, 'getStats']);
 
-// Search route
-Route::get('/search', [DTLRController::class, 'getDocuments']);
+// Fallback route for undefined endpoints
+Route::fallback(function () {
+    return response()->json([
+        'success' => false,
+        'message' => 'API endpoint not found'
+    ], 404);
+});

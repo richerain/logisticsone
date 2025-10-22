@@ -1,1054 +1,818 @@
 @extends('layouts.app')
 
-@section('title', 'DTLR Document Tracker')
+@section('title', 'Document Tracker - DTLR')
 
 @section('content')
-<div class="module-content bg-white rounded-xl p-6 shadow block">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Document Tracker</h2>
-        <button class="btn btn-primary" onclick="openUploadModal()">
-            <i class="bx bxs-plus-circle mr-2"></i>Upload Document
-        </button>
+    <div class="module-content bg-white rounded-xl p-6 shadow block">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Document Tracker</h2>
+            <button class="btn btn-primary" id="addDocumentBtn">
+                <i class="bx bx-plus mr-2"></i>Upload Document
+            </button>
+        </div>
+        <p>remove contract and other rom document type</p>
+        <p>linked tranc into transc ID's</p>
+        <p>uploaded by will be automatically fetched who is user is uploading it</p>
+
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
+                <div class="stat-figure text-primary">
+                    <i class="bx bx-file text-3xl"></i>
+                </div>
+                <div class="stat-title">Total Documents</div>
+                <div class="stat-value text-primary" id="total-documents">0</div>
+            </div>
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
+                <div class="stat-figure text-warning">
+                    <i class="bx bx-time text-3xl"></i>
+                </div>
+                <div class="stat-title">Pending Review</div>
+                <div class="stat-value text-warning" id="pending-documents">0</div>
+            </div>
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
+                <div class="stat-figure text-success">
+                    <i class="bx bx-check-circle text-3xl"></i>
+                </div>
+                <div class="stat-title">Indexed</div>
+                <div class="stat-value text-success" id="indexed-documents">0</div>
+            </div>
+            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-info">
+                <div class="stat-figure text-info">
+                    <i class="bx bx-archive text-3xl"></i>
+                </div>
+                <div class="stat-title">Archived</div>
+                <div class="stat-value text-info" id="archived-documents">0</div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="flex gap-4 mb-6 flex-wrap">
+            <div class="form-control flex-1 min-w-[300px]">
+                <input type="text" placeholder="Search documents..." class="input input-bordered w-full" id="searchDocuments">
+            </div>
+            <select class="select select-bordered" id="documentTypeFilter">
+                <option value="">All Types</option>
+                <option value="PO">Purchase Order</option>
+                <option value="GRN">Goods Received Note</option>
+                <option value="Invoice">Invoice</option>
+                <option value="Delivery Note">Delivery Note</option>
+                <option value="Quotation">Quotation</option>
+                <option value="Contract">Contract</option>
+                <option value="Other">Other</option>
+            </select>
+            <select class="select select-bordered" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Indexed">Indexed</option>
+                <option value="Pending Review">Pending Review</option>
+                <option value="Archived">Archived</option>
+            </select>
+        </div>
+
+        <!-- Documents Table -->
+        <div class="overflow-x-auto bg-base-100 rounded-lg">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="bg-gray-900 text-white">
+                        <th>Document ID</th>
+                        <th>Document Type</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>File</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="documents-table-body">
+                    <tr>
+                        <td colspan="8" class="text-center py-8">
+                            <div class="loading loading-spinner loading-lg"></div>
+                            <p class="text-gray-500 mt-2">Loading documents...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat text-primary-content rounded-lg p-4 shadow-lg border-l-4 border-primary">
-            <div class="stat-figure text-primary">
-                <i class="bx bxs-file text-3xl"></i>
+    <!-- Add/Edit Document Modal -->
+    <div id="documentModal" class="modal modal-lg">
+        <div class="modal-box max-w-4xl p-0 overflow-visible">
+            <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
+                <h3 class="font-bold text-white text-lg" id="documentModalTitle">Upload Document</h3>
+                <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeDocumentModalX">✕</button>
             </div>
-            <div class="stat-title text-primary">Total Documents</div>
-            <div class="stat-value text-primary" id="totalDocuments">0</div>
-        </div>
-        <div class="stat text-info-content rounded-lg p-4 shadow-lg border-l-4 border-info">
-            <div class="stat-figure text-info">
-                <i class="bx bxs-check-circle text-3xl"></i>
-            </div>
-            <div class="stat-title text-info">Indexed</div>
-            <div class="stat-value text-info" id="indexedDocuments">0</div>
-        </div>
-        <div class="stat text-success-content rounded-lg p-4 shadow-lg border-l-4 border-success">
-            <div class="stat-figure text-success">
-                <i class="bx bxs-time text-3xl"></i>
-            </div>
-            <div class="stat-title text-success">Pending Review</div>
-            <div class="stat-value text-success" id="pendingDocuments">0</div>
-        </div>
-        <div class="stat text-warning-content rounded-lg p-4 shadow-lg border-l-4 border-warning">
-            <div class="stat-figure text-warning">
-                <i class="bx bxs-archive text-3xl"></i>
-            </div>
-            <div class="stat-title text-warning">Archived</div>
-            <div class="stat-value text-warning" id="archivedDocuments">0</div>
-        </div>
-    </div>
-
-    <!-- Search and Filters -->
-    <div class="card bg-base-100 shadow-sm mb-6">
-        <div class="card-body">
-            <div class="flex flex-col md:flex-row gap-4">
-                <label class="input flex flex-1 items-center gap-2 border border-gray-300 rounded-lg px-4 py-2">
-                    <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <g
-                        stroke-linejoin="round"
-                        stroke-linecap="round"
-                        stroke-width="2.5"
-                        fill="none"
-                        stroke="currentColor"
-                        >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.3-4.3"></path>
-                        </g>
-                    </svg>
-                    <input class="w-full" type="search" id="searchInput" placeholder="Search documents..." onkeyup="handleSearch()" />
-                </label>
-                <div class="flex gap-2">
-                    <select id="documentTypeFilter" class="select select-bordered" onchange="handleSearch()">
-                        <option value="">All Types</option>
-                        <option value="PO">Purchase Order</option>
-                        <option value="GRN">Goods Received Note</option>
-                        <option value="Invoice">Invoice</option>
-                        <option value="Delivery Note">Delivery Note</option>
-                    </select>
-                    <select id="statusFilter" class="select select-bordered" onchange="handleSearch()">
-                        <option value="">All Status</option>
-                        <option value="indexed">Indexed</option>
-                        <option value="pending">Pending</option>
-                        <option value="review">Under Review</option>
-                        <option value="archived">Archived</option>
-                    </select>
-                </div>
-                <button class="btn bg-teal-600 text-white hover:bg-teal-700" onclick="openOCRModal()">
-                    <i class='bx bx-scan mr-2'></i>OCR Document
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Documents Table -->
-    <div class="overflow-x-auto">
-        <table class="table table-zebra w-full rounded-lg">
-            <thead class="bg-gray-800 text-white">
-                <tr>
-                    <th>Doc ID</th>
-                    <th>Type</th>
-                    <th>Linked To</th>
-                    <th>Extracted Fields</th>
-                    <th>Date Uploaded</th>
-                    <th>Uploaded By</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="documentsTableBody">
-                <!-- Loading row -->
-                <tr id="loadingRow">
-                    <td colspan="8" class="text-center py-8">
-                        <div class="flex justify-center items-center">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
-                            <span class="ml-2">Loading documents...</span>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination section -->
-    <div class="flex justify-between items-center mt-6">
-        <div class="text-sm text-gray-700">
-            Showing <span id="paginationFrom">0</span> to <span id="paginationTo">0</span> of <span id="paginationTotal">0</span> results
-        </div>
-        <div class="join" id="paginationContainer">
-            <!-- Pagination buttons will be generated here -->
-        </div>
-    </div>
-</div>
-
-<!-- Upload Document Modal -->
-<div id="uploadModal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box max-w-4xl">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg">Upload New Document</h3>
-            <button class="btn btn-sm btn-circle" onclick="closeUploadModal()">✕</button>
-        </div>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Document Type</span>
-                        </div>
-                        <select class="select select-bordered w-full" name="document_type" required>
-                            <option value="">Select Type</option>
-                            <option value="PO">Purchase Order</option>
-                            <option value="GRN">Goods Received Note</option>
-                            <option value="Invoice">Invoice</option>
-                            <option value="Delivery Note">Delivery Note</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </label>
-                </div>
-                <div>
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Linked Transaction</span>
-                        </div>
-                        <input type="text" class="input input-bordered w-full" name="linked_transaction" placeholder="e.g., PO-005, DLY-001">
-                    </label>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Document File</span>
-                        </div>
-                        <input type="file" class="file-input file-input-bordered w-full" name="document_file" accept=".pdf,.jpg,.jpeg,.png" required>
-                    </label>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="form-control">
-                        <div class="label">
-                            <span class="label-text">Description</span>
-                        </div>
-                        <textarea class="textarea textarea-bordered h-24" name="description" placeholder="Document description..."></textarea>
-                    </label>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Uploaded By</span>
-                        </div>
-                        <input type="text" class="input input-bordered w-full" name="uploaded_by" placeholder="Enter your name" required>
-                    </label>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Uploaded To (Department)</span>
-                        </div>
-                        <select class="select select-bordered w-full" name="uploaded_to" required>
-                            <option value="">Select Department</option>
-                            <option value="Procurement">Procurement</option>
-                            <option value="Logistics">Logistics</option>
-                            <option value="Warehousing">Warehousing</option>
-                            <option value="Asset Management">Asset Management</option>
-                            <option value="Document Tracking">Document Tracking</option>
-                        </select>
-                    </label>
-                </div>
-            </div>
-            <div class="modal-action">
-                <button type="button" class="btn btn-ghost" onclick="closeUploadModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Upload Document</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- OCR Modal -->
-<div id="ocrModal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box max-w-6xl">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg">OCR Document Processing</h3>
-            <button class="btn btn-sm btn-circle" onclick="closeOCRModal()">✕</button>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Left Section - File Upload & Preview -->
-            <div class="space-y-4">
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <input type="file" id="ocrFileInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
-                    <div class="cursor-pointer" onclick="document.getElementById('ocrFileInput').click()">
-                        <i class='bx bx-cloud-upload text-4xl text-gray-400 mb-2'></i>
-                        <p class="text-gray-600">Click to upload document</p>
-                        <p class="text-sm text-gray-500">Supports PDF, JPG, JPEG, PNG</p>
+            <div class="p-4 max-h-[70vh] overflow-y-auto">
+                <form id="documentForm" class="space-y-4" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" id="documentId" name="document_id">
+                    
+                    <!-- Auto-generated Document ID -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Document ID</span>
+                        </label>
+                        <input type="text" id="documentIdDisplay" class="input input-bordered input-sm w-full bg-gray-100" 
+                               readonly placeholder="Auto-generated">
                     </div>
-                </div>
-                <div id="filePreview" class="hidden">
-                    <h4 class="font-semibold mb-2">File Preview</h4>
-                    <div class="border rounded-lg p-4 bg-gray-50">
-                        <img id="previewImage" class="max-w-full max-h-64 mx-auto hidden">
-                        <div id="pdfPreview" class="hidden text-center">
-                            <i class='bx bxs-file-pdf text-4xl text-red-500 mb-2'></i>
-                            <p class="text-sm" id="pdfFileName"></p>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Document Type *</span>
+                            </label>
+                            <select id="documentType" name="document_type" class="select select-bordered select-sm w-full" required>
+                                <option value="">Select Document Type</option>
+                                <option value="PO">Purchase Order</option>
+                                <option value="GRN">Goods Received Note</option>
+                                <option value="Invoice">Invoice</option>
+                                <option value="Delivery Note">Delivery Note</option>
+                                <option value="Quotation">Quotation</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Linked Transaction</span>
+                            </label>
+                            <input type="text" id="linkedTransaction" name="linked_transaction" class="input input-bordered input-sm w-full" 
+                                   placeholder="e.g., PO-12345, GRN-67890">
                         </div>
                     </div>
-                </div>
-                <button id="processOCRBtn" class="btn btn-primary w-full hidden" onclick="processOCR()">
-                    <i class='bx bx-scan mr-2'></i>Process OCR
-                </button>
-            </div>
 
-            <!-- Right Section - Extracted Text -->
-            <div class="space-y-4">
-                <h4 class="font-semibold">Extracted Text</h4>
-                <div class="border rounded-lg p-4 bg-gray-50 h-64 overflow-y-auto">
-                    <pre id="extractedText" class="text-sm whitespace-pre-wrap">No text extracted yet. Upload a document and click Process OCR.</pre>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" class="input input-bordered" placeholder="PO Number" id="poNumber">
-                    <input type="text" class="input input-bordered" placeholder="Vendor Name" id="vendorName">
-                    <input type="text" class="input input-bordered" placeholder="Amount" id="amount">
-                    <input type="text" class="input input-bordered" placeholder="Date" id="documentDate">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Processed By</span>
-                        </div>
-                        <input type="text" class="input input-bordered w-full" id="processedBy" placeholder="Enter your name" required>
-                    </label>
-                </div>
-                <button class="btn btn-success w-full" onclick="saveOCRExtraction()">
-                    <i class='bx bx-save mr-2'></i>Save Extracted Data
-                </button>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Document File *</span>
+                        </label>
+                        <input type="file" id="documentFile" name="document_file" class="file-input file-input-bordered file-input-sm w-full" 
+                               accept=".pdf,.jpg,.jpeg,.png" required>
+                        <label class="label">
+                            <span class="label-text-alt">Supported formats: PDF, JPG, JPEG, PNG (Max: 10MB)</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Uploaded By *</span>
+                        </label>
+                        <input type="text" id="uploadedBy" name="uploaded_by" class="input input-bordered input-sm w-full" 
+                               placeholder="Enter your name or department" required>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Status</span>
+                        </label>
+                        <select id="documentStatus" name="status" class="select select-bordered select-sm w-full">
+                            <option value="Pending Review">Pending Review</option>
+                            <option value="Indexed">Indexed</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Extracted Fields (OCR)</span>
+                        </label>
+                        <textarea id="extractedFields" name="extracted_fields" class="textarea textarea-bordered textarea-sm h-24" 
+                                  placeholder="OCR extracted data will appear here automatically..."></textarea>
+                        <label class="label">
+                            <span class="label-text-alt">Fields extracted by OCR will be populated automatically</span>
+                        </label>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="modal-action flex justify-end space-x-3 pt-4 border-t">
+                        <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeDocumentModal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300 shadow-lg px-4" id="documentSubmitBtn">
+                            <i class="bx bx-save mr-1"></i><span id="documentModalSubmitText">Upload Document</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-        </div>
-        <div class="modal-action">
-            <button class="btn btn-ghost" onclick="closeOCRModal()">Close</button>
         </div>
     </div>
-</div>
 
-<!-- View Document Modal -->
-<div id="viewModal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box max-w-4xl">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg">Document Details</h3>
-            <button class="btn btn-sm btn-circle" onclick="closeViewModal()">✕</button>
-        </div>
-        <div id="viewModalContent">
-            <!-- Content will be loaded here -->
-        </div>
-        <div class="modal-action">
-            <button class="btn btn-ghost" onclick="closeViewModal()">Close</button>
+    <!-- View Document Modal -->
+    <div id="viewDocumentModal" class="modal modal-lg">
+        <div class="modal-box max-w-4xl p-0 overflow-visible">
+            <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
+                <h3 class="font-bold text-white text-lg">Document Details</h3>
+                <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeViewDocumentModalX">✕</button>
+            </div>
+            <div class="p-4 max-h-[70vh] overflow-y-auto">
+                <div class="space-y-4" id="documentDetails">
+                    <!-- Document details will be populated here -->
+                </div>
+                <div class="modal-action flex justify-end pt-4 border-t">
+                    <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeViewDocumentModal">Close</button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Edit Document Modal -->
-<div id="editModal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box max-w-4xl">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg">Edit Document</h3>
-            <button class="btn btn-sm btn-circle" onclick="closeEditModal()">✕</button>
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal">
+        <div class="modal-box max-w-sm text-center p-4">
+            <div class="loading loading-spinner loading-lg text-primary mb-2"></div>
+            <h3 class="font-bold text-sm mb-1" id="loadingTitle">Processing...</h3>
         </div>
-        <form id="editForm">
-            <div id="editModalContent">
-                <!-- Content will be loaded here -->
-            </div>
-            <div class="modal-action">
-                <button type="button" class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        </form>
     </div>
-</div>
 
 <script>
-// ==================== CONFIGURATION ====================
-const API_BASE_URL = 'http://localhost:8001/api/dtlr';
-let currentPage = 1;
-const itemsPerPage = 10;
-let allDocuments = [];
-let filteredDocuments = [];
-let currentDocumentId = null;
+    let documents = [];
 
-// ==================== INITIALIZATION ====================
-document.addEventListener('DOMContentLoaded', function() {
-    loadDocuments();
-    loadStats();
-});
+    // ==================== CONFIGURATION ====================
+    const API_BASE_URL = 'http://localhost:8001/api/dtlr';
 
-// ==================== STATS FUNCTIONS ====================
-async function loadStats() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/stats/overview`);
-        const data = await response.json();
-        
-        if (data.success) {
-            document.getElementById('totalDocuments').textContent = data.data.documents.total_documents || 0;
-            document.getElementById('indexedDocuments').textContent = data.data.documents.indexed || 0;
-            document.getElementById('pendingDocuments').textContent = data.data.documents.pending || 0;
-            document.getElementById('archivedDocuments').textContent = data.data.documents.archived || 0;
-        }
-    } catch (error) {
-        console.error('Error loading stats:', error);
+    // Utility functions
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
-}
 
-// ==================== DOCUMENT FUNCTIONS ====================
-async function loadDocuments() {
-    showLoading();
-    try {
-        const searchParams = new URLSearchParams({
-            page: currentPage,
-            limit: itemsPerPage,
-            search: document.getElementById('searchInput').value,
-            document_type: document.getElementById('documentTypeFilter').value,
-            status: document.getElementById('statusFilter').value
+    function getStatusBadge(status) {
+        const statusClasses = {
+            'Indexed': 'bg-green-600 uppercase',
+            'Pending Review': 'bg-yellow-400 uppercase',
+            'Archived': 'bg-blue-400 uppercase'
+        };
+        
+        return `<span class="badge text-white font-bold tracking-wider text-xs px-3 py-2 ${statusClasses[status] || 'bg-gray-400'} border-0">
+            ${status}
+        </span>`;
+    }
+
+    function getDocumentTypeBadge(type) {
+        const typeClasses = {
+            'PO': 'bg-purple-500',
+            'GRN': 'bg-orange-500',
+            'Invoice': 'bg-green-500',
+            'Delivery Note': 'bg-blue-500',
+            'Quotation': 'bg-pink-500',
+            'Contract': 'bg-red-500',
+            'Other': 'bg-gray-500'
+        };
+        
+        const fullTypes = {
+            'PO': 'Purchase Order',
+            'GRN': 'Goods Received Note',
+            'Invoice': 'Invoice',
+            'Delivery Note': 'Delivery Note',
+            'Quotation': 'Quotation',
+            'Contract': 'Contract',
+            'Other': 'Other Document'
+        };
+        
+        return `<span class="badge text-white font-semibold text-xs px-2 py-1 ${typeClasses[type] || 'bg-gray-400'} border-0">
+            ${fullTypes[type] || type}
+        </span>`;
+    }
+
+    // Show loading modal
+    function showLoadingModal(title = 'Processing...') {
+        document.getElementById('loadingTitle').textContent = title;
+        document.getElementById('loadingModal').classList.add('modal-open');
+    }
+
+    // Hide loading modal
+    function hideLoadingModal() {
+        document.getElementById('loadingModal').classList.remove('modal-open');
+    }
+
+    // Show success toast
+    function showSuccessToast(message) {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
         });
 
-        const response = await fetch(`${API_BASE_URL}/documents?${searchParams}`);
-        const data = await response.json();
-        
-        if (data.success) {
-            allDocuments = data.data.documents || [];
-            filteredDocuments = allDocuments;
-            renderDocuments();
-            updatePagination(data.data.total, data.data.current_page, data.data.last_page);
-        } else {
-            throw new Error(data.message);
+        Toast.fire({
+            icon: 'success',
+            title: message
+        });
+    }
+
+    // Load data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeEventListeners();
+        loadDocuments();
+        loadStats();
+    });
+
+    function initializeEventListeners() {
+        // Add document button
+        document.getElementById('addDocumentBtn').addEventListener('click', openAddDocumentModal);
+
+        // Close modal buttons
+        document.getElementById('closeDocumentModal').addEventListener('click', closeDocumentModal);
+        document.getElementById('closeDocumentModalX').addEventListener('click', closeDocumentModal);
+        document.getElementById('closeViewDocumentModal').addEventListener('click', closeViewDocumentModal);
+        document.getElementById('closeViewDocumentModalX').addEventListener('click', closeViewDocumentModal);
+
+        // Form submission
+        document.getElementById('documentForm').addEventListener('submit', handleDocumentSubmit);
+
+        // Search and filter
+        document.getElementById('searchDocuments').addEventListener('input', filterDocuments);
+        document.getElementById('documentTypeFilter').addEventListener('change', filterDocuments);
+        document.getElementById('statusFilter').addEventListener('change', filterDocuments);
+    }
+
+    async function loadStats() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/stats`);
+            const result = await response.json();
+            
+            if (result.success) {
+                const stats = result.data.documents;
+                document.getElementById('total-documents').textContent = stats.total_documents;
+                document.getElementById('pending-documents').textContent = stats.pending_review;
+                document.getElementById('indexed-documents').textContent = stats.indexed_documents;
+                document.getElementById('archived-documents').textContent = stats.archived_documents;
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
         }
-    } catch (error) {
-        console.error('Error loading documents:', error);
-        showError('Failed to load documents: ' + error.message);
-    } finally {
-        hideLoading();
     }
-}
 
-function renderDocuments() {
-    const tbody = document.getElementById('documentsTableBody');
-    if (!tbody) {
-        console.error('documentsTableBody not found');
-        return;
+    async function loadDocuments() {
+        try {
+            showDocumentsLoadingState();
+            const response = await fetch(`${API_BASE_URL}/documents`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                documents = result.data || [];
+                renderDocuments(documents);
+            } else {
+                throw new Error(result.message || 'Failed to load documents');
+            }
+        } catch (error) {
+            console.error('Error loading documents:', error);
+            showDocumentsErrorState('Failed to load documents: ' + error.message);
+        }
     }
-    
-    tbody.innerHTML = '';
 
-    if (filteredDocuments.length === 0) {
+    function showDocumentsLoadingState() {
+        const tbody = document.getElementById('documents-table-body');
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="grid grid-cols-1 text-gray-500 text-center">
-                    <i class='bx bx-lg bxs-file-find'></i>
-                    No documents found
+                <td colspan="8" class="text-center py-8">
+                    <div class="loading loading-spinner loading-lg"></div>
+                    <p class="text-gray-500 mt-2">Loading documents...</p>
                 </td>
             </tr>
         `;
-        return;
     }
 
-    filteredDocuments.forEach(doc => {
-        const extractedFields = doc.extracted_fields ? 
-            (typeof doc.extracted_fields === 'string' ? doc.extracted_fields : JSON.stringify(doc.extracted_fields)) : 
-            'No data extracted';
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="font-semibold">${doc.document_id || 'N/A'}</td>
-            <td>
-                <span class="badge badge-outline">${doc.document_type || 'N/A'}</span>
-            </td>
-            <td>${doc.linked_transaction || 'N/A'}</td>
-            <td class="max-w-xs truncate" title="${extractedFields}">${extractedFields}</td>
-            <td>${doc.upload_date || 'N/A'}</td>
-            <td>${doc.uploaded_by || 'N/A'}</td>
-            <td>
-                <span class="badge ${getStatusBadgeClass(doc.status)}">${doc.status || 'N/A'}</span>
-            </td>
-            <td>
-                <div class="flex gap-1">
-                    <button class="btn btn-sm bg-blue-400 btn-circle" onclick="viewDocument('${doc.id}')">
-                        <i class='bx bx-show-alt'></i>
-                    </button>
-                    <button class="btn btn-sm bg-yellow-400 btn-circle" onclick="editDocument('${doc.id}')">
-                        <i class='bx bx-edit'></i>
-                    </button>
-                    <button class="btn btn-sm bg-red-400 btn-circle" onclick="deleteDocument('${doc.id}')">
-                        <i class='bx bx-trash'></i>
-                    </button>
-                </div>
-            </td>
+    function showDocumentsErrorState(message) {
+        const tbody = document.getElementById('documents-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-8">
+                    <i class="bx bx-error text-4xl text-red-400 mb-2"></i>
+                    <p class="text-red-500">${message}</p>
+                    <button class="btn btn-sm btn-outline mt-2" onclick="loadDocuments()">Retry</button>
+                </td>
+            </tr>
         `;
-        tbody.appendChild(row);
-    });
-}
-
-function getStatusBadgeClass(status) {
-    const classes = {
-        'indexed': 'badge-success',
-        'pending': 'badge-warning',
-        'review': 'badge-info',
-        'archived': 'badge-neutral'
-    };
-    return classes[status] || 'badge-outline';
-}
-
-// ==================== SEARCH AND FILTER ====================
-function handleSearch() {
-    currentPage = 1;
-    loadDocuments();
-}
-
-// ==================== PAGINATION ====================
-function updatePagination(total, current, last) {
-    const fromElement = document.getElementById('paginationFrom');
-    const toElement = document.getElementById('paginationTo');
-    const totalElement = document.getElementById('paginationTotal');
-    const container = document.getElementById('paginationContainer');
-
-    if (fromElement) fromElement.textContent = ((current - 1) * itemsPerPage) + 1;
-    if (toElement) toElement.textContent = Math.min(current * itemsPerPage, total);
-    if (totalElement) totalElement.textContent = total;
-
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    // Previous button
-    const prevButton = document.createElement('button');
-    prevButton.className = 'join-item btn';
-    prevButton.innerHTML = '<i class="bx bxs-chevron-left"></i>';
-    prevButton.disabled = current === 1;
-    prevButton.onclick = () => changePage(current - 1);
-    container.appendChild(prevButton);
-
-    // Page numbers
-    const startPage = Math.max(1, current - 2);
-    const endPage = Math.min(last, startPage + 4);
-    
-    for (let i = startPage; i <= endPage; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.className = `join-item btn ${i === current ? 'btn-active' : ''}`;
-        pageButton.textContent = i;
-        pageButton.onclick = () => changePage(i);
-        container.appendChild(pageButton);
     }
 
-    // Next button
-    const nextButton = document.createElement('button');
-    nextButton.className = 'join-item btn';
-    nextButton.innerHTML = '<i class="bx bxs-chevron-right"></i>';
-    nextButton.disabled = current === last;
-    nextButton.onclick = () => changePage(current + 1);
-    container.appendChild(nextButton);
-}
-
-function changePage(page) {
-    currentPage = page;
-    loadDocuments();
-}
-
-// ==================== MODAL FUNCTIONS ====================
-function openUploadModal() {
-    const modal = document.getElementById('uploadModal');
-    if (modal) modal.classList.add('modal-open');
-}
-
-function closeUploadModal() {
-    const modal = document.getElementById('uploadModal');
-    if (modal) modal.classList.remove('modal-open');
-    const form = document.getElementById('uploadForm');
-    if (form) form.reset();
-}
-
-function openOCRModal() {
-    const modal = document.getElementById('ocrModal');
-    if (modal) modal.classList.add('modal-open');
-    
-    const fileInput = document.getElementById('ocrFileInput');
-    if (fileInput) {
-        fileInput.addEventListener('change', handleFileSelect);
-    }
-}
-
-function closeOCRModal() {
-    const modal = document.getElementById('ocrModal');
-    if (modal) modal.classList.remove('modal-open');
-    resetOCRModal();
-}
-
-function closeViewModal() {
-    const modal = document.getElementById('viewModal');
-    if (modal) modal.classList.remove('modal-open');
-}
-
-function closeEditModal() {
-    const modal = document.getElementById('editModal');
-    if (modal) modal.classList.remove('modal-open');
-}
-
-function resetOCRModal() {
-    const fileInput = document.getElementById('ocrFileInput');
-    const filePreview = document.getElementById('filePreview');
-    const processBtn = document.getElementById('processOCRBtn');
-    const previewImage = document.getElementById('previewImage');
-    const pdfPreview = document.getElementById('pdfPreview');
-    const extractedText = document.getElementById('extractedText');
-    const poNumber = document.getElementById('poNumber');
-    const vendorName = document.getElementById('vendorName');
-    const amount = document.getElementById('amount');
-    const documentDate = document.getElementById('documentDate');
-    const processedBy = document.getElementById('processedBy');
-
-    if (fileInput) fileInput.value = '';
-    if (filePreview) filePreview.classList.add('hidden');
-    if (processBtn) processBtn.classList.add('hidden');
-    if (previewImage) previewImage.classList.add('hidden');
-    if (pdfPreview) pdfPreview.classList.add('hidden');
-    if (extractedText) extractedText.textContent = 'No text extracted yet. Upload a document and click Process OCR.';
-    if (poNumber) poNumber.value = '';
-    if (vendorName) vendorName.value = '';
-    if (amount) amount.value = '';
-    if (documentDate) documentDate.value = '';
-    if (processedBy) processedBy.value = '';
-    
-    currentDocumentId = null;
-}
-
-// ==================== FILE HANDLING ====================
-function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const preview = document.getElementById('filePreview');
-    const previewImage = document.getElementById('previewImage');
-    const pdfPreview = document.getElementById('pdfPreview');
-    const processBtn = document.getElementById('processOCRBtn');
-
-    if (preview) preview.classList.remove('hidden');
-    if (processBtn) processBtn.classList.remove('hidden');
-
-    if (file.type.startsWith('image/')) {
-        if (previewImage) {
-            previewImage.classList.remove('hidden');
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-        if (pdfPreview) pdfPreview.classList.add('hidden');
-    } else if (file.type === 'application/pdf') {
-        if (previewImage) previewImage.classList.add('hidden');
-        if (pdfPreview) {
-            pdfPreview.classList.remove('hidden');
-            const pdfFileName = document.getElementById('pdfFileName');
-            if (pdfFileName) pdfFileName.textContent = file.name;
-        }
-    }
-}
-
-// ==================== OCR PROCESSING ====================
-async function processOCR() {
-    const fileInput = document.getElementById('ocrFileInput');
-    if (!fileInput) return;
-    
-    const file = fileInput.files[0];
-    const processedBy = document.getElementById('processedBy');
-    
-    if (!file) {
-        showAlert('Please select a file first', 'warning');
-        return;
-    }
-
-    if (!processedBy || !processedBy.value.trim()) {
-        showAlert('Please enter your name in the "Processed By" field', 'warning');
-        return;
-    }
-
-    showLoadingAlert('Processing OCR...');
-
-    try {
-        // First upload the document
-        const uploadFormData = new FormData();
-        uploadFormData.append('document_type', 'Other');
-        uploadFormData.append('document_file', file);
-        uploadFormData.append('uploaded_by', processedBy.value.trim());
-        uploadFormData.append('uploaded_to', 'Document Tracking');
-        uploadFormData.append('description', 'Document uploaded for OCR processing');
-
-        const uploadResponse = await fetch(`${API_BASE_URL}/documents`, {
-            method: 'POST',
-            body: uploadFormData
-        });
-
-        const uploadData = await uploadResponse.json();
-
-        if (uploadData.success) {
-            currentDocumentId = uploadData.data.id;
-            
-            // Then process OCR
-            const ocrResponse = await fetch(`${API_BASE_URL}/documents/${currentDocumentId}/process-ocr`, {
-                method: 'POST'
-            });
-
-            const ocrData = await ocrResponse.json();
-
-            if (ocrData.success) {
-                const extractedData = ocrData.data.extracted_data || {};
-                const extractedText = document.getElementById('extractedText');
-                const poNumber = document.getElementById('poNumber');
-                const vendorName = document.getElementById('vendorName');
-                const amount = document.getElementById('amount');
-                const documentDate = document.getElementById('documentDate');
-
-                if (extractedText) extractedText.textContent = extractedData.raw_text || 'No text extracted';
-                if (poNumber) poNumber.value = extractedData.po_number || '';
-                if (vendorName) vendorName.value = extractedData.vendor_name || '';
-                if (amount) amount.value = extractedData.amount || '';
-                if (documentDate) documentDate.value = extractedData.date || '';
-
-                showAlert('OCR processing completed successfully!', 'success');
-            } else {
-                throw new Error(ocrData.message || 'OCR processing failed');
-            }
-        } else {
-            throw new Error(uploadData.message || 'Document upload failed');
-        }
-    } catch (error) {
-        console.error('OCR processing error:', error);
-        showAlert('OCR processing failed: ' + error.message, 'error');
-    }
-}
-
-async function saveOCRExtraction() {
-    if (!currentDocumentId) {
-        showAlert('No document processed yet', 'warning');
-        return;
-    }
-
-    const processedBy = document.getElementById('processedBy');
-    if (!processedBy || !processedBy.value.trim()) {
-        showAlert('Please enter your name in the "Processed By" field', 'warning');
-        return;
-    }
-
-    const extractionData = {
-        extracted_fields: JSON.stringify({
-            po_number: document.getElementById('poNumber')?.value || '',
-            vendor_name: document.getElementById('vendorName')?.value || '',
-            amount: document.getElementById('amount')?.value || '',
-            date: document.getElementById('documentDate')?.value || '',
-            processed_by: processedBy.value.trim()
-        }),
-        status: 'indexed'
-    };
-
-    showLoadingAlert('Saving extracted data...');
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/documents/${currentDocumentId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(extractionData)
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showAlert('Extracted data saved successfully!', 'success');
-            closeOCRModal();
-            loadDocuments(); // Refresh the list
-        } else {
-            throw new Error(data.message || 'Failed to save data');
-        }
-    } catch (error) {
-        console.error('Save error:', error);
-        showAlert('Failed to save extracted data: ' + error.message, 'error');
-    }
-}
-
-// ==================== CRUD OPERATIONS ====================
-async function viewDocument(id) {
-    showLoadingAlert('Loading document details...');
-    try {
-        const response = await fetch(`${API_BASE_URL}/documents/${id}`);
-        const data = await response.json();
+    function renderDocuments(documentsData) {
+        const tbody = document.getElementById('documents-table-body');
         
-        if (data.success) {
-            const doc = data.data;
-            const extractedFields = doc.extracted_fields ? 
-                (typeof doc.extracted_fields === 'string' ? doc.extracted_fields : JSON.stringify(doc.extracted_fields, null, 2)) : 
-                'No data extracted';
-            
-            const viewModalContent = document.getElementById('viewModalContent');
-            if (viewModalContent) {
-                viewModalContent.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="font-semibold">Document ID:</label>
-                                <p>${doc.document_id || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <label class="font-semibold">Type:</label>
-                                <p>${doc.document_type || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <label class="font-semibold">Linked Transaction:</label>
-                                <p>${doc.linked_transaction || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <label class="font-semibold">Status:</label>
-                                <span class="badge ${getStatusBadgeClass(doc.status)}">${doc.status || 'N/A'}</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="font-semibold">Extracted Fields:</label>
-                            <pre class="bg-gray-100 p-3 rounded mt-1 text-sm max-h-40 overflow-auto">${extractedFields}</pre>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="font-semibold">Upload Date:</label>
-                                <p>${doc.upload_date || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <label class="font-semibold">Uploaded By:</label>
-                                <p>${doc.uploaded_by || 'N/A'}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="font-semibold">Description:</label>
-                            <p class="mt-1 p-3 bg-gray-100 rounded">${doc.description || 'No description'}</p>
-                        </div>
-                    </div>
-                `;
-            }
-            const viewModal = document.getElementById('viewModal');
-            if (viewModal) viewModal.classList.add('modal-open');
-        } else {
-            throw new Error(data.message || 'Failed to load document');
-        }
-    } catch (error) {
-        console.error('Error loading document:', error);
-        showAlert('Failed to load document details: ' + error.message, 'error');
-    }
-}
-
-async function editDocument(id) {
-    showLoadingAlert('Loading document for editing...');
-    try {
-        const response = await fetch(`${API_BASE_URL}/documents/${id}`);
-        const data = await response.json();
-        
-        if (data.success) {
-            const doc = data.data;
-            const editModalContent = document.getElementById('editModalContent');
-            if (editModalContent) {
-                editModalContent.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="form-control w-full">
-                                <div class="label">
-                                    <span class="label-text">Document ID</span>
-                                </div>
-                                <input type="text" class="input input-bordered w-full" name="document_id" value="${doc.document_id || ''}" required>
-                            </label>
-                        </div>
-                        <div>
-                            <label class="form-control w-full">
-                                <div class="label">
-                                    <span class="label-text">Document Type</span>
-                                </div>
-                                <select class="select select-bordered w-full" name="document_type" required>
-                                    <option value="PO" ${doc.document_type === 'PO' ? 'selected' : ''}>Purchase Order</option>
-                                    <option value="GRN" ${doc.document_type === 'GRN' ? 'selected' : ''}>Goods Received Note</option>
-                                    <option value="Invoice" ${doc.document_type === 'Invoice' ? 'selected' : ''}>Invoice</option>
-                                    <option value="Delivery Note" ${doc.document_type === 'Delivery Note' ? 'selected' : ''}>Delivery Note</option>
-                                    <option value="Contract" ${doc.document_type === 'Contract' ? 'selected' : ''}>Contract</option>
-                                    <option value="Other" ${doc.document_type === 'Other' ? 'selected' : ''}>Other</option>
-                                </select>
-                            </label>
-                        </div>
-                        <div>
-                            <label class="form-control w-full">
-                                <div class="label">
-                                    <span class="label-text">Linked Transaction</span>
-                                </div>
-                                <input type="text" class="input input-bordered w-full" name="linked_transaction" value="${doc.linked_transaction || ''}">
-                            </label>
-                        </div>
-                        <div>
-                            <label class="form-control w-full">
-                                <div class="label">
-                                    <span class="label-text">Status</span>
-                                </div>
-                                <select class="select select-bordered w-full" name="status" required>
-                                    <option value="pending" ${doc.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                    <option value="review" ${doc.status === 'review' ? 'selected' : ''}>Under Review</option>
-                                    <option value="indexed" ${doc.status === 'indexed' ? 'selected' : ''}>Indexed</option>
-                                    <option value="archived" ${doc.status === 'archived' ? 'selected' : ''}>Archived</option>
-                                </select>
-                            </label>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="form-control">
-                                <div class="label">
-                                    <span class="label-text">Extracted Fields</span>
-                                </div>
-                                <textarea class="textarea textarea-bordered h-24" name="extracted_fields">${typeof doc.extracted_fields === 'string' ? doc.extracted_fields : JSON.stringify(doc.extracted_fields || '')}</textarea>
-                            </label>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="form-control">
-                                <div class="label">
-                                    <span class="label-text">Description</span>
-                                </div>
-                                <textarea class="textarea textarea-bordered h-24" name="description">${doc.description || ''}</textarea>
-                            </label>
-                        </div>
-                    </div>
-                    <input type="hidden" name="id" value="${id}">
-                `;
-            }
-            
-            const editForm = document.getElementById('editForm');
-            if (editForm) {
-                editForm.onsubmit = function(e) {
-                    e.preventDefault();
-                    updateDocument(id);
-                };
-            }
-            
-            const editModal = document.getElementById('editModal');
-            if (editModal) editModal.classList.add('modal-open');
-        } else {
-            throw new Error(data.message || 'Failed to load document');
-        }
-    } catch (error) {
-        console.error('Error loading document for edit:', error);
-        showAlert('Failed to load document for editing: ' + error.message, 'error');
-    }
-}
-
-async function updateDocument(id) {
-    const form = document.getElementById('editForm');
-    if (!form) return;
-
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-
-    showLoadingAlert('Updating document...');
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/documents/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            showAlert('Document updated successfully!', 'success');
-            closeEditModal();
-            loadDocuments(); // Refresh the list
-        } else {
-            throw new Error(result.message || 'Failed to update document');
-        }
-    } catch (error) {
-        console.error('Update error:', error);
-        showAlert('Failed to update document: ' + error.message, 'error');
-    }
-}
-
-function deleteDocument(id) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            showLoadingAlert('Deleting document...');
-            try {
-                const response = await fetch(`${API_BASE_URL}/documents/${id}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert('Document deleted successfully!', 'success');
-                    loadDocuments(); // Refresh the list
-                } else {
-                    throw new Error(data.message || 'Failed to delete document');
-                }
-            } catch (error) {
-                console.error('Delete error:', error);
-                showAlert('Failed to delete document: ' + error.message, 'error');
-            }
-        }
-    });
-}
-
-// ==================== UPLOAD FORM HANDLING ====================
-const uploadForm = document.getElementById('uploadForm');
-if (uploadForm) {
-    uploadForm.onsubmit = async function(e) {
-        e.preventDefault();
-        
-        console.log('Upload form submitted');
-        
-        // Validate file input
-        const fileInput = this.querySelector('input[name="document_file"]');
-        if (!fileInput || !fileInput.files[0]) {
-            showAlert('Please select a document file to upload', 'warning');
+        if (documentsData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-8">
+                        <i class="bx bx-file text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-500">No documents found</p>
+                        <button class="btn btn-sm btn-primary mt-2" id="addFirstDocumentBtn">Upload First Document</button>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('addFirstDocumentBtn')?.addEventListener('click', openAddDocumentModal);
             return;
         }
 
-        console.log('File selected:', fileInput.files[0].name);
+        tbody.innerHTML = documentsData.map(document => {
+            const fileBadge = document.file_path ? 
+                `<span class="badge badge-success text-white">Available</span>` :
+                `<span class="badge badge-error text-white">Missing</span>`;
+                
+            return `
+            <tr>
+                <td class="font-mono font-semibold text-sm">${document.document_id}</td>
+                <td>${getDocumentTypeBadge(document.document_type)}</td>
+                <td class="text-sm">${formatDate(document.upload_date)}</td>
+                <td>${getStatusBadge(document.status)}</td>
+                <td>${fileBadge}</td>
+                <td>
+                    <div class="flex space-x-1">
+                        <button title="View" class="btn btn-sm btn-circle btn-info view-document-btn" data-document-id="${document.id}">
+                            <i class="bx bx-show-alt text-sm"></i>
+                        </button>
+                        ${document.file_path ? `
+                        <button title="Download" class="btn btn-sm btn-circle btn-success download-document-btn" data-document-id="${document.id}">
+                            <i class="bx bx-download text-sm"></i>
+                        </button>
+                        ` : ''}
+                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-document-btn" data-document-id="${document.id}">
+                            <i class="bx bx-edit text-sm"></i>
+                        </button>
+                        <button title="Delete" class="btn btn-sm btn-circle btn-error delete-document-btn" data-document-id="${document.id}">
+                            <i class="bx bx-trash text-sm"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            `;
+        }).join('');
+
+        // Add event listeners to dynamically created buttons
+        addDynamicEventListeners();
+    }
+
+    function addDynamicEventListeners() {
+        document.querySelectorAll('.view-document-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const documentId = this.getAttribute('data-document-id');
+                viewDocument(parseInt(documentId));
+            });
+        });
+
+        document.querySelectorAll('.download-document-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const documentId = this.getAttribute('data-document-id');
+                downloadDocument(parseInt(documentId));
+            });
+        });
+
+        document.querySelectorAll('.edit-document-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const documentId = this.getAttribute('data-document-id');
+                editDocument(parseInt(documentId));
+            });
+        });
+
+        document.querySelectorAll('.delete-document-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const documentId = this.getAttribute('data-document-id');
+                deleteDocument(parseInt(documentId));
+            });
+        });
+    }
+
+    function filterDocuments() {
+        const searchTerm = document.getElementById('searchDocuments').value.toLowerCase();
+        const typeFilter = document.getElementById('documentTypeFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        
+        const filtered = documents.filter(document => {
+            const matchesSearch = searchTerm === '' || 
+                document.document_id.toLowerCase().includes(searchTerm) ||
+                document.document_type.toLowerCase().includes(searchTerm) ||
+                (document.linked_transaction && document.linked_transaction.toLowerCase().includes(searchTerm)) ||
+                document.uploaded_by.toLowerCase().includes(searchTerm);
+            
+            const matchesType = typeFilter === '' || document.document_type === typeFilter;
+            const matchesStatus = statusFilter === '' || document.status === statusFilter;
+            
+            return matchesSearch && matchesType && matchesStatus;
+        });
+        
+        renderDocuments(filtered);
+    }
+
+    // Modal Functions
+    function openAddDocumentModal() {
+        document.getElementById('documentModalTitle').textContent = 'Upload Document';
+        document.getElementById('documentModalSubmitText').textContent = 'Upload Document';
+        document.getElementById('documentForm').reset();
+        document.getElementById('documentId').value = '';
+        document.getElementById('documentIdDisplay').value = 'Auto-generated';
+        document.getElementById('documentStatus').value = 'Pending Review';
+        
+        document.getElementById('documentModal').classList.add('modal-open');
+    }
+
+    function closeDocumentModal() {
+        document.getElementById('documentModal').classList.remove('modal-open');
+        document.getElementById('documentForm').reset();
+    }
+
+    function openViewDocumentModal() {
+        document.getElementById('viewDocumentModal').classList.add('modal-open');
+    }
+
+    function closeViewDocumentModal() {
+        document.getElementById('viewDocumentModal').classList.remove('modal-open');
+    }
+
+    // Document Actions
+    function viewDocument(documentId) {
+        const document = documents.find(d => d.id === documentId);
+        if (!document) return;
+
+        const documentDetails = `
+            <div class="space-y-4">
+                <!-- Basic Information -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <strong class="text-gray-700 text-xs">Document ID:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 font-mono">${document.document_id}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">Document Type:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${getDocumentTypeBadge(document.document_type)}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">Linked Transaction:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${document.linked_transaction || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">Uploaded By:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${document.uploaded_by}</p>
+                    </div>
+                </div>
+
+                <!-- File Information -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <strong class="text-gray-700 text-xs">Upload Date:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${formatDate(document.upload_date)}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">Status:</strong>
+                        <p class="mt-1 p-2">${getStatusBadge(document.status)}</p>
+                    </div>
+                </div>
+
+                <!-- File Details -->
+                ${document.file_path ? `
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <strong class="text-gray-700 text-xs">File Name:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${document.file_name}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">File Type:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${document.file_type}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">File Size:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${formatFileSize(document.file_size)}</p>
+                    </div>
+                </div>
+                ` : '<p class="text-warning text-sm">No file attached</p>'}
+
+                <!-- Extracted Fields -->
+                ${document.extracted_fields ? `
+                <div>
+                    <strong class="text-gray-700 text-xs">OCR Extracted Fields:</strong>
+                    <div class="text-sm p-2 bg-gray-50 rounded border mt-1 max-h-32 overflow-y-auto">
+                        <pre>${JSON.stringify(JSON.parse(document.extracted_fields), null, 2)}</pre>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Action Buttons -->
+                ${document.file_path ? `
+                <div class="flex justify-center pt-4">
+                    <button class="btn btn-success btn-sm download-from-view" data-document-id="${document.id}">
+                        <i class="bx bx-download mr-2"></i>Download File
+                    </button>
+                </div>
+                ` : ''}
+            </div>
+        `;
+
+        document.getElementById('documentDetails').innerHTML = documentDetails;
+        
+        // Add event listener for download button in view modal
+        const downloadBtn = document.querySelector('.download-from-view');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function() {
+                downloadDocument(document.id);
+            });
+        }
+        
+        openViewDocumentModal();
+    }
+
+    function formatFileSize(bytes) {
+        if (!bytes) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function editDocument(documentId) {
+        const document = documents.find(d => d.id === documentId);
+        if (!document) return;
+
+        document.getElementById('documentModalTitle').textContent = 'Edit Document';
+        document.getElementById('documentModalSubmitText').textContent = 'Update Document';
+        
+        document.getElementById('documentId').value = document.id;
+        document.getElementById('documentIdDisplay').value = document.document_id;
+        document.getElementById('documentType').value = document.document_type;
+        document.getElementById('linkedTransaction').value = document.linked_transaction || '';
+        document.getElementById('uploadedBy').value = document.uploaded_by;
+        document.getElementById('documentStatus').value = document.status;
+        document.getElementById('extractedFields').value = document.extracted_fields || '';
+
+        // File input is not required for edit
+        document.getElementById('documentFile').required = false;
+
+        document.getElementById('documentModal').classList.add('modal-open');
+    }
+
+    async function handleDocumentSubmit(e) {
+        e.preventDefault();
         
         const formData = new FormData(this);
-
-        // Log FormData contents for debugging
-        for (let [key, value] of formData.entries()) {
-            if (key === 'document_file') {
-                console.log('FormData:', key, value.name, value.size, value.type);
-            } else {
-                console.log('FormData:', key, value);
-            }
-        }
-
-        showLoadingAlert('Uploading document...');
+        const documentId = document.getElementById('documentId').value;
+        const isEdit = !!documentId;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/documents`, {
-                method: 'POST',
-                body: formData,
-                // Don't set Content-Type header - let browser set it with boundary
-            });
+            showLoadingModal(
+                isEdit ? 'Updating Document...' : 'Uploading Document...',
+                isEdit ? 'Please wait while we update the document.' : 'Please wait while we upload and process the document.'
+            );
 
-            console.log('Response status:', response.status);
-            
-            const data = await response.json();
-            console.log('Response data:', data);
+            let response;
+            if (isEdit) {
+                // For edits, use regular JSON
+                const documentData = {
+                    document_type: formData.get('document_type'),
+                    linked_transaction: formData.get('linked_transaction'),
+                    uploaded_by: formData.get('uploaded_by'),
+                    status: formData.get('status'),
+                    extracted_fields: formData.get('extracted_fields')
+                };
 
-            if (data.success) {
-                showAlert('Document uploaded successfully!', 'success');
-                closeUploadModal();
-                loadDocuments(); // Refresh the list
-                loadStats(); // Refresh stats
+                response = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(documentData)
+                });
             } else {
-                if (data.errors) {
-                    // Handle validation errors
-                    const errorMessages = Object.values(data.errors).flat().join(', ');
-                    console.error('Validation errors:', data.errors);
-                    throw new Error('Validation failed: ' + errorMessages);
-                } else {
-                    throw new Error(data.message || 'Upload failed');
-                }
+                // For new documents, use FormData for file upload
+                response = await fetch(`${API_BASE_URL}/documents`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                hideLoadingModal();
+                closeDocumentModal();
+                
+                // Wait for data to reload before showing success message
+                await loadDocuments();
+                await loadStats();
+                
+                showSuccessToast(
+                    isEdit ? 'Document updated successfully!' : 'Document uploaded successfully!'
+                );
+            } else {
+                throw new Error(result.message || `Failed to ${isEdit ? 'update' : 'upload'} document`);
             }
         } catch (error) {
-            console.error('Upload error:', error);
-            showAlert('Failed to upload document: ' + error.message, 'error');
+            hideLoadingModal();
+            Swal.fire('Error', `Failed to ${isEdit ? 'update' : 'upload'} document: ` + error.message, 'error');
         }
-    };
-}
+    }
 
-// ==================== UTILITY FUNCTIONS ====================
-function showLoading() {
-    const loadingRow = document.getElementById('loadingRow');
-    if (loadingRow) loadingRow.classList.remove('hidden');
-}
+    async function downloadDocument(documentId) {
+        try {
+            showLoadingModal('Preparing Download...', 'Please wait while we prepare your file for download.');
+            
+            const response = await fetch(`${API_BASE_URL}/documents/${documentId}/download`);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Download failed');
+            }
 
-function hideLoading() {
-    const loadingRow = document.getElementById('loadingRow');
-    if (loadingRow) loadingRow.classList.add('hidden');
-}
+            // Get filename from Content-Disposition header or use document ID
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `document-${documentId}.pdf`;
+            
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                if (filenameMatch) {
+                    filename = filenameMatch[1];
+                }
+            }
 
-function showAlert(message, type = 'info') {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
-
-    Toast.fire({
-        icon: type,
-        title: message
-    });
-}
-
-function showLoadingAlert(message) {
-    Swal.fire({
-        title: message,
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => {
-            Swal.showLoading();
+            // Create blob and download
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            hideLoadingModal();
+            showSuccessToast('Document downloaded successfully!');
+            
+        } catch (error) {
+            hideLoadingModal();
+            Swal.fire('Error', 'Failed to download document: ' + error.message, 'error');
         }
-    });
-}
+    }
 
-function showError(message) {
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: message,
-        confirmButtonText: 'OK'
-    });
-}
+    async function deleteDocument(documentId) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently delete the document and its associated file!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                showLoadingModal('Deleting Document...', 'Please wait while we remove the document.');
+
+                const response = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    hideLoadingModal();
+                    
+                    // Wait for data to reload before showing success message
+                    await loadDocuments();
+                    await loadStats();
+                    
+                    showSuccessToast('Document deleted successfully!');
+                } else {
+                    throw new Error(result.message || 'Failed to delete document');
+                }
+            } catch (error) {
+                hideLoadingModal();
+                Swal.fire('Error', 'Failed to delete document: ' + error.message, 'error');
+            }
+        }
+    }
 </script>
+
+<style>
+    .modal-box {
+        max-height: 85vh;
+    }
+    input:read-only {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+    }
+    .modal-box .max-h-\[70vh\] {
+        max-height: 70vh;
+    }
+    .table td {
+        white-space: nowrap;
+    }
+    pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
 @endsection

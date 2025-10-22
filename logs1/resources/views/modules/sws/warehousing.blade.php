@@ -5,11 +5,18 @@
 @section('content')
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Warehouse Management</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Goods Recieved</h2>
             <button class="btn btn-primary" id="addGrnBtn">
                 <i class="bx bx-plus mr-2"></i>New Entry
             </button>
         </div>
+        
+        <p>remove quantity order and recieved = quantity</p>
+        <p>access by manager and s/admin</p>
+        <p>item = desc order</p>
+        <p>remove edit</p>
+        <p>access delete s/admin</p>
+        <p></p>
 
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -69,7 +76,7 @@
             </select>
         </div>
 
-        <!-- GRN Records Table -->
+        <!-- Records Table -->
         <div class="overflow-x-auto bg-base-100 rounded-lg">
             <table class="table table-zebra w-full">
                 <thead>
@@ -79,7 +86,6 @@
                         <th>Item</th>
                         <th>Qty Ordered</th>
                         <th>Qty Received</th>
-                        <th>Condition</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -88,7 +94,7 @@
                     <tr>
                         <td colspan="10" class="text-center py-8">
                             <div class="loading loading-spinner loading-lg"></div>
-                            <p class="text-gray-500 mt-2">Loading GRN records...</p>
+                            <p class="text-gray-500 mt-2">Loading records...</p>
                         </td>
                     </tr>
                 </tbody>
@@ -96,11 +102,11 @@
         </div>
     </div>
 
-    <!-- Add/Edit GRN Modal -->
+    <!-- Add/Edit Modal -->
     <div id="grnModal" class="modal modal-lg">
         <div class="modal-box max-w-4xl p-0 overflow-visible">
             <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
-                <h3 class="font-bold text-white text-lg" id="grnModalTitle">New GRN Entry</h3>
+                <h3 class="font-bold text-white text-lg" id="grnModalTitle">New Entry</h3>
                 <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeGrnModalX">✕</button>
             </div>
             <div class="p-4 max-h-[70vh] overflow-y-auto">
@@ -206,7 +212,7 @@
         </div>
     </div>
 
-    <!-- View GRN Modal -->
+    <!-- View Modal -->
     <div id="viewGrnModal" class="modal modal-lg">
         <div class="modal-box max-w-4xl p-0 overflow-visible">
             <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
@@ -345,11 +351,11 @@
                 grnRecords = result.data || [];
                 renderGrnRecords(grnRecords);
             } else {
-                throw new Error(result.message || 'Failed to load GRN records');
+                throw new Error(result.message || 'Failed to load records');
             }
         } catch (error) {
-            console.error('Error loading GRN records:', error);
-            showGrnErrorState('Failed to load GRN records: ' + error.message);
+            console.error('Error loading records:', error);
+            showGrnErrorState('Failed to load records: ' + error.message);
         }
     }
 
@@ -374,7 +380,7 @@
             <tr>
                 <td colspan="10" class="text-center py-8">
                     <div class="loading loading-spinner loading-lg"></div>
-                    <p class="text-gray-500 mt-2">Loading GRN records...</p>
+                    <p class="text-gray-500 mt-2">Loading records...</p>
                 </td>
             </tr>
         `;
@@ -401,7 +407,7 @@
                 <tr>
                     <td colspan="10" class="text-center py-8">
                         <i class="bx bx-package text-4xl text-gray-400 mb-2"></i>
-                        <p class="text-gray-500">No GRN records found</p>
+                        <p class="text-gray-500">No records found</p>
                         <button class="btn btn-sm btn-primary mt-2" id="addFirstGrnBtn">Create First GRN</button>
                     </td>
                 </tr>
@@ -426,7 +432,6 @@
                         ${record.qty_received} ${diffSymbol}
                     </span>
                 </td>
-                <td>${getConditionBadge(record.condition)}</td>
                 <td>${getStatusBadge(record.status)}</td>
                 <td>
                     <div class="flex space-x-1">
@@ -504,7 +509,7 @@
 
     // Modal Functions
     function openAddGrnModal() {
-        document.getElementById('grnModalTitle').textContent = 'New GRN Entry';
+        document.getElementById('grnModalTitle').textContent = 'New Entry';
         document.getElementById('grnModalSubmitText').textContent = 'Save GRN';
         document.getElementById('grnForm').reset();
         document.getElementById('grnId').value = '';
@@ -528,7 +533,7 @@
         document.getElementById('viewGrnModal').classList.remove('modal-open');
     }
 
-    // GRN Actions
+    // Actions
     function viewGrn(grnId) {
         const record = grnRecords.find(r => r.id === grnId);
         if (!record) return;

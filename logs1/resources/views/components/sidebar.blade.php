@@ -87,9 +87,9 @@
                 </a>
                 <ul class="submodules hidden pl-4 space-y-2">
                     <li>
-                        <a href="{{ route('modules.sws.warehousing') }}" title="Warehouse Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.warehousing') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.sws.warehousing') }}" title="Goods Received" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.warehousing') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-receipt mr-2"></i>
-                            <span class="module-text">Warehouse Management</span>
+                            <span class="module-text">Goods Received</span>
                         </a>
                     </li>
                     <li>
@@ -105,9 +105,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.sws.restock') }}" title="Restock Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.restock') ? 'bg-white/30' : '' }}"> 
+                        <a href="{{ route('modules.sws.restock') }}" title="Digital inventory" class="items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.restock') ? 'bg-white/30' : '' }}"> 
                             <i class="bx bxs-truck mr-2"></i>
-                            <span class="module-text">Restock Management</span>
+                            <span class="module-text">Digital Inventory</span>
                         </a>
                     </li>
                 </ul>
