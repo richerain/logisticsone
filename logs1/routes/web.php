@@ -150,3 +150,11 @@ Route::prefix('api/sws/warehousing')->group(function () {
     Route::put('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyPut'])->where('endpoint', '.*');
     Route::delete('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyDelete'])->where('endpoint', '.*');
 });
+
+// SWS Digital Inventory Proxy Routes
+Route::prefix('api/sws/digital')->group(function () {
+    Route::get('/{endpoint}', [FrontendController::class, 'swsDigitalProxyGet'])->where('endpoint', '.*');
+    Route::post('/{endpoint}', [FrontendController::class, 'swsDigitalProxyPost'])->where('endpoint', '.*');
+    Route::put('/{endpoint}', [FrontendController::class, 'swsDigitalProxyPut'])->where('endpoint', '.*');
+    Route::delete('/{endpoint}', [FrontendController::class, 'swsDigitalProxyDelete'])->where('endpoint', '.*');
+});

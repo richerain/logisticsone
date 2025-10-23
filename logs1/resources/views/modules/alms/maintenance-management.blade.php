@@ -10,11 +10,9 @@
                 <i class="bx bx-plus mr-2"></i>Schedule Maintenance
             </button>
         </div>
-        <p>remove resched</p>
-        <p>manager and admin can edit but only status</p>
 
         <!-- Stats Section -->
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
                 <div class="stat-figure text-primary">
                     <i class="bx bx-calendar text-3xl"></i>
@@ -36,14 +34,14 @@
                 <div class="stat-title">Under Maintenance</div>
                 <div class="stat-value text-info text-lg" id="maintenance-schedules">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-secondary">
+            <div class="hidden stat bg-base-100 rounded-lg shadow-lg border-l-4 border-secondary">
                 <div class="stat-figure text-secondary">
                     <i class="bx bx-refresh text-3xl"></i>
                 </div>
                 <div class="stat-title">Re-Schedule</div>
                 <div class="stat-value text-secondary text-lg" id="reschedule-schedules">0</div>
             </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-purple-600">
+            <div class="hidden stat bg-base-100 rounded-lg shadow-lg border-l-4 border-purple-600">
                 <div class="stat-figure text-purple-600">
                     <i class="bx bx-recycle text-3xl"></i>
                 </div>
@@ -515,7 +513,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-maintenance-btn" data-maintenance-id="${schedule.id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-maintenance-btn" data-maintenance-id="${schedule.id}">
+                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-maintenance-btn" data-maintenance-id="${schedule.id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         ${schedule.status !== 'Done' && schedule.status !== 'Reject' ? `

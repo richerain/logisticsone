@@ -33,7 +33,7 @@ class FrontendController extends Controller
 
     public function swsRestock()
     {
-        return view('modules.sws.restock', ['title' => 'SWS Restock Management']);
+        return view('modules.sws.digital', ['title' => 'SWS Digital Inventory Management']);
     }
     // sws methods end
     
@@ -541,6 +541,50 @@ class FrontendController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'SWS Warehousing Service unavailable. Please try again later.'
+            ], 503);
+        }
+    }
+
+    // SWS Digital Inventory Proxy Methods
+    public function swsDigitalProxyGet($endpoint, Request $request)
+    {
+        return $this->swsDigitalProxyRequest('GET', $endpoint, $request);
+    }
+
+    public function swsDigitalProxyPost($endpoint, Request $request)
+    {
+        return $this->swsDigitalProxyRequest('POST', $endpoint, $request);
+    }
+
+    public function swsDigitalProxyPut($endpoint, Request $request)
+    {
+        return $this->swsDigitalProxyRequest('PUT', $endpoint, $request);
+    }
+
+    public function swsDigitalProxyDelete($endpoint, Request $request)
+    {
+        return $this->swsDigitalProxyRequest('DELETE', $endpoint, $request);
+    }
+
+    private function swsDigitalProxyRequest($method, $endpoint, Request $request)
+    {
+        try {
+            $url = 'http://localhost:8001/api/sws/digital/' . $endpoint;
+            
+            Log::info("SWS Digital Proxying {$method} request to: {$url}", $request->all());
+
+            $response = Http::timeout(30)->{$method}($url, $request->all());
+
+            $data = $response->json();
+
+            return response()->json($data, $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('SWS Digital Proxy error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'SWS Digital Inventory Service unavailable. Please try again later.'
             ], 503);
         }
     }

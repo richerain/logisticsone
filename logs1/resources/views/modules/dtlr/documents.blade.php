@@ -10,9 +10,6 @@
                 <i class="bx bx-plus mr-2"></i>Upload Document
             </button>
         </div>
-        <p>remove contract and other rom document type</p>
-        <p>linked tranc into transc ID's</p>
-        <p>uploaded by will be automatically fetched who is user is uploading it</p>
 
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -436,7 +433,7 @@
                             <i class="bx bx-download text-sm"></i>
                         </button>
                         ` : ''}
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-document-btn" data-document-id="${document.id}">
+                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-document-btn" data-document-id="${document.id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-document-btn" data-document-id="${document.id}">

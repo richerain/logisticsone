@@ -64,13 +64,13 @@
         
         <!-- Action Buttons -->
         <div class="flex gap-2 mb-4">
-            <button class="btn btn-primary" id="procureRequisitionBtn">
-                <i class="bx bx-sm bxs-cart-download" title="Procure Requisition"></i>Procure Requisition
+            <button class=" btn btn-primary" id="procureRequisitionBtn">
+                <i class=" bx bx-sm bxs-cart-download" title="Procure Requisition"></i>Procure Requisition
             </button>
             <button class="btn btn-primary" id="addPurchaseBtn">
                 <i class="bx bx-sm bxs-cart" title="Purchase Requisition"></i> Purchase Requisition
             </button>
-            <button class="btn btn-success flex" id="viewEmailBtn">
+            <button class="hidden btn btn-success" id="viewEmailBtn">
                 <i class="bx bx-sm bxs-envelope" title="Email"></i> Requisition Email
             </button>
         </div>
@@ -821,7 +821,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-purchase-btn" data-purchase-id="${purchase.purchase_id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-purchase-btn" data-purchase-id="${purchase.purchase_id}">
+                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-purchase-btn" data-purchase-id="${purchase.purchase_id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-purchase-btn" data-purchase-id="${purchase.purchase_id}">

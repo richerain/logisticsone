@@ -105,7 +105,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.sws.restock') }}" title="Digital inventory" class="items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.restock') ? 'bg-white/30' : '' }}"> 
+                        <a href="{{ route('modules.sws.restock') }}" title="Digital inventory" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.restock') ? 'bg-white/30' : '' }}"> 
                             <i class="bx bxs-truck mr-2"></i>
                             <span class="module-text">Digital Inventory</span>
                         </a>

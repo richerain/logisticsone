@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\SWSController;
+use App\Http\Controllers\Api\DigitalController;
 
 // Auth routes
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -32,6 +33,18 @@ Route::prefix('warehousing')->group(function () {
     Route::delete('/{id}', [SWSController::class, 'destroy']);
 });
 
+// Digital Inventory routes
+Route::prefix('digital')->group(function () {
+    Route::get('/', [DigitalController::class, 'index']);
+    Route::post('/', [DigitalController::class, 'store']);
+    Route::get('/stats/overview', [DigitalController::class, 'getStats']);
+    Route::get('/search/filter', [DigitalController::class, 'search']);
+    Route::post('/sync-from-grn/{grnId}', [DigitalController::class, 'syncFromGrn']);
+    Route::get('/{id}', [DigitalController::class, 'show']);
+    Route::put('/{id}', [DigitalController::class, 'update']);
+    Route::delete('/{id}', [DigitalController::class, 'destroy']);
+});
+
 // Legacy routes for backward compatibility with gateway
 Route::get('/inventory', [SWSController::class, 'index']);
 Route::post('/inventory', [SWSController::class, 'store']);
@@ -45,11 +58,11 @@ Route::get('/storage/{id}', [SWSController::class, 'show']);
 Route::put('/storage/{id}', [SWSController::class, 'update']);
 Route::delete('/storage/{id}', [SWSController::class, 'destroy']);
 
-Route::get('/restock', [SWSController::class, 'index']);
-Route::post('/restock', [SWSController::class, 'store']);
-Route::get('/restock/{id}', [SWSController::class, 'show']);
-Route::put('/restock/{id}', [SWSController::class, 'update']);
-Route::delete('/restock/{id}', [SWSController::class, 'destroy']);
+Route::get('/restock', [DigitalController::class, 'index']);
+Route::post('/restock', [DigitalController::class, 'store']);
+Route::get('/restock/{id}', [DigitalController::class, 'show']);
+Route::put('/restock/{id}', [DigitalController::class, 'update']);
+Route::delete('/restock/{id}', [DigitalController::class, 'destroy']);
 
 // Debug route to check email configuration
 Route::get('/debug/email-config', function() {

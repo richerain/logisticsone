@@ -57,13 +57,13 @@
                 <option value="Asset Lifecycle & Maintenance">Asset Lifecycle & Maintenance</option>
                 <option value="Document Tracking & Logistics Record">Document Tracking & Logistics Record</option>
             </select>
-            <select class="select select-bordered" id="aiOcrFilter">
+            <select class="hidden select select-bordered" id="aiOcrFilter">
                 <option value="">All AI/OCR</option>
                 <option value="true">AI/OCR Used</option>
                 <option value="false">No AI/OCR</option>
             </select>
-            <input type="date" class="input input-bordered" id="dateFromFilter" placeholder="From Date">
-            <input type="date" class="input input-bordered" id="dateToFilter" placeholder="To Date">
+            <input type="date" class="hidden input input-bordered" id="dateFromFilter" placeholder="From Date">
+            <input type="date" class="hidden input input-bordered" id="dateToFilter" placeholder="To Date">
         </div>
 
         <!-- Logistics Records Table -->

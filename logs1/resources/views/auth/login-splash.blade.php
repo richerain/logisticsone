@@ -55,9 +55,9 @@
               console.error('Session initialization error:', error);
           });
 
-        // Redirect to dashboard after 2 seconds
+        // Redirect to Dashboard after 2 seconds
         setTimeout(() => {
-            console.log('Redirecting to dashboard...');
+            console.log('Redirecting to Dashboard...');
             window.location.href = '/dashboard';
         }, 2000);
     });

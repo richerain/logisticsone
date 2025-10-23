@@ -10,15 +10,6 @@
                 <i class="bx bx-plus mr-2"></i>Add New Vendor
             </button>
         </div>
-        <p>s/admin manager can view</p>
-        <p>vendor name > company name</p>
-        <p>add seller name</p>
-        <p>shop name remove</p>
-        <p></p>
-        <p></p>
-        <p></p>
-        <p></p>
-
         <!-- Combined Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
@@ -430,7 +421,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-vendor-btn" data-vendor-id="${vendor.ven_id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-vendor-btn" data-vendor-id="${vendor.ven_id}">
+                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-vendor-btn" data-vendor-id="${vendor.ven_id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-vendor-btn" data-vendor-id="${vendor.ven_id}" data-shop-id="${vendor.shop_id}">

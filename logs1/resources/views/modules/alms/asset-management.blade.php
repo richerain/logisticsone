@@ -10,12 +10,6 @@
                 <i class="bx bx-plus mr-2"></i>Add New Asset
             </button>
         </div>
-        <p>asset from good recienote</p>
-        <p>assetname into item</p>
-        <p>remove assigned location</p>
-        <p>Warranty Expiry should be fetching from grn</p>
-        <p>remove edit</p>
-        <p>active item should fetch to the digital inventory</p>
 
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
@@ -430,7 +424,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-asset-btn" data-asset-id="${asset.id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-asset-btn" data-asset-id="${asset.id}">
+                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-asset-btn" data-asset-id="${asset.id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-asset-btn" data-asset-id="${asset.id}">

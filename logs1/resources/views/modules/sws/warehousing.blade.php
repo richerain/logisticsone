@@ -10,13 +10,6 @@
                 <i class="bx bx-plus mr-2"></i>New Entry
             </button>
         </div>
-        
-        <p>remove quantity order and recieved = quantity</p>
-        <p>access by manager and s/admin</p>
-        <p>item = desc order</p>
-        <p>remove edit</p>
-        <p>access delete s/admin</p>
-        <p></p>
 
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -83,9 +76,9 @@
                     <tr class="bg-gray-900 text-white">
                         <th>GRN ID</th>
                         <th>PO Number</th>
-                        <th>Item</th>
-                        <th>Qty Ordered</th>
-                        <th>Qty Received</th>
+                        <th>Item Desc</th>
+                         <!--<th>Qty Ordered</th>-->
+                         <!--<th>Qty Received</th>-->
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -426,8 +419,8 @@
                 <td class="font-mono font-semibold text-sm">${record.grn_id}</td>
                 <td class="font-mono text-sm">${record.po_number}</td>
                 <td class="text-sm">${record.item}</td>
-                <td class="text-center text-sm">${record.qty_ordered}</td>
-                <td class="text-center text-sm">
+                <td class="hidden text-center text-sm">${record.qty_ordered}</td>
+                <td class="hidden text-center text-sm">
                     <span class="${diffClass} font-semibold">
                         ${record.qty_received} ${diffSymbol}
                     </span>
@@ -438,7 +431,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-grn-btn" data-grn-id="${record.id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-grn-btn" data-grn-id="${record.id}">
+                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-grn-btn" data-grn-id="${record.id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-grn-btn" data-grn-id="${record.id}">

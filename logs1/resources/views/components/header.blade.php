@@ -1,6 +1,6 @@
 <header class="bg-[#28644c] text-white p-3 flex justify-between items-center fixed w-full z-10 top-0">
     <div class="flex items-center space-x-4">
-        <button id="sidebar-toggle" class="p-2 w-8 h-8 flex items-center justify-center" title="Sidebar">
+        <button id="sidebar-toggle" class="p-2 w-8 h-10 flex items-center justify-center" title="Sidebar">
             <i class="bx bx-menu text-white text-1xl hover:text-gray-300 cursor-pointer"></i>
         </button>
         <a href="{{ route('dashboard') }}" class="text-lg pl-3 font-bold">Microfinancial</a>
@@ -8,7 +8,7 @@
 
     <div class="flex items-center space-x-4 relative">
         <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="relative p-2 transition duration-200 focus:outline-none cursor-pointer" title="Notification" id="notification-toggle"> 
+            <div tabindex="0" role="button" class=" hidden relative p-2 transition duration-200 focus:outline-none cursor-pointer" title="Notification" id="notification-toggle"> 
                 <i class="bx bxs-bell bx-tada-hover text-lg"></i>
             </div>
             <ul tabindex="0" class="dropdown-content menu text-gray-500 bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg hidden" id="notification-dropdown">
@@ -34,7 +34,7 @@
             </div>
             <ul tabindex="0" class="dropdown-content menu text-gray-500 bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg hidden" id="profile-dropdown">
                 <li><a class="dropdown-item" onclick="openModal('profile-modal')"><i class="bx bxs-user-circle"></i>Profile</a></li>
-                <li><a class="dropdown-item" onclick="openModal('settings-modal')"><i class="bx bxs-cog"></i>Settings</a></li>
+                <li><a class="hidden dropdown-item" onclick="openModal('settings-modal')"><i class="bx bxs-cog"></i>Settings</a></li>
                 <li><a class="dropdown-item" onclick="handleLogoutWithSweetAlert()"><i class="bx bx-log-out"></i>Logout</a></li>
             </ul>
         </div>

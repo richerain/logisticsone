@@ -10,15 +10,6 @@
                 <i class="bx bx-plus mr-2"></i>Add New Quote
             </button>
         </div>
-        <p>for vendor acc only </p>
-        <p>remove reject status</p>
-        <p>can view</p>
-        <p>can change status</p>
-        <p></p>
-        <p></p>
-        <p></p>
-        <p></p>
-
         <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
@@ -63,7 +54,7 @@
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
             </select>
-            <input type="date" class="input input-bordered" id="dateFilter" placeholder="Filter by date">
+            <input type="date" class="hidden input input-bordered" id="dateFilter" placeholder="Filter by date">
         </div>
 
         <!-- Quotes Table -->
@@ -549,7 +540,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-quote-btn" data-quote-id="${quote.quote_id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-quote-btn" data-quote-id="${quote.quote_id}">
+                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-quote-btn" data-quote-id="${quote.quote_id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-quote-btn" data-quote-id="${quote.quote_id}">

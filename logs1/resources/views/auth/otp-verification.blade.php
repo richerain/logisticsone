@@ -334,7 +334,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Verification Successful!',
-                    text: 'Redirecting to system...',
+                    text: 'Redirecting to Logistics System...',
                     timer: 1500,
                     showConfirmButton: false,
                     background: '#f0fdf4',
