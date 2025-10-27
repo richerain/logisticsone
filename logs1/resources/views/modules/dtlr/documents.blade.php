@@ -104,7 +104,7 @@
                     <input type="hidden" id="documentId" name="document_id">
                     
                     <!-- Auto-generated Document ID -->
-                    <div class="form-control">
+                    <div class="hidden form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Document ID</span>
                         </label>

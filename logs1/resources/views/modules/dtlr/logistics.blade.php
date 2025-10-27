@@ -6,7 +6,7 @@
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Logistics Record</h2>
-            <button class="btn btn-primary" id="exportLogsBtn">
+            <button class="hidden btn btn-primary" id="exportLogsBtn">
                 <i class="bx bx-export mr-2"></i>Export Logs
             </button>
         </div>

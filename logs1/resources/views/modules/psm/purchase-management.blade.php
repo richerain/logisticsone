@@ -64,7 +64,7 @@
         
         <!-- Action Buttons -->
         <div class="flex gap-2 mb-4">
-            <button class=" btn btn-primary" id="procureRequisitionBtn">
+            <button class="hidden btn btn-primary" id="procureRequisitionBtn">
                 <i class=" bx bx-sm bxs-cart-download" title="Procure Requisition"></i>Procure Requisition
             </button>
             <button class="btn btn-primary" id="addPurchaseBtn">
@@ -116,7 +116,7 @@
                     <input type="hidden" id="purchaseId" name="purchase_id">
                     
                     <!-- Auto-generated IDs Section -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="hidden grid grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Request ID</span>

@@ -118,7 +118,7 @@
                     <input type="hidden" id="assetId" name="asset_id">
                     
                     <!-- Auto-generated Asset ID -->
-                    <div class="form-control">
+                    <div class="hidden form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Asset ID</span>
                         </label>

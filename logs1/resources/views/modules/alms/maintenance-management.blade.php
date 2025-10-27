@@ -120,7 +120,7 @@
                     <input type="hidden" id="maintenanceId" name="maintenance_id">
                     
                     <!-- Auto-generated Schedule ID -->
-                    <div class="form-control">
+                    <div class="hidden form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Schedule ID</span>
                         </label>

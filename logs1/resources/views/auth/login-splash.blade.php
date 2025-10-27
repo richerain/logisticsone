@@ -13,9 +13,6 @@
     <h2 class="text-3xl font-bold mb-2">Microfinancial</h2>
     <p class="text-lg">Welcome back, <span id="userName">{{ $user['firstname'] ?? 'User' }}</span>!</p>
     <p class="text-sm mt-2">You are now redirecting to the dashboard...</p>
-    <div class="mt-4">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-    </div>
   </div>
 
 <script>

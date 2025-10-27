@@ -104,7 +104,7 @@
                     <input type="hidden" id="logisticsId" name="logistics_id">
                     
                     <!-- Auto-generated Delivery ID -->
-                    <div class="form-control">
+                    <div class="hidden form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Delivery ID</span>
                         </label>

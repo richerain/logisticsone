@@ -77,14 +77,14 @@
                         </div>
                         <div class="form-control">
                             <input type="file" id="profile-picture-input" accept="image/*" class="file-input file-input-bordered file-input-sm w-full max-w-xs hidden" />
-                            <button onclick="document.getElementById('profile-picture-input').click()" class="btn btn-outline btn-primary btn-sm w-full">
+                            <button onclick="document.getElementById('profile-picture-input').click()" class="hidden btn btn-outline btn-primary btn-sm w-full">
                                 <i class="bx bx-upload mr-2"></i>Change Photo
                             </button>
                         </div>
                         <div class="mt-4 space-y-2">
                             <h4 class="font-semibold text-lg text-gray-800" id="modal-fullname">Full Name</h4>
-                            <p class="text-sm text-gray-600" id="modal-role">Role</p>
-                            <div class="text-xs text-gray-500 mt-2">
+                            <p class="hidden text-sm text-gray-600" id="modal-role">Role</p>
+                            <div class="hidden text-xs text-gray-500 mt-2">
                                 <i class="bx bx-id-card mr-1"></i>
                                 <span id="modal-empid">Employee ID</span>
                             </div>
@@ -93,24 +93,21 @@
 
                     <!-- Quick Stats Card -->
                     <div class="bg-base-100 rounded-xl p-4 border border-base-300 shadow-sm">
-                        <h5 class="font-semibold text-gray-800 mb-3 flex items-center">
-                            <i class="bx bx-stats mr-2 text-primary"></i>
-                            Account Overview
-                        </h5>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Member Since</span>
-                                <span class="font-medium" id="member-since">2024</span>
+                        <div class="">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">System Role</span>
+                                </label>
+                                <input type="text" id="profile-role" class="input input-bordered bg-gray-50 text-gray-600 capitalize" readonly disabled />
                             </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Last Updated</span>
-                                <span class="font-medium" id="last-updated">Recently</span>
+                                    
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-semibold">Status</span>
+                                </label>
+                                <input type="text" id="profile-status" class="input input-bordered bg-gray-50 text-gray-600 capitalize" readonly disabled />
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Profile Complete</span>
-                                <span class="badge badge-success badge-sm">100%</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -122,10 +119,6 @@
                                 <i class="bx bx-user-circle mr-2"></i>
                                 Personal Information
                             </h4>
-                            <div class="text-sm text-gray-500">
-                                <i class="bx bx-info-circle mr-1"></i>
-                                All fields marked with * are required
-                            </div>
                         </div>
                         
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -135,7 +128,6 @@
                                     <label class="label">
                                         <span class="label-text font-semibold flex items-center">
                                             Employee ID
-                                            <span class="text-gray-400 ml-1">(Auto-generated)</span>
                                         </span>
                                     </label>
                                     <input type="text" id="profile-empid" class="input input-bordered bg-gray-50 text-gray-600" readonly disabled />
@@ -207,21 +199,7 @@
                                     <input type="date" id="profile-birthdate" class="input input-bordered focus:input-primary" />
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="form-control">
-                                        <label class="label">
-                                            <span class="label-text font-semibold">System Role</span>
-                                        </label>
-                                        <input type="text" id="profile-role" class="input input-bordered bg-gray-50 text-gray-600" readonly disabled />
-                                    </div>
-                                    
-                                    <div class="form-control">
-                                        <label class="label">
-                                            <span class="label-text font-semibold">Status</span>
-                                        </label>
-                                        <input type="text" id="profile-status" class="input input-bordered bg-gray-50 text-gray-600" readonly disabled />
-                                    </div>
-                                </div>
+    
                             </div>
                         </div>
 

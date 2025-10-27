@@ -116,7 +116,7 @@
                     <input type="hidden" id="stockId" name="id">
                     
                     <!-- Auto-generated Stock ID -->
-                    <div class="form-control">
+                    <div class="hidden form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Stock ID</span>
                         </label>

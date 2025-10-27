@@ -108,7 +108,7 @@
                     <input type="hidden" id="grnId" name="id">
                     
                     <!-- Auto-generated GRN ID -->
-                    <div class="form-control">
+                    <div class="hidden form-control">
                         <label class="label">
                             <span class="label-text font-semibold">GRN ID</span>
                         </label>
@@ -117,7 +117,7 @@
                     </div>
 
                     <!-- Auto-generated PO Number -->
-                    <div class="form-control">
+                    <div class="hidden form-control">
                         <label class="label">
                             <span class="label-text font-semibold">PO Number</span>
                         </label>

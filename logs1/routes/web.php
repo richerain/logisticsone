@@ -22,13 +22,22 @@ Route::get('/register', function () {
 Route::get('/otp-verification', [FrontendController::class, 'showOtpVerification'])->name('otp.verification');
 
 // Splash pages (standalone) - with authentication check
-Route::get('/login-splash', function () {
+Route::get('/login-splash', function (Request $request) {
     // Check if user is authenticated via cookie
     $isAuthenticated = isset($_COOKIE['isAuthenticated']) && $_COOKIE['isAuthenticated'] === 'true';
     if (!$isAuthenticated) {
         return redirect()->route('login');
     }
-    return view('auth.login-splash');
+
+    // Get user data from cookie
+    $user = null;
+    if (isset($_COOKIE['user'])) {
+        $user = json_decode($_COOKIE['user'], true);
+    }
+
+    return view('auth.login-splash', [
+        'user' => $user // Pass user data to the view
+    ]);
 })->name('login.splash');
 
 Route::get('/logout-splash', function (Request $request) {
