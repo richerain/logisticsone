@@ -29,18 +29,3 @@ Route::put('/maintenance-schedules/{id}', [ALMSController::class, 'updateMainten
 Route::post('/maintenance-schedules/{id}/complete', [ALMSController::class, 'completeMaintenance']);
 Route::delete('/maintenance-schedules/{id}', [ALMSController::class, 'deleteMaintenanceSchedule']);
 Route::get('/maintenance-schedules/stats', [ALMSController::class, 'getMaintenanceStats']);
-
-// Helper method for getting a single asset
-Route::get('/assets/{id}', function ($id) {
-    return app(ALMSController::class)->getAsset($id);
-});
-
-// Helper method for getting a single maintenance schedule  
-Route::get('/maintenance-schedules/{id}', function ($id) {
-    return app(ALMSController::class)->getMaintenanceSchedule($id);
-});
-
-// Helper method for deleting a maintenance schedule
-Route::delete('/maintenance-schedules/{id}', function ($id) {
-    return app(ALMSController::class)->deleteMaintenanceSchedule($id);
-});

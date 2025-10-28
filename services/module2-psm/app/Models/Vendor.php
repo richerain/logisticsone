@@ -48,16 +48,19 @@ class Vendor extends Model
         });
     }
 
-    public function shops()
-    {
-        return $this->hasMany(Shop::class, 'ven_id');
-    }
-
     /**
      * Get vendor code for display
      */
     public function getVendorCodeDisplayAttribute(): string
     {
         return $this->ven_code;
+    }
+
+    /**
+     * Get the quotes for this vendor
+     */
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class, 'ven_id');
     }
 }

@@ -129,4 +129,12 @@ class Purchase extends Model
         
         return '<span class="badge ' . $class . '">' . $this->status . '</span>';
     }
+
+    /**
+     * Get the quotes for this purchase request
+     */
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class, 'request_id', 'request_id');
+    }
 }

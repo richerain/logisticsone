@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
-class PLTLogisticsController extends Controller
+class PLTController extends Controller
 {
     /**
      * Display a listing of the logistics projects.
@@ -15,7 +15,7 @@ class PLTLogisticsController extends Controller
     public function index(Request $request)
     {
         try {
-            \Log::info('PLTLogisticsController index called', ['request' => $request->all()]);
+            \Log::info('PLTController index called', ['request' => $request->all()]);
             
             $query = Logistics::query();
 
@@ -53,7 +53,7 @@ class PLTLogisticsController extends Controller
 
             $logistics = $query->get();
 
-            \Log::info('PLTLogisticsController returning data', ['count' => count($logistics)]);
+            \Log::info('PLTController returning data', ['count' => count($logistics)]);
 
             return response()->json([
                 'success' => true,
@@ -62,7 +62,7 @@ class PLTLogisticsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('PLTLogisticsController index error: ' . $e->getMessage(), [
+            \Log::error('PLTController index error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -78,7 +78,7 @@ class PLTLogisticsController extends Controller
      */
     public function store(Request $request)
     {
-        \Log::info('PLTLogisticsController store called', $request->all());
+        \Log::info('PLTController store called', $request->all());
 
         $validator = Validator::make($request->all(), [
             'vehicle_id' => 'required|string|max:20',
@@ -107,7 +107,7 @@ class PLTLogisticsController extends Controller
 
             DB::commit();
 
-            \Log::info('PLTLogisticsController store success', ['delivery_id' => $logistics->delivery_id]);
+            \Log::info('PLTController store success', ['delivery_id' => $logistics->delivery_id]);
 
             return response()->json([
                 'success' => true,
@@ -117,7 +117,7 @@ class PLTLogisticsController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('PLTLogisticsController store error: ' . $e->getMessage());
+            \Log::error('PLTController store error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -132,7 +132,7 @@ class PLTLogisticsController extends Controller
     public function show($id)
     {
         try {
-            \Log::info('PLTLogisticsController show called', ['id' => $id]);
+            \Log::info('PLTController show called', ['id' => $id]);
 
             $logistics = Logistics::where('delivery_id', $id)
                                 ->orWhere('logistics_id', $id)
@@ -152,7 +152,7 @@ class PLTLogisticsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('PLTLogisticsController show error: ' . $e->getMessage());
+            \Log::error('PLTController show error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -166,7 +166,7 @@ class PLTLogisticsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        \Log::info('PLTLogisticsController update called', ['id' => $id, 'data' => $request->all()]);
+        \Log::info('PLTController update called', ['id' => $id, 'data' => $request->all()]);
 
         $validator = Validator::make($request->all(), [
             'vehicle_id' => 'sometimes|required|string|max:20',
@@ -214,7 +214,7 @@ class PLTLogisticsController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('PLTLogisticsController update error: ' . $e->getMessage());
+            \Log::error('PLTController update error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -229,7 +229,7 @@ class PLTLogisticsController extends Controller
     public function destroy($id)
     {
         try {
-            \Log::info('PLTLogisticsController destroy called', ['id' => $id]);
+            \Log::info('PLTController destroy called', ['id' => $id]);
 
             DB::beginTransaction();
 
@@ -255,7 +255,7 @@ class PLTLogisticsController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('PLTLogisticsController destroy error: ' . $e->getMessage());
+            \Log::error('PLTController destroy error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -270,7 +270,7 @@ class PLTLogisticsController extends Controller
     public function stats()
     {
         try {
-            \Log::info('PLTLogisticsController stats called');
+            \Log::info('PLTController stats called');
 
             $total = Logistics::count();
             $scheduled = Logistics::where('status', 'Scheduled')->count();
@@ -290,7 +290,7 @@ class PLTLogisticsController extends Controller
                 'completion_rate' => $total > 0 ? round(($delivered / $total) * 100, 2) : 0
             ];
 
-            \Log::info('PLTLogisticsController stats result', $stats);
+            \Log::info('PLTController stats result', $stats);
 
             return response()->json([
                 'success' => true,
@@ -299,7 +299,7 @@ class PLTLogisticsController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('PLTLogisticsController stats error: ' . $e->getMessage());
+            \Log::error('PLTController stats error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -313,7 +313,7 @@ class PLTLogisticsController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        \Log::info('PLTLogisticsController updateStatus called', ['id' => $id, 'status' => $request->status]);
+        \Log::info('PLTController updateStatus called', ['id' => $id, 'status' => $request->status]);
 
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:Scheduled,In Transit,Delivered'
@@ -360,7 +360,7 @@ class PLTLogisticsController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('PLTLogisticsController updateStatus error: ' . $e->getMessage());
+            \Log::error('PLTController updateStatus error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
