@@ -46,7 +46,7 @@
                     <!-- dashboard sidebar btn end -->
                     <!-- Procurement & Sourcing Management btn start -->
                     <li class="has-dropdown">
-                        <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-4 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                        <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                             <div class="flex items-center flex-1 min-w-0">
                                 <i class="bx bxs-cart mr-2 shrink-0"></i>
                                 <span class="module-text flex-1">Procurement & Sourcing Management</span>
