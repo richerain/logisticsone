@@ -64,13 +64,13 @@
         
         <!-- Action Buttons -->
         <div class="flex gap-2 mb-4">
-            <button class="hidden btn btn-primary" id="procureRequisitionBtn">
+            <button class="btn btn-primary" id="procureRequisitionBtn">
                 <i class=" bx bx-sm bxs-cart-download" title="Procure Requisition"></i>Procure Requisition
             </button>
             <button class="btn btn-primary" id="addPurchaseBtn">
                 <i class="bx bx-sm bxs-cart" title="Purchase Requisition"></i> Purchase Requisition
             </button>
-            <button class="hidden btn btn-success" id="viewEmailBtn">
+            <button class="btn btn-success" id="viewEmailBtn">
                 <i class="bx bx-sm bxs-envelope" title="Email"></i> Requisition Email
             </button>
         </div>
@@ -116,7 +116,7 @@
                     <input type="hidden" id="purchaseId" name="purchase_id">
                     
                     <!-- Auto-generated IDs Section -->
-                    <div class="hidden grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Request ID</span>
@@ -821,7 +821,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-purchase-btn" data-purchase-id="${purchase.purchase_id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-purchase-btn" data-purchase-id="${purchase.purchase_id}">
+                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-purchase-btn" data-purchase-id="${purchase.purchase_id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-purchase-btn" data-purchase-id="${purchase.purchase_id}">

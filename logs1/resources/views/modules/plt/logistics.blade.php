@@ -60,8 +60,8 @@
                 <option value="In Transit">In Transit</option>
                 <option value="Delivered">Delivered</option>
             </select>
-            <input type="date" class="hidden input input-bordered" id="dateFilter" placeholder="Delivery Date">
-            <button class="hidden btn btn-outline" id="clearFilters">Clear</button>
+            <input type="date" class="input input-bordered" id="dateFilter" placeholder="Delivery Date">
+            <button class="btn btn-outline" id="clearFilters">Clear</button>
         </div>
 
         <!-- Logistics Projects Table -->
@@ -104,7 +104,7 @@
                     <input type="hidden" id="logisticsId" name="logistics_id">
                     
                     <!-- Auto-generated Delivery ID -->
-                    <div class="hidden form-control">
+                    <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Delivery ID</span>
                         </label>
@@ -437,7 +437,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-logistics-btn" data-logistics-id="${logistic.delivery_id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-logistics-btn" data-logistics-id="${logistic.delivery_id}">
+                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-logistics-btn" data-logistics-id="${logistic.delivery_id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Update Status" class="btn btn-sm btn-circle btn-secondary status-logistics-btn" data-logistics-id="${logistic.delivery_id}">

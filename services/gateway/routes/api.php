@@ -42,38 +42,27 @@ Route::get('/debug/email-config', function (Request $request) {
 //otp routes end
 
 // module1-sws entire routes start
-// SWS Inventory routes
-Route::get('/sws/inventory', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/inventory');
+// SWS Warehousing routes - GRN Management
+Route::get('/sws/warehousing', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing');
 });
-Route::post('/sws/inventory', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/inventory');
+Route::post('/sws/warehousing', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/warehousing');
 });
-Route::get('/sws/inventory/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8002/api/inventory/{$id}");
+Route::get('/sws/warehousing/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8002/api/warehousing/{$id}");
 });
-Route::put('/sws/inventory/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8002/api/inventory/{$id}");
+Route::put('/sws/warehousing/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8002/api/warehousing/{$id}");
 });
-Route::delete('/sws/inventory/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8002/api/inventory/{$id}");
+Route::delete('/sws/warehousing/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8002/api/warehousing/{$id}");
 });
-
-// SWS Storage routes
-Route::get('/sws/storage', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/storage');
+Route::get('/sws/warehousing/stats/overview', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing/stats/overview');
 });
-Route::post('/sws/storage', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/storage');
-});
-Route::get('/sws/storage/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8002/api/storage/{$id}");
-});
-Route::put('/sws/storage/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8002/api/storage/{$id}");
-});
-Route::delete('/sws/storage/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8002/api/storage/{$id}");
+Route::get('/sws/warehousing/search/filter', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing/search/filter');
 });
 
 // SWS Digital Inventory routes
@@ -118,29 +107,6 @@ Route::put('/sws/restock/{id}', function (Request $request, $id) {
 Route::delete('/sws/restock/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyDelete($request, "http://localhost:8002/api/restock/{$id}");
 });
-
-// SWS Warehousing routes - GRN Management
-Route::get('/sws/warehousing', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing');
-});
-Route::post('/sws/warehousing', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8002/api/warehousing');
-});
-Route::get('/sws/warehousing/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8002/api/warehousing/{$id}");
-});
-Route::put('/sws/warehousing/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8002/api/warehousing/{$id}");
-});
-Route::delete('/sws/warehousing/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8002/api/warehousing/{$id}");
-});
-Route::get('/sws/warehousing/stats/overview', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing/stats/overview');
-});
-Route::get('/sws/warehousing/search/filter', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/warehousing/search/filter');
-});
 // module1-sws entire routes end
 
 // module2-psm entire routes start
@@ -156,60 +122,6 @@ Route::put('/psm/vendors/{id}', function (Request $request, $id) {
 });
 Route::delete('/psm/vendors/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyDelete($request, "http://localhost:8003/api/vendors/{$id}");
-});
-
-// PSM Shop routes
-Route::get('/psm/shops', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/shops');
-});
-Route::post('/psm/shops', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8003/api/shops');
-});
-
-// PSM Product routes
-Route::get('/psm/products', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/products');
-});
-Route::post('/psm/products', function (Request $request) {
-    return app(GatewayController::class)->proxyUpload($request, 'http://localhost:8003/api/products');
-});
-Route::put('/psm/products/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyUpload($request, "http://localhost:8003/api/products/{$id}");
-});
-Route::delete('/psm/products/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8003/api/products/{$id}");
-});
-
-// PSM Market routes
-Route::get('/psm/market/products', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/market/products');
-});
-
-// PSM Order routes
-Route::get('/psm/orders', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/orders');
-});
-Route::post('/psm/orders', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8003/api/orders');
-});
-Route::put('/psm/orders/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8003/api/orders/{$id}");
-});
-
-// PSM Budget Approval routes
-Route::get('/psm/budget-approvals', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/budget-approvals');
-});
-Route::put('/psm/budget-approvals/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyPut($request, "http://localhost:8003/api/budget-approvals/{$id}");
-});
-
-// PSM Reorder routes
-Route::get('/psm/reorders', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/reorders');
-});
-Route::post('/psm/reorders', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8003/api/reorders');
 });
 
 // PSM Quote routes
@@ -320,65 +232,6 @@ Route::post('/alms/maintenance-schedules/{id}/complete', function (Request $requ
 });
 Route::get('/alms/maintenance-schedules/stats', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/maintenance-schedules/stats');
-});
-
-// Asset Transfer routes
-Route::get('/alms/asset-transfers', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/asset-transfers');
-});
-Route::post('/alms/asset-transfers', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/asset-transfers');
-});
-Route::get('/alms/asset-transfers/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8005/api/asset-transfers/{$id}");
-});
-
-// Disposal routes
-Route::get('/alms/disposals', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/disposals');
-});
-Route::post('/alms/disposals', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/disposals');
-});
-Route::get('/alms/disposals/{id}', function (Request $request, $id) {
-    return app(GatewayController::class)->proxyGet($request, "http://localhost:8005/api/disposals/{$id}");
-});
-
-// Asset Category routes
-Route::get('/alms/asset-categories', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/asset-categories');
-});
-Route::post('/alms/asset-categories', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/asset-categories');
-});
-
-// Branch routes
-Route::get('/alms/branches', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/branches');
-});
-Route::post('/alms/branches', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/branches');
-});
-
-// Employee routes
-Route::get('/alms/employees', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/employees');
-});
-Route::post('/alms/employees', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/employees');
-});
-
-// Maintenance Type routes
-Route::get('/alms/maintenance-types', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/maintenance-types');
-});
-Route::post('/alms/maintenance-types', function (Request $request) {
-    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8005/api/maintenance-types');
-});
-
-// Reports routes
-Route::get('/alms/reports', function (Request $request) {
-    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8005/api/reports');
 });
 // module4-alms entire routes end
 

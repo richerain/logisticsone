@@ -108,7 +108,7 @@
                     <input type="hidden" id="grnId" name="id">
                     
                     <!-- Auto-generated GRN ID -->
-                    <div class="hidden form-control">
+                    <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">GRN ID</span>
                         </label>
@@ -117,7 +117,7 @@
                     </div>
 
                     <!-- Auto-generated PO Number -->
-                    <div class="hidden form-control">
+                    <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">PO Number</span>
                         </label>
@@ -419,8 +419,8 @@
                 <td class="font-mono font-semibold text-sm">${record.grn_id}</td>
                 <td class="font-mono text-sm">${record.po_number}</td>
                 <td class="text-sm">${record.item}</td>
-                <td class="hidden text-center text-sm">${record.qty_ordered}</td>
-                <td class="hidden text-center text-sm">
+                <td class="text-center text-sm">${record.qty_ordered}</td>
+                <td class="text-center text-sm">
                     <span class="${diffClass} font-semibold">
                         ${record.qty_received} ${diffSymbol}
                     </span>
@@ -431,7 +431,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-grn-btn" data-grn-id="${record.id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-grn-btn" data-grn-id="${record.id}">
+                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-grn-btn" data-grn-id="${record.id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-grn-btn" data-grn-id="${record.id}">

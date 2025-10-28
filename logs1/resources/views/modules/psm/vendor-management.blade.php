@@ -6,7 +6,7 @@
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">Vendor Management</h2>
-            <button class="btn btn-primary hidden" id="addVendorBtn">
+            <button class="btn btn-primary" id="addVendorBtn">
                 <i class="bx bx-plus mr-2"></i>Add New Vendor
             </button>
         </div>
@@ -421,7 +421,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-vendor-btn" data-vendor-id="${vendor.ven_id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-vendor-btn" data-vendor-id="${vendor.ven_id}">
+                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-vendor-btn" data-vendor-id="${vendor.ven_id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-vendor-btn" data-vendor-id="${vendor.ven_id}" data-shop-id="${vendor.shop_id}">

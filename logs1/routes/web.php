@@ -72,20 +72,6 @@ Route::get('/logout', function (Request $request) {
 })->name('logout');
 // Logout route section end
 
-// Session section routes start (kept for compatibility but timeout disabled)
-Route::get('/api/session/check', [SessionController::class, 'checkSession'])->name('api.session.check');
-Route::post('/api/session/extend', [SessionController::class, 'extendSession'])->name('api.session.extend');
-Route::get('/api/session/info', [SessionController::class, 'getSessionInfo'])->name('api.session.info');
-Route::post('/api/session/initialize', [SessionController::class, 'initializeSession'])->name('api.session.initialize');
-Route::post('/api/session/handle-timeout', [SessionController::class, 'handleTimeout'])->name('api.session.handle-timeout');
-// Session section routes end
-
-// Redirect /home to dashboard section start (default post-login)
-Route::get('/home', function () {
-    return redirect()->route('dashboard');
-});
-// Redirect /home to dashboard section end
-
 // Login processing route section start
 Route::post('/process-login', [FrontendController::class, 'processLogin'])->name('process.login');
 // Login processing route section end
@@ -104,32 +90,18 @@ Route::middleware(['web.auth'])->group(function () {
     Route::get('/dashboard', [FrontendController::class, 'dashboard'])->name('dashboard');
 
     // SWS gateway route section start
-        Route::get('/modules/sws/warehousing', [FrontendController::class, 'swsWarehousing'])->name('modules.sws.warehousing');
-    Route::get('/modules/sws/inventory', [FrontendController::class, 'swsInventory'])->name('modules.sws.inventory');
-    Route::get('/modules/sws/storage', [FrontendController::class, 'swsStorage'])->name('modules.sws.storage');
+    Route::get('/modules/sws/warehousing', [FrontendController::class, 'swsWarehousing'])->name('modules.sws.warehousing');
     Route::get('/modules/sws/restock', [FrontendController::class, 'swsRestock'])->name('modules.sws.restock');
     // SWS gateway route section end
 
     // PSM gateway route section start
     Route::get('/modules/psm/vendor-management', [FrontendController::class, 'psmVendorManagement'])->name('modules.psm.vendor-management');
-    Route::get('/modules/psm/vendor-market', [FrontendController::class, 'psmVendorMarket'])->name('modules.psm.vendor-market');
-    Route::get('/modules/psm/order-management', [FrontendController::class, 'psmOrderManagement'])->name('modules.psm.order-management');
-    Route::get('/modules/psm/budget-approval', [FrontendController::class, 'psmBudgetApproval'])->name('modules.psm.budget-approval');
-    Route::get('/modules/psm/place-order', [FrontendController::class, 'psmPlaceOrder'])->name('modules.psm.place-order');
-    Route::get('/modules/psm/reorder-management', [FrontendController::class, 'psmReorderManagement'])->name('modules.psm.reorder-management');
-    Route::get('/modules/psm/products-management', [FrontendController::class, 'psmProductsManagement'])->name('modules.psm.products-management');
     Route::get('/modules/psm/vendor-quote', [FrontendController::class, 'psmVendorQuote'])->name('modules.psm.vendor-quote');
     Route::get('/modules/psm/purchase-management', [FrontendController::class, 'psmPurchaseManagement'])->name('modules.psm.purchase-management');
     // PSM gateway route section end    
 
     // PLT gateway route section start
     Route::get('/modules/plt/logistics', [FrontendController::class, 'pltLogistics'])->name('modules.plt.logistics');
-    Route::get('/modules/plt/projects', [FrontendController::class, 'pltProjects'])->name('modules.plt.projects');
-    Route::get('/modules/plt/dispatches', [FrontendController::class, 'pltDispatches'])->name('modules.plt.dispatches');
-    Route::get('/modules/plt/resources', [FrontendController::class, 'pltResources'])->name('modules.plt.resources');
-    Route::get('/modules/plt/allocations', [FrontendController::class, 'pltAllocations'])->name('modules.plt.allocations');
-    Route::get('/modules/plt/milestones', [FrontendController::class, 'pltMilestones'])->name('modules.plt.milestones');
-    Route::get('/modules/plt/tracking-logs', [FrontendController::class, 'pltTrackingLogs'])->name('modules.plt.tracking-logs');
     // PLT gateway route section end
 
     // ALMS gateway route section start
@@ -152,7 +124,7 @@ Route::prefix('api/psm/purchase')->group(function () {
     Route::delete('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyDelete'])->where('endpoint', '.*');
 });
 
-// SWS Warehousing Proxy Routes
+// SWS Inventory Flow Proxy Routes
 Route::prefix('api/sws/warehousing')->group(function () {
     Route::get('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyGet'])->where('endpoint', '.*');
     Route::post('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyPost'])->where('endpoint', '.*');
@@ -166,4 +138,20 @@ Route::prefix('api/sws/digital')->group(function () {
     Route::post('/{endpoint}', [FrontendController::class, 'swsDigitalProxyPost'])->where('endpoint', '.*');
     Route::put('/{endpoint}', [FrontendController::class, 'swsDigitalProxyPut'])->where('endpoint', '.*');
     Route::delete('/{endpoint}', [FrontendController::class, 'swsDigitalProxyDelete'])->where('endpoint', '.*');
+});
+
+// PLT Proxy Routes
+Route::prefix('api/plt')->group(function () {
+    Route::get('/{endpoint}', [FrontendController::class, 'pltProxyGet'])->where('endpoint', '.*');
+    Route::post('/{endpoint}', [FrontendController::class, 'pltProxyPost'])->where('endpoint', '.*');
+    Route::put('/{endpoint}', [FrontendController::class, 'pltProxyPut'])->where('endpoint', '.*');
+    Route::delete('/{endpoint}', [FrontendController::class, 'pltProxyDelete'])->where('endpoint', '.*');
+});
+
+// DTLR Proxy Routes
+Route::prefix('api/dtlr')->group(function () {
+    Route::get('/{endpoint}', [FrontendController::class, 'dtlrProxyGet'])->where('endpoint', '.*');
+    Route::post('/{endpoint}', [FrontendController::class, 'dtlrProxyPost'])->where('endpoint', '.*');
+    Route::put('/{endpoint}', [FrontendController::class, 'dtlrProxyPut'])->where('endpoint', '.*');
+    Route::delete('/{endpoint}', [FrontendController::class, 'dtlrProxyDelete'])->where('endpoint', '.*');
 });

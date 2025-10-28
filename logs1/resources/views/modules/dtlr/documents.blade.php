@@ -104,7 +104,7 @@
                     <input type="hidden" id="documentId" name="document_id">
                     
                     <!-- Auto-generated Document ID -->
-                    <div class="hidden form-control">
+                    <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Document ID</span>
                         </label>
@@ -433,7 +433,7 @@
                             <i class="bx bx-download text-sm"></i>
                         </button>
                         ` : ''}
-                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-document-btn" data-document-id="${document.id}">
+                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-document-btn" data-document-id="${document.id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-document-btn" data-document-id="${document.id}">

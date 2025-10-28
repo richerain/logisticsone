@@ -18,17 +18,7 @@ class FrontendController extends Controller
     // sws methods start
     public function swsWarehousing()
     {
-        return view('modules.sws.warehousing', ['title' => 'SWS GRN Management']);
-    }
-
-    public function swsInventory()
-    {
-        return view('modules.sws.inventory', ['title' => 'SWS Inventory Management']);
-    }
-
-    public function swsStorage()
-    {
-        return view('modules.sws.storage', ['title' => 'SWS Storage Management']);
+        return view('modules.sws.warehousing', ['title' => 'SWS Inventory Flow']);
     }
 
     public function swsRestock()
@@ -43,35 +33,6 @@ class FrontendController extends Controller
         return view('modules.psm.vendor-management');
     }
 
-    public function psmVendorMarket()
-    {
-        return view('modules.psm.vendor-market');
-    }
-
-    public function psmOrderManagement()
-    {
-        return view('modules.psm.order-management');
-    }
-
-    public function psmBudgetApproval()
-    {
-        return view('modules.psm.budget-approval');
-    }
-
-    public function psmPlaceOrder()
-    {
-        return view('modules.psm.place-order');
-    }
-
-    public function psmReorderManagement()
-    {
-        return view('modules.psm.reorder-management');
-    }
-
-    public function psmProductsManagement()
-    {
-        return view('modules.psm.products-management');
-    }
     public function psmVendorQuote()
     {
     return view('modules.psm.vendor-quote', ['title' => 'Vendor Quote Management']);
@@ -84,39 +45,9 @@ class FrontendController extends Controller
     // psm methods end
     
     // plt methods start
-        public function pltLogistics()
+    public function pltLogistics()
     {
         return view('modules.plt.logistics', ['title' => 'Logistics Projects - PLT']);
-    }
-
-    public function pltProjects()
-    {
-        return view('modules.plt.projects');
-    }
-
-    public function pltDispatches()
-    {
-        return view('modules.plt.dispatches');
-    }
-
-    public function pltResources()
-    {
-        return view('modules.plt.resources');
-    }
-
-    public function pltAllocations()
-    {
-        return view('modules.plt.allocations');
-    }
-
-    public function pltMilestones()
-    {
-        return view('modules.plt.milestones');
-    }
-
-    public function pltTrackingLogs()
-    {
-        return view('modules.plt.tracking-logs');
     }
     // plt methods end
     
@@ -345,28 +276,6 @@ class FrontendController extends Controller
                 'message' => 'Service unavailable. Please try again later.'
             ], 503);
         }
-    }
-
-    // Session timeout check
-    public function checkSession(Request $request)
-    {
-        $lastActivity = $request->cookie('lastActivity');
-        $currentTime = time();
-        $timeout = 15 * 60; // 15 minutes in seconds
-
-        if ($lastActivity && ($currentTime - $lastActivity) > $timeout) {
-            return response()->json([
-                'session_valid' => false,
-                'message' => 'Session expired due to inactivity'
-            ]);
-        }
-
-        // Update last activity
-        setcookie('lastActivity', $currentTime, time() + (86400 * 30), "/");
-
-        return response()->json([
-            'session_valid' => true
-        ]);
     }
 
     // PLT Proxy Methods

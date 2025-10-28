@@ -118,7 +118,7 @@
                     <input type="hidden" id="assetId" name="asset_id">
                     
                     <!-- Auto-generated Asset ID -->
-                    <div class="hidden form-control">
+                    <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Asset ID</span>
                         </label>
@@ -424,7 +424,7 @@
                         <button title="View" class="btn btn-sm btn-circle btn-info view-asset-btn" data-asset-id="${asset.id}">
                             <i class="bx bx-show-alt text-sm"></i>
                         </button>
-                        <button title="Edit" class="hidden btn btn-sm btn-circle btn-warning edit-asset-btn" data-asset-id="${asset.id}">
+                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-asset-btn" data-asset-id="${asset.id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-asset-btn" data-asset-id="${asset.id}">

@@ -10,7 +10,7 @@ use Haruncpi\LaravelIdGenerator\IdGenerator;
 
 class SWSController extends Controller
 {
-    // Get all GRN records
+    // Get all Inventory Flow records
     public function index()
     {
         try {
@@ -19,20 +19,20 @@ class SWSController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $grnRecords,
-                'message' => 'GRN records retrieved successfully'
+                'message' => 'Inventory Flow records retrieved successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching GRN records: ' . $e->getMessage());
+            Log::error('Error fetching Inventory Flow records: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve GRN records',
+                'message' => 'Failed to retrieve Inventory Flow records',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Create new GRN record
+    // Create new Inventory Flow record
     public function store(Request $request)
     {
         try {
@@ -73,7 +73,7 @@ class SWSController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $grnRecord,
-                'message' => 'GRN record created successfully'
+                'message' => 'Inventory Flow record created successfully'
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -83,17 +83,17 @@ class SWSController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Error creating GRN record: ' . $e->getMessage());
+            Log::error('Error creating Inventory Flow record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create GRN record',
+                'message' => 'Failed to create Inventory Flow record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Get single GRN record
+    // Get single Inventory Flow record
     public function show($id)
     {
         try {
@@ -102,27 +102,27 @@ class SWSController extends Controller
             if (!$grnRecord) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'GRN record not found'
+                    'message' => 'Inventory Flow record not found'
                 ], 404);
             }
 
             return response()->json([
                 'success' => true,
                 'data' => $grnRecord,
-                'message' => 'GRN record retrieved successfully'
+                'message' => 'Inventory Flow record retrieved successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching GRN record: ' . $e->getMessage());
+            Log::error('Error fetching Inventory Flow record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve GRN record',
+                'message' => 'Failed to retrieve Inventory Flow record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Update GRN record
+    // Update Inventory Flow record
     public function update(Request $request, $id)
     {
         try {
@@ -131,7 +131,7 @@ class SWSController extends Controller
             if (!$grnRecord) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'GRN record not found'
+                    'message' => 'Inventory Flow record not found'
                 ], 404);
             }
 
@@ -150,7 +150,7 @@ class SWSController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $grnRecord,
-                'message' => 'GRN record updated successfully'
+                'message' => 'Inventory Flow record updated successfully'
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -160,17 +160,17 @@ class SWSController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Error updating GRN record: ' . $e->getMessage());
+            Log::error('Error updating Inventory Flow record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update GRN record',
+                'message' => 'Failed to update Inventory Flow record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Delete GRN record
+    // Delete Inventory Flow record
     public function destroy($id)
     {
         try {
@@ -179,7 +179,7 @@ class SWSController extends Controller
             if (!$grnRecord) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'GRN record not found'
+                    'message' => 'Inventory Flow record not found'
                 ], 404);
             }
 
@@ -187,21 +187,21 @@ class SWSController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'GRN record deleted successfully'
+                'message' => 'Inventory Flow record deleted successfully'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error deleting GRN record: ' . $e->getMessage());
+            Log::error('Error deleting Inventory Flow record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete GRN record',
+                'message' => 'Failed to delete Inventory Flow record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Get GRN statistics
+    // Get Inventory Flow statistics
     public function getStats()
     {
         try {
@@ -220,20 +220,20 @@ class SWSController extends Controller
                     'missing_condition' => $missingCondition,
                     'completed_status' => $completedStatus
                 ],
-                'message' => 'GRN statistics retrieved successfully'
+                'message' => 'Inventory Flow statistics retrieved successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching GRN statistics: ' . $e->getMessage());
+            Log::error('Error fetching Inventory Flow statistics: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve GRN statistics',
+                'message' => 'Failed to retrieve Inventory Flow statistics',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Search GRN records
+    // Search Inventory Flow records
     public function search(Request $request)
     {
         try {
@@ -264,14 +264,14 @@ class SWSController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $results,
-                'message' => 'GRN records search completed successfully'
+                'message' => 'Inventory Flow records search completed successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error searching GRN records: ' . $e->getMessage());
+            Log::error('Error searching Inventory Flow records: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to search GRN records',
+                'message' => 'Failed to search Inventory Flow records',
                 'error' => $e->getMessage()
             ], 500);
         }

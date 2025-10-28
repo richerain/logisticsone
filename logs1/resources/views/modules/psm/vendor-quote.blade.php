@@ -54,7 +54,7 @@
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
             </select>
-            <input type="date" class="hidden input input-bordered" id="dateFilter" placeholder="Filter by date">
+            <input type="date" class="input input-bordered" id="dateFilter" placeholder="Filter by date">
         </div>
 
         <!-- Quotes Table -->
@@ -100,7 +100,7 @@
                     
                     <!-- Auto-generated IDs Section -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="hidden form-control">
+                        <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Quote ID</span>
                             </label>

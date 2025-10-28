@@ -6,7 +6,7 @@
     <div class="overflow-y-auto scrollbar scrollbar-opacity-30 flex-grow">
         <ul class="space-y-2 text-green-50" id="sidebar-menu">
             <li>
-                <a href="{{ route('dashboard') }}" title="Dashboard" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('dashboard') ? 'bg-white/30' : '' }}">
+                <a href="{{ route('dashboard') }}" title="Dashboard" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('dashboard') ? 'bg-white/30' : '' }}">
                     <i class="bx bxs-home mr-2"></i>
                     <span class="module-text">Dashboard</span>
                 </a>
@@ -14,12 +14,12 @@
 
             <!-- Procurement & Sourcing - Visible to superadmin, admin, manager -->
             <li class="has-sub" data-roles="superadmin,admin,manager,vendor">
-                <a href="#" title="Procurement & Sourcing Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
+                <a href="#" title="Procurement & Sourcing Management" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
                     <i class="bx bxs-cart mr-2"></i>
-                    <span class="module-text">Procurement & Sourcing</span>
+                    <span class="module-text">Procurement & Sourcing Management</span>
                     <i class="bx bx-chevron-right chevron ml-auto"></i>
                 </a>
-                <ul class="submodules hidden pl-4 space-y-2">
+                <ul class="submodules hidden pl-4 space-y-2 text-sm">
                     <li>
                         <a href="{{ route('modules.psm.purchase-management') }}" title="Purchase Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.purchase-management') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-purchase-tag-alt mr-2"></i>
@@ -38,70 +38,21 @@
                             <span class="module-text">Vendor Management</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('modules.psm.vendor-market') }}" title="Vendor Market" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-market') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-store mr-2"></i>
-                            <span class="module-text">Vendor Market</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.psm.order-management') }}" title="Order Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.order-management') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-receipt mr-2"></i>
-                            <span class="module-text">Order Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.psm.budget-approval') }}" title="Budget Approval" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.budget-approval') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-credit-card mr-2"></i>
-                            <span class="module-text">Budget Approval</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.psm.place-order') }}" title="Place Order Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.place-order') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-package mr-2"></i>
-                            <span class="module-text">Place Order Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.psm.reorder-management') }}" title="Re-Order Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.reorder-management') ? 'bg-white/30' : '' }}">
-                            <i class="bx bx-refresh mr-2"></i>
-                            <span class="module-text">Re-Order Management <p class="badge badge-xs badge-warning">#</p></span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.psm.products-management') }}" title="Products Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.products-management') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-purchase-tag mr-2"></i>
-                            <span class="module-text">Products Management</span>
-                        </a>
-                    </li>
-                    <!-- Shop Management removed - functionality merged into Vendor Management -->
                 </ul>
             </li>
 
             <!-- Smart Warehousing System - Visible to all except vendor -->
             <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Smart Warehousing System" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
+                <a href="#" title="Smart Warehousing System" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
                     <i class="bx bxs-store mr-2"></i>
-                    <span class="module-text">Smart Warehousing</span>
+                    <span class="module-text">Smart Warehousing System</span>
                     <i class="bx bx-chevron-right chevron ml-auto"></i>
                 </a>
-                <ul class="submodules hidden pl-4 space-y-2">
+                <ul class="submodules hidden pl-4 space-y-2 text-sm">
                     <li>
-                        <a href="{{ route('modules.sws.warehousing') }}" title="Goods Received" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.warehousing') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.sws.warehousing') }}" title="Inventory Flow" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.warehousing') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-receipt mr-2"></i>
-                            <span class="module-text">Goods Received</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.sws.inventory') }}" title="Inventory Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.inventory') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-package mr-2"></i>
-                            <span class="module-text">Inventory Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.sws.storage') }}" title="Storage Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.storage') ? 'bg-white/30' : '' }}"> 
-                            <i class="bx bxs-archive mr-2"></i>
-                            <span class="module-text">Storage Management</span>
+                            <span class="module-text">Inventory Flow</span>
                         </a>
                     </li>
                     <li>
@@ -115,51 +66,16 @@
 
             <!-- Project Logistics Tracker - Visible to all except vendor -->
             <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Project Logistics Tracker" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
+                <a href="#" title="Project Logistics Tracker" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
                     <i class="bx bxs-map mr-2"></i>
                     <span class="module-text">Project Logistics Tracker</span>
                     <i class="bx bx-chevron-right chevron ml-auto"></i>
                 </a>
-                <ul class="submodules hidden pl-4 space-y-2">
+                <ul class="submodules hidden pl-4 space-y-2 text-sm">
                     <li>
                         <a href="{{ route('modules.plt.logistics') }}" title="Logistics Projects" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.logistics') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-truck mr-2"></i>
                             <span class="module-text">Logistics Projects</span>
-                        </a>
-                    </li>
-                        <a href="{{ route('modules.plt.projects') }}" title="Project Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.projects') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-briefcase mr-2"></i>
-                            <span class="module-text">Project Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.plt.dispatches') }}" title="Dispatch Tracking" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.dispatches') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-truck mr-2"></i>
-                            <span class="module-text">Dispatch Tracking</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.plt.resources') }}" title="Resource Management" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.resources') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-cube mr-2"></i>
-                            <span class="module-text">Resource Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.plt.allocations') }}" title="Resource Allocation" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.allocations') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-user-check mr-2"></i>
-                            <span class="module-text">Resource Allocation</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.plt.milestones') }}" title="Milestone Tracking" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.milestones') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-flag mr-2"></i>
-                            <span class="module-text">Milestone Tracking</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.plt.tracking-logs') }}" title="Tracking Logs" class="hidden items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.tracking-logs') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-notepad mr-2"></i>
-                            <span class="module-text">Tracking Logs</span>
                         </a>
                     </li>
                 </ul>
@@ -167,12 +83,12 @@
 
             <!-- Asset Lifecycle & Maintenance - Visible to superadmin, admin, manager, staff -->
             <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Asset Lifecycle & Maintenance" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
+                <a href="#" title="Asset Lifecycle & Maintenance" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
                     <i class="bx bxs-wrench mr-2"></i>
-                    <span class="module-text">Lifecycle & Maintenance</span>
+                    <span class="module-text">Asset Lifecycle & Maintenance</span>
                     <i class="bx bx-chevron-right chevron ml-auto"></i>
                 </a>
-                <ul class="submodules hidden pl-4 space-y-2">
+                <ul class="submodules hidden pl-4 space-y-2 text-sm">
                     <li>
                         <a href="{{ route('modules.alms.asset') }}" title="Asset Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.asset') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-archive-in mr-2"></i>
@@ -190,12 +106,12 @@
 
             <!-- Document Tracking & Logistics Record - Visible to all roles except vendor -->
             <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Document Tracking & Logistics Record" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
+                <a href="#" title="Document Tracking & Logistics Record" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
                     <i class="bx bxs-file mr-2"></i>
-                    <span class="module-text">Tracking & Record</span>
+                    <span class="module-text">Document Tracking & Logistics Record</span>
                     <i class="bx bx-chevron-right chevron ml-auto"></i>
                 </a>
-                <ul class="submodules hidden pl-4 space-y-2">
+                <ul class="submodules hidden pl-4 space-y-2 text-sm">
                     <li>
                         <a href="{{ route('modules.dtlr.documents') }}" title="Document Tracker" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.documents') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-file-doc mr-2"></i>

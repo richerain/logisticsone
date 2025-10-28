@@ -22,7 +22,7 @@ Route::post('/auth/check-otp-session', [OtpController::class, 'checkOtpSession']
 Route::put('/profile/update', [ProfileController::class, 'update']);
 Route::post('/profile/upload-picture', [ProfileController::class, 'uploadPicture']);
 
-// SWS Warehousing routes - GRN Management (Primary endpoints)
+// SWS Inventory Flow routes - GRN Management (Primary endpoints)
 Route::prefix('warehousing')->group(function () {
     Route::get('/', [SWSController::class, 'index']);
     Route::post('/', [SWSController::class, 'store']);
@@ -46,18 +46,6 @@ Route::prefix('digital')->group(function () {
 });
 
 // Legacy routes for backward compatibility with gateway
-Route::get('/inventory', [SWSController::class, 'index']);
-Route::post('/inventory', [SWSController::class, 'store']);
-Route::get('/inventory/{id}', [SWSController::class, 'show']);
-Route::put('/inventory/{id}', [SWSController::class, 'update']);
-Route::delete('/inventory/{id}', [SWSController::class, 'destroy']);
-
-Route::get('/storage', [SWSController::class, 'index']);
-Route::post('/storage', [SWSController::class, 'store']);
-Route::get('/storage/{id}', [SWSController::class, 'show']);
-Route::put('/storage/{id}', [SWSController::class, 'update']);
-Route::delete('/storage/{id}', [SWSController::class, 'destroy']);
-
 Route::get('/restock', [DigitalController::class, 'index']);
 Route::post('/restock', [DigitalController::class, 'store']);
 Route::get('/restock/{id}', [DigitalController::class, 'show']);
