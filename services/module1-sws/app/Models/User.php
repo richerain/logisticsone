@@ -45,22 +45,13 @@ class User extends Authenticatable
 
         static::creating(function ($user) {
             if (empty($user->employee_id)) {
-                $prefixes = [
-                    'superadmin' => 'L1SAD',
-                    'admin' => 'L1ADM',
-                    'manager' => 'L1MAN',
-                    'staff' => 'L1STF',
-                    'vendor' => 'L1VEN'
-                ];
-
-                $prefix = $prefixes[strtolower($user->roles)] ?? 'L1EMP';
-                
+                // Use EMP prefix for all roles
                 $config = [
                     'table' => 'users',
                     'field' => 'employee_id',
                     'length' => 8,
-                    'prefix' => $prefix,
-                    'reset_on_prefix_change' => true
+                    'prefix' => 'EMP',
+                    'reset_on_prefix_change' => false
                 ];
 
                 $user->employee_id = IdGenerator::generate($config);

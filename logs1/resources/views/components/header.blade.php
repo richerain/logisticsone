@@ -29,7 +29,10 @@
                         <img id="header-profile-picture" src="{{ asset('images/default.jpg') }}" alt="User Profile" />
                     </div>
                 </div>
-                <span class="text-white font-xs" id="header-username">my name</span>
+                <div class="flex flex-col items-start">
+                    <span class="text-white font-xs" id="header-username">my name</span>
+                    <span class="text-white opacity-50 text-sm bg-gray-500 rounded px-1" id="header-role">Role</span>
+                </div>
                 <i class="bx bx-chevron-right chevron-profile pr-3"></i>
             </div>
             <ul tabindex="0" class="dropdown-content menu text-gray-500 bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg hidden" id="profile-dropdown">
@@ -481,8 +484,14 @@
     function updateHeaderWithUserInfo() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const usernameElement = document.getElementById('header-username');
+        const roleElement = document.getElementById('header-role');
+        
         if (usernameElement && user.firstname) {
             usernameElement.textContent = user.firstname;
+        }
+        
+        if (roleElement && user.roles) {
+            roleElement.textContent = user.roles.charAt(0).toUpperCase() + user.roles.slice(1).toLowerCase();
         }
         
         // Update header profile picture
@@ -710,8 +719,14 @@
         // Update header with current user info
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const usernameElement = document.getElementById('header-username');
+        const roleElement = document.getElementById('header-role');
+        
         if (usernameElement && user.firstname) {
             usernameElement.textContent = user.firstname;
+        }
+        
+        if (roleElement && user.roles) {
+            roleElement.textContent = user.roles.charAt(0).toUpperCase() + user.roles.slice(1).toLowerCase();
         }
 
         // Update header profile picture
