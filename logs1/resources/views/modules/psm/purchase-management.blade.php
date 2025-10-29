@@ -5,50 +5,11 @@
 @section('content')
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Purchase Management</h2>
-        </div>
-        
-        <!-- Stats Section -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
-                <div class="stat-figure text-primary">
-                    <i class="bx bx-file text-3xl"></i>
-                </div>
-                <div class="stat-title">Total Requests</div>
-                <div class="stat-value text-primary" id="total-requests">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
-                <div class="stat-figure text-warning">
-                    <i class="bx bx-time text-3xl"></i>
-                </div>
-                <div class="stat-title">Pending</div>
-                <div class="stat-value text-warning" id="pending-requests">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-info">
-                <div class="stat-figure text-info">
-                    <i class="bx bx-trending-up text-3xl"></i>
-                </div>
-                <div class="stat-title">In Progress</div>
-                <div class="stat-value text-info" id="progress-requests">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
-                <div class="stat-figure text-success">
-                    <i class="bx bx-check-circle text-3xl"></i>
-                </div>
-                <div class="stat-title">Approved</div>
-                <div class="stat-value text-success" id="approved-requests">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-error">
-                <div class="stat-figure text-error">
-                    <i class="bx bx-x-circle text-3xl"></i>
-                </div>
-                <div class="stat-title">Rejected</div>
-                <div class="stat-value text-error" id="rejected-requests">0</div>
-            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Purchase Management</h2>            
         </div>
 
         <!-- Search and Filters -->
-        <div class="flex gap-4 mb-6">
+        <div class="flex gap-4 mb-5">
             <div class="form-control flex-1">
                 <input type="text" placeholder="Search requests..." class="input input-bordered w-full" id="searchPurchases">
             </div>
@@ -61,17 +22,9 @@
                 <option value="Rejected">Rejected</option>
             </select>
         </div>
-        
-        <!-- Action Buttons -->
-        <div class="flex gap-2 mb-4">
-            <button class="btn btn-primary" id="procureRequisitionBtn">
-                <i class=" bx bx-sm bxs-cart-download" title="Procure Requisition"></i>Procure Requisition
-            </button>
+        <div class="flex justify-end  mb-5">
             <button class="btn btn-primary" id="addPurchaseBtn">
-                <i class="bx bx-sm bxs-cart" title="Purchase Requisition"></i> Purchase Requisition
-            </button>
-            <button class="btn btn-success" id="viewEmailBtn">
-                <i class="bx bx-sm bxs-envelope" title="Email"></i> Requisition Email
+                <i class="bx bx-plus mr-2"></i>Purchase Requisition
             </button>
         </div>
 
@@ -116,7 +69,7 @@
                     <input type="hidden" id="purchaseId" name="purchase_id">
                     
                     <!-- Auto-generated IDs Section -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Request ID</span>
@@ -132,9 +85,7 @@
                             <input type="text" id="poNumber" class="input input-bordered input-sm w-full bg-gray-100" 
                                    readonly placeholder="Auto-generated">
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Branch *</span>
@@ -142,7 +93,9 @@
                             <input type="text" id="branch" name="branch" class="input input-bordered input-sm w-full" 
                                    placeholder="Enter branch name" required>
                         </div>
+                    </div>
 
+                    <div class="grid grid-cols-3 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Vendor *</span>
@@ -151,20 +104,29 @@
                                 <option value="">Select Vendor</option>
                             </select>
                         </div>
-                    </div>
 
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">Item Name *</span>
-                        </label>
-                        <input type="text" id="item" name="item" class="input input-bordered input-sm w-full" 
-                               placeholder="Enter item name" required>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Item Name *</span>
+                            </label>
+                            <select id="item" name="item" class="select select-bordered select-sm w-full" required>
+                                <option value="">Select Item</option>
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Unit Price (₱)</span>
+                            </label>
+                            <input type="text" id="unitPrice" class="input input-bordered input-sm w-full bg-gray-100" 
+                                   readonly placeholder="Auto-fetched from vendor">
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text font-semibold">Quantity *</span>
+                                <span class="label-text font-semibold">Quantity (Pack) *</span>
                             </label>
                             <input type="number" id="quantity" name="quantity" class="input input-bordered input-sm w-full" 
                                    min="1" required>
@@ -172,7 +134,7 @@
 
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text font-semibold">Units *</span>
+                                <span class="label-text font-semibold">Units (Pcs) *</span>
                             </label>
                             <input type="number" id="units" name="units" class="input input-bordered input-sm w-full" 
                                    min="1" required>
@@ -180,22 +142,14 @@
 
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text font-semibold">Unit Price (₱) *</span>
-                            </label>
-                            <input type="number" id="unitPrice" name="unit_price" class="input input-bordered input-sm w-full" 
-                                   min="0" step="0.01" required>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-control">
-                            <label class="label">
                                 <span class="label-text font-semibold">Total Quote (₱)</span>
                             </label>
                             <input type="text" id="totalQuote" class="input input-bordered input-sm w-full bg-gray-100" 
                                    readonly placeholder="Auto-calculated">
                         </div>
+                    </div>
 
+                    <div class="grid grid-cols-3 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Estimated Budget (₱) *</span>
@@ -203,9 +157,7 @@
                             <input type="number" id="estimatedBudget" name="estimated_budget" class="input input-bordered input-sm w-full" 
                                    min="0" step="0.01" required>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Expected Delivery *</span>
@@ -214,27 +166,11 @@
                                    placeholder="e.g., 5 Days, 7 Days, 15 Days" required>
                         </div>
 
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Quote Date *</span>
-                            </label>
-                            <input type="date" id="quoteDate" name="quote_date" class="input input-bordered input-sm w-full" required>
-                        </div>
+                        <!-- Empty column to maintain 3-column layout -->
+                        <div class="form-control"></div>
                     </div>
 
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">Status</span>
-                        </label>
-                        <select id="purchaseStatus" name="status" class="select select-bordered select-sm w-full">
-                            <option value="Pending">Pending</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Received">Received</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-
+                    <!-- Description Field -->
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Description</span>
@@ -257,7 +193,7 @@
 
     <!-- View Purchase Modal -->
     <div id="viewPurchaseModal" class="modal modal-lg">
-        <div class="modal-box max-w-4xl p-0 overflow-visible">
+        <div class="modal-box max-w-6xl p-0 overflow-visible">
             <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
                 <h3 class="font-bold text-white text-lg">Purchase Request Details</h3>
                 <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeViewPurchaseModalX">✕</button>
@@ -268,271 +204,6 @@
                 </div>
                 <div class="modal-action flex justify-end pt-4 border-t">
                     <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeViewPurchaseModal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Procure Requisition Modal -->
-    <div id="procureRequisitionModal" class="modal modal-lg">
-        <div class="modal-box max-w-4xl p-0 overflow-visible">
-            <div class="flex justify-between items-center bg-blue-700 p-4 rounded-t-lg">
-                <h3 class="font-bold text-white text-lg">Procure Requisition</h3>
-                <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeProcureRequisitionModalX">✕</button>
-            </div>
-            <div class="p-4 max-h-[70vh] overflow-y-auto">
-                <form id="procureRequisitionForm" class="space-y-4">
-                    @csrf
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Requisition ID</span>
-                            </label>
-                            <input type="text" id="procureRequisitionId" class="input input-bordered input-sm w-full bg-gray-100" 
-                                   readonly placeholder="Auto-generated">
-                        </div>
-
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Department *</span>
-                            </label>
-                            <select id="procureDepartment" name="department" class="select select-bordered select-sm w-full" required>
-                                <option value="HR">Human Resources Department</option>
-                                <option value="Core">Core Department</option>
-                                <option value="Logs">Logistics Department</option>
-                                <option value="Finance">Financial Department</option>
-                                <option value="Admin">Administrative Department</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">Item Description *</span>
-                        </label>
-                        <textarea id="procureItemDescription" name="item_description" class="textarea textarea-bordered textarea-sm h-20" 
-                                  placeholder="Describe the items to be procured..." required></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Priority Level *</span>
-                            </label>
-                            <select id="procurePriority" name="priority" class="select select-bordered select-sm w-full" required>
-                                <option value="Low">Low</option>
-                                <option value="Medium" selected>Medium</option>
-                                <option value="High">High</option>
-                                <option value="Urgent">Urgent</option>
-                            </select>
-                        </div>
-
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Required By Date *</span>
-                            </label>
-                            <input type="date" id="procureRequiredDate" name="required_date" class="input input-bordered input-sm w-full" required>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Estimated Budget (₱) *</span>
-                            </label>
-                            <input type="number" id="procureEstimatedBudget" name="estimated_budget" class="input input-bordered input-sm w-full" 
-                                   min="0" step="0.01" required>
-                        </div>
-
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text font-semibold">Preferred Vendor</span>
-                            </label>
-                            <select id="procureVendor" name="vendor" class="select select-bordered select-sm w-full">
-                                <option value="">Select Preferred Vendor</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">Justification *</span>
-                        </label>
-                        <textarea id="procureJustification" name="justification" class="textarea textarea-bordered textarea-sm h-16" 
-                                  placeholder="Explain why this procurement is necessary..." required></textarea>
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">Additional Notes</span>
-                        </label>
-                        <textarea id="procureNotes" name="notes" class="textarea textarea-bordered textarea-sm h-12" 
-                                  placeholder="Any additional information..."></textarea>
-                    </div>
-
-                    <!-- Modal Actions -->
-                    <div class="modal-action flex justify-end space-x-3 pt-4 border-t">
-                        <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeProcureRequisitionModal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg px-4">
-                            <i class="bx bx-send mr-1"></i>Submit Requisition
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Email Modal -->
-    <div id="emailModal" class="modal modal-lg">
-        <div class="modal-box max-w-3xl p-0 overflow-visible">
-            <div class="flex justify-between items-center bg-purple-700 p-4 rounded-t-lg">
-                <h3 class="font-bold text-white text-lg">Received Request Emails</h3>
-                <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeEmailModalX">✕</button>
-            </div>
-            <div class="p-4 max-h-[70vh] overflow-y-auto">
-                <div class="space-y-4">
-                    <!-- Email List -->
-                    <div class="space-y-3" id="emailList">
-                        <!-- Equipment Requests -->
-                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Computer Equipment Request</h4>
-                                    <p class="text-xs text-gray-600 mb-1">From: IT Department</p>
-                                    <p class="text-xs text-gray-500">Date: 01/15/2024</p>
-                                </div>
-                            </div>
-                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
-                                <div class="flex items-center space-x-3">
-                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-800">computer_equipment_request.pdf</p>
-                                        <p class="text-xs text-gray-500">1.2 MB</p>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-primary download-file" data-filename="computer_equipment_request.pdf">
-                                    <i class="bx bx-download mr-1"></i>Download
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Network Equipment Purchase</h4>
-                                    <p class="text-xs text-gray-600 mb-1">From: Network Team</p>
-                                    <p class="text-xs text-gray-500">Date: 01/14/2024</p>
-                                </div>
-                            </div>
-                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
-                                <div class="flex items-center space-x-3">
-                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-800">network_equipment_quote.pdf</p>
-                                        <p class="text-xs text-gray-500">0.9 MB</p>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-primary download-file" data-filename="network_equipment_quote.pdf">
-                                    <i class="bx bx-download mr-1"></i>Download
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Supplies Requests -->
-                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Office Supplies Request</h4>
-                                    <p class="text-xs text-gray-600 mb-1">From: Admin Department</p>
-                                    <p class="text-xs text-gray-500">Date: 01/13/2024</p>
-                                </div>
-                            </div>
-                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
-                                <div class="flex items-center space-x-3">
-                                    <i class="bx bx-file-word text-blue-500 text-2xl"></i>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-800">office_supplies_list.docx</p>
-                                        <p class="text-xs text-gray-500">0.8 MB</p>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-primary download-file" data-filename="office_supplies_list.docx">
-                                    <i class="bx bx-download mr-1"></i>Download
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Cleaning Supplies Order</h4>
-                                    <p class="text-xs text-gray-600 mb-1">From: Facilities Management</p>
-                                    <p class="text-xs text-gray-500">Date: 01/12/2024</p>
-                                </div>
-                            </div>
-                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
-                                <div class="flex items-center space-x-3">
-                                    <i class="bx bx-file-excel text-green-500 text-2xl"></i>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-800">cleaning_supplies_order.xlsx</p>
-                                        <p class="text-xs text-gray-500">0.7 MB</p>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-primary download-file" data-filename="cleaning_supplies_order.xlsx">
-                                    <i class="bx bx-download mr-1"></i>Download
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Furniture Requests -->
-                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Office Furniture Purchase</h4>
-                                    <p class="text-xs text-gray-600 mb-1">From: HR Department</p>
-                                    <p class="text-xs text-gray-500">Date: 01/11/2024</p>
-                                </div>
-                            </div>
-                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
-                                <div class="flex items-center space-x-3">
-                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-800">office_furniture_quotation.pdf</p>
-                                        <p class="text-xs text-gray-500">1.5 MB</p>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-primary download-file" data-filename="office_furniture_quotation.pdf">
-                                    <i class="bx bx-download mr-1"></i>Download
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="email-item bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800 text-sm mb-1">Conference Room Furniture</h4>
-                                    <p class="text-xs text-gray-600 mb-1">From: Executive Office</p>
-                                    <p class="text-xs text-gray-500">Date: 01/10/2024</p>
-                                </div>
-                            </div>
-                            <div class="file-attachment flex items-center justify-between p-3 bg-gray-50 rounded border">
-                                <div class="flex items-center space-x-3">
-                                    <i class="bx bx-file-pdf text-red-500 text-2xl"></i>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-800">conference_furniture_specs.pdf</p>
-                                        <p class="text-xs text-gray-500">2.1 MB</p>
-                                    </div>
-                                </div>
-                                <button class="btn btn-sm btn-primary download-file" data-filename="conference_furniture_specs.pdf">
-                                    <i class="bx bx-download mr-1"></i>Download
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-action flex justify-end pt-4 border-t">
-                    <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeEmailModal">Close</button>
                 </div>
             </div>
         </div>
@@ -549,6 +220,7 @@
 <script>
     let purchases = [];
     let vendors = [];
+    let vendorProducts = [];
 
     // ==================== CONFIGURATION ====================
     const API_BASE_URL = 'http://localhost:8001/api/psm/purchase';
@@ -614,13 +286,6 @@
         });
     }
 
-    // Generate random ID
-    function generateRandomId(prefix = 'REQ') {
-        const timestamp = Date.now().toString().slice(-6);
-        const random = Math.random().toString(36).substring(2, 5).toUpperCase();
-        return `${prefix}-${timestamp}-${random}`;
-    }
-
     // Load data on page load
     document.addEventListener('DOMContentLoaded', function() {
         initializeEventListeners();
@@ -631,73 +296,38 @@
     function initializeEventListeners() {
         // Add purchase button
         document.getElementById('addPurchaseBtn').addEventListener('click', openAddPurchaseModal);
-        
-        // Procure requisition button
-        document.getElementById('procureRequisitionBtn').addEventListener('click', openProcureRequisitionModal);
-        
-        // Email button
-        document.getElementById('viewEmailBtn').addEventListener('click', openEmailModal);
 
         // Close modal buttons
         document.getElementById('closePurchaseModal').addEventListener('click', closePurchaseModal);
         document.getElementById('closePurchaseModalX').addEventListener('click', closePurchaseModal);
         document.getElementById('closeViewPurchaseModal').addEventListener('click', closeViewPurchaseModal);
         document.getElementById('closeViewPurchaseModalX').addEventListener('click', closeViewPurchaseModal);
-        document.getElementById('closeProcureRequisitionModal').addEventListener('click', closeProcureRequisitionModal);
-        document.getElementById('closeProcureRequisitionModalX').addEventListener('click', closeProcureRequisitionModal);
-        document.getElementById('closeEmailModal').addEventListener('click', closeEmailModal);
-        document.getElementById('closeEmailModalX').addEventListener('click', closeEmailModal);
 
         // Form submission
         document.getElementById('purchaseForm').addEventListener('submit', handlePurchaseSubmit);
-        document.getElementById('procureRequisitionForm').addEventListener('submit', handleProcureRequisitionSubmit);
 
-        // Auto-calculate total quote when units or unit price changes
+        // Auto-calculate total quote when quantity or units change
+        document.getElementById('quantity').addEventListener('input', calculatePurchaseTotals);
         document.getElementById('units').addEventListener('input', calculatePurchaseTotals);
-        document.getElementById('unitPrice').addEventListener('input', calculatePurchaseTotals);
+
+        // Vendor and item selection events
+        document.getElementById('vendor').addEventListener('change', loadVendorProducts);
+        document.getElementById('item').addEventListener('change', updateUnitPrice);
 
         // Search and filter
         document.getElementById('searchPurchases').addEventListener('input', filterPurchases);
         document.getElementById('statusFilter').addEventListener('change', filterPurchases);
-
-        // Email download buttons
-        document.querySelectorAll('.download-file').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const filename = this.getAttribute('data-filename');
-                downloadFile(filename);
-            });
-        });
     }
 
     function calculatePurchaseTotals() {
+        const quantity = parseInt(document.getElementById('quantity').value) || 0;
         const units = parseInt(document.getElementById('units').value) || 0;
-        const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+        const unitPrice = parseFloat(document.getElementById('unitPrice').value.replace('₱', '').replace(/,/g, '')) || 0;
         
-        // Calculate total quote based on units and unit price
-        const totalQuote = units * unitPrice;
+        // Calculate total quote based on quantity, units, and unit price
+        const totalQuote = quantity * units * unitPrice;
         
         document.getElementById('totalQuote').value = formatCurrency(totalQuote);
-    }
-
-    function downloadFile(filename) {
-        showLoadingModal('Downloading File...');
-        
-        // Simulate download process
-        setTimeout(() => {
-            hideLoadingModal();
-            
-            // Create a temporary link to trigger download
-            const link = document.createElement('a');
-            link.href = '#'; // In real implementation, this would be the actual file URL
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showSuccessToast(`Successfully Download`);
-            
-            console.log(`Downloading file...`);
-        }, 1000);
     }
 
     async function loadVendors() {
@@ -708,7 +338,6 @@
             if (result.success) {
                 vendors = result.data || [];
                 populateVendorDropdown();
-                populateProcureVendorDropdown();
             }
         } catch (error) {
             console.error('Error loading vendors:', error);
@@ -722,21 +351,64 @@
         vendors.forEach(vendor => {
             const option = document.createElement('option');
             option.value = vendor.ven_name;
-            option.textContent = `${vendor.ven_name} (${vendor.ven_code || vendor.ven_email})`;
+            option.textContent = `${vendor.ven_name} (${vendor.vendor_type || 'Supplies'})`;
             vendorSelect.appendChild(option);
         });
     }
 
-    function populateProcureVendorDropdown() {
-        const vendorSelect = document.getElementById('procureVendor');
-        vendorSelect.innerHTML = '<option value="">Select Preferred Vendor</option>';
+    async function loadVendorProducts() {
+        const vendorName = document.getElementById('vendor').value;
+        if (!vendorName) {
+            document.getElementById('item').innerHTML = '<option value="">Select Item</option>';
+            document.getElementById('unitPrice').value = '';
+            return;
+        }
+
+        try {
+            // Find vendor by name
+            const vendor = vendors.find(v => v.ven_name === vendorName);
+            if (!vendor) return;
+
+            const response = await fetch(`http://localhost:8001/api/psm/vendors/${vendor.ven_id}/products`);
+            const result = await response.json();
+            
+            if (result.success) {
+                vendorProducts = result.data || [];
+                populateItemDropdown();
+            }
+        } catch (error) {
+            console.error('Error loading vendor products:', error);
+        }
+    }
+
+    function populateItemDropdown() {
+        const itemSelect = document.getElementById('item');
+        itemSelect.innerHTML = '<option value="">Select Item</option>';
         
-        vendors.forEach(vendor => {
+        // Filter only active products
+        const activeProducts = vendorProducts.filter(product => product.product_status === 'active');
+        
+        activeProducts.forEach(product => {
             const option = document.createElement('option');
-            option.value = vendor.ven_name;
-            option.textContent = `${vendor.ven_name} (${vendor.ven_code || vendor.ven_email})`;
-            vendorSelect.appendChild(option);
+            option.value = product.product_name;
+            option.textContent = `${product.product_name} - ${formatCurrency(product.product_price)} (Stock: ${product.product_stock})`;
+            option.setAttribute('data-price', product.product_price);
+            itemSelect.appendChild(option);
         });
+    }
+
+    function updateUnitPrice() {
+        const itemName = document.getElementById('item').value;
+        const selectedOption = document.getElementById('item').selectedOptions[0];
+        
+        if (selectedOption && selectedOption.getAttribute('data-price')) {
+            const price = parseFloat(selectedOption.getAttribute('data-price'));
+            document.getElementById('unitPrice').value = formatCurrency(price);
+            calculatePurchaseTotals(); // Recalculate totals when price changes
+        } else {
+            document.getElementById('unitPrice').value = '';
+            document.getElementById('totalQuote').value = '';
+        }
     }
 
     async function loadPurchases() {
@@ -753,7 +425,6 @@
             if (result.success) {
                 purchases = result.data || [];
                 renderPurchases(purchases);
-                updateStats(purchases);
             } else {
                 throw new Error(result.message || 'Failed to load purchase requests');
             }
@@ -810,8 +481,8 @@
             <tr>
                 <td class="font-mono font-semibold text-sm">${purchase.request_id}</td>
                 <td class="text-sm">${purchase.item}</td>
-                <td class="text-center text-sm">${purchase.quantity}</td>
-                <td class="text-center text-sm">${purchase.units}</td>
+                <td class="text-center text-sm">${purchase.quantity} Pack</td>
+                <td class="text-center text-sm">${purchase.units} Pcs</td>
                 <td class="text-right font-mono text-sm font-semibold">${formatCurrency(purchase.total_quote)}</td>
                 <td class="text-right font-mono text-sm">${formatCurrency(purchase.estimated_budget)}</td>
                 <td class="font-mono font-semibold text-sm">${purchase.po_number}</td>
@@ -820,9 +491,6 @@
                     <div class="flex space-x-1">
                         <button title="View" class="btn btn-sm btn-circle btn-info view-purchase-btn" data-purchase-id="${purchase.purchase_id}">
                             <i class="bx bx-show-alt text-sm"></i>
-                        </button>
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-purchase-btn" data-purchase-id="${purchase.purchase_id}">
-                            <i class="bx bx-edit text-sm"></i>
                         </button>
                         <button title="Delete" class="btn btn-sm btn-circle btn-error delete-purchase-btn" data-purchase-id="${purchase.purchase_id}">
                             <i class="bx bx-trash text-sm"></i>
@@ -845,31 +513,12 @@
             });
         });
 
-        document.querySelectorAll('.edit-purchase-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const purchaseId = this.getAttribute('data-purchase-id');
-                editPurchase(parseInt(purchaseId));
-            });
-        });
-
         document.querySelectorAll('.delete-purchase-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const purchaseId = this.getAttribute('data-purchase-id');
                 deletePurchase(parseInt(purchaseId));
             });
         });
-    }
-
-    function updateStats(purchasesData) {
-        document.getElementById('total-requests').textContent = purchasesData.length;
-        document.getElementById('pending-requests').textContent = 
-            purchasesData.filter(p => p.status === 'Pending').length;
-        document.getElementById('progress-requests').textContent = 
-            purchasesData.filter(p => p.status === 'In Progress').length;
-        document.getElementById('approved-requests').textContent = 
-            purchasesData.filter(p => p.status === 'Approved').length;
-        document.getElementById('rejected-requests').textContent = 
-            purchasesData.filter(p => p.status === 'Rejected').length;
     }
 
     function filterPurchases() {
@@ -888,7 +537,6 @@
         });
         
         renderPurchases(filtered);
-        updateStats(filtered);
     }
 
     // Modal Functions
@@ -897,12 +545,16 @@
         document.getElementById('purchaseModalSubmitText').textContent = 'Save Request';
         document.getElementById('purchaseForm').reset();
         document.getElementById('purchaseId').value = '';
-        document.getElementById('purchaseStatus').value = 'Pending';
-        document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
         
         // Clear auto-generated ID fields for new requests
         document.getElementById('requestId').value = 'Auto-generated';
         document.getElementById('poNumber').value = 'Auto-generated';
+        
+        // Reset vendor and item dropdowns
+        document.getElementById('vendor').value = '';
+        document.getElementById('item').innerHTML = '<option value="">Select Item</option>';
+        document.getElementById('unitPrice').value = '';
+        document.getElementById('totalQuote').value = '';
         
         calculatePurchaseTotals();
         document.getElementById('purchaseModal').classList.add('modal-open');
@@ -921,26 +573,6 @@
         document.getElementById('viewPurchaseModal').classList.remove('modal-open');
     }
 
-    function openProcureRequisitionModal() {
-        document.getElementById('procureRequisitionForm').reset();
-        document.getElementById('procureRequisitionId').value = generateRandomId('PROC');
-        document.getElementById('procureRequiredDate').value = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        document.getElementById('procureRequisitionModal').classList.add('modal-open');
-    }
-
-    function closeProcureRequisitionModal() {
-        document.getElementById('procureRequisitionModal').classList.remove('modal-open');
-        document.getElementById('procureRequisitionForm').reset();
-    }
-
-    function openEmailModal() {
-        document.getElementById('emailModal').classList.add('modal-open');
-    }
-
-    function closeEmailModal() {
-        document.getElementById('emailModal').classList.remove('modal-open');
-    }
-
     // Purchase Actions
     function viewPurchase(purchaseId) {
         const purchase = purchases.find(p => p.purchase_id === purchaseId);
@@ -948,8 +580,8 @@
 
         const purchaseDetails = `
             <div class="space-y-4">
-                <!-- Basic Information -->
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Basic Information - 4 Column Layout -->
+                <div class="grid grid-cols-4 gap-4">
                     <div>
                         <strong class="text-gray-700 text-xs">Request ID:</strong>
                         <p class="text-sm p-2 bg-gray-50 rounded border mt-1 font-mono">${purchase.request_id}</p>
@@ -968,21 +600,19 @@
                     </div>
                 </div>
 
-                <!-- Item Information -->
-                <div>
-                    <strong class="text-gray-700 text-xs">Item Name:</strong>
-                    <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${purchase.item}</p>
-                </div>
-
-                <!-- Quantity and Pricing -->
-                <div class="grid grid-cols-3 gap-4">
+                <!-- Item Information - 4 Column Layout -->
+                <div class="grid grid-cols-4 gap-4">
+                    <div>
+                        <strong class="text-gray-700 text-xs">Item Name:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${purchase.item}</p>
+                    </div>
                     <div>
                         <strong class="text-gray-700 text-xs">Quantity:</strong>
-                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${purchase.quantity}</p>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${purchase.quantity} Pack</p>
                     </div>
                     <div>
                         <strong class="text-gray-700 text-xs">Units:</strong>
-                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${purchase.units}</p>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${purchase.units} Pcs</p>
                     </div>
                     <div>
                         <strong class="text-gray-700 text-xs">Unit Price:</strong>
@@ -990,8 +620,8 @@
                     </div>
                 </div>
 
-                <!-- Financial Information -->
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Financial Information - 4 Column Layout -->
+                <div class="grid grid-cols-4 gap-4">
                     <div>
                         <strong class="text-gray-700 text-xs">Total Quote:</strong>
                         <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-right font-mono font-semibold">${formatCurrency(purchase.total_quote)}</p>
@@ -1000,13 +630,9 @@
                         <strong class="text-gray-700 text-xs">Estimated Budget:</strong>
                         <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-right font-mono">${formatCurrency(purchase.estimated_budget)}</p>
                     </div>
-                </div>
-
-                <!-- Delivery and Date -->
-                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <strong class="text-gray-700 text-xs">Expected Delivery:</strong>
-                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${purchase.expected_delivery} Days</p>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${purchase.expected_delivery}</p>
                     </div>
                     <div>
                         <strong class="text-gray-700 text-xs">Quote Date:</strong>
@@ -1014,10 +640,16 @@
                     </div>
                 </div>
 
-                <!-- Status -->
-                <div>
-                    <strong class="text-gray-700 text-xs">Status:</strong>
-                    <p class="mt-1 p-2">${getStatusBadge(purchase.status)}</p>
+                <!-- Status - 4 Column Layout -->
+                <div class="grid grid-cols-4 gap-4">
+                    <div>
+                        <strong class="text-gray-700 text-xs">Status:</strong>
+                        <p class="mt-1 p-2">${getStatusBadge(purchase.status)}</p>
+                    </div>
+                    <!-- Empty columns to maintain 4-column layout -->
+                    <div></div>
+                    <div></div>
+                    <div></div>
                 </div>
 
                 <!-- Description -->
@@ -1050,32 +682,6 @@
         openViewPurchaseModal();
     }
 
-    function editPurchase(purchaseId) {
-        const purchase = purchases.find(p => p.purchase_id === purchaseId);
-        if (!purchase) return;
-
-        document.getElementById('purchaseModalTitle').textContent = 'Edit Purchase Request';
-        document.getElementById('purchaseModalSubmitText').textContent = 'Update Request';
-        
-        document.getElementById('purchaseId').value = purchase.purchase_id;
-        document.getElementById('requestId').value = purchase.request_id;
-        document.getElementById('poNumber').value = purchase.po_number;
-        document.getElementById('branch').value = purchase.branch;
-        document.getElementById('vendor').value = purchase.vendor;
-        document.getElementById('item').value = purchase.item;
-        document.getElementById('quantity').value = purchase.quantity;
-        document.getElementById('units').value = purchase.units;
-        document.getElementById('unitPrice').value = purchase.unit_price;
-        document.getElementById('estimatedBudget').value = purchase.estimated_budget;
-        document.getElementById('expectedDelivery').value = purchase.expected_delivery;
-        document.getElementById('quoteDate').value = purchase.quote_date;
-        document.getElementById('purchaseStatus').value = purchase.status;
-        document.getElementById('description').value = purchase.description || '';
-
-        calculatePurchaseTotals();
-        document.getElementById('purchaseModal').classList.add('modal-open');
-    }
-
     async function handlePurchaseSubmit(e) {
         e.preventDefault();
         
@@ -1083,17 +689,18 @@
         const purchaseId = document.getElementById('purchaseId').value;
         const isEdit = !!purchaseId;
 
+        // Auto-set current date for quote_date and status as "Pending" for new requests
         const purchaseData = {
             branch: formData.get('branch'),
             vendor: formData.get('vendor'),
             item: formData.get('item'),
             quantity: parseInt(formData.get('quantity')) || 1,
             units: parseInt(formData.get('units')) || 1,
-            unit_price: parseFloat(formData.get('unit_price')) || 0,
+            unit_price: parseFloat(document.getElementById('unitPrice').value.replace('₱', '').replace(/,/g, '')) || 0,
             estimated_budget: parseFloat(formData.get('estimated_budget')) || 0,
             expected_delivery: formData.get('expected_delivery'),
-            quote_date: formData.get('quote_date'),
-            status: formData.get('status'),
+            quote_date: new Date().toISOString().split('T')[0], // Auto-set current date
+            status: isEdit ? undefined : 'Pending', // Auto-set to "Pending" for new requests
             description: formData.get('description')
         };
         
@@ -1141,40 +748,6 @@
         } catch (error) {
             hideLoadingModal();
             Swal.fire('Error', `Failed to ${isEdit ? 'update' : 'create'} purchase request: ` + error.message, 'error');
-        }
-    }
-
-    async function handleProcureRequisitionSubmit(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        
-        const procureData = {
-            requisition_id: formData.get('requisition_id'),
-            department: formData.get('department'),
-            item_description: formData.get('item_description'),
-            priority: formData.get('priority'),
-            required_date: formData.get('required_date'),
-            estimated_budget: parseFloat(formData.get('estimated_budget')) || 0,
-            vendor: formData.get('vendor'),
-            justification: formData.get('justification'),
-            notes: formData.get('notes')
-        };
-        
-        try {
-            showLoadingModal('Submitting Procure Requisition...');
-
-            // Simulate API call - replace with actual API endpoint
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            hideLoadingModal();
-            closeProcureRequisitionModal();
-            
-            showSuccessToast('Procure requisition submitted successfully!');
-            
-        } catch (error) {
-            hideLoadingModal();
-            Swal.fire('Error', 'Failed to submit procure requisition: ' + error.message, 'error');
         }
     }
 
@@ -1234,16 +807,6 @@
     }
     .table td {
         white-space: nowrap;
-    }
-    .checkbox:checked {
-        background-color: #4f46e5;
-        border-color: #4f46e5;
-    }
-    .email-item {
-        border-left: 4px solid #8b5cf6;
-    }
-    .email-item:hover {
-        border-left-color: #7c3aed;
     }
 </style>
 @endsection

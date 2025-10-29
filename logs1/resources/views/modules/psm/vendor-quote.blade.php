@@ -10,37 +10,6 @@
                 <i class="bx bx-plus mr-2"></i>Add New Quote
             </button>
         </div>
-        <!-- Stats Section -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
-                <div class="stat-figure text-primary">
-                    <i class="bx bx-file text-3xl"></i>
-                </div>
-                <div class="stat-title">Total Quotes</div>
-                <div class="stat-value text-primary" id="total-quotes">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
-                <div class="stat-figure text-warning">
-                    <i class="bx bx-time text-3xl"></i>
-                </div>
-                <div class="stat-title">Pending</div>
-                <div class="stat-value text-warning" id="pending-quotes">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
-                <div class="stat-figure text-success">
-                    <i class="bx bx-check-circle text-3xl"></i>
-                </div>
-                <div class="stat-title">Approved</div>
-                <div class="stat-value text-success" id="approved-quotes">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-info">
-                <div class="stat-figure text-info">
-                    <i class="bx bx-calendar text-3xl"></i>
-                </div>
-                <div class="stat-title">This Month</div>
-                <div class="stat-value text-info" id="monthly-quotes">0</div>
-            </div>
-        </div>
 
         <!-- Search and Filters -->
         <div class="flex gap-4 mb-6">
@@ -54,7 +23,6 @@
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
             </select>
-            <input type="date" class="input input-bordered" id="dateFilter" placeholder="Filter by date">
         </div>
 
         <!-- Quotes Table -->
@@ -86,9 +54,9 @@
         </div>
     </div>
 
-    <!-- Add/Edit Quote Modal -->
-    <div id="quoteModal" class="modal modal-lg">
-        <div class="modal-box max-w-2xl p-0 overflow-visible">
+    <!-- Add/Edit Quote Modal - Wider for 4 columns -->
+    <div id="quoteModal" class="modal modal-xl">
+        <div class="modal-box max-w-6xl p-0 overflow-visible">
             <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
                 <h3 class="font-bold text-white text-lg" id="quoteModalTitle">New Quote</h3>
                 <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeQuoteModalX">✕</button>
@@ -98,8 +66,8 @@
                     @csrf
                     <input type="hidden" id="quoteId" name="quote_id">
                     
-                    <!-- Auto-generated IDs Section -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <!-- Auto-generated IDs Section - 4 Column Layout -->
+                    <div class="grid grid-cols-4 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Quote ID</span>
@@ -116,19 +84,32 @@
                                 <option value="">Select Request ID</option>
                             </select>
                         </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Vendor *</span>
+                            </label>
+                            <select id="vendorId" name="ven_id" class="select select-bordered select-sm w-full bg-gray-100" 
+                                   readonly required>
+                                <option value="">Select Vendor</option>
+                            </select>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Status</span>
+                            </label>
+                            <select id="quoteStatus" name="status" class="select select-bordered select-sm w-full bg-gray-100" readonly>
+                                <option value="pending">Pending</option>
+                                <option value="received">Received</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">Vendor *</span>
-                        </label>
-                        <select id="vendorId" name="ven_id" class="select select-bordered select-sm w-full" required>
-                            <option value="">Select Vendor</option>
-                        </select>
-                    </div>
-
-                    <!-- Auto-filled fields from Purchase Management -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <!-- Auto-filled fields from Purchase Management - 4 Column Layout -->
+                    <div class="grid grid-cols-4 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Item Name</span>
@@ -144,9 +125,7 @@
                             <input type="text" id="quantity" class="input input-bordered input-sm w-full bg-gray-100" 
                                    readonly placeholder="Auto-filled from purchase">
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Unit Price (₱)</span>
@@ -164,7 +143,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-4 gap-4">
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text font-semibold">Delivery Lead Time (Days)</span>
@@ -180,20 +159,25 @@
                             <input type="text" id="quoteDate" class="input input-bordered input-sm w-full bg-gray-100" 
                                    readonly placeholder="Auto-filled from purchase">
                         </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Branch</span>
+                            </label>
+                            <input type="text" id="branch" class="input input-bordered input-sm w-full bg-gray-100" 
+                                   readonly placeholder="Auto-filled from purchase">
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">PO Number</span>
+                            </label>
+                            <input type="text" id="poNumber" class="input input-bordered input-sm w-full bg-gray-100" 
+                                   readonly placeholder="Auto-filled from purchase">
+                        </div>
                     </div>
 
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text font-semibold">Status</span>
-                        </label>
-                        <select id="quoteStatus" name="status" class="select select-bordered select-sm w-full">
-                            <option value="pending">Pending</option>
-                            <option value="received">Received</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
-
+                    <!-- Notes - Full width -->
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text font-semibold">Notes</span>
@@ -214,9 +198,9 @@
         </div>
     </div>
 
-    <!-- View Quote Modal -->
-    <div id="viewQuoteModal" class="modal modal-lg">
-        <div class="modal-box max-w-2xl p-0 overflow-visible">
+    <!-- View Quote Modal - Wider for 4 columns -->
+    <div id="viewQuoteModal" class="modal modal-xl">
+        <div class="modal-box max-w-6xl p-0 overflow-visible">
             <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
                 <h3 class="font-bold text-white text-lg">Quote Details</h3>
                 <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeViewQuoteModalX">✕</button>
@@ -228,6 +212,56 @@
                 <div class="modal-action flex justify-end pt-4 border-t">
                     <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeViewQuoteModal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Quote Modal - Only Status and Notes -->
+    <div id="editQuoteModal" class="modal modal-lg">
+        <div class="modal-box max-w-2xl p-0 overflow-visible">
+            <div class="flex justify-between items-center bg-green-700 p-4 rounded-t-lg">
+                <h3 class="font-bold text-white text-lg">Edit Quote</h3>
+                <button class="btn btn-sm btn-circle btn-ghost hover:bg-white/20 text-white" id="closeEditQuoteModalX">✕</button>
+            </div>
+            <div class="p-4 max-h-[70vh] overflow-y-auto">
+                <form id="editQuoteForm" class="space-y-4">
+                    @csrf
+                    <input type="hidden" id="editQuoteId" name="quote_id">
+                    
+                    <!-- Only Status and Notes Fields -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">Status</span>
+                            </label>
+                            <select id="editQuoteStatus" name="status" class="select select-bordered select-sm w-full">
+                                <option value="pending">Pending</option>
+                                <option value="received">Received</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+
+                        <!-- Empty column to maintain layout -->
+                        <div class="form-control"></div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold">Notes</span>
+                        </label>
+                        <textarea id="editQuoteNotes" name="notes" class="textarea textarea-bordered textarea-sm h-16" 
+                                  placeholder="Additional notes..."></textarea>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="modal-action flex justify-end space-x-3 pt-4 border-t">
+                        <button type="button" class="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors px-4" id="closeEditQuoteModal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300 shadow-lg px-4">
+                            <i class="bx bx-save mr-1"></i>Update Quote
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -338,9 +372,12 @@
         document.getElementById('closeQuoteModalX').addEventListener('click', closeQuoteModal);
         document.getElementById('closeViewQuoteModal').addEventListener('click', closeViewQuoteModal);
         document.getElementById('closeViewQuoteModalX').addEventListener('click', closeViewQuoteModal);
+        document.getElementById('closeEditQuoteModal').addEventListener('click', closeEditQuoteModal);
+        document.getElementById('closeEditQuoteModalX').addEventListener('click', closeEditQuoteModal);
 
         // Form submission
         document.getElementById('quoteForm').addEventListener('submit', handleQuoteSubmit);
+        document.getElementById('editQuoteForm').addEventListener('submit', handleEditQuoteSubmit);
 
         // Request ID change event
         document.getElementById('requestId').addEventListener('change', function() {
@@ -369,6 +406,10 @@
                     // Set notes from purchase description
                     document.getElementById('quoteNotes').value = purchase.description || '';
                     
+                    // Set branch and PO number
+                    document.getElementById('branch').value = purchase.branch || '';
+                    document.getElementById('poNumber').value = purchase.po_number || '';
+                    
                     // Auto-select vendor if name matches
                     const vendor = vendors.find(v => v.ven_name === purchase.vendor);
                     if (vendor) {
@@ -384,7 +425,6 @@
         // Search and filter
         document.getElementById('searchQuotes').addEventListener('input', filterQuotes);
         document.getElementById('statusFilter').addEventListener('change', filterQuotes);
-        document.getElementById('dateFilter').addEventListener('change', filterQuotes);
     }
 
     function clearAutoFilledFields() {
@@ -397,6 +437,8 @@
         document.getElementById('quoteStatus').value = 'pending';
         document.getElementById('quoteNotes').value = '';
         document.getElementById('vendorId').value = '';
+        document.getElementById('branch').value = '';
+        document.getElementById('poNumber').value = '';
     }
 
     async function loadPurchaseRequests() {
@@ -468,7 +510,6 @@
             if (result.success) {
                 quotes = result.data || [];
                 renderQuotes(quotes);
-                updateStats(quotes);
             } else {
                 throw new Error(result.message || 'Failed to load quotes');
             }
@@ -579,27 +620,9 @@
         });
     }
 
-    function updateStats(quotesData) {
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        
-        document.getElementById('total-quotes').textContent = quotesData.length;
-        document.getElementById('pending-quotes').textContent = 
-            quotesData.filter(q => q.status === 'pending').length;
-        document.getElementById('approved-quotes').textContent = 
-            quotesData.filter(q => q.status === 'approved').length;
-        document.getElementById('monthly-quotes').textContent = 
-            quotesData.filter(q => {
-                const quoteDate = new Date(q.quote_date);
-                return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
-            }).length;
-    }
-
     function filterQuotes() {
         const searchTerm = document.getElementById('searchQuotes').value.toLowerCase();
         const statusFilter = document.getElementById('statusFilter').value;
-        const dateFilter = document.getElementById('dateFilter').value;
         
         const filtered = quotes.filter(quote => {
             const matchesSearch = searchTerm === '' || 
@@ -609,13 +632,11 @@
                 (quote.vendor?.ven_name && quote.vendor.ven_name.toLowerCase().includes(searchTerm));
             
             const matchesStatus = statusFilter === '' || quote.status === statusFilter;
-            const matchesDate = dateFilter === '' || quote.quote_date === dateFilter;
             
-            return matchesSearch && matchesStatus && matchesDate;
+            return matchesSearch && matchesStatus;
         });
         
         renderQuotes(filtered);
-        updateStats(filtered);
     }
 
     // Modal Functions
@@ -631,11 +652,11 @@
         // Clear auto-filled fields
         clearAutoFilledFields();
         
-        // Enable all fields for new quote
+        // Enable request ID selection, disable vendor and status
         document.getElementById('requestId').disabled = false;
-        document.getElementById('vendorId').disabled = false;
-        document.getElementById('quoteStatus').disabled = false;
-        document.getElementById('quoteNotes').readOnly = false;
+        document.getElementById('vendorId').disabled = true;
+        document.getElementById('quoteStatus').disabled = true;
+        document.getElementById('quoteNotes').readOnly = true;
         
         document.getElementById('quoteModal').classList.add('modal-open');
     }
@@ -653,6 +674,15 @@
         document.getElementById('viewQuoteModal').classList.remove('modal-open');
     }
 
+    function openEditQuoteModal() {
+        document.getElementById('editQuoteModal').classList.add('modal-open');
+    }
+
+    function closeEditQuoteModal() {
+        document.getElementById('editQuoteModal').classList.remove('modal-open');
+        document.getElementById('editQuoteForm').reset();
+    }
+
     // Quote Actions
     function viewQuote(quoteId) {
         const quote = quotes.find(q => q.quote_id === quoteId);
@@ -660,8 +690,8 @@
 
         const quoteDetails = `
             <div class="space-y-4">
-                <!-- Basic Information -->
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Basic Information - 4 Column Layout -->
+                <div class="grid grid-cols-4 gap-4">
                     <div>
                         <strong class="text-gray-700 text-xs">Quote ID:</strong>
                         <p class="text-sm p-2 bg-gray-50 rounded border mt-1 font-mono">${quote.quote_code}</p>
@@ -681,21 +711,15 @@
                     </div>
                 </div>
 
-                <!-- Item Information -->
-                <div>
-                    <strong class="text-gray-700 text-xs">Item Name:</strong>
-                    <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${quote.item_name}</p>
-                </div>
-
-                <!-- Quantity and Pricing -->
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Item Information - 4 Column Layout -->
+                <div class="grid grid-cols-4 gap-4">
+                    <div>
+                        <strong class="text-gray-700 text-xs">Item Name:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${quote.item_name}</p>
+                    </div>
                     <div>
                         <strong class="text-gray-700 text-xs">Quantity:</strong>
                         <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${quote.quantity}</p>
-                    </div>
-                    <div>
-                        <strong class="text-gray-700 text-xs">Units:</strong>
-                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${quote.units?.toLocaleString() || '0'}</p>
                     </div>
                     <div>
                         <strong class="text-gray-700 text-xs">Unit Price:</strong>
@@ -707,8 +731,8 @@
                     </div>
                 </div>
 
-                <!-- Delivery and Date -->
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Delivery and Date - 4 Column Layout -->
+                <div class="grid grid-cols-4 gap-4">
                     <div>
                         <strong class="text-gray-700 text-xs">Delivery Lead Time:</strong>
                         <p class="text-sm p-2 bg-gray-50 rounded border mt-1 text-center">${quote.delivery_lead_time} Days</p>
@@ -716,6 +740,14 @@
                     <div>
                         <strong class="text-gray-700 text-xs">Quote Date:</strong>
                         <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${formatDate(quote.quote_date)}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">Branch:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1">${quote.purchase?.branch || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <strong class="text-gray-700 text-xs">PO Number:</strong>
+                        <p class="text-sm p-2 bg-gray-50 rounded border mt-1 font-mono">${quote.purchase?.po_number || 'N/A'}</p>
                     </div>
                 </div>
 
@@ -753,68 +785,98 @@
         const quote = quotes.find(q => q.quote_id === quoteId);
         if (!quote) return;
 
-        document.getElementById('quoteModalTitle').textContent = 'Edit Quote';
-        document.getElementById('quoteModalSubmitText').textContent = 'Update Quote';
+        // Set only status and notes for edit modal
+        document.getElementById('editQuoteId').value = quote.quote_id;
+        document.getElementById('editQuoteStatus').value = quote.status;
+        document.getElementById('editQuoteNotes').value = quote.notes || '';
         
-        document.getElementById('quoteId').value = quote.quote_id;
-        document.getElementById('quoteCode').value = quote.quote_code;
-        document.getElementById('requestId').value = quote.request_id;
-        document.getElementById('vendorId').value = quote.ven_id;
-        document.getElementById('itemName').value = quote.item_name;
-        document.getElementById('quantity').value = quote.quantity;
-        document.getElementById('unitPrice').value = formatCurrency(quote.unit_price);
-        document.getElementById('totalQuote').value = formatCurrency(quote.total_quote);
-        document.getElementById('deliveryLeadTime').value = quote.delivery_lead_time;
-        document.getElementById('quoteDate').value = formatDate(quote.quote_date);
-        document.getElementById('quoteStatus').value = quote.status;
-        document.getElementById('quoteNotes').value = quote.notes || '';
-
-        // Disable fields that shouldn't be edited
-        document.getElementById('requestId').disabled = true;
-        document.getElementById('itemName').disabled = true;
-        document.getElementById('quantity').disabled = true;
-        document.getElementById('unitPrice').disabled = true;
-        document.getElementById('totalQuote').disabled = true;
-        document.getElementById('deliveryLeadTime').disabled = true;
-        document.getElementById('quoteDate').disabled = true;
-        document.getElementById('vendorId').disabled = true;
-        
-        // Only allow editing status and notes
-        document.getElementById('quoteStatus').disabled = false;
-        document.getElementById('quoteNotes').readOnly = false;
-
-        document.getElementById('quoteModal').classList.add('modal-open');
+        openEditQuoteModal();
     }
 
-async function handleQuoteSubmit(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const quoteId = document.getElementById('quoteId').value;
-    const isEdit = !!quoteId;
+    async function handleQuoteSubmit(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const quoteId = document.getElementById('quoteId').value;
+        const isEdit = !!quoteId;
 
-    // Format the date properly for the backend
-    const quoteDateInput = document.getElementById('quoteDate').value;
-    const quoteDate = quoteDateInput ? new Date(quoteDateInput).toISOString().split('T')[0] : '';
+        // Format the date properly for the backend
+        const quoteDateInput = document.getElementById('quoteDate').value;
+        const quoteDate = quoteDateInput ? new Date(quoteDateInput).toISOString().split('T')[0] : '';
 
-    const quoteData = {
-        request_id: formData.get('request_id'),
-        ven_id: parseInt(formData.get('ven_id')),
-        delivery_lead_time: parseInt(document.getElementById('deliveryLeadTime').value) || 0,
-        quote_date: quoteDate,
-        status: formData.get('status'),
-        notes: formData.get('notes')
-    };
-    
-    try {
-        showLoadingModal(
-            isEdit ? 'Updating Quote...' : 'Creating Quote...',
-            isEdit ? 'Please wait while we update quote information.' : 'Please wait while we create new quote.'
-        );
+        const quoteData = {
+            request_id: formData.get('request_id'),
+            ven_id: parseInt(document.getElementById('vendorId').value) || 0,
+            delivery_lead_time: parseInt(document.getElementById('deliveryLeadTime').value) || 0,
+            quote_date: quoteDate,
+            status: document.getElementById('quoteStatus').value,
+            notes: document.getElementById('quoteNotes').value
+        };
+        
+        try {
+            showLoadingModal(
+                isEdit ? 'Updating Quote...' : 'Creating Quote...',
+                isEdit ? 'Please wait while we update quote information.' : 'Please wait while we create new quote.'
+            );
 
-        let response;
-        if (isEdit) {
-            response = await fetch(`${API_BASE_URL}/quotes/${quoteId}`, {
+            let response;
+            if (isEdit) {
+                response = await fetch(`${API_BASE_URL}/quotes/${quoteId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(quoteData)
+                });
+            } else {
+                response = await fetch(`${API_BASE_URL}/quotes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(quoteData)
+                });
+            }
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                hideLoadingModal();
+                closeQuoteModal();
+                
+                // Wait for data to reload before showing success message
+                await loadQuotes();
+                
+                showSuccessToast(
+                    isEdit ? 'Quote updated successfully!' : 'Quote created successfully!'
+                );
+            } else {
+                throw new Error(result.message || `Failed to ${isEdit ? 'update' : 'create'} quote`);
+            }
+        } catch (error) {
+            hideLoadingModal();
+            Swal.fire('Error', `Failed to ${isEdit ? 'update' : 'create'} quote: ` + error.message, 'error');
+        }
+    }
+
+    async function handleEditQuoteSubmit(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const quoteId = document.getElementById('editQuoteId').value;
+
+        // Only update status and notes
+        const quoteData = {
+            status: formData.get('status'),
+            notes: formData.get('notes')
+        };
+        
+        try {
+            showLoadingModal('Updating Quote...');
+
+            const response = await fetch(`${API_BASE_URL}/quotes/${quoteId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -822,37 +884,25 @@ async function handleQuoteSubmit(e) {
                 },
                 body: JSON.stringify(quoteData)
             });
-        } else {
-            response = await fetch(`${API_BASE_URL}/quotes`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(quoteData)
-            });
-        }
 
-        const result = await response.json();
+            const result = await response.json();
 
-        if (response.ok && result.success) {
+            if (response.ok && result.success) {
+                hideLoadingModal();
+                closeEditQuoteModal();
+                
+                // Wait for data to reload before showing success message
+                await loadQuotes();
+                
+                showSuccessToast('Quote updated successfully!');
+            } else {
+                throw new Error(result.message || 'Failed to update quote');
+            }
+        } catch (error) {
             hideLoadingModal();
-            closeQuoteModal();
-            
-            // Wait for data to reload before showing success message
-            await loadQuotes();
-            
-            showSuccessToast(
-                isEdit ? 'Quote updated successfully!' : 'Quote created successfully!'
-            );
-        } else {
-            throw new Error(result.message || `Failed to ${isEdit ? 'update' : 'create'} quote`);
+            Swal.fire('Error', 'Failed to update quote: ' + error.message, 'error');
         }
-    } catch (error) {
-        hideLoadingModal();
-        Swal.fire('Error', `Failed to ${isEdit ? 'update' : 'create'} quote: ` + error.message, 'error');
     }
-}
 
     async function deleteQuote(quoteId) {
         const result = await Swal.fire({

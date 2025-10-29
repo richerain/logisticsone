@@ -5,8 +5,8 @@
 @section('content')
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Vendor Management</h2>
-            <button class="btn btn-primary" id="addVendorBtn">
+            <h2 class="text-2xl font-bold text-gray-800">Vendor List</h2>
+            <button class="hidden btn btn-primary" id="addVendorBtn">
                 <i class="bx bx-plus mr-2"></i>Add New Vendor
             </button>            
         </div>
@@ -42,7 +42,7 @@
         <div id="no-vendors-state" class="hidden text-center py-12">
             <i class="bx bx-package text-6xl text-gray-400 mb-4"></i>
             <h3 class="text-xl font-semibold text-gray-600 mb-2">No Vendors Found</h3>
-            <button class="btn btn-primary" id="addFirstVendorBtn">
+            <button class="hidden btn btn-primary" id="addFirstVendorBtn">
                 Add First Vendor
             </button>
         </div>
@@ -184,7 +184,7 @@
                         <h4 class="text-lg font-semibold text-gray-800" id="vendorProductsVendorName"></h4>
                         <p class="text-sm text-gray-600" id="vendorProductsVendorInfo"></p>
                     </div>
-                    <button class="btn btn-primary btn-sm" id="addProductBtn">
+                    <button class="hidden btn btn-primary btn-sm" id="addProductBtn">
                         <i class="bx bx-plus mr-1"></i>Add New Product
                     </button>
                 </div>
@@ -202,7 +202,7 @@
                                 <th>Warranty</th>
                                 <th>Expiration</th>
                                 <th>Status</th>
-                                <th>Actions</th>
+                                <th class="hidden">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="vendor-products-table-body">
@@ -472,8 +472,6 @@
         
         // Update modal title and vendor info
         document.getElementById('vendorProductsModalTitle').textContent = 'Vendor Products - ' + vendorName;
-        document.getElementById('vendorProductsVendorName').textContent = vendorName;
-        document.getElementById('vendorProductsVendorInfo').textContent = `Managing products for ${vendorName}`;
         
         // Show loading state
         document.getElementById('vendor-products-table-body').innerHTML = `
@@ -560,12 +558,12 @@
                         ${product.product_status.toUpperCase()}
                     </span>
                 </td>
-                <td>
+                <td class="hidden">
                     <div class="flex space-x-1">
-                        <button title="Edit" class="btn btn-sm btn-circle btn-warning edit-product-btn" data-product-id="${product.product_id}">
+                        <button title="Edit" class=" btn btn-sm btn-circle btn-warning edit-product-btn" data-product-id="${product.product_id}">
                             <i class="bx bx-edit text-sm"></i>
                         </button>
-                        <button title="Delete" class="btn btn-sm btn-circle btn-error delete-product-btn" data-product-id="${product.product_id}">
+                        <button title="Delete" class=" btn btn-sm btn-circle btn-error delete-product-btn" data-product-id="${product.product_id}">
                             <i class="bx bx-trash text-sm"></i>
                         </button>
                     </div>
@@ -953,13 +951,13 @@
                         <button class="btn btn-sm btn-info view-vendor-btn" data-vendor-id="${vendor.ven_id}">
                             <i class="bx bx-show-alt mr-1"></i>Info
                         </button>
-                        <button class="btn btn-sm btn-warning edit-vendor-btn" data-vendor-id="${vendor.ven_id}">
+                        <button class="hidden btn btn-sm btn-warning edit-vendor-btn" data-vendor-id="${vendor.ven_id}">
                             <i class="bx bx-edit mr-1"></i>Edit
                         </button>
                         <button class="btn btn-sm btn-primary products-vendor-btn" data-vendor-id="${vendor.ven_id}" data-vendor-name="${vendor.ven_name}">
                             <i class="bx bx-package mr-1"></i>Products
                         </button>
-                        <button class="btn btn-sm btn-error delete-vendor-btn" data-vendor-id="${vendor.ven_id}">
+                        <button class="hidden btn btn-sm btn-error delete-vendor-btn" data-vendor-id="${vendor.ven_id}">
                             <i class="bx bx-trash mr-1"></i>Delete
                         </button>
                     </div>

@@ -69,21 +69,26 @@ class Purchase extends Model
                 ]);
             }
 
-            // Auto-calculate units and total quote
-            $model->units = $model->quantity;
-            $model->total_quote = $model->quantity * $model->unit_price;
+            // Auto-calculate total quote based on quantity, units, and unit price
+            if (empty($model->total_quote) && $model->quantity && $model->units && $model->unit_price) {
+                $model->total_quote = $model->quantity * $model->units * $model->unit_price;
+            }
 
             // Set default status if not provided
             if (empty($model->status)) {
                 $model->status = 'Pending';
             }
+
+            // Set current date for quote_date if not provided
+            if (empty($model->quote_date)) {
+                $model->quote_date = now()->toDateString();
+            }
         });
 
         static::updating(function ($model) {
-            // Recalculate units and total quote when quantity or unit_price changes
-            if ($model->isDirty(['quantity', 'unit_price'])) {
-                $model->units = $model->quantity;
-                $model->total_quote = $model->quantity * $model->unit_price;
+            // Recalculate total quote when quantity, units, or unit_price changes
+            if ($model->isDirty(['quantity', 'units', 'unit_price'])) {
+                $model->total_quote = $model->quantity * $model->units * $model->unit_price;
             }
         });
     }
