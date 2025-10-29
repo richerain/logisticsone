@@ -27,7 +27,6 @@
                 </div>
                 <div class="stat-value text-green-900" id="total-tasks">0</div>
             </div>
-
             <!-- Stats 02: Pending Items -->
             <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-yellow-700">
                 <div class="stat-title flex items-center justify-between">
@@ -38,7 +37,6 @@
                 </div>
                 <div class="stat-value text-yellow-900" id="pending-items">0</div>
             </div>
-
             <!-- Stats 03: Completed Items -->
             <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700">
                 <div class="stat-title flex items-center justify-between">
@@ -49,7 +47,6 @@
                 </div>
                 <div class="stat-value text-blue-900" id="completed-items">0</div>
             </div>
-
             <!-- Stats 04: Overdue Items (distinct from first three) -->
             <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-red-700">
                 <div class="stat-title flex items-center justify-between">
@@ -60,7 +57,6 @@
                 </div>
                 <div class="stat-value text-red-900" id="overdue-items">0</div>
             </div>
-
             <!-- Stats 05: In Progress (distinct) -->
             <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-indigo-700">
                 <div class="stat-title flex items-center justify-between">
@@ -71,7 +67,6 @@
                 </div>
                 <div class="stat-value text-indigo-900" id="inprogress-items">0</div>
             </div>
-
             <!-- Stats 06: On Hold (distinct) -->
             <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-purple-700">
                 <div class="stat-title flex items-center justify-between">
@@ -86,45 +81,227 @@
     </div>
     <!-- Statistics Section end -->
 
-<!-- Announcement Board Section -->
-<div class="bg-green-100 rounded-lg p-5 mb-5 min-h-[200px] flex flex-col">
-  <div class="flex items-center mb-4 space-x-2 text-gray-700">
-    <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
-  </div>
-  <div class="flex-1 flex items-center justify-center">
-    <div class="stat card bg-gray-50 shadow-lg border-4 border-gray-200">
-        <div class="flex stat-title items-center justify-center italic pt-40 pb-40">No Announcement yet...</div>
-    </div>
-  </div>
-</div>
-
-<!-- Statistics Charts Section start -->
-<div class="bg-green-100 rounded-lg p-5 shadow-lg mb-5">
-    <h2 class="text-gray-700 text-lg font-semibold mb-4"><i class='bx bx-fw bxs-pie-chart-alt-2' ></i>Statistics Charts</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold">Bar Chart</h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="chart1" style="width:100%;height:160px;"></canvas>
-            </div>
+    <!-- announcement board section start -->
+    <div class="bg-green-100 rounded-lg p-5 mb-5 min-h-[200px] flex flex-col">
+        <div class="flex items-center mb-4 space-x-2 text-gray-700">
+            <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
         </div>
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold">Doughnut Chart</h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="chart2" style="width:100%;height:160px;"></canvas>
-            </div>
-        </div>
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold">Line Chart</h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="chart3" style="width:100%;height:160px;"></canvas>
+        <div class="flex-1 flex items-center justify-center">
+            <div class="stat card bg-gray-50 shadow-lg border-4 border-gray-200">
+                <div class="flex stat-title items-center justify-center italic pt-40 pb-40">No Announcement yet...</div>
             </div>
         </div>
     </div>
-</div>
-<!-- Statistics Charts Section end -->
+    <!-- announcement board section end -->
 
-<!-- role-based visibility section -->
+    <!-- statistics charts section start -->
+    <div class="bg-green-100 rounded-lg p-5 shadow-lg mb-5">
+        <h2 class="text-gray-700 text-lg font-semibold mb-4"><i class='bx bx-fw bxs-pie-chart-alt-2' ></i>Statistics Charts</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold">Bar Chart</h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="chart1" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold">Doughnut Chart</h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="chart2" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold">Line Chart</h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="chart3" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- statistics charts section end -->
+
+    <!-- vendor section start -->
+    <div class="bg-green-100 rounded-lg p-5 shadow-lg">
+        <h2 class="text-gray-700 text-lg font-semibold mb-4"><i class='bx bx-fw bxs-user-account'></i>Vendor</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+            <!-- Equipment Card -->
+            <div class="bg-white rounded-lg shadow-xl border-l-4 border-green-700 overflow-hidden w-full min-w-0">
+                <div class="p-4 flex flex-col md:flex-row items-start md:items-center md:space-x-4">
+                    <span class="flex-shrink-0 w-16 md:w-20 text-center min-w-0">
+                        <div class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-green-100 text-green-800 shadow-sm text-xl">
+                            <i class="bx bx-wrench"></i>
+                        </div>
+                    </span>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-gray-800 truncate">Equipment</h3>
+                            <span class="text-xs bg-green-50 text-green-800 px-2 py-1 rounded-full whitespace-nowrap">Product Type</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1 truncate">Vendors specializing in tools, heavy equipment and machinery.</p>
+
+                        <!-- Main vendor preview -->
+                        <div class="mt-3 bg-gray-50 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center min-w-0">
+                            <div class="flex-shrink-0 text-center w-20 min-w-0">
+                                <div class="text-3xl text-green-700"><i class="bx bx-user-circle"></i></div>
+                                <div class="text-xs text-gray-500 mt-1 truncate">VendorID</div>
+                                <div class="text-sm font-semibold truncate">VEN00001</div>
+                            </div>
+
+                            <div class="ml-0 sm:ml-3 mt-3 sm:mt-0 min-w-0 w-full">
+                                <div class="font-semibold text-gray-800 truncate">John's Tools</div>
+                                <div class="text-sm text-gray-600 truncate">Owner: John Dadap</div>
+                                <div class="text-sm text-gray-600">Products: <span class="font-semibold">10</span></div>
+                                <div class="text-sm mt-1 flex flex-wrap items-center gap-2">
+                                    <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full" title="Operating: vendor shop still operating">Operating</span>
+                                    <span class="text-xs text-gray-500 truncate">Since 2023</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button class="flex items-center bg-green-600 text-white text-sm px-3 py-1 rounded hover:bg-green-700">
+                                <i class="bx bx-info-circle mr-2"></i>More Info
+                            </button>
+                            <button class="flex items-center bg-gray-800 text-white text-sm px-3 py-1 rounded hover:bg-gray-900">
+                                <i class="bx bx-package mr-2"></i>Products
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- summary row -->
+                <div class="border-t px-4 py-3 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm gap-3">
+                    <div class="flex items-center space-x-4 flex-wrap">
+                        <div class="text-center min-w-0">
+                            <div class="text-lg font-bold text-gray-800">3</div>
+                            <div class="text-xs text-gray-500">Active Vendors</div>
+                        </div>
+                        <div class="text-center min-w-0">
+                            <div class="text-lg font-bold text-gray-800">1</div>
+                            <div class="text-xs text-gray-500">Inactive Vendors</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500 whitespace-nowrap">Total Products: <span class="font-semibold">28</span></div>
+                </div>
+            </div>
+
+            <!-- Supplies Card -->
+            <div class="bg-white rounded-lg shadow-xl border-l-4 border-yellow-700 overflow-hidden w-full min-w-0">
+                <div class="p-4 flex flex-col md:flex-row items-start md:items-center md:space-x-4">
+                    <span class="flex-shrink-0 w-16 md:w-20 text-center min-w-0">
+                        <div class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-yellow-100 text-yellow-900 shadow-sm text-xl">
+                            <i class="bx bx-box"></i>
+                        </div>
+                    </span>
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-gray-800 truncate">Supplies</h3>
+                            <span class="text-xs bg-yellow-50 text-yellow-900 px-2 py-1 rounded-full whitespace-nowrap">Product Type</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1 truncate">Consumables, accessories and general supplies for operations.</p>
+
+                        <!-- Main vendor preview -->
+                        <div class="mt-3 bg-gray-50 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center min-w-0">
+                            <div class="flex-shrink-0 text-center w-20 min-w-0">
+                                <div class="text-3xl text-yellow-700"><i class="bx bx-user-circle"></i></div>
+                                <div class="text-xs text-gray-500 mt-1 truncate">VendorID</div>
+                                <div class="text-sm font-semibold truncate">VEN00002</div>
+                            </div>
+
+                            <div class="ml-0 sm:ml-3 mt-3 sm:mt-0 min-w-0 w-full">
+                                <div class="font-semibold text-gray-800 truncate">Supply Co.</div>
+                                <div class="text-sm text-gray-600 truncate">Owner: Maria Santos</div>
+                                <div class="text-sm text-gray-600">Products: <span class="font-semibold">24</span></div>
+                                <div class="text-sm mt-1 flex flex-wrap items-center gap-2">
+                                    <span class="inline-block bg-yellow-100 text-yellow-900 text-xs px-2 py-0.5 rounded-full" title="Operating: vendor shop still operating">Operating</span>
+                                    <span class="text-xs text-gray-500 truncate">Since 2021</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button class="flex items-center bg-yellow-600 text-white text-sm px-3 py-1 rounded hover:bg-yellow-700">
+                                <i class="bx bx-info-circle mr-2"></i>More Info
+                            </button>
+                            <button class="flex items-center bg-gray-800 text-white text-sm px-3 py-1 rounded hover:bg-gray-900">
+                                <i class="bx bx-package mr-2"></i>Products
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- summary row -->
+                <div class="border-t px-4 py-3 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm gap-3">
+                    <div class="flex items-center space-x-4 flex-wrap">
+                        <div class="text-center min-w-0">
+                            <div class="text-lg font-bold text-gray-800">5</div>
+                            <div class="text-xs text-gray-500">Active Vendors</div>
+                        </div>
+                        <div class="text-center min-w-0">
+                            <div class="text-lg font-bold text-gray-800">2</div>
+                            <div class="text-xs text-gray-500">Inactive Vendors</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500 whitespace-nowrap">Total Products: <span class="font-semibold">142</span></div>
+                </div>
+            </div>
+
+            <!-- Furniture Card -->
+            <div class="bg-white rounded-lg shadow-xl border-l-4 border-indigo-700 overflow-hidden w-full min-w-0">
+                <div class="p-4 flex flex-col md:flex-row items-start md:items-center md:space-x-4">
+
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-gray-800 truncate">Furniture</h3>
+                            <span class="text-xs bg-indigo-50 text-indigo-800 px-2 py-1 rounded-full whitespace-nowrap">Product Type</span>
+                        </div>
+
+                        <!-- Main vendor preview -->
+                        <div class="mt-3 bg-gray-50 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center min-w-0">
+                            <div class="flex-shrink-0 text-center w-20 min-w-0">
+                                <div class="text-3xl text-indigo-700"><i class="bx bx-user-circle"></i></div>
+                                <div class="text-xs text-gray-500 mt-1 truncate">VendorID</div>
+                                <div class="text-sm font-semibold truncate">VEN00003</div>
+                            </div>
+
+                            <div class="ml-0 sm:ml-3 mt-3 sm:mt-0 min-w-0 w-full">
+                                <div class="font-semibold text-gray-800 truncate">HomeFurn Furnishings</div>
+                                <div class="text-sm text-gray-600 truncate">Owner: Ana Lopez</div>
+                                <div class="text-sm text-gray-600">Products: <span class="font-semibold">38</span></div>
+                                <div class="text-sm mt-1 flex flex-wrap items-center gap-2">
+                                    <span class="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full" title="Not Operating: vendor shop stopped operating">Operating</span>
+                                    <span class="text-xs text-gray-500 truncate">Since 2022</span>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    <div class="border-t px-4 py-3 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm gap-3">
+                        <div class="text-xs text-gray-500 bg-yellow-300 rounded px-2 whitespace-nowrap">Active</div>
+                        <div class="text-xs text-gray-500 whitespace-nowrap">Total Products: <span class="font-semibold">64</span></div>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- summary row -->
+                <div class="border-t px-4 py-3 bg-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between text-sm gap-3">
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button class="flex items-center bg-indigo-600 text-white text-sm px-3 py-1 rounded hover:bg-indigo-700">
+                                <i class="bx bx-info-circle mr-2"></i>More Info
+                            </button>
+                            <button class="flex items-center bg-gray-800 text-white text-sm px-3 py-1 rounded hover:bg-gray-900">
+                                <i class="bx bx-package mr-2"></i>Products
+                            </button>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- vendor section end -->
+
+    <!-- role-based visibility section -->
     <div class="hidden grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 rounded-lg bg-green-100" id="role-based-panels">
         <!-- Super Admin Panel -->
         <div class="p-4 bg-green-900 text-white rounded-lg hidden" data-roles="superadmin">
@@ -136,7 +313,6 @@
                 <li>All Module Access</li>
             </ul>
         </div>
-        
         <!-- Admin Panel -->
         <div class="p-4 bg-green-800 text-white rounded-lg hidden" data-roles="superadmin,admin">
             <h3 class="font-bold">Admin Panel</h3>
@@ -147,7 +323,6 @@
                 <li>Reports & Analytics</li>
             </ul>
         </div>
-        
         <!-- Manager Panel -->
         <div class="p-4 bg-green-700 text-white rounded-lg hidden" data-roles="superadmin,admin,manager">
             <h3 class="font-bold">Manager Panel</h3>
@@ -158,7 +333,6 @@
                 <li>Operational Reports</li>
             </ul>
         </div>
-        
         <!-- Staff Panel -->
         <div class="p-4 bg-green-600 text-white rounded-lg hidden" data-roles="superadmin,admin,manager,staff">
             <h3 class="font-bold">Staff Panel</h3>
@@ -169,7 +343,6 @@
                 <li>Basic Reports</li>
             </ul>
         </div>
-        
         <!-- Vendor Panel -->
         <div class="p-4 bg-green-500 text-white rounded-lg hidden" data-roles="superadmin,vendor">
             <h3 class="font-bold">Vendor Panel</h3>
@@ -181,7 +354,6 @@
             </ul>
         </div>
     </div>
-
 </div>
 
 <script>

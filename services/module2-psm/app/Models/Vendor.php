@@ -20,11 +20,15 @@ class Vendor extends Model
         'ven_email',
         'ven_address',
         'ven_rating',
-        'ven_status'
+        'ven_status',
+        'vendor_type', // New field
+        'owner', // Changed from shop_name to owner
+        'shop_prods'
     ];
 
     protected $casts = [
         'ven_rating' => 'decimal:2',
+        'shop_prods' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
@@ -45,6 +49,11 @@ class Vendor extends Model
                     'prefix' => 'VEN'
                 ]);
             }
+
+            // Set default owner if not provided
+            if (empty($model->owner)) {
+                $model->owner = $model->ven_name . ' Owner';
+            }
         });
     }
 
@@ -62,5 +71,38 @@ class Vendor extends Model
     public function quotes()
     {
         return $this->hasMany(Quote::class, 'ven_id');
+    }
+
+    /**
+     * Get the products for this vendor
+     */
+    public function products()
+    {
+        return $this->hasMany(VendorProduct::class, 'ven_id');
+    }
+
+    /**
+     * Update product count
+     */
+    public function updateProductCount()
+    {
+        $this->shop_prods = $this->products()->count();
+        $this->save();
+    }
+
+    /**
+     * Get owner name with fallback
+     */
+    public function getOwnerDisplayAttribute(): string
+    {
+        return $this->owner ?: $this->ven_name . ' Owner';
+    }
+
+    /**
+     * Get vendor type with fallback
+     */
+    public function getVendorTypeDisplayAttribute(): string
+    {
+        return $this->vendor_type ?: 'Supplies';
     }
 }

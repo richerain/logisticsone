@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Vendor;
 use App\Models\Purchase;
 use App\Models\Quote;
+use App\Models\VendorProduct;
 use Illuminate\Support\Facades\Log;
 
 class PSMController extends Controller
@@ -34,11 +35,12 @@ class PSMController extends Controller
             'ven_email' => 'required|email|unique:psm_vendors,ven_email',
             'ven_contacts' => 'nullable|string|max:255',
             'ven_address' => 'nullable|string',
-            'ven_rating' => 'nullable|numeric|min:0|max:5'
+            'ven_rating' => 'nullable|numeric|min:0|max:5',
+            'vendor_type' => 'required|in:Equipment,Supplies,Furniture', // New validation
+            'owner' => 'nullable|string|max:255' // Changed from shop_name to owner
         ]);
 
         try {
-            // Remove ven_code from request - let the model handle auto-generation
             $vendorData = $request->all();
             $vendor = Vendor::create($vendorData);
             
@@ -66,7 +68,9 @@ class PSMController extends Controller
                 'ven_contacts' => 'nullable|string|max:255',
                 'ven_address' => 'nullable|string',
                 'ven_rating' => 'nullable|numeric|min:0|max:5',
-                'ven_status' => 'sometimes|in:active,inactive'
+                'ven_status' => 'sometimes|in:active,inactive',
+                'vendor_type' => 'sometimes|required|in:Equipment,Supplies,Furniture', // New validation
+                'owner' => 'nullable|string|max:255' // Changed from shop_name to owner
             ]);
 
             $vendor->update($request->all());
@@ -98,6 +102,139 @@ class PSMController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete vendor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Vendor Products Management
+    public function getVendorProducts(Request $request, $vendorId = null)
+    {
+        try {
+            $query = VendorProduct::with('vendor');
+            
+            if ($vendorId) {
+                $query->where('ven_id', $vendorId);
+            }
+            
+            $products = $query->orderBy('created_at', 'desc')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $products
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch vendor products: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createVendorProduct(Request $request)
+    {
+        $request->validate([
+            'ven_id' => 'required|exists:psm_vendors,ven_id',
+            'product_name' => 'required|string|max:255',
+            'product_description' => 'nullable|string',
+            'product_price' => 'required|numeric|min:0',
+            'product_stock' => 'required|integer|min:0',
+            'warranty_from' => 'nullable|date', // New validation
+            'warranty_to' => 'nullable|date|after_or_equal:warranty_from', // New validation
+            'expiration' => 'nullable|date' // New validation
+        ]);
+
+        try {
+            $productData = $request->all();
+            $product = VendorProduct::create($productData);
+            
+            // Update vendor's product count
+            $vendor = Vendor::find($request->ven_id);
+            if ($vendor) {
+                $vendor->updateProductCount();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product created successfully',
+                'data' => $product->load('vendor')
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create product: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateVendorProduct(Request $request, $id)
+    {
+        try {
+            $product = VendorProduct::findOrFail($id);
+            
+            $request->validate([
+                'product_name' => 'sometimes|required|string|max:255',
+                'product_description' => 'nullable|string',
+                'product_price' => 'sometimes|required|numeric|min:0',
+                'product_stock' => 'sometimes|required|integer|min:0',
+                'product_status' => 'sometimes|in:active,inactive',
+                'warranty_from' => 'nullable|date', // New validation
+                'warranty_to' => 'nullable|date|after_or_equal:warranty_from', // New validation
+                'expiration' => 'nullable|date' // New validation
+            ]);
+
+            $product->update($request->all());
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Product updated successfully',
+                'data' => $product->load('vendor')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update product: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteVendorProduct($id)
+    {
+        try {
+            $product = VendorProduct::findOrFail($id);
+            $vendorId = $product->ven_id;
+            $product->delete();
+            
+            // Update vendor's product count
+            $vendor = Vendor::find($vendorId);
+            if ($vendor) {
+                $vendor->updateProductCount();
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Product deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete product: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getVendorProduct($id)
+    {
+        try {
+            $product = VendorProduct::with('vendor')->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch product: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -124,6 +124,26 @@ Route::delete('/psm/vendors/{id}', function (Request $request, $id) {
     return app(GatewayController::class)->proxyDelete($request, "http://localhost:8003/api/vendors/{$id}");
 });
 
+// PSM Vendor Products routes
+Route::get('/psm/vendor-products', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/vendor-products');
+});
+Route::get('/psm/vendors/{vendorId}/products', function (Request $request, $vendorId) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8003/api/vendors/{$vendorId}/products");
+});
+Route::post('/psm/vendor-products', function (Request $request) {
+    return app(GatewayController::class)->proxyPost($request, 'http://localhost:8003/api/vendor-products');
+});
+Route::get('/psm/vendor-products/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyGet($request, "http://localhost:8003/api/vendor-products/{$id}");
+});
+Route::put('/psm/vendor-products/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyPut($request, "http://localhost:8003/api/vendor-products/{$id}");
+});
+Route::delete('/psm/vendor-products/{id}', function (Request $request, $id) {
+    return app(GatewayController::class)->proxyDelete($request, "http://localhost:8003/api/vendor-products/{$id}");
+});
+
 // PSM Quote routes
 Route::get('/psm/quotes', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8003/api/quotes');

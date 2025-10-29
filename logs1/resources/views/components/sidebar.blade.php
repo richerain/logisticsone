@@ -33,9 +33,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('modules.psm.vendor-management') }}" title="Vendor Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-management') ? 'bg-white/30' : '' }}">
+                        <a href="{{ route('modules.psm.vendor-management') }}" title="Vendor List" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-management') ? 'bg-white/30' : '' }}">
                             <i class="bx bxs-group mr-2"></i>
-                            <span class="module-text">Vendor Management</span>
+                            <span class="module-text">Vendor List</span>
                         </a>
                     </li>
                 </ul>

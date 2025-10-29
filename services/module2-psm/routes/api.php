@@ -10,6 +10,14 @@ Route::post('/vendors', [PSMController::class, 'createVendor']);
 Route::put('/vendors/{id}', [PSMController::class, 'updateVendor']);
 Route::delete('/vendors/{id}', [PSMController::class, 'deleteVendor']);
 
+// Vendor Products Routes
+Route::get('/vendor-products', [PSMController::class, 'getVendorProducts']);
+Route::get('/vendors/{vendorId}/products', [PSMController::class, 'getVendorProducts']);
+Route::post('/vendor-products', [PSMController::class, 'createVendorProduct']);
+Route::get('/vendor-products/{id}', [PSMController::class, 'getVendorProduct']);
+Route::put('/vendor-products/{id}', [PSMController::class, 'updateVendorProduct']);
+Route::delete('/vendor-products/{id}', [PSMController::class, 'deleteVendorProduct']);
+
 // Vendor Quote Routes
 Route::get('/quotes', [PSMController::class, 'getQuotes']);
 Route::post('/quotes', [PSMController::class, 'createQuote']);
