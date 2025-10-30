@@ -21,11 +21,17 @@ class Digital extends Model
         'units',
         'available_item',
         'status',
-        'grn_id'
+        'vendor_id',
+        'vendor_name',
+        'quote_id',
+        'quote_code',
+        'purchase_price',
+        'warranty_info'
     ];
 
     protected $casts = [
         'available_item' => 'integer',
+        'purchase_price' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
@@ -52,38 +58,6 @@ class Digital extends Model
             $newId = $lastId + 1;
             return 'STK' . str_pad($newId, 5, '0', STR_PAD_LEFT);
         }
-    }
-
-    /**
-     * Relationship with Warehousing (Goods Received)
-     */
-    public function warehousing()
-    {
-        return $this->belongsTo(Warehousing::class, 'grn_id', 'id');
-    }
-
-    /**
-     * Scope a query to only include low stock items
-     */
-    public function scopeLowStock($query)
-    {
-        return $query->where('status', 'lowstock');
-    }
-
-    /**
-     * Scope a query to only include on stock items
-     */
-    public function scopeOnStock($query)
-    {
-        return $query->where('status', 'onstock');
-    }
-
-    /**
-     * Scope a query to only include out of stock items
-     */
-    public function scopeOutOfStock($query)
-    {
-        return $query->where('status', 'outofstock');
     }
 
     /**

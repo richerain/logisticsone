@@ -87,6 +87,9 @@ Route::get('/sws/digital/stats/overview', function (Request $request) {
 Route::get('/sws/digital/search/filter', function (Request $request) {
     return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/digital/search/filter');
 });
+Route::get('/sws/digital/received-quotes', function (Request $request) {
+    return app(GatewayController::class)->proxyGet($request, 'http://localhost:8002/api/digital/received-quotes');
+});
 Route::post('/sws/digital/sync-from-grn/{grnId}', function (Request $request, $grnId) {
     return app(GatewayController::class)->proxyPost($request, "http://localhost:8002/api/digital/sync-from-grn/{$grnId}");
 });

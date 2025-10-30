@@ -5,49 +5,10 @@
 @section('content')
     <div class="module-content bg-white rounded-xl p-6 shadow block">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Goods Recieved</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Inventory Flow</h2>
             <button class="btn btn-primary" id="addGrnBtn">
                 <i class="bx bx-plus mr-2"></i>New Entry
             </button>
-        </div>
-
-        <!-- Stats Section -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-primary">
-                <div class="stat-figure text-primary">
-                    <i class="bx bx-file text-3xl"></i>
-                </div>
-                <div class="stat-title">Total Records</div>
-                <div class="stat-value text-primary" id="total-records">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-success">
-                <div class="stat-figure text-success">
-                    <i class="bx bx-check-circle text-3xl"></i>
-                </div>
-                <div class="stat-title">Good Condition</div>
-                <div class="stat-value text-success" id="good-condition">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-warning">
-                <div class="stat-figure text-warning">
-                    <i class="bx bx-error text-3xl"></i>
-                </div>
-                <div class="stat-title">Damaged</div>
-                <div class="stat-value text-warning" id="damaged-condition">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-error">
-                <div class="stat-figure text-error">
-                    <i class="bx bx-x-circle text-3xl"></i>
-                </div>
-                <div class="stat-title">Missing</div>
-                <div class="stat-value text-error" id="missing-condition">0</div>
-            </div>
-            <div class="stat bg-base-100 rounded-lg shadow-lg border-l-4 border-info">
-                <div class="stat-figure text-info">
-                    <i class="bx bx-task text-3xl"></i>
-                </div>
-                <div class="stat-title">Completed</div>
-                <div class="stat-value text-info" id="completed-status">0</div>
-            </div>
         </div>
 
         <!-- Search and Filters -->
@@ -77,8 +38,11 @@
                         <th>GRN ID</th>
                         <th>PO Number</th>
                         <th>Item Desc</th>
-                         <!--<th>Qty Ordered</th>-->
-                         <!--<th>Qty Received</th>-->
+                        <th>Qty Ordered</th>
+                        <th>Qty Received</th>
+                        <th>Condition</th>
+                        <th>Warehouse Location</th>
+                        <th>Received By</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -307,7 +271,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         initializeEventListeners();
         loadGrnRecords();
-        loadStats();
     });
 
     function initializeEventListeners() {
@@ -349,21 +312,6 @@
         } catch (error) {
             console.error('Error loading records:', error);
             showGrnErrorState('Failed to load records: ' + error.message);
-        }
-    }
-
-    async function loadStats() {
-        try {
-            const response = await fetch(`${API_BASE_URL}/stats/overview`);
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.success) {
-                    updateStats(result.data);
-                }
-            }
-        } catch (error) {
-            console.error('Error loading stats:', error);
         }
     }
 
@@ -425,6 +373,9 @@
                         ${record.qty_received} ${diffSymbol}
                     </span>
                 </td>
+                <td>${getConditionBadge(record.condition)}</td>
+                <td class="text-sm">${record.warehouse_location}</td>
+                <td class="text-sm">${record.received_by}</td>
                 <td>${getStatusBadge(record.status)}</td>
                 <td>
                     <div class="flex space-x-1">
@@ -468,14 +419,6 @@
                 deleteGrn(parseInt(grnId));
             });
         });
-    }
-
-    function updateStats(statsData) {
-        document.getElementById('total-records').textContent = statsData.total_records || 0;
-        document.getElementById('good-condition').textContent = statsData.good_condition || 0;
-        document.getElementById('damaged-condition').textContent = statsData.damaged_condition || 0;
-        document.getElementById('missing-condition').textContent = statsData.missing_condition || 0;
-        document.getElementById('completed-status').textContent = statsData.completed_status || 0;
     }
 
     function filterGrnRecords() {
@@ -691,7 +634,6 @@
                 
                 // Wait for data to reload before showing success message
                 await loadGrnRecords();
-                await loadStats();
                 
                 showSuccessToast(
                     isEdit ? 'GRN record updated successfully!' : 'GRN record created successfully!'
@@ -735,7 +677,6 @@
                     
                     // Wait for data to reload before showing success message
                     await loadGrnRecords();
-                    await loadStats();
                     
                     showSuccessToast('GRN record deleted successfully!');
                 } else {

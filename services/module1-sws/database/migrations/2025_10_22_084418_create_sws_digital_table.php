@@ -19,21 +19,21 @@ return new class extends Migration
             $table->string('units', 50)->comment('Measurement units (pcs, kg, boxes, etc)');
             $table->integer('available_item')->default(0)->comment('Number of available items');
             $table->enum('status', ['lowstock', 'onstock', 'outofstock'])->default('onstock');
-            $table->unsignedBigInteger('grn_id')->nullable()->comment('Reference to Goods Received Note');
+            $table->unsignedBigInteger('vendor_id')->nullable()->comment('Reference to Vendor');
+            $table->string('vendor_name', 255)->nullable()->comment('Vendor name');
+            $table->string('quote_id', 50)->nullable()->comment('Reference to Quote ID');
+            $table->string('quote_code', 50)->nullable()->comment('Quote Code');
+            $table->decimal('purchase_price', 12, 2)->nullable()->comment('Purchase price from quote');
+            $table->text('warranty_info')->nullable()->comment('Warranty information');
             $table->timestamps();
-
-            // Foreign key constraint
-            $table->foreign('grn_id')
-                  ->references('id')
-                  ->on('sws_warehousing')
-                  ->onDelete('set null');
 
             // Indexes for better performance
             $table->index('stock_id');
             $table->index('item_name');
             $table->index('type');
             $table->index('status');
-            $table->index('grn_id');
+            $table->index('vendor_id');
+            $table->index('quote_id');
             $table->index('created_at');
         });
     }

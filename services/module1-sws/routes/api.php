@@ -39,6 +39,7 @@ Route::prefix('digital')->group(function () {
     Route::post('/', [DigitalController::class, 'store']);
     Route::get('/stats/overview', [DigitalController::class, 'getStats']);
     Route::get('/search/filter', [DigitalController::class, 'search']);
+    Route::get('/received-quotes', [DigitalController::class, 'getReceivedQuotes']); // NEW ROUTE
     Route::post('/sync-from-grn/{grnId}', [DigitalController::class, 'syncFromGrn']);
     Route::get('/{id}', [DigitalController::class, 'show']);
     Route::put('/{id}', [DigitalController::class, 'update']);

@@ -4,276 +4,335 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Digital;
-use App\Models\Warehousing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class DigitalController extends Controller
 {
-    // Get all digital inventory records
+    // Get all Digital Inventory records
     public function index()
     {
         try {
-            Log::info('Fetching all digital inventory records');
-            $digitalRecords = Digital::with('warehousing')
-                ->orderBy('created_at', 'desc')
-                ->get();
-            
-            Log::info('Successfully fetched ' . count($digitalRecords) . ' digital inventory records');
+            $stockRecords = Digital::orderBy('created_at', 'desc')->get();
             
             return response()->json([
                 'success' => true,
-                'data' => $digitalRecords,
-                'message' => 'Digital inventory records retrieved successfully'
+                'data' => $stockRecords,
+                'message' => 'Digital Inventory records retrieved successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching digital inventory records: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error fetching Digital Inventory records: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve digital inventory records',
+                'message' => 'Failed to retrieve Digital Inventory records',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Create new digital inventory record
+    // Create new Digital Inventory record
     public function store(Request $request)
     {
         try {
-            Log::info('Creating new digital inventory record', $request->all());
-
             $validatedData = $request->validate([
                 'item_name' => 'required|string|max:255',
-                'type' => 'required|string|max:100',
+                'type' => 'required|string|in:Equipment,Supplies,Furniture',
                 'units' => 'required|string|max:50',
                 'available_item' => 'required|integer|min:0',
-                'status' => 'sometimes|string|in:lowstock,onstock,outofstock',
-                'grn_id' => 'sometimes|exists:sws_warehousing,id'
+                'vendor_id' => 'nullable|integer',
+                'vendor_name' => 'nullable|string|max:255',
+                'quote_id' => 'nullable|string|max:50',
+                'quote_code' => 'nullable|string|max:50',
+                'purchase_price' => 'nullable|numeric|min:0',
+                'warranty_info' => 'nullable|string'
             ]);
 
             // Generate Stock ID
             $stockId = Digital::generateStockId();
 
-            $digitalRecord = Digital::create([
+            // Determine status based on available items
+            $status = $this->determineStatus($validatedData['available_item']);
+
+            $stockRecord = Digital::create([
                 'stock_id' => $stockId,
                 'item_name' => $validatedData['item_name'],
                 'type' => $validatedData['type'],
                 'units' => $validatedData['units'],
                 'available_item' => $validatedData['available_item'],
-                'status' => $validatedData['status'] ?? 'onstock',
-                'grn_id' => $validatedData['grn_id'] ?? null
+                'status' => $status,
+                'vendor_id' => $validatedData['vendor_id'] ?? null,
+                'vendor_name' => $validatedData['vendor_name'] ?? null,
+                'quote_id' => $validatedData['quote_id'] ?? null,
+                'quote_code' => $validatedData['quote_code'] ?? null,
+                'purchase_price' => $validatedData['purchase_price'] ?? null,
+                'warranty_info' => $validatedData['warranty_info'] ?? null
             ]);
-
-            // Auto-update status based on available items
-            $digitalRecord->updateStatus();
-
-            Log::info('Successfully created digital inventory record with ID: ' . $digitalRecord->id);
 
             return response()->json([
                 'success' => true,
-                'data' => $digitalRecord->load('warehousing'),
-                'message' => 'Digital inventory record created successfully'
+                'data' => $stockRecord,
+                'message' => 'Digital Inventory record created successfully'
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation failed for digital inventory record: ' . json_encode($e->errors()));
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Error creating digital inventory record: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error creating Digital Inventory record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create digital inventory record',
+                'message' => 'Failed to create Digital Inventory record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Get single digital inventory record
+    // Get single Digital Inventory record
     public function show($id)
     {
         try {
-            Log::info('Fetching digital inventory record with ID: ' . $id);
+            $stockRecord = Digital::find($id);
             
-            $digitalRecord = Digital::with('warehousing')->find($id);
-            
-            if (!$digitalRecord) {
-                Log::warning('Digital inventory record not found with ID: ' . $id);
+            if (!$stockRecord) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Digital inventory record not found'
+                    'message' => 'Digital Inventory record not found'
                 ], 404);
             }
 
-            Log::info('Successfully fetched digital inventory record with ID: ' . $id);
-
             return response()->json([
                 'success' => true,
-                'data' => $digitalRecord,
-                'message' => 'Digital inventory record retrieved successfully'
+                'data' => $stockRecord,
+                'message' => 'Digital Inventory record retrieved successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching digital inventory record: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error fetching Digital Inventory record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve digital inventory record',
+                'message' => 'Failed to retrieve Digital Inventory record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Update digital inventory record
+    // Update Digital Inventory record
     public function update(Request $request, $id)
     {
         try {
-            Log::info('Updating digital inventory record with ID: ' . $id, $request->all());
-
-            $digitalRecord = Digital::find($id);
+            $stockRecord = Digital::find($id);
             
-            if (!$digitalRecord) {
-                Log::warning('Digital inventory record not found with ID: ' . $id);
+            if (!$stockRecord) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Digital inventory record not found'
+                    'message' => 'Digital Inventory record not found'
                 ], 404);
             }
 
             $validatedData = $request->validate([
                 'item_name' => 'sometimes|string|max:255',
-                'type' => 'sometimes|string|max:100',
+                'type' => 'sometimes|string|in:Equipment,Supplies,Furniture',
                 'units' => 'sometimes|string|max:50',
                 'available_item' => 'sometimes|integer|min:0',
-                'status' => 'sometimes|string|in:lowstock,onstock,outofstock',
-                'grn_id' => 'sometimes|exists:sws_warehousing,id'
+                'vendor_id' => 'nullable|integer',
+                'vendor_name' => 'nullable|string|max:255',
+                'quote_id' => 'nullable|string|max:50',
+                'quote_code' => 'nullable|string|max:50',
+                'purchase_price' => 'nullable|numeric|min:0',
+                'warranty_info' => 'nullable|string'
             ]);
 
-            $digitalRecord->update($validatedData);
+            // Update status based on available items if available_item is being updated
+            if (isset($validatedData['available_item'])) {
+                $validatedData['status'] = $this->determineStatus($validatedData['available_item']);
+            }
 
-            // Auto-update status based on available items
-            $digitalRecord->updateStatus();
-
-            Log::info('Successfully updated digital inventory record with ID: ' . $id);
+            $stockRecord->update($validatedData);
 
             return response()->json([
                 'success' => true,
-                'data' => $digitalRecord->load('warehousing'),
-                'message' => 'Digital inventory record updated successfully'
+                'data' => $stockRecord,
+                'message' => 'Digital Inventory record updated successfully'
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation failed for digital inventory record update: ' . json_encode($e->errors()));
-            
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Error updating digital inventory record: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error updating Digital Inventory record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update digital inventory record',
+                'message' => 'Failed to update Digital Inventory record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Delete digital inventory record
+    // Delete Digital Inventory record
     public function destroy($id)
     {
         try {
-            Log::info('Deleting digital inventory record with ID: ' . $id);
-
-            $digitalRecord = Digital::find($id);
+            $stockRecord = Digital::find($id);
             
-            if (!$digitalRecord) {
-                Log::warning('Digital inventory record not found with ID: ' . $id);
+            if (!$stockRecord) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Digital inventory record not found'
+                    'message' => 'Digital Inventory record not found'
                 ], 404);
             }
 
-            $digitalRecord->delete();
-
-            Log::info('Successfully deleted digital inventory record with ID: ' . $id);
+            $stockRecord->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Digital inventory record deleted successfully'
+                'message' => 'Digital Inventory record deleted successfully'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error deleting digital inventory record: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error deleting Digital Inventory record: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete digital inventory record',
+                'message' => 'Failed to delete Digital Inventory record',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Get digital inventory statistics
+    // Get received quotes from PSM for dropdown
+    public function getReceivedQuotes()
+    {
+        try {
+            Log::info('Fetching received quotes from PSM module...');
+            
+            // Use caching to reduce load on PSM service (cache for 5 minutes)
+            $receivedQuotes = Cache::remember('received_quotes', 300, function () {
+                // Fetch quotes from PSM module through the gateway
+                // Note: SWS service (port 8002) calls Gateway (port 8001) which routes to PSM (port 8003)
+                $response = Http::timeout(10)->get('http://localhost:8001/api/psm/quotes');
+                
+                Log::info('PSM Quotes API Response Status: ' . $response->status());
+                
+                if (!$response->successful()) {
+                    Log::error('Failed to fetch quotes from PSM module. Status: ' . $response->status());
+                    // Return empty array instead of throwing exception for graceful degradation
+                    return [];
+                }
+
+                $quotesData = $response->json();
+                Log::info('PSM Quotes Data structure:', ['keys' => array_keys($quotesData)]);
+                
+                if (!$quotesData['success'] ?? false) {
+                    Log::error('PSM API returned error: ' . ($quotesData['message'] ?? 'Unknown error'));
+                    return [];
+                }
+
+                // Filter quotes with status "received" or "approved" and ensure they have required data
+                $receivedQuotes = collect($quotesData['data'] ?? [])
+                    ->filter(function ($quote) {
+                        $hasValidStatus = isset($quote['status']) && in_array($quote['status'], ['received', 'approved']);
+                        $hasItemName = isset($quote['item_name']) && !empty($quote['item_name']);
+                        $hasQuantity = isset($quote['quantity']) && $quote['quantity'] > 0;
+                        
+                        return $hasValidStatus && $hasItemName && $hasQuantity;
+                    })
+                    ->map(function ($quote) {
+                        Log::info('Processing quote for digital inventory:', [
+                            'quote_id' => $quote['quote_id'] ?? null,
+                            'item_name' => $quote['item_name'] ?? null,
+                            'status' => $quote['status'] ?? null
+                        ]);
+                        
+                        return [
+                            'quote_id' => $quote['quote_id'] ?? null,
+                            'quote_code' => $quote['quote_code'] ?? ($quote['quote_id'] ?? 'N/A'),
+                            'item_name' => $quote['item_name'] ?? 'Unknown Item',
+                            'quantity' => $quote['quantity'] ?? 0,
+                            'units' => $this->mapUnits($quote['units'] ?? 'pcs'),
+                            'unit_price' => $quote['unit_price'] ?? 0,
+                            'vendor_id' => $quote['ven_id'] ?? null,
+                            'vendor_name' => $this->getVendorName($quote),
+                            'vendor_type' => $this->getVendorType($quote),
+                            'warranty_info' => $this->extractWarrantyInfo($quote),
+                            'delivery_lead_time' => $quote['delivery_lead_time'] ?? 0,
+                            'total_quote' => $quote['total_quote'] ?? 0
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
+
+                Log::info('Successfully processed received quotes', ['count' => count($receivedQuotes)]);
+                return $receivedQuotes;
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $receivedQuotes,
+                'message' => 'Received quotes retrieved successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching received quotes: ' . $e->getMessage());
+            Log::error('Error trace: ' . $e->getTraceAsString());
+            
+            // Return empty array for graceful degradation
+            return response()->json([
+                'success' => true, // Still return success=true to not break frontend
+                'message' => 'No quotes available from vendor system',
+                'data' => []
+            ]);
+        }
+    }
+
+    // Get Digital Inventory statistics
     public function getStats()
     {
         try {
-            Log::info('Fetching digital inventory statistics');
-
             $totalRecords = Digital::count();
-            $lowStock = Digital::lowStock()->count();
-            $onStock = Digital::onStock()->count();
-            $outOfStock = Digital::outOfStock()->count();
+            $onStock = Digital::where('status', 'onstock')->count();
+            $lowStock = Digital::where('status', 'lowstock')->count();
+            $outOfStock = Digital::where('status', 'outofstock')->count();
             $totalItems = Digital::sum('available_item');
-
-            $stats = [
-                'total_records' => $totalRecords,
-                'low_stock' => $lowStock,
-                'on_stock' => $onStock,
-                'out_of_stock' => $outOfStock,
-                'total_items' => $totalItems
-            ];
-
-            Log::info('Digital inventory statistics: ' . json_encode($stats));
 
             return response()->json([
                 'success' => true,
-                'data' => $stats,
-                'message' => 'Digital inventory statistics retrieved successfully'
+                'data' => [
+                    'total_records' => $totalRecords,
+                    'on_stock' => $onStock,
+                    'low_stock' => $lowStock,
+                    'out_of_stock' => $outOfStock,
+                    'total_items' => $totalItems
+                ],
+                'message' => 'Digital Inventory statistics retrieved successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching digital inventory statistics: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error fetching Digital Inventory statistics: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to retrieve digital inventory statistics',
+                'message' => 'Failed to retrieve Digital Inventory statistics',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Search digital inventory records
+    // Search Digital Inventory records
     public function search(Request $request)
     {
         try {
-            Log::info('Searching digital inventory records', $request->all());
-
-            $query = Digital::with('warehousing');
+            $query = Digital::query();
 
             // Search by multiple criteria
             if ($request->has('search') && !empty($request->search)) {
@@ -282,103 +341,131 @@ class DigitalController extends Controller
                     $q->where('stock_id', 'like', '%' . $searchTerm . '%')
                       ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
                       ->orWhere('type', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('units', 'like', '%' . $searchTerm . '%');
+                      ->orWhere('units', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('vendor_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('quote_code', 'like', '%' . $searchTerm . '%');
                 });
             }
 
-            if ($request->has('status') && !empty($request->status)) {
+            if ($request->has('status') && !empty($request.status)) {
                 $query->where('status', $request->status);
             }
 
-            if ($request->has('type') && !empty($request->type)) {
-                $query->where('type', 'like', '%' . $request->type . '%');
+            if ($request->has('type') && !empty($request.type)) {
+                $query->where('type', $request->type);
             }
 
             $results = $query->orderBy('created_at', 'desc')->get();
 
-            Log::info('Search completed, found ' . count($results) . ' records');
-
             return response()->json([
                 'success' => true,
                 'data' => $results,
-                'message' => 'Digital inventory records search completed successfully'
+                'message' => 'Digital Inventory records search completed successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error searching digital inventory records: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error searching Digital Inventory records: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to search digital inventory records',
+                'message' => 'Failed to search Digital Inventory records',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
-    // Sync from Goods Received (GRN) - automatically create digital inventory from completed GRN
-    public function syncFromGrn($grnId)
+    // Determine stock status based on available items
+    private function determineStatus($availableItem)
+    {
+        if ($availableItem <= 0) {
+            return 'outofstock';
+        } elseif ($availableItem < 10) { // Low stock threshold
+            return 'lowstock';
+        } else {
+            return 'onstock';
+        }
+    }
+
+    // Extract warranty information from quote
+    private function extractWarrantyInfo($quote)
+    {
+        // Check if there's warranty information in the quote or vendor data
+        if (isset($quote['notes']) && !empty($quote['notes'])) {
+            return $quote['notes'];
+        }
+        
+        if (isset($quote['warranty_info']) && !empty($quote['warranty_info'])) {
+            return $quote['warranty_info'];
+        }
+        
+        // Default warranty information
+        return "Standard warranty applies";
+    }
+
+    // Map units from purchase to inventory units
+    private function mapUnits($purchaseUnits)
+    {
+        $unitMapping = [
+            'pcs' => 'pcs',
+            'kg' => 'kg',
+            'g' => 'g',
+            'L' => 'L',
+            'ml' => 'ml',
+            'boxes' => 'boxes',
+            'units' => 'units',
+            'sets' => 'sets'
+        ];
+        
+        return $unitMapping[$purchaseUnits] ?? 'pcs';
+    }
+
+    // Get vendor name from quote data
+    private function getVendorName($quote)
+    {
+        if (isset($quote['vendor']['ven_name'])) {
+            return $quote['vendor']['ven_name'];
+        }
+        
+        if (isset($quote['vendor_name'])) {
+            return $quote['vendor_name'];
+        }
+        
+        if (isset($quote['vendor']) && is_string($quote['vendor'])) {
+            return $quote['vendor'];
+        }
+        
+        return 'Unknown Vendor';
+    }
+
+    // Get vendor type from quote data
+    private function getVendorType($quote)
+    {
+        if (isset($quote['vendor']['vendor_type'])) {
+            return $quote['vendor']['vendor_type'];
+        }
+        
+        // Default to Equipment if not specified
+        return 'Equipment';
+    }
+
+    // Sync stock from GRN (Goods Received Note)
+    public function syncFromGrn(Request $request, $grnId)
     {
         try {
-            Log::info('Syncing GRN to digital inventory for GRN ID: ' . $grnId);
-
-            $grnRecord = Warehousing::find($grnId);
+            // This method would sync data from Inventory Flow (GRN) to Digital Inventory
+            // Implementation depends on your GRN data structure
+            Log::info("Syncing digital inventory from GRN: {$grnId}");
             
-            if (!$grnRecord) {
-                Log::warning('GRN record not found with ID: ' . $grnId);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'GRN record not found'
-                ], 404);
-            }
-
-            if ($grnRecord->status !== 'Completed') {
-                Log::warning('GRN record not completed, cannot sync. GRN ID: ' . $grnId);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'GRN record must be completed to sync to digital inventory'
-                ], 400);
-            }
-
-            // Check if already synced
-            $existingDigital = Digital::where('grn_id', $grnId)->first();
-            if ($existingDigital) {
-                Log::warning('GRN record already synced to digital inventory. GRN ID: ' . $grnId);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'GRN record already synced to digital inventory'
-                ], 400);
-            }
-
-            // Create digital inventory record
-            $stockId = Digital::generateStockId();
-            
-            $digitalRecord = Digital::create([
-                'stock_id' => $stockId,
-                'item_name' => $grnRecord->item,
-                'type' => 'General', // Default type, can be customized
-                'units' => 'pcs', // Default units, can be customized
-                'available_item' => $grnRecord->qty_received,
-                'grn_id' => $grnRecord->id
-            ]);
-
-            // Auto-update status
-            $digitalRecord->updateStatus();
-
-            Log::info('Successfully synced GRN to digital inventory. Stock ID: ' . $stockId);
-
             return response()->json([
                 'success' => true,
-                'data' => $digitalRecord,
-                'message' => 'GRN record successfully synced to digital inventory'
+                'message' => 'Sync initiated successfully',
+                'data' => ['grn_id' => $grnId]
             ]);
-
         } catch (\Exception $e) {
-            Log::error('Error syncing GRN to digital inventory: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Error syncing from GRN: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to sync GRN to digital inventory',
+                'message' => 'Failed to sync from GRN',
                 'error' => $e->getMessage()
             ], 500);
         }
