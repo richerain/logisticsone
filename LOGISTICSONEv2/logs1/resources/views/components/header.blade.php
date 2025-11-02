@@ -5,9 +5,8 @@
             <!-- Sidebar toggle button -->
             <button id="toggle-btn" class="pl-2 focus:outline-none"><i class="bx bx-menu text-2xl cursor-pointer"></i></button>
             <!-- company name & logo button -->
-            <button type="button" onclick="window.location.href='/home'" class="flex items-center space-x-1 focus:outline-none">
-                <h1 class="text-2xl font-bold tracking-tight">Microfinancial</h1>    
-                <img src="{{ asset('images/micrologo.png') }}" alt="Micro logo" class="h-10 w-10 rounded-full object-cover" loading="lazy" />  
+            <button type="button" onclick="window.location.href='/home'" class="flex items-center pl-2 focus:outline-none">
+                <h1 class="text-2xl font-bold tracking-tight">Microfinancial</h1>
             </button>
         </div>
         <!-- profile section -->

@@ -35,7 +35,7 @@
     <div class="overflow-x-auto">
         <table class="table table-zebra w-full">
             <thead>
-                <tr class="bg-gray-100">
+                <tr class="bg-gray-700 font-bold text-white">
                     <th>Document ID</th>
                     <th>Document Type</th>
                     <th>Title</th>

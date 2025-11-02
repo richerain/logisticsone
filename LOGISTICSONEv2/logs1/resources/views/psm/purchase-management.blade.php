@@ -19,7 +19,7 @@
     <div class="overflow-x-auto">
         <table class="table table-zebra w-full">
             <thead>
-                <tr class="bg-gray-100">
+                <tr class="bg-gray-700 font-bold text-white">
                     <th class="font-semibold">PO Number</th>
                     <th class="font-semibold">Vendor</th>
                     <th class="font-semibold">Amount</th>

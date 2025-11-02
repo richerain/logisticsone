@@ -89,6 +89,9 @@
             </li>
             <!-- Document Tracking & Logistics Record btn end -->
         </ul>
+        <div class="mt-1 flex justify-center space-x-1 opacity-10">
+            <img src="{{ asset('images/micrologo.png') }}" alt="Micro logo" class="h-32 w-32 rounded-full object-cover" loading="lazy" />
+        </div>
     </div>
 </aside>
 

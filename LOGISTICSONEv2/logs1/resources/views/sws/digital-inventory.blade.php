@@ -27,21 +27,21 @@
             <div class="space-y-3">
                 <div>
                     <div class="flex justify-between mb-1">
-                        <span>Furniture</span>
+                        <span>Equipment</span>
                         <span>65%</span>
                     </div>
                     <progress class="progress progress-primary w-full" value="65" max="100"></progress>
                 </div>
                 <div>
                     <div class="flex justify-between mb-1">
-                        <span>Electronics</span>
+                        <span>Supplies</span>
                         <span>45%</span>
                     </div>
                     <progress class="progress progress-warning w-full" value="45" max="100"></progress>
                 </div>
                 <div>
                     <div class="flex justify-between mb-1">
-                        <span>Office Supplies</span>
+                        <span>Furniture</span>
                         <span>80%</span>
                     </div>
                     <progress class="progress progress-success w-full" value="80" max="100"></progress>

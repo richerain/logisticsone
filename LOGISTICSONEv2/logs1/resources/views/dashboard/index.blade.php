@@ -9,7 +9,7 @@
 </div>
 
 <!-- announcement board section start -->
-<div class="bg-green-100 rounded-lg p-5 mb-3 shadow-xl overflow-visible min-h-[200px] flex flex-col">
+<div class="bg-green-100 shadow-lg rounded-lg p-5 mb-3 overflow-visible min-h-[200px] flex flex-col">
     <div class="flex items-center mb-4 space-x-2 text-gray-700">
         <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
     </div>
@@ -51,10 +51,10 @@
             </div>
 
             <!-- Pagination controls: show 3 per page, can view previous announcements on next pages -->
-            <div class="join justify-end mt-4">
-                <button class="join-item bg-white btn btn-sm">«</button>
-                <button class="join-item bg-white btn btn-sm">Page 1</button>
-                <button class="join-item bg-white btn btn-sm">»</button>
+            <div class="join justify-center gap-0.5 mt-4">
+                <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-left'></i></button>
+                <button class="join-item btn btn-sm">Page 1</button>
+                <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-right'></i></button>
             </div>
         </div>
     </div>
