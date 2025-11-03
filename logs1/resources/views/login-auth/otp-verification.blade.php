@@ -10,6 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <main class="flex items-center justify-center min-h-screen bg-green-700 p-6">
@@ -21,7 +22,7 @@
                          alt="Microfinancial Logistics Logo"
                          class="w-20 h-20 sm:w-24 sm:h-24 md:w-40 md:h-40 lg:w-56 lg:h-56 mx-auto mb-4 object-contain" />
                     <h3 class="text-xl md:text-2xl lg:text-3xl font-bold text-white">Microfinancial Logistics I</h3>
-                    <p class="text-xs sm:text-sm text-green-100 mt-2">Secure access to your Logistics Dashboard.</p>
+                    <p class="text-xs sm:text-sm text-green-100 mt-2">Secure access to your Logistics I System.</p>
                 </div>
             </div>
             <!-- Logo / branding panel end -->
@@ -36,6 +37,7 @@
 
                 <!-- otp form start -->
                 <form id="otp-form" class="space-y-4" novalidate>
+                    @csrf
                     <!-- hidden email -->
                     <input type="hidden" name="email" id="email" value="{{ request()->get('email', 'mail@site.com') }}" />
 
@@ -61,7 +63,7 @@
                     </div>
 
                     <div class="space-y-2">
-                        <button id="verify-btn" type="button" class="btn btn-primary w-full">
+                        <button id="verify-btn" type="button" class="btn btn-primary w-full" disabled>
                             <span id="verify-text">Verify OTP</span>
                             <span id="verify-spinner" class="loading loading-spinner loading-sm hidden"></span>
                         </button>
@@ -95,6 +97,7 @@
                 this.setupOTPInputs();
                 this.setupEventListeners();
                 this.startTimer();
+                this.otpInputs[0].focus();
             }
             
             setupOTPInputs() {
@@ -110,6 +113,8 @@
                         // Enable verify button if all inputs are filled
                         if (this.isOTPComplete()) {
                             this.verifyBtn.disabled = false;
+                        } else {
+                            this.verifyBtn.disabled = true;
                         }
                     });
                     
@@ -124,6 +129,22 @@
                     input.addEventListener('keypress', (e) => {
                         if (!/^\d$/.test(e.key)) {
                             e.preventDefault();
+                        }
+                    });
+
+                    // Handle paste event
+                    input.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
+                        if (pasteData.length === 6) {
+                            pasteData.split('').forEach((char, idx) => {
+                                if (this.otpInputs[idx]) {
+                                    this.otpInputs[idx].value = char;
+                                }
+                            });
+                            if (this.isOTPComplete()) {
+                                this.verifyBtn.disabled = false;
+                            }
                         }
                     });
                 });
@@ -159,7 +180,8 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json'
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
                             email: this.email,
@@ -170,8 +192,7 @@
                     const data = await response.json();
                     
                     if (data.success) {
-                        // Store token and redirect
-                        localStorage.setItem('auth_token', data.token);
+                        // Redirect to splash login
                         window.location.href = '/splash-login';
                     } else {
                         throw new Error(data.message || 'OTP verification failed');
@@ -192,7 +213,8 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Accept': 'application/json'
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
                             email: this.email

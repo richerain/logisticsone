@@ -7,6 +7,7 @@ use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 
 class AuthService
 {
@@ -46,7 +47,7 @@ class AuthService
         $this->sendOtpEmail($user->email, $otp, $user->firstname);
 
         // Store email in session for OTP verification
-        session(['otp_email' => $user->email]);
+        Session::put('otp_email', $user->email);
 
         return [
             'success' => true,
@@ -76,7 +77,7 @@ class AuthService
         $this->sendOtpEmail($user->email, $otp, $user->firstname);
 
         // Store email in session for OTP verification
-        session(['otp_email' => $user->email]);
+        Session::put('otp_email', $user->email);
 
         return [
             'success' => true,
@@ -110,8 +111,8 @@ class AuthService
             'email_verified_at' => now()
         ]);
 
-        // Log the user in
-        Auth::guard('web')->login($user);
+        // Log the user in using the correct guard
+        Auth::guard('sws')->login($user);
 
         return [
             'success' => true,
@@ -130,9 +131,9 @@ class AuthService
 
     public function logout()
     {
-        Auth::guard('web')->logout();
-        session()->invalidate();
-        session()->regenerateToken();
+        Auth::guard('sws')->logout();
+        Session::invalidate();
+        Session::regenerateToken();
 
         return [
             'success' => true,
@@ -142,7 +143,7 @@ class AuthService
 
     public function getCurrentUser()
     {
-        $user = Auth::user();
+        $user = Auth::guard('sws')->user();
 
         if (!$user) {
             return [
@@ -174,10 +175,14 @@ class AuthService
             'expires_in' => 10
         ];
 
-        Mail::send('emails.otp', $data, function($message) use ($email, $name) {
-            $message->to($email, $name)
-                    ->subject('Your OTP Code - Microfinancial Logistics I');
-            $message->from('logistic1.microfinancial@gmail.com', 'Microfinancial Logistics I');
-        });
+        try {
+            Mail::send('emails.otp', $data, function($message) use ($email, $name) {
+                $message->to($email, $name)
+                        ->subject('Your OTP Code - Microfinancial Logistics I');
+                $message->from('logistic1.microfinancial@gmail.com', 'Microfinancial Logistics I');
+            });
+        } catch (\Exception $e) {
+            \Log::error('OTP Email failed: ' . $e->getMessage());
+        }
     }
 }

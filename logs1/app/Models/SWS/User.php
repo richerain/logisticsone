@@ -54,4 +54,10 @@ class User extends Authenticatable
     {
         return $this->roles === $role;
     }
+
+    // Specify the guard for this model
+    public function guardName()
+    {
+        return 'sws';
+    }
 }

@@ -10,6 +10,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+    <!-- Add CSRF Token Meta Tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <main class="flex items-center justify-center min-h-screen bg-green-700 p-6">
@@ -21,95 +23,71 @@
                          alt="Microfinancial Logistics Logo"
                          class="w-20 h-20 sm:w-24 sm:h-24 md:w-40 md:h-40 lg:w-56 lg:h-56 mx-auto mb-4 object-contain" />
                     <h3 class="text-xl md:text-2xl lg:text-3xl font-bold text-white">Microfinancial Logistics I</h3>
-                    <p class="text-xs sm:text-sm text-green-100 mt-2">Secure access to your Logistics Dashboard.</p>
+                    <p class="text-xs sm:text-sm text-green-100 mt-2">Secure access to Logistics I System.</p>
                 </div>
             </div>
             <!-- Logo / branding panel end -->
             <!-- login form panel start -->
             <div class="md:w-1/2 p-8">
-                <h2 class="text-2xl font-bold text-gray-700 text-center">Microfinancial Logistics Login</h2>
+                <h2 class="text-3xl font-bold text-gray-700 text-center">Login</h2>
                 <p class="text-center text-gray-600 mb-6">Please enter your credentials to access the system.</p>
 
-<!-- login form start -->
-<form id="loginForm" class="space-y-4" novalidate>
-    @csrf <!-- Add CSRF token -->
-    
-    <!-- email field start -->
-    <label class="block">
-        <span class="text-gray-700">Email</span>
-        <div class="relative mt-1">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="bx bxs-envelope text-gray-400 text-lg" aria-hidden="true"></i>
-            </span>
-            <input
-                type="email"
-                name="email"
-                id="email"
-                placeholder="mail@site.com"
-                class="input input-bordered w-full pl-10 mt-0"
-                aria-label="Email address"
-                required
-            />
-        </div>
-        <span id="email-error" class="text-red-600 text-sm hidden"></span>
-    </label>
-    <!-- email field end -->
-    
-    <!-- password field start -->
-    <label class="block relative">
-        <span class="text-gray-700">Password</span>
-        <div class="relative mt-1">
-            <!-- left lock icon -->
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="bx bxs-lock text-gray-400 text-lg" aria-hidden="true"></i>
-            </span>
+                <!-- login form start -->
+                <form id="loginForm" class="space-y-4" novalidate>
+                    @csrf <!-- Add CSRF token -->
+                    
+                    <!-- email field start -->
+                    <label class="block">
+                        <span class="text-gray-700">Email</span>
+                        <div class="relative mt-1">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="bx bxs-envelope text-gray-400 text-lg" aria-hidden="true"></i>
+                            </span>
+                            <input type="email" name="email" id="email" placeholder="mail@site.com" class="input input-bordered w-full pl-10 mt-0" aria-label="Email address" required/>
+                        </div>
+                        <span id="email-error" class="text-red-600 text-sm hidden"></span>
+                    </label>
+                    <!-- email field end -->
+                    
+                    <!-- password field start -->
+                    <label class="block relative">
+                        <span class="text-gray-700">Password</span>
+                        <div class="relative mt-1">
+                            <!-- left lock icon -->
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="bx bxs-lock text-gray-400 text-lg" aria-hidden="true"></i>
+                            </span>
+                            <input id="password" name="password" type="password" placeholder="Password" class="input input-bordered w-full pl-10 pr-12 mt-0" aria-label="Password" required/>
+                            <!-- toggle show/hide button -->
+                            <button type="button" onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500" aria-pressed="false" aria-label="Show password">
+                                <i class="bx bx-show-alt text-lg"></i>
+                            </button>
+                        </div>
+                        <span id="password-error" class="text-red-600 text-sm hidden"></span>
+                    </label>
+                    <!-- password field end -->
+                    
+                    <!-- Terms and Conditions checkbox section start-->
+                    <div class="flex items-center justify-between">
+                        <label for="agree" class="flex items-center space-x-2 cursor-pointer">
+                            <input id="agree" name="agree" type="checkbox"
+                                class="checkbox h-4 w-4 md:h-5 md:w-5 shrink-0 align-middle"
+                                aria-checked="false" required />
+                            <span class="text-sm text-gray-600 leading-tight">
+                                I have read and agree to the
+                                <a href="#" class="text-blue-600 hover:underline">Terms &amp; Conditions</a>
+                            </span>
+                        </label>
+                    </div>
+                    <span id="agree-error" class="text-red-600 text-sm hidden"></span>
+                    <!-- Terms and Conditions checkbox section end-->
 
-            <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Password"
-                class="input input-bordered w-full pl-10 pr-12 mt-0"
-                aria-label="Password"
-                required
-            />
-
-            <!-- toggle show/hide button -->
-            <button
-                type="button"
-                onclick="togglePassword(this)"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-                aria-pressed="false"
-                aria-label="Show password"
-            >
-                <i class="bx bx-show-alt text-lg"></i>
-            </button>
-        </div>
-        <span id="password-error" class="text-red-600 text-sm hidden"></span>
-    </label>
-    <!-- password field end -->
-    
-    <!-- Terms and Conditions checkbox section start-->
-    <div class="flex items-center justify-between">
-        <label for="agree" class="flex items-center space-x-2 cursor-pointer">
-            <input id="agree" name="agree" type="checkbox"
-                   class="checkbox h-4 w-4 md:h-5 md:w-5 shrink-0 align-middle"
-                   aria-checked="false" required />
-            <span class="text-sm text-gray-600 leading-tight">
-                I have read and agree to the
-                <a href="#" class="text-blue-600 hover:underline">Terms &amp; Conditions</a>
-            </span>
-        </label>
-    </div>
-    <span id="agree-error" class="text-red-600 text-sm hidden"></span>
-    <!-- Terms and Conditions checkbox section end-->
-
-    <button type="submit" id="loginBtn" class="btn btn-primary w-full">
-        <span id="loginText">Login</span>
-        <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
-    </button>
-</form>
-<!-- login form end -->
+                    <button type="submit" id="loginBtn" class="btn btn-primary w-full">
+                        <span id="loginText">Login</span>
+                        <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
+                    </button>
+                </form>
+                <!-- login form end -->
             </div>
             <!-- login form panel end -->
         </div>
@@ -133,7 +111,7 @@
         // Basic validation
         const email = formData.get('email');
         const password = formData.get('password');
-        const agree = formData.get('agree');
+        const agree = document.getElementById('agree').checked;
 
         if (!email) {
             showError('email-error', 'Email is required');
@@ -159,6 +137,9 @@
         loginText.textContent = 'Logging in...';
         loginSpinner.classList.remove('hidden');
 
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
         // Make API request with CSRF token
         fetch('/api/login', {
             method: 'POST',
@@ -166,7 +147,7 @@
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': csrfToken
             },
             body: JSON.stringify({
                 email: email,

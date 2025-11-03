@@ -28,5 +28,12 @@
             </div>
         </div>
     </main>
+
+    <script>
+        // Redirect to home after a short delay
+        setTimeout(() => {
+            window.location.href = '/home';
+        }, 2000);
+    </script>
 </body>
 </html>
