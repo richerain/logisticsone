@@ -28,5 +28,12 @@
             </div>
         </div>
     </main>
+
+    <script>
+        // Redirect to login page after 2 seconds
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 2000);
+    </script>
 </body>
 </html>

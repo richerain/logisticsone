@@ -4,7 +4,7 @@
         <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Dashboard</h2>
     </div>
     <div class="text-right">
-        <span class="text-md text-gray-600">Welcome back, Firstname - Role</span>
+        <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('sws')->user()->firstname }} - {{ ucfirst(Auth::guard('sws')->user()->roles) }}</span>
     </div>
 </div>
 
@@ -206,7 +206,7 @@
         <div class="bg-white/80 rounded-lg p-3 shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-semibold text-gray-700">DTLR</span>
-                <span class="flex items-center text-xs px-2py-1 rounded-full bg-green-100 text-green-800">
+                <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
                     <i class='bx bxs-circle text-xs mr-1'></i>Active
                 </span>
             </div>
