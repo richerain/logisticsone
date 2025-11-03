@@ -6,4 +6,4 @@
     <button onclick="history.back()" class="btn btn-primary">
         <i class='bx bx-arrow-back mr-2'></i>Go Back
     </button>
-</div>
+</div> 
