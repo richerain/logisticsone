@@ -1,157 +1,134 @@
 <?php
 
-use App\Http\Controllers\FrontendController;
-use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\PSMController;
+use App\Http\Controllers\SWSController;
+use App\Http\Controllers\PLTController;
+use App\Http\Controllers\ALMSController;
+use App\Http\Controllers\DTLRController;
+use App\Http\Controllers\AuthController;
 
-// Splash on root (fresh run) - changed to login for initial load
-Route::view('/', 'auth.login')->name('root');
-
-// Custom auth views/routes (no real auth checks)
+// Authentication Routes
 Route::get('/login', function () {
-    return view('auth.login');
+    return view('login-auth.login');
 })->name('login');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+Route::get('/otp-verification', function () {
+    return view('login-auth.otp-verification');
+})->name('otp.verification');
 
-// OTP Verification Route
-Route::get('/otp-verification', [FrontendController::class, 'showOtpVerification'])->name('otp.verification');
+Route::get('/splash-login', function () {
+    return view('login-auth.splash-login');
+})->name('splash.login');
 
-// Splash pages (standalone) - with authentication check
-Route::get('/login-splash', function (Request $request) {
-    // Check if user is authenticated via cookie
-    $isAuthenticated = isset($_COOKIE['isAuthenticated']) && $_COOKIE['isAuthenticated'] === 'true';
-    if (!$isAuthenticated) {
-        return redirect()->route('login');
-    }
+Route::get('/splash-logout', function () {
+    return view('login-auth.splash-logout');
+})->name('splash.logout');
 
-    // Get user data from cookie
-    $user = null;
-    if (isset($_COOKIE['user'])) {
-        $user = json_decode($_COOKIE['user'], true);
-    }
+// Public API routes for authentication
+Route::prefix('api')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
+});
 
-    return view('auth.login-splash', [
-        'user' => $user // Pass user data to the view
-    ]);
-})->name('login.splash');
+// Protected Routes - Using normal Laravel auth
+Route::middleware(['auth'])->group(function () {
+    Route::get('/home', function () {
+        return view('home');
+    })->name('home');
 
-Route::get('/logout-splash', function (Request $request) {
-    $timeoutReason = $request->get('timeout', 'normal');
-    $message = 'You have been logged out successfully.';
+    Route::get('/dashboard', function () {
+        return view('dashboard.index');
+    })->name('dashboard');
+
+    // Module content loading routes
+    Route::get('/module/{module}', function ($module) {
+        // Map module names to their respective views
+        $moduleViews = [
+            'dashboard' => 'dashboard.index',
+            'psm-purchase' => 'psm.purchase-management',
+            'psm-vendor-quote' => 'psm.vendor-quote',
+            'psm-vendor-management' => 'psm.vendor-management',
+            'sws-inventory-flow' => 'sws.inventory-flow',
+            'sws-digital-inventory' => 'sws.digital-inventory',
+            'plt-logistics-projects' => 'plt.logistics-projects',
+            'alms-asset-management' => 'alms.asset-management',
+            'alms-maintenance-management' => 'alms.maintenance-management',
+            'dtlr-document-tracker' => 'dtlr.document-tracker',
+            'dtlr-logistics-record' => 'dtlr.logistics-record',
+        ];
+
+        $view = $moduleViews[$module] ?? 'components.module-not-found';
+        
+        if (!view()->exists($view)) {
+            return response()->view('components.module-under-construction', ['module' => $module], 404);
+        }
+        
+        // If it's an AJAX request, return just the module content
+        if (request()->ajax()) {
+            return view($view);
+        }
+        
+        // If it's a direct browser request, return the full home page with the module loaded
+        return view('home');
+    })->name('module.load');
+});
+
+// Protected API routes
+Route::prefix('api')->middleware(['auth'])->group(function () {
+    // PSM routes
+    Route::prefix('psm')->group(function () {
+        Route::get('/purchases', [PSMController::class, 'getPurchases']);
+        Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
+        Route::get('/vendors', [PSMController::class, 'getVendors']);
+    });
     
-    return view('auth.logout-splash', [
-        'message' => $message,
-        'timeout_reason' => $timeoutReason
-    ]);
-})->name('logout.splash');
-
-// Logout route section start - direct to logout splash
-Route::get('/logout', function (Request $request) {
-    $user = null;
-    $userCookie = isset($_COOKIE['user']) ? json_decode($_COOKIE['user'], true) : null;
+    // SWS routes
+    Route::prefix('sws')->group(function () {
+        Route::get('/inventory-flow', [SWSController::class, 'getInventoryFlow']);
+        Route::get('/digital-inventory', [SWSController::class, 'getDigitalInventory']);
+    });
     
-    if ($userCookie) {
-        Log::info('User logout', ['user_id' => $userCookie['id'], 'email' => $userCookie['Email']]);
+    // PLT routes
+    Route::prefix('plt')->group(function () {
+        Route::get('/projects', [PLTController::class, 'getProjects']);
+    });
+
+    // ALMS routes
+    Route::prefix('alms')->group(function () {
+        Route::get('/assets', [ALMSController::class, 'getAssets']);
+        Route::get('/maintenance', [ALMSController::class, 'getMaintenance']);
+    });
+
+    // DTLR routes
+    Route::prefix('dtlr')->group(function () {
+        Route::get('/document-tracker', [DTLRController::class, 'getDocumentTracker']);
+        Route::get('/logistics-record', [DTLRController::class, 'getLogisticsRecord']);
+    });
+});
+
+// Redirect root to login
+Route::get('/', function () {
+    return redirect('/login');
+});
+
+// Health check endpoints
+Route::get('/up', function () {
+    return 'Application is healthy';
+});
+
+Route::get('/api/health', function () {
+    return response()->json(['status' => 'healthy', 'timestamp' => now()]);
+});
+
+Route::get('/api/test-db', function () {
+    try {
+        DB::connection('sws')->getPdo();
+        return response()->json(['database' => 'Connected successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['database' => 'Connection failed: ' . $e->getMessage()], 500);
     }
-
-    // Clear all authentication data
-    $cookies = ['isAuthenticated', 'user', 'lastActivity', 'sessionStart', 'browserSession'];
-    foreach ($cookies as $cookie) {
-        setcookie($cookie, '', time() - 3600, '/');
-    }
-
-    // Clear session storage
-    session()->flush();
-
-    return redirect()->route('logout.splash');
-})->name('logout');
-// Logout route section end
-
-// Login processing route section start
-Route::post('/process-login', [FrontendController::class, 'processLogin'])->name('process.login');
-// Login processing route section end
-
-// OTP section routes start
-Route::post('/api/auth/verify-otp', [FrontendController::class, 'verifyOtp'])->name('api.auth.verify-otp');
-Route::post('/api/auth/resend-otp', [FrontendController::class, 'resendOtp'])->name('api.auth.resend-otp');
-// OTP section routes end
-
-// account-profile section route start
-Route::post('/api/profile/update', [FrontendController::class, 'updateProfile'])->name('api.profile.update');
-// account-profile section route end
-
-// Protected routes section - with authentication middleware start
-Route::middleware(['web.auth'])->group(function () {
-    Route::get('/dashboard', [FrontendController::class, 'dashboard'])->name('dashboard');
-
-    // SWS gateway route section start
-    Route::get('/modules/sws/warehousing', [FrontendController::class, 'swsWarehousing'])->name('modules.sws.warehousing');
-    Route::get('/modules/sws/restock', [FrontendController::class, 'swsRestock'])->name('modules.sws.restock');
-    // SWS gateway route section end
-
-    // PSM gateway route section start
-    Route::get('/modules/psm/vendor-management', [FrontendController::class, 'psmVendorManagement'])->name('modules.psm.vendor-management');
-    Route::get('/modules/psm/vendor-quote', [FrontendController::class, 'psmVendorQuote'])->name('modules.psm.vendor-quote');
-    Route::get('/modules/psm/purchase-management', [FrontendController::class, 'psmPurchaseManagement'])->name('modules.psm.purchase-management');
-    // PSM gateway route section end    
-
-    // PLT gateway route section start
-    Route::get('/modules/plt/logistics', [FrontendController::class, 'pltLogistics'])->name('modules.plt.logistics');
-    // PLT gateway route section end
-
-    // ALMS gateway route section start
-    Route::get('/modules/alms/asset', [FrontendController::class, 'almsAsset'])->name('modules.alms.asset');
-    Route::get('/modules/alms/maintenance', [FrontendController::class, 'almsMaintenance'])->name('modules.alms.maintenance');
-    // ALMS gateway route section end
-
-    // DTLR gateway route section start
-    Route::get('/modules/dtlr/documents', [FrontendController::class, 'dtlrDocuments'])->name('modules.dtlr.documents');
-    Route::get('/modules/dtlr/logistics', [FrontendController::class, 'dtlrLogistics'])->name('modules.dtlr.logistics');
-    // DTLR gateway route section end
-});
-// Protected routes section - with authentication middleware end
-
-// PSM Purchase Management Proxy Routes
-Route::prefix('api/psm/purchase')->group(function () {
-    Route::get('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyGet'])->where('endpoint', '.*');
-    Route::post('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyPost'])->where('endpoint', '.*');
-    Route::put('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyPut'])->where('endpoint', '.*');
-    Route::delete('/{endpoint}', [FrontendController::class, 'psmPurchaseProxyDelete'])->where('endpoint', '.*');
-});
-
-// SWS Inventory Flow Proxy Routes
-Route::prefix('api/sws/warehousing')->group(function () {
-    Route::get('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyGet'])->where('endpoint', '.*');
-    Route::post('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyPost'])->where('endpoint', '.*');
-    Route::put('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyPut'])->where('endpoint', '.*');
-    Route::delete('/{endpoint}', [FrontendController::class, 'swsWarehousingProxyDelete'])->where('endpoint', '.*');
-});
-
-// SWS Digital Inventory Proxy Routes
-Route::prefix('api/sws/digital')->group(function () {
-    Route::get('/{endpoint}', [FrontendController::class, 'swsDigitalProxyGet'])->where('endpoint', '.*');
-    Route::post('/{endpoint}', [FrontendController::class, 'swsDigitalProxyPost'])->where('endpoint', '.*');
-    Route::put('/{endpoint}', [FrontendController::class, 'swsDigitalProxyPut'])->where('endpoint', '.*');
-    Route::delete('/{endpoint}', [FrontendController::class, 'swsDigitalProxyDelete'])->where('endpoint', '.*');
-});
-
-// PLT Proxy Routes
-Route::prefix('api/plt')->group(function () {
-    Route::get('/{endpoint}', [FrontendController::class, 'pltProxyGet'])->where('endpoint', '.*');
-    Route::post('/{endpoint}', [FrontendController::class, 'pltProxyPost'])->where('endpoint', '.*');
-    Route::put('/{endpoint}', [FrontendController::class, 'pltProxyPut'])->where('endpoint', '.*');
-    Route::delete('/{endpoint}', [FrontendController::class, 'pltProxyDelete'])->where('endpoint', '.*');
-});
-
-// DTLR Proxy Routes
-Route::prefix('api/dtlr')->group(function () {
-    Route::get('/{endpoint}', [FrontendController::class, 'dtlrProxyGet'])->where('endpoint', '.*');
-    Route::post('/{endpoint}', [FrontendController::class, 'dtlrProxyPost'])->where('endpoint', '.*');
-    Route::put('/{endpoint}', [FrontendController::class, 'dtlrProxyPut'])->where('endpoint', '.*');
-    Route::delete('/{endpoint}', [FrontendController::class, 'dtlrProxyDelete'])->where('endpoint', '.*');
 });

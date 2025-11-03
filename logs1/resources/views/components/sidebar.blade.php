@@ -1,190 +1,255 @@
-<aside id="sidebar" class="bg-[#2f855A] z-0 h-screen p-4 fixed top-15.5 shadow-lg w-64 transition-all duration-500 ease-in-out flex flex-col transform translate-x-0">
-    <h2 class="text-xl font-bold text-green-50 text-center flex-shrink-0">
-        <span class="full-title">Logistics I</span>
-    </h2>
-    <hr class="my-4 flex-shrink-0" />
-    <div class="overflow-y-auto scrollbar scrollbar-opacity-30 flex-grow">
-        <ul class="space-y-2 text-green-50" id="sidebar-menu">
-            <li>
-                <a href="{{ route('dashboard') }}" title="Dashboard" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('dashboard') ? 'bg-white/30' : '' }}">
-                    <i class="bx bxs-home mr-2"></i>
-                    <span class="module-text">Dashboard</span>
-                </a>
-            </li>
-
-            <!-- Procurement & Sourcing - Visible to superadmin, admin, manager -->
-            <li class="has-sub" data-roles="superadmin,admin,manager,vendor">
-                <a href="#" title="Procurement & Sourcing Management" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
-                    <i class="bx bxs-cart mr-2"></i>
-                    <span class="module-text">Procurement & Sourcing Management</span>
-                    <i class="bx bx-chevron-right chevron ml-auto"></i>
-                </a>
-                <ul class="submodules hidden pl-4 space-y-2 text-sm">
-                    <li>
-                        <a href="{{ route('modules.psm.purchase-management') }}" title="Purchase Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.purchase-management') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-purchase-tag-alt mr-2"></i>
-                            <span class="module-text">Purchase Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.psm.vendor-quote') }}" title="Vendor Quote" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-quote') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-file-blank mr-2"></i>
-                            <span class="module-text">Vendor Quote</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.psm.vendor-management') }}" title="Vendor List" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.psm.vendor-management') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-group mr-2"></i>
-                            <span class="module-text">Vendor List</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Smart Warehousing System - Visible to all except vendor -->
-            <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Smart Warehousing System" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
-                    <i class="bx bxs-store mr-2"></i>
-                    <span class="module-text">Smart Warehousing System</span>
-                    <i class="bx bx-chevron-right chevron ml-auto"></i>
-                </a>
-                <ul class="submodules hidden pl-4 space-y-2 text-sm">
-                    <li>
-                        <a href="{{ route('modules.sws.warehousing') }}" title="Inventory Flow" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.warehousing') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-receipt mr-2"></i>
-                            <span class="module-text">Inventory Flow</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.sws.restock') }}" title="Digital inventory" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.sws.restock') ? 'bg-white/30' : '' }}"> 
-                            <i class="bx bxs-truck mr-2"></i>
-                            <span class="module-text">Digital Inventory</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Project Logistics Tracker - Visible to all except vendor -->
-            <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Project Logistics Tracker" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
-                    <i class="bx bxs-map mr-2"></i>
-                    <span class="module-text">Project Logistics Tracker</span>
-                    <i class="bx bx-chevron-right chevron ml-auto"></i>
-                </a>
-                <ul class="submodules hidden pl-4 space-y-2 text-sm">
-                    <li>
-                        <a href="{{ route('modules.plt.logistics') }}" title="Logistics Projects" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.plt.logistics') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-truck mr-2"></i>
-                            <span class="module-text">Logistics Projects</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Asset Lifecycle & Maintenance - Visible to superadmin, admin, manager, staff -->
-            <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Asset Lifecycle & Maintenance" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
-                    <i class="bx bxs-wrench mr-2"></i>
-                    <span class="module-text">Asset Lifecycle & Maintenance</span>
-                    <i class="bx bx-chevron-right chevron ml-auto"></i>
-                </a>
-                <ul class="submodules hidden pl-4 space-y-2 text-sm">
-                    <li>
-                        <a href="{{ route('modules.alms.asset') }}" title="Asset Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.asset') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-archive-in mr-2"></i>
-                            <span class="module-text">Asset Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.alms.maintenance') }}" title="Maintenance Management" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.alms.maintenance') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-calendar-event mr-2"></i>
-                            <span class="module-text">Maintenance Management</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Document Tracking & Logistics Record - Visible to all roles except vendor -->
-            <li class="has-sub" data-roles="superadmin,admin,manager,staff">
-                <a href="#" title="Document Tracking & Logistics Record" class="text-sm flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.*') ? 'bg-white/30' : '' }}" onclick="toggleSubmodules(this); return false;">
-                    <i class="bx bxs-file mr-2"></i>
-                    <span class="module-text">Document Tracking & Logistics Record</span>
-                    <i class="bx bx-chevron-right chevron ml-auto"></i>
-                </a>
-                <ul class="submodules hidden pl-4 space-y-2 text-sm">
-                    <li>
-                        <a href="{{ route('modules.dtlr.documents') }}" title="Document Tracker" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.documents') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-file-doc mr-2"></i>
-                            <span class="module-text">Document Tracker</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('modules.dtlr.logistics') }}" title="Logistics Record" class="flex items-center p-2 rounded hover:bg-white/50 {{ request()->routeIs('modules.dtlr.logistics') ? 'bg-white/30' : '' }}">
-                            <i class="bx bxs-notepad mr-2"></i>
-                            <span class="module-text">Logistics Record</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
+<!-- resources/views/components/sidebar.blade.php -->
+<aside id="sidebar" class="bg-[#2f855A] text-white flex flex-col z-50 absolute md:relative w-72 -ml-72 md:ml-0 transition-all duration-300 ease-in-out h-auto">
+    <div class="department-header text-center py-5 mx-2 border-b border-white/50">
+        <h1 class="text-xl font-bold">Logistics I</h1>
     </div>
-    <hr class="my-4 flex-shrink-0" />
+    <div class="px-3 py-5 flex-1">
+        <ul class="space-y-1">
+            <!-- dashboard sidebar btn start -->
+            <li>
+                <a href="#" data-module="dashboard" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word">
+                    <i class="bx bxs-dashboard mr-2 shrink-0"></i>
+                    <span class="flex-1">Dashboard</span>
+                </a>
+            </li>
+            <!-- dashboard sidebar btn end -->
+            <!-- Procurement & Sourcing Management btn start -->
+            <li class="has-dropdown">
+                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <i class="bx bxs-cart mr-2 shrink-0"></i>
+                        <span class="module-text flex-1">Procurement & Sourcing Management</span>
+                    </div>
+                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
+                </div>
+                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
+                    <li><a href="#" data-module="psm-purchase" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-purchase-tag' ></i>Purchase Management</span></a></li>
+                    <li><a href="#" data-module="psm-vendor-quote" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-quote-single-left' ></i>Vendor Quote</span></a></li>
+                    <li><a href="#" data-module="psm-vendor-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-detail' ></i>Vendor Management</span></a></li>
+                </ul>
+            </li>
+            <!-- Procurement & Sourcing Management btn end -->
+            <!-- Smart Warehousing System btn start -->
+            <li class="has-dropdown">
+                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <i class="bx bxs-store mr-2 shrink-0"></i>
+                        <span class="flex-1">Smart Warehousing System</span>
+                    </div>
+                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
+                </div>
+                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
+                    <li><a href="#" data-module="sws-inventory-flow" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bx-sync'></i>Inventory Flow</span></a></li>
+                    <li><a href="#" data-module="sws-digital-inventory" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-archive-in'></i>Digital Inventory</span></a></li>
+                </ul>
+            </li>
+            <!-- Smart Warehousing System btn end -->
+            <!-- Project Logistics Tracker btn start -->
+            <li class="has-dropdown">
+                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <i class="bx bxs-truck mr-2 shrink-0"></i>
+                        <span class="flex-1">Project Logistics Tracker</span>
+                    </div>
+                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
+                </div>
+                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2 space-y-2">
+                    <li><a href="#" data-module="plt-logistics-projects" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package' ></i>Logistics Projects</a></li>
+                </ul>
+            </li>
+            <!-- Project Logistics Tracker btn end -->
+            <!-- Asset Lifecycle & Maintenance btn start -->
+            <li class="has-dropdown">
+                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <i class="bx bxs-hard-hat mr-2 shrink-0"></i>
+                        <span class="flex-1">Asset Lifecycle & Maintenance</span>
+                    </div>
+                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
+                </div>
+                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
+                    <li><a href="#" data-module="alms-asset-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-archive'></i>Asset Management</a></li>
+                    <li><a href="#" data-module="alms-maintenance-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-wrench'></i>Maintenance Management</a></li>
+                </ul>
+            </li>
+            <!-- Asset Lifecycle & Maintenance btn end -->
+            <!-- Document Tracking & Logistics Record btn start -->
+            <li class="has-dropdown">
+                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <i class="bx bxs-map mr-2 shrink-0"></i>
+                        <span class="flex-1">Document Tracking & Logistics Record</span>
+                    </div>
+                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
+                </div>
+                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
+                    <li><a href="#" data-module="dtlr-document-tracker" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-file'></i>Document Tracker</a></li>
+                    <li><a href="#" data-module="dtlr-logistics-record" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package'></i>Logistics Record</a></li>
+                </ul>
+            </li>
+            <!-- Document Tracking & Logistics Record btn end -->
+        </ul>
+        <div class="mt-1 flex justify-center space-x-1 opacity-10">
+            <img src="{{ asset('images/micrologo.png') }}" alt="Micro logo" class="h-32 w-32 rounded-full object-cover" loading="lazy" />
+        </div>
+    </div>
 </aside>
 
 <script>
-    // Function to filter sidebar items based on user role
-    function filterSidebarByRole() {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const userRole = user.roles ? user.roles.toLowerCase() : '';
-        
-        const sidebarItems = document.querySelectorAll('#sidebar-menu li[data-roles]');
-        
-        sidebarItems.forEach(item => {
-            const allowedRoles = item.getAttribute('data-roles').split(',');
-            
-            if (!allowedRoles.includes(userRole)) {
-                item.style.display = 'none';
-            } else {
-                item.style.display = 'block';
-            }
-        });
-    }
-
-    // Apply role-based filtering when DOM is loaded
+    // Enhanced module loading functionality
     document.addEventListener('DOMContentLoaded', function() {
-        filterSidebarByRole();
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const moduleContent = document.getElementById('module-content');
         
-        // Auto-expand submenu if current route is in a submodule
-        const currentPath = window.location.pathname;
-        const submodules = document.querySelectorAll('.submodules');
-        const chevrons = document.querySelectorAll('.chevron');
-        
-        submodules.forEach(function(sub, index) {
-            const links = sub.querySelectorAll('a');
-            for (let link of links) {
-                if (link.href.includes(currentPath)) {
-                    const parentA = sub.parentElement.querySelector('a');
-                    const chevron = parentA.querySelector('.chevron');
-                    sub.classList.remove('hidden');
-                    chevron.classList.replace('bx-chevron-right', 'bx-chevron-down');
-                    parentA.classList.add('bg-white/30');
-                    break;
+        // Function to load module content
+        function loadModuleContent(module, pushState = true) {
+            // Show loading state
+            moduleContent.innerHTML = '<div class="flex justify-center items-center h-64"><div class="loading loading-spinner loading-lg"></div></div>';
+
+            // Send AJAX request to load module content
+            fetch(`/module/${module}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(html => {
+                moduleContent.innerHTML = html;
+                
+                // Update browser history if needed
+                if (pushState) {
+                    history.pushState({ module: module }, '', `/module/${module}`);
+                }
+                
+                // Re-initialize any charts or dynamic content
+                if (typeof initializeCharts === 'function') {
+                    initializeCharts();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading module:', error);
+                moduleContent.innerHTML = `
+                    <div class="alert alert-error">
+                        <div class="flex-1">
+                            <label>Error loading module content. Please try again.</label>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Add click event listeners to sidebar links
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const module = this.getAttribute('data-module');
+                loadModuleContent(module);
+            });
+        });
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.module) {
+                loadModuleContent(event.state.module, false);
+            } else {
+                // Load dashboard if no module state
+                window.location.href = '/home';
             }
         });
+
+        // Check if we're on a module URL and load the appropriate content
+        const currentPath = window.location.pathname;
+        if (currentPath.startsWith('/module/')) {
+            const module = currentPath.split('/').pop();
+            loadModuleContent(module, false);
+        }
+
+        // Handle direct access to home - ensure dashboard is loaded
+        if (currentPath === '/home' || currentPath === '/') {
+            // Dashboard is already loaded via server-side include
+            history.replaceState({ module: 'dashboard' }, '', '/home');
+        }
     });
 
-    // Toggle submodules function
-    function toggleSubmodules(element) {
-        const submodules = element.nextElementSibling;
-        const chevron = element.querySelector('.chevron');
-        
-        if (submodules.classList.contains('hidden')) {
-            submodules.classList.remove('hidden');
-            chevron.classList.replace('bx-chevron-right', 'bx-chevron-down');
-        } else {
-            submodules.classList.add('hidden');
-            chevron.classList.replace('bx-chevron-down', 'bx-chevron-right');
+    // Sidebar toggle logics (keep the existing sidebar toggle code)
+    document.addEventListener("DOMContentLoaded", () => {
+        const sidebar = document.getElementById("sidebar");
+        const mainContent = document.getElementById("main-content");
+        const toggleBtn = document.getElementById("toggle-btn");
+        const overlay = document.getElementById("overlay");
+        const dropdownToggles = document.querySelectorAll(".has-dropdown > div");
+
+        function toggleSidebar() {
+            if (window.innerWidth >= 768) {
+                if (sidebar.classList.contains("md:-ml-72")) {
+                    sidebar.classList.remove("md:-ml-72");
+                } else {
+                    sidebar.classList.add("md:-ml-72");
+                    mainContent.classList.remove("md:ml-72");
+                }
+            } else {
+                sidebar.classList.toggle("ml-0");
+                overlay.classList.toggle("hidden");
+                if (sidebar.classList.contains("ml-0")) {
+                    document.body.style.overflow = "hidden";
+                } else {
+                    document.body.style.overflow = "";
+                }
+            }
         }
-    }
+
+        function closeAllDropdowns() {
+            dropdownToggles.forEach((toggle) => {
+                const dropdown = toggle.nextElementSibling;
+                const chevron = toggle.querySelector(".bx-chevron-down");
+                if (!dropdown.classList.contains("hidden")) {
+                    dropdown.classList.add("hidden");
+                    chevron.classList.remove("rotate-180");
+                }
+            });
+        }
+
+        dropdownToggles.forEach((toggle) => {
+            toggle.addEventListener("click", () => {
+                const dropdown = toggle.nextElementSibling;
+                const chevron = toggle.querySelector(".bx-chevron-down");
+                dropdownToggles.forEach((otherToggle) => {
+                    if (otherToggle !== toggle) {
+                        otherToggle.nextElementSibling.classList.add("hidden");
+                        otherToggle.querySelector(".bx-chevron-down").classList.remove("rotate-180");
+                    }
+                });
+                dropdown.classList.toggle("hidden");
+                chevron.classList.toggle("rotate-180");
+            });
+        });
+
+        overlay.addEventListener("click", () => {
+            sidebar.classList.remove("ml-0");
+            overlay.classList.add("hidden");
+            document.body.style.overflow = "";
+        });
+
+        toggleBtn.addEventListener("click", toggleSidebar);
+
+        window.addEventListener("resize", () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove("ml-0");
+                overlay.classList.add("hidden");
+                document.body.style.overflow = "";
+                if (!sidebar.classList.contains("md:-ml-72") && !mainContent.classList.contains("md:ml-72")) {
+                    sidebar.classList.add("md:-ml-72");
+                }
+            } else {
+                sidebar.classList.remove("md:-ml-72");
+                mainContent.classList.remove("md:ml-72");
+            }
+            closeAllDropdowns();
+        });
+    });
 </script>

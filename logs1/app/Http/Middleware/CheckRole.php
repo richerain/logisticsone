@@ -10,11 +10,20 @@ class CheckRole
 {
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // Get user from session or token (you'll need to adapt this based on your auth system)
-        $user = $request->user(); // Or get from your authentication system
+        $user = auth()->user();
         
-        if (!$user || !in_array($user->role, $roles)) {
-            abort(403, 'Unauthorized access.');
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
+        if (!in_array($user->roles, $roles)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Insufficient permissions'
+            ], 403);
         }
 
         return $next($request);
