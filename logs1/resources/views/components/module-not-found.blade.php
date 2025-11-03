@@ -6,4 +6,4 @@
     <button onclick="location.reload()" class="btn btn-primary">
         <i class='bx bx-home mr-2'></i>Return to Dashboard
     </button>
-</div>
+</div> 
