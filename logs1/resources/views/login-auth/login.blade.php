@@ -269,7 +269,7 @@
                     <button id="decline-terms" class="btn btn-ghost text-gray-600 hover:bg-gray-200">
                         Cancel
                     </button>
-                    <button id="accept-terms" class="btn btn-primary bg-green-600 hover:bg-green-700 text-white">
+                    <button id="accept-terms" class="btn btn-primary border-none bg-green-600 hover:bg-green-700 text-white">
                         <i class='bx bxs-check-circle mr-2'></i>Yes, I Agree
                     </button>
                 </div>
