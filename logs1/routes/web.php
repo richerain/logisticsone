@@ -43,10 +43,11 @@ Route::middleware([
         Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/refresh-session', [AuthController::class, 'refreshSession']); // Add this route
     });
 
-    // Protected Routes - Using normal Laravel auth
-    Route::middleware(['auth:sws'])->group(function () {
+    // Protected Routes - Using normal Laravel auth with session timeout
+    Route::middleware(['auth:sws', 'session.timeout'])->group(function () { // Added session.timeout middleware
         Route::get('/home', function () {
             return view('home');
         })->name('home');
@@ -88,8 +89,8 @@ Route::middleware([
         })->name('module.load');
     });
 
-    // Protected API routes
-    Route::prefix('api')->middleware(['auth:sws'])->group(function () {
+    // Protected API routes with session timeout
+    Route::prefix('api')->middleware(['auth:sws', 'session.timeout'])->group(function () {
         // PSM routes
         Route::prefix('psm')->group(function () {
             Route::get('/purchases', [PSMController::class, 'getPurchases']);

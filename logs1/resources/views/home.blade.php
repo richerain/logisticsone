@@ -40,6 +40,9 @@
         </main>
     </div>
 
+    <!-- Session Timeout Modal -->
+    @include('components.session-timeout-modal')
+
     <script>
         // Global function to initialize charts
         function initializeCharts() {

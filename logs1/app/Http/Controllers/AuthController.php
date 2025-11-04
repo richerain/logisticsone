@@ -5,6 +5,13 @@ namespace App\Http\Controllers;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+//newly added imports
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\SWS\User;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -87,4 +94,16 @@ class AuthController extends Controller
 
         return response()->json($result, $result['success'] ? 200 : 401);
     }
+    /**
+     * Refresh session activity timestamp
+     */
+    public function refreshSession(Request $request)
+    {
+        if (Auth::guard('sws')->check()) {
+            session(['last_activity' => time()]);
+            return response()->json(['success' => true, 'message' => 'Session refreshed']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+    }    
 }
