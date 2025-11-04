@@ -80,8 +80,8 @@
                         </label>
                     </div>
                     <span id="agree-error" class="text-red-600 text-sm hidden"></span>
-                    <!-- Terms and Conditions checkbox section end-->
-
+                    <!-- Terms and Conditions checkbox section end -->
+                    <!-- Testing github -->
                     <button type="submit" id="loginBtn" class="btn btn-primary w-full">
                         <span id="loginText">Login</span>
                         <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
