@@ -30,26 +30,26 @@
 
 <!-- Profile Details Modal -->
 <div id="profile-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9998] flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg w-full max-w-5xl mx-auto"> <!-- Increased to max-w-5xl -->
+    <div class="bg-white rounded-lg w-full max-w-5xl mx-auto">
         <!-- Modal Header - More Compact -->
-        <div class="flex items-center justify-between p-4 border-b border-gray-200"> <!-- Reduced padding -->
-            <div class="flex items-center space-x-2"> <!-- Reduced space -->
-                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center"> <!-- Smaller icon -->
-                    <i class='bx bxs-user text-green-600 text-lg'></i> <!-- Smaller text -->
+        <div class="flex bg-green-700 items-center justify-between p-4 border-b border-gray-200">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class='bx bxs-user text-green-600 text-lg'></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-semibold text-gray-800">User Profile</h3> <!-- Smaller heading -->
-                    <p class="text-xs text-gray-600">View your account details</p>
+                    <h3 class="text-base font-semibold text-gray-100">User Profile</h3>
+                    <p class="text-xs text-gray-200">View your account details</p>
                 </div>
             </div>
             <button id="close-profile-modal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <i class='bx bx-x text-lg'></i> <!-- Smaller close icon -->
+                <i class='bx bx-x text-lg'></i>
             </button>
         </div>
 
         <!-- Modal Body - No scrolling needed -->
-        <div class="p-4"> <!-- Reduced padding -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3"> <!-- 4-column layout with smaller gap -->
+        <div class="p-4 bg-green-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 
                 <!-- Column 1: Profile & Basic Info -->
                 <div class="space-y-3">
@@ -58,7 +58,7 @@
                         <div class="relative mb-2">
                             <img src="{{ Auth::guard('sws')->user()->picture ?? asset('images/default.jpg') }}" 
                                  alt="Profile Picture" 
-                                 class="w-20 h-20 rounded-full object-cover border-3 border-green-200 shadow"> <!-- Smaller profile picture -->
+                                 class="w-20 h-20 rounded-full object-cover border-3 border-green-200 shadow">
                         </div>
                         <h2 class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::guard('sws')->user()->firstname }} {{ Auth::guard('sws')->user()->lastname }}</h2>
                         <p class="text-green-600 text-xs font-medium capitalize">{{ Auth::guard('sws')->user()->roles }}</p>
@@ -66,13 +66,11 @@
 
                     <!-- Account Status -->
                     <div class="space-y-1">
-                        <div class="flex justify-between items-center text-xs">
+                        <div class="flex justify-evenly items-center text-xs">
                             <span class="text-gray-600">Status:</span>
-                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 capitalize">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-400 text-green-800 capitalize">
                                 {{ Auth::guard('sws')->user()->status }}
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center text-xs">
+                            </span> 
                             <span class="text-gray-600">Verified:</span>
                             <span class="px-2 py-1 rounded-full text-xs font-medium {{ Auth::guard('sws')->user()->email_verified_at ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
                                 {{ Auth::guard('sws')->user()->email_verified_at ? 'Yes' : 'No' }}
@@ -99,16 +97,12 @@
                             <p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->firstname }} {{ Auth::guard('sws')->user()->middlename }} {{ Auth::guard('sws')->user()->lastname }}</p>
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-1">
-                            <div>
-                                <label class="text-xs font-medium text-gray-600 block">Gender</label>
-                                <p class="text-gray-800 text-xs capitalize">{{ Auth::guard('sws')->user()->sex }}</p>
-                            </div>
-                            
-                            <div>
-                                <label class="text-xs font-medium text-gray-600 block">Age</label>
-                                <p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->age }}</p>
-                            </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-start items-center text-xs gap-2">
+                                <label class="text-xs font-medium text-gray-600 block">Sex:</label><p class="text-gray-800 text-xs capitalize">{{ Auth::guard('sws')->user()->sex }}</p>
+
+                                <label class="text-xs font-medium text-gray-600 block">Age:</label><p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->age }}</p>
+                            </div> 
                         </div>
                     </div>
                 </div>
@@ -144,8 +138,8 @@
                         <i class='bx bxs-cog mr-1 text-green-600 text-sm'></i>
                         System Info
                     </h4>
-                    
-                    <div class="space-y-2">
+
+                    <div class="flex justify-evenly items-center">
                         <div>
                             <label class="text-xs font-medium text-gray-600 block">Member Since</label>
                             <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->created_at)->format('M d, Y') }}</p>
@@ -158,12 +152,12 @@
                     </div>
 
                     <!-- Address Section -->
-                    <div class="pt-1"> <!-- Reduced padding top -->
+                    <div class="pt-1">
                         <h4 class="font-semibold text-gray-800 text-sm border-b pb-1 flex items-center">
                             <i class='bx bxs-map mr-1 text-green-600 text-sm'></i>
                             Address
                         </h4>
-                        <p class="text-gray-800 text-xs mt-1"> <!-- Reduced margin top -->
+                        <p class="text-gray-800 text-xs mt-1">
                             @if(Auth::guard('sws')->user()->address)
                                 {{ Auth::guard('sws')->user()->address }}
                             @else
@@ -177,8 +171,8 @@
         </div>
 
         <!-- Modal Footer - Minimal -->
-        <div class="flex justify-end p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg"> <!-- Reduced padding -->
-            <button id="close-profile-modal-bottom" class="btn btn-ghost text-gray-600 hover:bg-gray-200 btn-sm">
+        <div class="flex justify-end p-3 border-t border-gray-200 bg-green-700 rounded-b-lg">
+            <button id="close-profile-modal-bottom" class="btn btn-ghost text-gray-100 hover:bg-gray-100 hover:text-gray-800 btn-sm">
                 Close
             </button>
         </div>
