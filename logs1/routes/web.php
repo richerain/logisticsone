@@ -43,11 +43,12 @@ Route::middleware([
         Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/refresh-session', [AuthController::class, 'refreshSession']); // Add this route
+        Route::post('/refresh-session', [AuthController::class, 'refreshSession']);
+        Route::get('/csrf-token', [AuthController::class, 'getCsrfToken']); // Add this route
     });
 
     // Protected Routes - Using normal Laravel auth with session timeout
-    Route::middleware(['auth:sws', 'session.timeout'])->group(function () { // Added session.timeout middleware
+    Route::middleware(['auth:sws', 'session.timeout'])->group(function () {
         Route::get('/home', function () {
             return view('home');
         })->name('home');

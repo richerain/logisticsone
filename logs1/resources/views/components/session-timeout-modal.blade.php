@@ -38,12 +38,14 @@ class SessionTimeoutHandler {
         this.timeoutModal = document.getElementById('session-timeout-modal');
         this.countdownTimer = document.getElementById('countdown-timer');
         this.extendSessionBtn = document.getElementById('extend-session-btn');
+        this.modalContent = this.timeoutModal?.querySelector('.bg-white');
         
-        this.warningTime = 300000; // 5 minutes in milliseconds (changed from 600000)
-        this.countdownTime = 60000; // 1 minute countdown (unchanged)
+        this.warningTime = 300000; // 5 minutes in milliseconds
+        this.countdownTime = 60000; // 1 minute countdown
         this.countdownInterval = null;
-        this.timeoutInterval = null;
         this.warningTimeout = null;
+        this.isModalActive = false;
+        this.isExtendingSession = false;
         
         this.init();
     }
@@ -55,13 +57,18 @@ class SessionTimeoutHandler {
     }
     
     setupEventListeners() {
-        // User activity events
+        // User activity events - but exclude events within the modal
         const activityEvents = [
             'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
         ];
         
         activityEvents.forEach(event => {
-            document.addEventListener(event, () => this.resetTimers(), { passive: true });
+            document.addEventListener(event, (e) => {
+                // Don't reset timers if the event is within the modal
+                if (!this.isEventInModal(e)) {
+                    this.resetTimers();
+                }
+            }, { passive: true });
         });
         
         // Extend session button
@@ -73,6 +80,22 @@ class SessionTimeoutHandler {
                 this.checkSession();
             }
         });
+        
+        // Prevent modal from closing when clicking inside modal content
+        if (this.modalContent) {
+            this.modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+    }
+    
+    isEventInModal(event) {
+        if (!this.timeoutModal || this.timeoutModal.classList.contains('hidden')) {
+            return false;
+        }
+        
+        // Check if the event target is within the modal
+        return this.timeoutModal.contains(event.target);
     }
     
     startTimeoutTimer() {
@@ -84,6 +107,7 @@ class SessionTimeoutHandler {
     showWarningModal() {
         this.timeoutModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        this.isModalActive = true;
         
         // Disable sidebar interactions
         this.disableSidebar();
@@ -109,33 +133,131 @@ class SessionTimeoutHandler {
     }
     
     async extendSession() {
+        if (this.isExtendingSession) return; // Prevent multiple clicks
+        
+        this.isExtendingSession = true;
+        this.extendSessionBtn.disabled = true;
+        this.extendSessionBtn.innerHTML = '<i class="bx bx-loader bx-spin mr-1"></i>Extending...';
+        
         try {
+            // First, try to get a fresh CSRF token
+            let csrfToken = this.getCsrfToken();
+            
             const response = await fetch('/api/refresh-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin' // Include cookies
             });
             
-            const data = await response.json();
-            
-            if (data.success) {
-                this.hideWarningModal();
-                this.resetTimers();
+            if (response.status === 419) {
+                // CSRF token mismatch, try to get a new one and retry
+                await this.refreshCsrfToken();
+                csrfToken = this.getCsrfToken();
+                
+                const retryResponse = await fetch('/api/refresh-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                if (!retryResponse.ok) {
+                    throw new Error('Session may have expired. Please login again.');
+                }
+                
+                const data = await retryResponse.json();
+                this.handleSuccessfulExtension(data);
+            } else if (response.ok) {
+                const data = await response.json();
+                this.handleSuccessfulExtension(data);
             } else {
-                throw new Error('Failed to extend session');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
         } catch (error) {
             console.error('Session extension error:', error);
-            this.logoutDueToTimeout();
+            
+            if (error.message.includes('expired') || error.message.includes('419')) {
+                this.showTemporaryMessage('Session has expired. Please login again.', 'error');
+                setTimeout(() => {
+                    window.location.href = '/splash-logout';
+                }, 2000);
+            } else {
+                this.showTemporaryMessage('Failed to extend session. Please try again.', 'error');
+                this.resetExtendButton();
+            }
+        } finally {
+            this.isExtendingSession = false;
         }
+    }
+    
+    handleSuccessfulExtension(data) {
+        // Update CSRF token if provided
+        if (data.csrf_token) {
+            this.updateCsrfToken(data.csrf_token);
+        }
+        
+        this.hideWarningModal();
+        this.resetTimers();
+        this.showTemporaryMessage('Session extended successfully!', 'success');
+        this.resetExtendButton();
+    }
+    
+    resetExtendButton() {
+        this.extendSessionBtn.disabled = false;
+        this.extendSessionBtn.innerHTML = '<i class="bx bx-time mr-1"></i>Stay Logged In';
+    }
+    
+    async refreshCsrfToken() {
+        try {
+            const response = await fetch('/api/csrf-token', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.csrf_token) {
+                    this.updateCsrfToken(data.csrf_token);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to refresh CSRF token:', error);
+        }
+    }
+    
+    getCsrfToken() {
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        return metaTag ? metaTag.getAttribute('content') : '';
+    }
+    
+    updateCsrfToken(newToken) {
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) {
+            metaTag.setAttribute('content', newToken);
+        }
+        
+        // Also update any hidden CSRF input fields
+        const csrfInputs = document.querySelectorAll('input[name="_token"]');
+        csrfInputs.forEach(input => {
+            input.value = newToken;
+        });
     }
     
     hideWarningModal() {
         this.timeoutModal.classList.add('hidden');
         document.body.style.overflow = '';
+        this.isModalActive = false;
         this.enableSidebar();
         
         if (this.countdownInterval) {
@@ -145,12 +267,12 @@ class SessionTimeoutHandler {
     }
     
     resetTimers() {
-        if (this.warningTimeout) {
-            clearTimeout(this.warningTimeout);
+        if (this.isModalActive) {
+            return; // Don't reset timers if modal is active
         }
         
-        if (this.timeoutInterval) {
-            clearTimeout(this.timeoutInterval);
+        if (this.warningTimeout) {
+            clearTimeout(this.warningTimeout);
         }
         
         this.hideWarningModal();
@@ -163,8 +285,9 @@ class SessionTimeoutHandler {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
+                    'X-CSRF-TOKEN': this.getCsrfToken()
+                },
+                credentials: 'same-origin'
             });
             
             if (response.status === 401) {
@@ -179,10 +302,51 @@ class SessionTimeoutHandler {
         // Clear all intervals and timeouts
         if (this.warningTimeout) clearTimeout(this.warningTimeout);
         if (this.countdownInterval) clearInterval(this.countdownInterval);
-        if (this.timeoutInterval) clearTimeout(this.timeoutInterval);
         
-        // Redirect to splash logout
-        window.location.href = '/splash-logout';
+        // Show logout message
+        this.showTemporaryMessage('Session expired. Logging out...', 'warning');
+        
+        // Redirect to splash logout after a brief delay
+        setTimeout(() => {
+            window.location.href = '/splash-logout';
+        }, 1000);
+    }
+    
+    showTemporaryMessage(message, type = 'info') {
+        // Remove any existing temporary message
+        const existingMessage = document.getElementById('temp-session-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.id = 'temp-session-message';
+        messageDiv.className = `fixed top-4 right-4 z-[10000] p-4 rounded-lg shadow-lg ${
+            type === 'success' ? 'bg-green-500 text-white' :
+            type === 'error' ? 'bg-red-500 text-white' :
+            type === 'warning' ? 'bg-yellow-500 text-white' :
+            'bg-blue-500 text-white'
+        }`;
+        messageDiv.innerHTML = `
+            <div class="flex items-center">
+                <i class='bx ${
+                    type === 'success' ? 'bxs-check-circle' :
+                    type === 'error' ? 'bxs-error-circle' :
+                    type === 'warning' ? 'bxs-time' :
+                    'bxs-info-circle'
+                } mr-2'></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(messageDiv);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 3000);
     }
     
     disableSidebar() {
@@ -192,6 +356,7 @@ class SessionTimeoutHandler {
         if (sidebar) {
             sidebar.style.pointerEvents = 'none';
             sidebar.style.userSelect = 'none';
+            sidebar.style.opacity = '0.6';
         }
         
         sidebarLinks.forEach(link => {
@@ -207,6 +372,7 @@ class SessionTimeoutHandler {
         if (sidebar) {
             sidebar.style.pointerEvents = 'auto';
             sidebar.style.userSelect = 'auto';
+            sidebar.style.opacity = '1';
         }
         
         sidebarLinks.forEach(link => {

@@ -100,10 +100,33 @@ class AuthController extends Controller
     public function refreshSession(Request $request)
     {
         if (Auth::guard('sws')->check()) {
+            // Update last activity timestamp
             session(['last_activity' => time()]);
-            return response()->json(['success' => true, 'message' => 'Session refreshed']);
+            
+            // Regenerate CSRF token to prevent token mismatch
+            $request->session()->regenerateToken();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Session refreshed',
+                'csrf_token' => csrf_token() // Return new CSRF token
+            ]);
         }
 
-        return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
-    }    
+        return response()->json([
+            'success' => false, 
+            'message' => 'Not authenticated',
+            'requires_relogin' => true
+        ], 401);
+    }
+
+    /**
+     * Get current CSRF token (for when session is still valid but token might expire)
+     */
+    public function getCsrfToken(Request $request)
+    {
+        return response()->json([
+            'csrf_token' => csrf_token()
+        ]);
+    }
 }
