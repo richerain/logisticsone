@@ -39,12 +39,16 @@ class SessionTimeoutHandler {
         this.extendSessionBtn = document.getElementById('extend-session-btn');
         this.modalContent = this.timeoutModal?.querySelector('.bg-white');
         
-        this.warningTime = 300000; // 5 minutes in milliseconds
+        this.sessionLifetime = 2 * 60 * 1000; // 2 minutes in milliseconds
+        this.warningTime = 60000; // Show warning 1 minute before expiry
         this.countdownTime = 60000; // 1 minute countdown
         this.countdownInterval = null;
         this.warningTimeout = null;
         this.isModalActive = false;
         this.isExtendingSession = false;
+        this.extensionAttempts = 0;
+        this.maxExtensionAttempts = 5;
+        this.lastActivity = Date.now();
         
         this.init();
     }
@@ -53,10 +57,13 @@ class SessionTimeoutHandler {
         this.resetTimers();
         this.setupEventListeners();
         this.startTimeoutTimer();
+        
+        // Pre-check session status on load
+        this.checkSessionStatus();
     }
     
     setupEventListeners() {
-        // User activity events - but exclude events within the modal
+        // User activity events
         const activityEvents = [
             'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'
         ];
@@ -65,6 +72,7 @@ class SessionTimeoutHandler {
             document.addEventListener(event, (e) => {
                 // Don't reset timers if the event is within the modal
                 if (!this.isEventInModal(e)) {
+                    this.lastActivity = Date.now();
                     this.resetTimers();
                 }
             }, { passive: true });
@@ -76,7 +84,7 @@ class SessionTimeoutHandler {
         // Visibility change (tab switch)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                this.checkSession();
+                this.checkSessionStatus();
             }
         });
         
@@ -98,15 +106,20 @@ class SessionTimeoutHandler {
     }
     
     startTimeoutTimer() {
+        if (this.warningTimeout) {
+            clearTimeout(this.warningTimeout);
+        }
+        
         this.warningTimeout = setTimeout(() => {
             this.showWarningModal();
-        }, this.warningTime);
+        }, this.sessionLifetime - this.warningTime);
     }
     
     showWarningModal() {
         this.timeoutModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         this.isModalActive = true;
+        this.extensionAttempts = 0; // Reset attempts for new warning
         
         // Disable sidebar interactions
         this.disableSidebar();
@@ -118,29 +131,61 @@ class SessionTimeoutHandler {
     startCountdown() {
         let timeLeft = this.countdownTime / 1000; // Convert to seconds
         
+        // Clear any existing interval
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
+        
+        const startTime = Date.now();
+        const endTime = startTime + this.countdownTime;
+        
         this.countdownInterval = setInterval(() => {
-            timeLeft--;
+            const now = Date.now();
+            timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
             
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             this.countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
+            // Enable extension button even at low time
+            if (timeLeft <= 5) {
+                this.extendSessionBtn.disabled = false;
+                this.extendSessionBtn.innerHTML = '<i class="bx bx-time mr-1"></i>Stay Logged In';
+            }
+            
             if (timeLeft <= 0) {
                 this.logoutDueToTimeout();
             }
-        }, 1000);
+        }, 100);
     }
     
     async extendSession() {
-        if (this.isExtendingSession) return; // Prevent multiple clicks
+        if (this.isExtendingSession) {
+            return;
+        }
+        
+        this.extensionAttempts++;
+        
+        if (this.extensionAttempts > this.maxExtensionAttempts) {
+            this.showTemporaryMessage('Too many extension attempts. Please login again.', 'error');
+            setTimeout(() => {
+                window.location.href = '/splash-logout';
+            }, 2000);
+            return;
+        }
         
         this.isExtendingSession = true;
         this.extendSessionBtn.disabled = true;
         this.extendSessionBtn.innerHTML = '<i class="bx bx-loader bx-spin mr-1"></i>Extending...';
         
         try {
-            // First, try to get a fresh CSRF token
-            let csrfToken = this.getCsrfToken();
+            // First, check if session is still valid
+            const sessionCheck = await this.checkSessionStatus();
+            if (!sessionCheck.authenticated) {
+                throw new Error('Session no longer valid');
+            }
+            
+            const csrfToken = this.getCsrfToken();
             
             const response = await fetch('/api/refresh-session', {
                 method: 'POST',
@@ -149,41 +194,47 @@ class SessionTimeoutHandler {
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': csrfToken
                 },
-                credentials: 'same-origin' // Include cookies
+                credentials: 'same-origin'
             });
             
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Successful extension of session');
+                this.handleSuccessfulExtension(data);
+                return;
+            }
+            
+            // Handle CSRF token mismatch
             if (response.status === 419) {
-                // CSRF token mismatch, try to get a new one and retry
                 await this.refreshCsrfToken();
-                csrfToken = this.getCsrfToken();
+                const newCsrfToken = this.getCsrfToken();
                 
                 const retryResponse = await fetch('/api/refresh-session', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
+                        'X-CSRF-TOKEN': newCsrfToken
                     },
                     credentials: 'same-origin'
                 });
                 
-                if (!retryResponse.ok) {
-                    throw new Error('Session may have expired. Please login again.');
+                if (retryResponse.ok) {
+                    const retryData = await retryResponse.json();
+                    console.log('Successful extension of session');
+                    this.handleSuccessfulExtension(retryData);
+                    return;
+                } else {
+                    throw new Error('Failed to extend session after CSRF refresh');
                 }
-                
-                const data = await retryResponse.json();
-                this.handleSuccessfulExtension(data);
-            } else if (response.ok) {
-                const data = await response.json();
-                this.handleSuccessfulExtension(data);
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
-        } catch (error) {
-            console.error('Session extension error:', error);
             
-            if (error.message.includes('expired') || error.message.includes('419')) {
+            // Handle other errors
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            
+        } catch (error) {
+            if (error.message.includes('expired') || error.message.includes('419') || error.message.includes('401') || error.message.includes('not valid')) {
                 this.showTemporaryMessage('Session has expired. Please login again.', 'error');
                 setTimeout(() => {
                     window.location.href = '/splash-logout';
@@ -197,6 +248,28 @@ class SessionTimeoutHandler {
         }
     }
     
+    async checkSessionStatus() {
+        try {
+            const response = await fetch('/api/check-session', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken()
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                return data;
+            } else {
+                return { authenticated: false };
+            }
+        } catch (error) {
+            return { authenticated: false };
+        }
+    }
+    
     handleSuccessfulExtension(data) {
         // Update CSRF token if provided
         if (data.csrf_token) {
@@ -207,6 +280,8 @@ class SessionTimeoutHandler {
         this.resetTimers();
         this.showTemporaryMessage('Session extended successfully!', 'success');
         this.resetExtendButton();
+        this.extensionAttempts = 0; // Reset attempts after successful extension
+        this.lastActivity = Date.now(); // Update last activity
     }
     
     resetExtendButton() {
@@ -231,7 +306,7 @@ class SessionTimeoutHandler {
                 }
             }
         } catch (error) {
-            console.error('Failed to refresh CSRF token:', error);
+            // Silent fail
         }
     }
     
@@ -274,27 +349,11 @@ class SessionTimeoutHandler {
             clearTimeout(this.warningTimeout);
         }
         
-        this.hideWarningModal();
-        this.startTimeoutTimer();
-    }
-    
-    async checkSession() {
-        try {
-            const response = await fetch('/api/me', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': this.getCsrfToken()
-                },
-                credentials: 'same-origin'
-            });
-            
-            if (response.status === 401) {
-                this.logoutDueToTimeout();
-            }
-        } catch (error) {
-            console.error('Session check error:', error);
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
         }
+        
+        this.startTimeoutTimer();
     }
     
     logoutDueToTimeout() {

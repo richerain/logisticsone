@@ -94,22 +94,30 @@ class AuthController extends Controller
 
         return response()->json($result, $result['success'] ? 200 : 401);
     }
+
     /**
      * Refresh session activity timestamp
      */
     public function refreshSession(Request $request)
     {
         if (Auth::guard('sws')->check()) {
-            // Update last activity timestamp
-            session(['last_activity' => time()]);
+            // Force session regeneration and save
+            $request->session()->regenerate(true);
             
-            // Regenerate CSRF token to prevent token mismatch
-            $request->session()->regenerateToken();
+            // Update last activity timestamp in session
+            $request->session()->put('last_activity', time());
+            
+            // Force immediate session save
+            $request->session()->save();
+
+            // Get fresh CSRF token
+            $newToken = csrf_token();
             
             return response()->json([
                 'success' => true, 
-                'message' => 'Session refreshed',
-                'csrf_token' => csrf_token() // Return new CSRF token
+                'message' => 'Session refreshed successfully',
+                'csrf_token' => $newToken,
+                'session_refreshed_at' => now()->toDateTimeString()
             ]);
         }
 
@@ -128,5 +136,33 @@ class AuthController extends Controller
         return response()->json([
             'csrf_token' => csrf_token()
         ]);
+    }
+
+    /**
+     * Check session status
+     */
+    public function checkSession(Request $request)
+    {
+        if (Auth::guard('sws')->check()) {
+            // Update last activity
+            $request->session()->put('last_activity', time());
+            
+            return response()->json([
+                'success' => true,
+                'authenticated' => true,
+                'user' => [
+                    'id' => Auth::guard('sws')->id(),
+                    'email' => Auth::guard('sws')->user()->email,
+                ],
+                'csrf_token' => csrf_token(),
+                'session_lifetime' => config('session.lifetime', 2)
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'authenticated' => false,
+            'message' => 'Session not found or expired'
+        ], 401);
     }
 }

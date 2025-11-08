@@ -44,7 +44,8 @@ Route::middleware([
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/refresh-session', [AuthController::class, 'refreshSession']);
-        Route::get('/csrf-token', [AuthController::class, 'getCsrfToken']); // Add this route
+        Route::get('/csrf-token', [AuthController::class, 'getCsrfToken']);
+        Route::get('/check-session', [AuthController::class, 'checkSession']); // Added this line
     });
 
     // Protected Routes - Using normal Laravel auth with session timeout

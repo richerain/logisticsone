@@ -20,18 +20,33 @@ class CheckSessionTimeout
             $lastActivity = session('last_activity');
             $sessionLifetime = config('session.lifetime') * 60; // Convert to seconds
             
-            if ($lastActivity && (time() - $lastActivity > $sessionLifetime)) {
+            // Initialize last_activity if not set
+            if (!$lastActivity) {
+                $lastActivity = time();
+                session(['last_activity' => $lastActivity]);
+            }
+            
+            // Check if session has expired
+            if ((time() - $lastActivity) > $sessionLifetime) {
                 Auth::guard('sws')->logout();
-                session()->flush();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
                 
                 if ($request->expectsJson()) {
-                    return response()->json(['session_expired' => true], 401);
+                    return response()->json([
+                        'success' => false,
+                        'session_expired' => true,
+                        'message' => 'Session expired due to inactivity'
+                    ], 401);
                 }
                 
                 return redirect('/splash-logout');
             }
             
-            session(['last_activity' => time()]);
+            // Update last activity for every request (only if not an API call to refresh-session or check-session)
+            if (!$request->is('api/refresh-session') && !$request->is('api/check-session')) {
+                session(['last_activity' => time()]);
+            }
         }
 
         return $next($request);
