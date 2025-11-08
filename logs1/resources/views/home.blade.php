@@ -13,20 +13,55 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.js"></script>
     <!-- Add CSRF Token Meta Tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        /* Custom scrollbar for sidebar */
+        .sidebar-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Active sidebar link styles */
+        .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+        
+        .sidebar-link.active-submodule {
+            background-color: rgba(255, 255, 255, 0.25);
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
     <!-- Header Component -->
     @include('components.header')
 
-    <div class="flex w-full">
+    <div class="flex w-full h-[calc(100vh-4rem)]">
         <div id="overlay" class="hidden fixed inset-0 bg-black opacity-50 z-40"></div> 
 
         <!-- Sidebar Component -->
         @include('components.sidebar')
 
-        <main id="main-content" class="flex-1 flex flex-col p-6 min-h-[calc(100vh-4rem)] w-full">
+        <main id="main-content" class="flex-1 flex flex-col min-h-0 overflow-hidden">
             <!-- Content will be loaded dynamically here -->
-            <div id="module-content">
+            <div id="module-content" class="flex-1 overflow-y-auto p-6">
                 <!-- Default dashboard content will be loaded here initially -->
                 @if(request()->is('home') || request()->is('/'))
                     @include('dashboard.index')
@@ -34,7 +69,7 @@
             </div>
 
             <!-- Footer -->
-            <footer class="mt-auto pt-5 text-xs text-gray-500 text-center">
+            <footer class="shrink-0 py-3 text-xs text-gray-500 text-center bg-white border-t border-gray-200">
             Copyright © 2025 BSIT 4117 Microfinancial I Logistic I . All Rights Reserved.
             </footer>
         </main>
@@ -119,7 +154,29 @@
         // Initialize charts when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeCharts();
+            
+            // Set dashboard as active by default
+            setActiveSidebarLink('dashboard');
         });
+
+        // Function to set active sidebar link
+        function setActiveSidebarLink(module) {
+            // Remove active classes from all sidebar links
+            const allLinks = document.querySelectorAll('.sidebar-link');
+            allLinks.forEach(link => {
+                link.classList.remove('active', 'active-submodule');
+            });
+            
+            // Add active class to the clicked module
+            const activeLink = document.querySelector(`[data-module="${module}"]`);
+            if (activeLink) {
+                if (module === 'dashboard') {
+                    activeLink.classList.add('active');
+                } else {
+                    activeLink.classList.add('active-submodule');
+                }
+            }
+        }
     </script>
 </body>
 </html>

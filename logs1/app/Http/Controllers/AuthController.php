@@ -155,7 +155,7 @@ class AuthController extends Controller
                     'email' => Auth::guard('sws')->user()->email,
                 ],
                 'csrf_token' => csrf_token(),
-                'session_lifetime' => config('session.lifetime', 2)
+                'session_lifetime' => config('session.lifetime', 5)
             ]);
         }
 

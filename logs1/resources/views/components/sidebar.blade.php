@@ -1,9 +1,9 @@
 <!-- resources/views/components/sidebar.blade.php -->
-<aside id="sidebar" class="bg-[#2f855A] text-white flex flex-col z-50 absolute md:relative w-72 -ml-72 md:ml-0 transition-all duration-300 ease-in-out h-auto">
-    <div class="department-header text-center py-5 mx-2 border-b border-white/50">
+<aside id="sidebar" class="bg-[#2f855A] text-white flex flex-col z-50 absolute md:relative w-72 -ml-72 md:ml-0 transition-all duration-300 ease-in-out h-full overflow-hidden">
+    <div class="department-header text-center py-5 mx-2 border-b border-white/50 shrink-0">
         <h1 class="text-xl font-bold">Logistics I</h1>
     </div>
-    <div class="px-3 py-5 flex-1">
+    <div class="flex-1 overflow-y-auto sidebar-scrollbar px-3 py-5">
         <ul class="space-y-1">
             <!-- dashboard sidebar btn start -->
             <li>
@@ -126,6 +126,9 @@
                     history.pushState({ module: module }, '', `/module/${module}`);
                 }
                 
+                // Set active sidebar link
+                setActiveSidebarLink(module);
+                
                 // Re-initialize any charts or dynamic content
                 if (typeof initializeCharts === 'function') {
                     initializeCharts();
@@ -141,6 +144,38 @@
                     </div>
                 `;
             });
+        }
+
+        // Function to set active sidebar link
+        function setActiveSidebarLink(module) {
+            // Remove active classes from all sidebar links
+            const allLinks = document.querySelectorAll('.sidebar-link');
+            allLinks.forEach(link => {
+                link.classList.remove('active', 'active-submodule');
+            });
+            
+            // Add active class to the clicked module
+            const activeLink = document.querySelector(`[data-module="${module}"]`);
+            if (activeLink) {
+                if (module === 'dashboard') {
+                    activeLink.classList.add('active');
+                } else {
+                    activeLink.classList.add('active-submodule');
+                    
+                    // Auto-expand the parent dropdown if it's a submodule
+                    const parentDropdown = activeLink.closest('.dropdown-menu');
+                    if (parentDropdown && parentDropdown.classList.contains('hidden')) {
+                        const dropdownToggle = parentDropdown.previousElementSibling;
+                        if (dropdownToggle) {
+                            const chevron = dropdownToggle.querySelector('.bx-chevron-down');
+                            parentDropdown.classList.remove('hidden');
+                            if (chevron) {
+                                chevron.classList.add('rotate-180');
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Add click event listeners to sidebar links
@@ -173,6 +208,7 @@
         if (currentPath === '/home' || currentPath === '/') {
             // Dashboard is already loaded via server-side include
             history.replaceState({ module: 'dashboard' }, '', '/home');
+            setActiveSidebarLink('dashboard');
         }
     });
 

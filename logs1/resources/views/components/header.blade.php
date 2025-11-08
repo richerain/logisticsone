@@ -32,7 +32,7 @@
 <div id="profile-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9998] flex items-center justify-center p-4">
     <div class="bg-white rounded-lg w-full max-w-5xl mx-auto">
         <!-- Modal Header - More Compact -->
-        <div class="flex bg-green-700 items-center justify-between p-4 border-b border-gray-200">
+        <div class="flex bg-green-700 items-center rounded-t-lg justify-between p-4 border-b border-gray-200">
             <div class="flex items-center space-x-2">
                 <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                     <i class='bx bxs-user text-green-600 text-lg'></i>
@@ -49,7 +49,7 @@
 
         <!-- Modal Body - No scrolling needed -->
         <div class="p-4 bg-green-100">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 
                 <!-- Column 1: Profile & Basic Info -->
                 <div class="space-y-3">
@@ -77,11 +77,24 @@
                             </span>
                         </div>
                     </div>
+
+                    <!-- Additional Info -->
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <label class="text-xs font-medium text-gray-600 block">Member Since</label>
+                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->created_at)->format('M d, Y') }}</p>
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-medium text-gray-600 block">Last Updated</label>
+                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->updated_at)->format('M d, Y') }}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Column 2: Personal Information -->
-                <div class="space-y-2">
-                    <h4 class="font-semibold text-gray-800 text-sm border-b pb-1 flex items-center">
+                <div class="pl-2 border-l border-gray-400 space-y-2">
+                    <h4 class="font-semibold text-gray-800 text-sm border-b border-gray-400 pb-1 flex items-center">
                         <i class='bx bxs-id-card mr-1 text-green-600 text-sm'></i>
                         Personal Info
                     </h4>
@@ -104,12 +117,17 @@
                                 <label class="text-xs font-medium text-gray-600 block">Age:</label><p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->age }}</p>
                             </div> 
                         </div>
+                        
+                        <div>
+                            <label class="text-xs font-medium text-gray-600 block">Birthdate</label>
+                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->birthdate)->format('M d, Y') }}</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Column 3: Contact Information -->
-                <div class="space-y-2">
-                    <h4 class="font-semibold text-gray-800 text-sm border-b pb-1 flex items-center">
+                <div class="pl-2 border-l border-gray-400 space-y-2">
+                    <h4 class="font-semibold text-gray-800 text-sm border-b border-gray-400 pb-1 flex items-center">
                         <i class='bx bxs-contact mr-1 text-green-600 text-sm'></i>
                         Contact
                     </h4>
@@ -124,49 +142,24 @@
                             <label class="text-xs font-medium text-gray-600 block">Phone</label>
                             <p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->contactnum }}</p>
                         </div>
-                        
-                        <div>
-                            <label class="text-xs font-medium text-gray-600 block">Birthdate</label>
-                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->birthdate)->format('M d, Y') }}</p>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Column 4: System & Additional Info -->
-                <div class="space-y-2">
-                    <h4 class="font-semibold text-gray-800 text-sm border-b pb-1 flex items-center">
-                        <i class='bx bxs-cog mr-1 text-green-600 text-sm'></i>
-                        System Info
-                    </h4>
-
-                    <div class="flex justify-evenly items-center">
-                        <div>
-                            <label class="text-xs font-medium text-gray-600 block">Member Since</label>
-                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->created_at)->format('M d, Y') }}</p>
+                        <!-- Address Section -->
+                        <div class="pt-1">
+                            <h4 class="font-semibold text-gray-800 text-sm border-b pb-1 flex items-center">
+                                <i class='bx bxs-map mr-1 text-green-600 text-sm'></i>
+                                Address
+                            </h4>
+                            <p class="text-gray-800 text-xs mt-1">
+                                @if(Auth::guard('sws')->user()->address)
+                                    {{ Auth::guard('sws')->user()->address }}
+                                @else
+                                    <span class="text-gray-500 italic">No address provided</span>
+                                @endif
+                            </p>
                         </div>
                         
-                        <div>
-                            <label class="text-xs font-medium text-gray-600 block">Last Updated</label>
-                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->updated_at)->format('M d, Y') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Address Section -->
-                    <div class="pt-1">
-                        <h4 class="font-semibold text-gray-800 text-sm border-b pb-1 flex items-center">
-                            <i class='bx bxs-map mr-1 text-green-600 text-sm'></i>
-                            Address
-                        </h4>
-                        <p class="text-gray-800 text-xs mt-1">
-                            @if(Auth::guard('sws')->user()->address)
-                                {{ Auth::guard('sws')->user()->address }}
-                            @else
-                                <span class="text-gray-500 italic">No address provided</span>
-                            @endif
-                        </p>
                     </div>
                 </div>
-
             </div>
         </div>
 
