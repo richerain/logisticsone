@@ -3,18 +3,17 @@
     <div class="bg-white rounded-lg p-6 w-80 mx-4">
         <div class="flex items-center mb-4">
             <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                <i class='bx bx-time text-red-600 text-xl'></i>
+                <i class='bx bx-time p-10 text-red-600 text-xl'></i>
             </div>
             <div>
                 <h3 class="text-lg font-semibold text-gray-800">Session Timeout!!</h3>
-                <p class="text-sm text-gray-600">Your session is about to expire due to inactivity.</p>
             </div>
         </div>
         
         <div class="mb-4">
             <div class="flex items-center text-sm text-gray-600 mb-2">
-                <i class='bx bx-info-circle mr-2 text-blue-500'></i>
-                <span>You will be logged out for security reasons.</span>
+                <i class='bx bx-info-circle mr-2 p-1 text-blue-500'></i>
+                <span>Your session is about to expire due to inactivity. You will be logged out automatically.</span>
             </div>
             <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
                 <p class="text-xs text-yellow-800 text-center">
@@ -25,7 +24,7 @@
         </div>
         
         <div class="flex justify-end space-x-3">
-            <button id="extend-session-btn" class="btn btn-primary text-white bg-green-600 hover:bg-green-700">
+            <button id="extend-session-btn" class="btn btn-primary border-none text-white bg-green-600 hover:bg-green-700">
                 <i class='bx bx-time mr-1'></i>Stay Logged In
             </button>
         </div>
