@@ -58,14 +58,45 @@ Route::middleware([
             return view('dashboard.index');
         })->name('dashboard');
 
-        // Module content loading routes
+        // Module content loading routes with role-based access control
         Route::get('/module/{module}', function ($module) {
+            $user = auth()->guard('sws')->user();
+            
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            // Define module access rules
+            $moduleAccess = [
+                'dashboard' => ['vendor', 'staff', 'manager', 'admin', 'superadmin'],
+                'psm-purchase' => ['staff', 'manager', 'admin', 'superadmin'],
+                'psm-vendor-management' => ['staff', 'manager', 'admin', 'superadmin'],
+                'psm-vendor-quote' => ['vendor'],
+                'psm-product-management' => ['vendor'], // Added Product Management for vendor role
+                'sws-inventory-flow' => ['staff', 'manager', 'admin', 'superadmin'],
+                'sws-digital-inventory' => ['staff', 'manager', 'admin', 'superadmin'],
+                'plt-logistics-projects' => ['staff', 'manager', 'admin', 'superadmin'],
+                'alms-asset-management' => ['staff', 'manager', 'admin', 'superadmin'],
+                'alms-maintenance-management' => ['staff', 'manager', 'admin', 'superadmin'],
+                'dtlr-document-tracker' => ['staff', 'manager', 'admin', 'superadmin'],
+                'dtlr-logistics-record' => ['staff', 'manager', 'admin', 'superadmin'],
+            ];
+
+            // Check if user has access to the module
+            if (!isset($moduleAccess[$module]) || !in_array($user->roles, $moduleAccess[$module])) {
+                if (request()->ajax()) {
+                    return response()->json(['error' => 'Access denied'], 403);
+                }
+                return response()->view('components.module-not-found', ['message' => 'Access denied'], 403);
+            }
+
             // Map module names to their respective views
             $moduleViews = [
                 'dashboard' => 'dashboard.index',
                 'psm-purchase' => 'psm.purchase-management',
                 'psm-vendor-quote' => 'psm.vendor-quote',
                 'psm-vendor-management' => 'psm.vendor-management',
+                'psm-product-management' => 'psm.product-management', // Added Product Management view
                 'sws-inventory-flow' => 'sws.inventory-flow',
                 'sws-digital-inventory' => 'sws.digital-inventory',
                 'plt-logistics-projects' => 'plt.logistics-projects',
@@ -98,6 +129,7 @@ Route::middleware([
             Route::get('/purchases', [PSMController::class, 'getPurchases']);
             Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
             Route::get('/vendors', [PSMController::class, 'getVendors']);
+            Route::get('/products', [PSMController::class, 'getProducts']); // Added products route
         });
         
         // SWS routes

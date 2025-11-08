@@ -10,39 +10,58 @@
 
 <div class="bg-white rounded-lg shadow-lg p-6">
     <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">Registered Vendors</h3>
+        <h3 class="text-xl font-semibold text-gray-800">Vendor List</h3>
         <button class="btn btn-primary">
             <i class='bx bx-plus mr-2'></i>Add Vendor
         </button>
     </div>
 
-    <div class="overflow-x-auto">
-        <table class="table table-zebra w-full">
-            <thead>
-                <tr class="bg-gray-700 font-bold text-white">
-                    <th>Vendor ID</th>
-                    <th>Company Name</th>
-                    <th>Contact Person</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>V-001</td>
-                    <td>ABC Suppliers Inc.</td>
-                    <td>John Doe</td>
-                    <td>john@abcsuppliers.com</td>
-                    <td>+63 912 345 6789</td>
-                    <td><span class="badge badge-success">Active</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline mr-2">View</button>
-                        <button class="btn btn-sm btn-primary">Edit</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="">
+        <div class="vendor-card bg-gray-100 border-2 rounded-lg p-10 grid grid-cols-4 gap-1">
+            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
+                <h1 class="text-lg font-semibold text-gray-800">
+                    <i class='bx bxs-fridge p-2 bg-gray-300 rounded-full'></i>
+                    Equipmentos
+                </h1>
+                <p class="text-gray-600 bg-gray-300 rounded-lg">Equipment</p>
+                <p class="text-gray-600">Contact: Jorge Lucero</p>
+                <p class="text-gray-600">Email: equipmentos@gmail.com</p>
+                <p class="text-gray-600">Phone: +63 912 345 6789</p>
+                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
+                <p>star</p>
+            </div>
+            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
+                <h1 class="text-lg font-semibold text-gray-800">
+                    <i class='bx bxs-package p-2 bg-gray-300 rounded-full'></i>
+                    Marked Supplies
+                </h1>
+                <p class="text-gray-600 bg-gray-300 rounded-lg">Supplies</p>
+                <p class="text-gray-600">Contact: John Dadap </p>
+                <p class="text-gray-600">Email: markedsupplies@gmail.com</p>
+                <p class="text-gray-600">Phone: +63 912 345 6789</p>
+                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
+            </div>
+            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
+                <h1 class="text-lg font-semibold text-gray-800">
+                    <i class='bx bx-chair p-2 bg-gray-300 rounded-full'></i>
+                    Futureniture
+                </h1>
+                <p class="text-gray-600 bg-gray-300 rounded-lg">Furniture</p>
+                <p class="text-gray-600">Contact: John Doe</p>
+                <p class="text-gray-600">Email: futureniture@gmail.com</p>
+                <p class="text-gray-600">Phone: +63 912 345 6789</p>
+                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
+            </div>
+            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
+                <h1 class="text-lg font-semibold text-gray-800">
+                    <i class='bx bxs-car-mechanic p-2 bg-gray-300 rounded-full'></i>
+                    Autobotstocks
+                </h1>
+                <p class="text-gray-600 bg-gray-300 rounded-lg">Automotive</p>
+                <p class="text-gray-600">Contact: John Doe</p>
+                <p class="text-gray-600">Email: autobotstocks@gmail.com</p>
+                <p class="text-gray-600">Phone: +63 912 345 6789</p>
+                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
+            </div>
+        </div>
     </div>
-</div>

@@ -6,14 +6,18 @@
     <div class="flex-1 overflow-y-auto sidebar-scrollbar px-3 py-5">
         <ul class="space-y-1">
             <!-- dashboard sidebar btn start -->
+            @if(in_array(auth()->guard('sws')->user()->roles, ['vendor', 'staff', 'manager', 'admin', 'superadmin']))
             <li>
                 <a href="#" data-module="dashboard" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word">
                     <i class="bx bxs-dashboard mr-2 shrink-0"></i>
                     <span class="flex-1">Dashboard</span>
                 </a>
             </li>
+            @endif
             <!-- dashboard sidebar btn end -->
+            
             <!-- Procurement & Sourcing Management btn start -->
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0">
@@ -24,12 +28,14 @@
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
                     <li><a href="#" data-module="psm-purchase" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-purchase-tag' ></i>Purchase Management</span></a></li>
-                    <li><a href="#" data-module="psm-vendor-quote" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-quote-single-left' ></i>Vendor Quote</span></a></li>
                     <li><a href="#" data-module="psm-vendor-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-detail' ></i>Vendor Management</span></a></li>
                 </ul>
             </li>
+            @endif
             <!-- Procurement & Sourcing Management btn end -->
+            
             <!-- Smart Warehousing System btn start -->
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0">
@@ -43,8 +49,11 @@
                     <li><a href="#" data-module="sws-digital-inventory" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-archive-in'></i>Digital Inventory</span></a></li>
                 </ul>
             </li>
+            @endif
             <!-- Smart Warehousing System btn end -->
+            
             <!-- Project Logistics Tracker btn start -->
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0">
@@ -57,8 +66,11 @@
                     <li><a href="#" data-module="plt-logistics-projects" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package' ></i>Logistics Projects</a></li>
                 </ul>
             </li>
+            @endif
             <!-- Project Logistics Tracker btn end -->
+            
             <!-- Asset Lifecycle & Maintenance btn start -->
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0">
@@ -72,8 +84,11 @@
                     <li><a href="#" data-module="alms-maintenance-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-wrench'></i>Maintenance Management</a></li>
                 </ul>
             </li>
+            @endif
             <!-- Asset Lifecycle & Maintenance btn end -->
+            
             <!-- Document Tracking & Logistics Record btn start -->
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0">
@@ -87,7 +102,26 @@
                     <li><a href="#" data-module="dtlr-logistics-record" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package'></i>Logistics Record</a></li>
                 </ul>
             </li>
+            @endif
             <!-- Document Tracking & Logistics Record btn end -->
+            
+            <!-- Vendor module btn start -->
+            @if(auth()->guard('sws')->user()->roles === 'vendor')
+            <li class="has-dropdown">
+                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                    <div class="flex items-center flex-1 min-w-0">
+                        <i class="bx bxs-user-detail mr-2 shrink-0"></i>
+                        <span class="flex-1">Vendor Module</span>
+                    </div>
+                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
+                </div>
+                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
+                    <li><a href="#" data-module="psm-vendor-quote" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-quote-left' ></i>Vendor Quote</span></a></li>
+                    <li><a href="#" data-module="psm-product-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-package' ></i>Product Management</span></a></li>
+                </ul>
+            </li>
+            @endif
+            <!-- Vendor module btn end -->
         </ul>
         <div class="mt-1 flex justify-center space-x-1 opacity-10">
             <img src="{{ asset('images/micrologo.png') }}" alt="Micro logo" class="h-32 w-32 rounded-full object-cover" loading="lazy" />
@@ -109,11 +143,15 @@
             // Send AJAX request to load module content
             fetch(`/module/${module}`, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             })
             .then(response => {
                 if (!response.ok) {
+                    if (response.status === 403) {
+                        throw new Error('Access denied');
+                    }
                     throw new Error('Network response was not ok');
                 }
                 return response.text();
@@ -136,13 +174,23 @@
             })
             .catch(error => {
                 console.error('Error loading module:', error);
-                moduleContent.innerHTML = `
-                    <div class="alert alert-error">
-                        <div class="flex-1">
-                            <label>Error loading module content. Please try again.</label>
+                if (error.message === 'Access denied') {
+                    moduleContent.innerHTML = `
+                        <div class="alert alert-error">
+                            <div class="flex-1">
+                                <label>Access denied. You don't have permission to access this module.</label>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    moduleContent.innerHTML = `
+                        <div class="alert alert-error">
+                            <div class="flex-1">
+                                <label>Error loading module content. Please try again.</label>
+                            </div>
+                        </div>
+                    `;
+                }
             });
         }
 

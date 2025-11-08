@@ -29,4 +29,11 @@ class PSMController extends Controller
             'data' => []
         ]);
     }
+    public function getProducts()
+    {
+        return response()->json([
+            'message' => 'PSM Products data',
+            'data' => []
+        ]);
+    }
 }

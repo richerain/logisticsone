@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-//newly added imports
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\SWS\User;

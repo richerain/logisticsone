@@ -52,4 +52,20 @@
             </tbody>
         </table>
     </div>
+    <!-- pagination section start -->
+        <div class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-600">
+                Showing 1 to 2 of 2 entries
+            </div>
+            <div class="join">
+                <button class="join-item btn btn-sm">
+                    <i class='bx bx-chevron-left'></i>
+                </button>
+                <button class="join-item btn btn-sm">1</button>
+                <button class="join-item btn btn-sm">
+                    <i class='bx bx-chevron-right'></i>
+                </button>
+            </div>
+        </div>
+    <!-- pagination section end -->
 </div>
