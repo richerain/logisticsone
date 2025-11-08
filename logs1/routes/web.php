@@ -71,8 +71,9 @@ Route::middleware([
                 'dashboard' => ['vendor', 'staff', 'manager', 'admin', 'superadmin'],
                 'psm-purchase' => ['staff', 'manager', 'admin', 'superadmin'],
                 'psm-vendor-management' => ['staff', 'manager', 'admin', 'superadmin'],
+                'psm-vendor-info' => ['vendor'], // Added Vendor Info for vendor role
                 'psm-vendor-quote' => ['vendor'],
-                'psm-product-management' => ['vendor'], // Added Product Management for vendor role
+                'psm-product-management' => ['vendor'],
                 'sws-inventory-flow' => ['staff', 'manager', 'admin', 'superadmin'],
                 'sws-digital-inventory' => ['staff', 'manager', 'admin', 'superadmin'],
                 'plt-logistics-projects' => ['staff', 'manager', 'admin', 'superadmin'],
@@ -94,9 +95,10 @@ Route::middleware([
             $moduleViews = [
                 'dashboard' => 'dashboard.index',
                 'psm-purchase' => 'psm.purchase-management',
+                'psm-vendor-info' => 'psm.vendor-info', // Added Vendor Info view
                 'psm-vendor-quote' => 'psm.vendor-quote',
                 'psm-vendor-management' => 'psm.vendor-management',
-                'psm-product-management' => 'psm.product-management', // Added Product Management view
+                'psm-product-management' => 'psm.product-management',
                 'sws-inventory-flow' => 'sws.inventory-flow',
                 'sws-digital-inventory' => 'sws.digital-inventory',
                 'plt-logistics-projects' => 'plt.logistics-projects',
@@ -129,7 +131,8 @@ Route::middleware([
             Route::get('/purchases', [PSMController::class, 'getPurchases']);
             Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
             Route::get('/vendors', [PSMController::class, 'getVendors']);
-            Route::get('/products', [PSMController::class, 'getProducts']); // Added products route
+            Route::get('/products', [PSMController::class, 'getProducts']);
+            Route::get('/vendor-info', [PSMController::class, 'getVendorInfo']); // Added vendor info route
         });
         
         // SWS routes

@@ -15,7 +15,7 @@
                     <i class='bx bx-plus mr-2'></i>Add Product
                 </button>
             </div>
-            <table class="table table-zebra w-full">
+            <table class="table table-sm table-zebra w-full">
                 <thead>
                     <tr class="bg-gray-700 font-bold text-white">
                         <th class="px-4 py-2 text-left">Product ID</th>
@@ -38,10 +38,10 @@
                         <td class="px-4 py-2">
                             <div class="flex space-x-2">
                                 <button class="btn btn-sm btn-outline btn-primary">
-                                    <i class='bx bx-edit'></i>
+                                    edit
                                 </button>
                                 <button class="btn btn-sm btn-outline btn-error">
-                                    <i class='bx bx-trash'></i>
+                                    delete
                                 </button>
                             </div>
                         </td>
@@ -56,10 +56,10 @@
                         <td class="px-4 py-2">
                             <div class="flex space-x-2">
                                 <button class="btn btn-sm btn-outline btn-primary">
-                                    <i class='bx bx-edit'></i>
+                                    edit
                                 </button>
                                 <button class="btn btn-sm btn-outline btn-error">
-                                    <i class='bx bx-trash'></i>
+                                    delete
                                 </button>
                             </div>
                         </td>
@@ -74,11 +74,11 @@
             </div>
             <div class="join">
                 <button class="join-item btn btn-sm">
-                    <i class='bx bx-chevron-left'></i>
+                    <i class='bx bxs-chevrons-left'></i>
                 </button>
                 <button class="join-item btn btn-sm">1</button>
                 <button class="join-item btn btn-sm">
-                    <i class='bx bx-chevron-right'></i>
+                    <i class='bx bxs-chevrons-right'></i>
                 </button>
             </div>
         </div>

@@ -118,6 +118,7 @@
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
                     <li><a href="#" data-module="psm-vendor-quote" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-quote-left' ></i>Vendor Quote</span></a></li>
                     <li><a href="#" data-module="psm-product-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-package' ></i>Product Management</span></a></li>
+                    <li><a href="#" data-module="psm-vendor-info" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-account' ></i>Vendor Info</span></a></li>
                 </ul>
             </li>
             @endif

@@ -25,7 +25,7 @@
     </div>
 
     <div class="overflow-x-auto">
-        <table class="table table-zebra w-full">
+        <table class="table table-sm table-zebra w-full">
             <thead>
                 <tr class="bg-gray-700 font-bold text-white">
                     <th>Quote ID</th>
@@ -59,11 +59,11 @@
             </div>
             <div class="join">
                 <button class="join-item btn btn-sm">
-                    <i class='bx bx-chevron-left'></i>
+                    <i class='bx bxs-chevrons-left'></i>
                 </button>
                 <button class="join-item btn btn-sm">1</button>
                 <button class="join-item btn btn-sm">
-                    <i class='bx bx-chevron-right'></i>
+                    <i class='bx bxs-chevrons-right'></i>
                 </button>
             </div>
         </div>
