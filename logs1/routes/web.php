@@ -44,8 +44,14 @@ Route::middleware([
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/refresh-session', [AuthController::class, 'refreshSession']);
+        Route::get('/check-session', [AuthController::class, 'checkSession']);
         Route::get('/csrf-token', [AuthController::class, 'getCsrfToken']);
-        Route::get('/check-session', [AuthController::class, 'checkSession']); // Added this line
+    });
+
+    // Vendor Info Routes (Public for now, will add auth later)
+    Route::prefix('vendor-info')->group(function () {
+        Route::get('/data', [PSMController::class, 'getVendorInfo']);
+        Route::post('/update', [PSMController::class, 'updateVendorInfo']);
     });
 
     // Protected Routes - Using normal Laravel auth with session timeout
@@ -58,47 +64,14 @@ Route::middleware([
             return view('dashboard.index');
         })->name('dashboard');
 
-        // Module content loading routes with role-based access control
+        // Module content loading routes
         Route::get('/module/{module}', function ($module) {
-            $user = auth()->guard('sws')->user();
-            
-            if (!$user) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
-
-            // Define module access rules
-            $moduleAccess = [
-                'dashboard' => ['vendor', 'staff', 'manager', 'admin', 'superadmin'],
-                'psm-purchase' => ['staff', 'manager', 'admin', 'superadmin'],
-                'psm-vendor-management' => ['staff', 'manager', 'admin', 'superadmin'],
-                'psm-vendor-info' => ['vendor'], // Added Vendor Info for vendor role
-                'psm-vendor-quote' => ['vendor'],
-                'psm-product-management' => ['vendor'],
-                'sws-inventory-flow' => ['staff', 'manager', 'admin', 'superadmin'],
-                'sws-digital-inventory' => ['staff', 'manager', 'admin', 'superadmin'],
-                'plt-logistics-projects' => ['staff', 'manager', 'admin', 'superadmin'],
-                'alms-asset-management' => ['staff', 'manager', 'admin', 'superadmin'],
-                'alms-maintenance-management' => ['staff', 'manager', 'admin', 'superadmin'],
-                'dtlr-document-tracker' => ['staff', 'manager', 'admin', 'superadmin'],
-                'dtlr-logistics-record' => ['staff', 'manager', 'admin', 'superadmin'],
-            ];
-
-            // Check if user has access to the module
-            if (!isset($moduleAccess[$module]) || !in_array($user->roles, $moduleAccess[$module])) {
-                if (request()->ajax()) {
-                    return response()->json(['error' => 'Access denied'], 403);
-                }
-                return response()->view('components.module-not-found', ['message' => 'Access denied'], 403);
-            }
-
             // Map module names to their respective views
             $moduleViews = [
                 'dashboard' => 'dashboard.index',
                 'psm-purchase' => 'psm.purchase-management',
-                'psm-vendor-info' => 'psm.vendor-info', // Added Vendor Info view
                 'psm-vendor-quote' => 'psm.vendor-quote',
                 'psm-vendor-management' => 'psm.vendor-management',
-                'psm-product-management' => 'psm.product-management',
                 'sws-inventory-flow' => 'sws.inventory-flow',
                 'sws-digital-inventory' => 'sws.digital-inventory',
                 'plt-logistics-projects' => 'plt.logistics-projects',
@@ -131,8 +104,6 @@ Route::middleware([
             Route::get('/purchases', [PSMController::class, 'getPurchases']);
             Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
             Route::get('/vendors', [PSMController::class, 'getVendors']);
-            Route::get('/products', [PSMController::class, 'getProducts']);
-            Route::get('/vendor-info', [PSMController::class, 'getVendorInfo']); // Added vendor info route
         });
         
         // SWS routes

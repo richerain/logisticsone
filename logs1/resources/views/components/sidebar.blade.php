@@ -8,7 +8,7 @@
             <!-- dashboard sidebar btn start -->
             @if(in_array(auth()->guard('sws')->user()->roles, ['vendor', 'staff', 'manager', 'admin', 'superadmin']))
             <li>
-                <a href="#" data-module="dashboard" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word">
+                <a href="#" data-module="dashboard" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word" title="Dashboard">
                     <i class="bx bxs-dashboard mr-2 shrink-0"></i>
                     <span class="flex-1">Dashboard</span>
                 </a>
@@ -17,112 +17,94 @@
             <!-- dashboard sidebar btn end -->
             
             <!-- Procurement & Sourcing Management btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
-                    <div class="flex items-center flex-1 min-w-0">
+                    <div class="flex items-center flex-1 min-w-0" title="Procurement & Sourcing Management">
                         <i class="bx bxs-cart mr-2 shrink-0"></i>
                         <span class="module-text flex-1">Procurement & Sourcing Management</span>
                     </div>
                     <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
-                    <li><a href="#" data-module="psm-purchase" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-purchase-tag' ></i>Purchase Management</span></a></li>
-                    <li><a href="#" data-module="psm-vendor-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-detail' ></i>Vendor Management</span></a></li>
+                    <li><a href="#" data-module="psm-purchase"  title="Purchase Management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-purchase-tag' ></i>Purchase Management</span></a></li>
+                    <li><a href="#" data-module="psm-vendor-quote"  title="Vendor Qoute" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-quote-left' ></i>Vendor Quote</span></a></li>
+                    <li><a href="#" data-module="psm-vendor-management"  title="Vendors" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-detail' ></i>Vendors</span></a></li>
                 </ul>
             </li>
             @endif
             <!-- Procurement & Sourcing Management btn end -->
             
             <!-- Smart Warehousing System btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
-                    <div class="flex items-center flex-1 min-w-0">
+                    <div class="flex items-center flex-1 min-w-0" title="Smart Warehousing System">
                         <i class="bx bxs-store mr-2 shrink-0"></i>
                         <span class="flex-1">Smart Warehousing System</span>
                     </div>
                     <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
-                    <li><a href="#" data-module="sws-inventory-flow" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bx-sync'></i>Inventory Flow</span></a></li>
-                    <li><a href="#" data-module="sws-digital-inventory" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-archive-in'></i>Digital Inventory</span></a></li>
+                    <li><a href="#" data-module="sws-inventory-flow"  title="Inventory Flow" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bx-sync'></i>Inventory Flow</span></a></li>
+                    <li><a href="#" data-module="sws-digital-inventory"  title="Digital Inventory" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-archive-in'></i>Digital Inventory</span></a></li>
                 </ul>
             </li>
             @endif
             <!-- Smart Warehousing System btn end -->
             
             <!-- Project Logistics Tracker btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
-                    <div class="flex items-center flex-1 min-w-0">
+                    <div class="flex items-center flex-1 min-w-0"  title="Project Logistics Tracker" >
                         <i class="bx bxs-truck mr-2 shrink-0"></i>
                         <span class="flex-1">Project Logistics Tracker</span>
                     </div>
                     <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2 space-y-2">
-                    <li><a href="#" data-module="plt-logistics-projects" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package' ></i>Logistics Projects</a></li>
+                    <li><a href="#" data-module="plt-logistics-projects" title="Logistics Projects" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package' ></i>Logistics Projects</a></li>
                 </ul>
             </li>
             @endif
             <!-- Project Logistics Tracker btn end -->
             
             <!-- Asset Lifecycle & Maintenance btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
-                    <div class="flex items-center flex-1 min-w-0">
+                    <div class="flex items-center flex-1 min-w-0" title="Asset Lifecycle & Maintenance" >
                         <i class="bx bxs-hard-hat mr-2 shrink-0"></i>
                         <span class="flex-1">Asset Lifecycle & Maintenance</span>
                     </div>
                     <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
-                    <li><a href="#" data-module="alms-asset-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-archive'></i>Asset Management</a></li>
-                    <li><a href="#" data-module="alms-maintenance-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-wrench'></i>Maintenance Management</a></li>
+                    <li><a href="#" data-module="alms-asset-management"  title="Asset Management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-archive'></i>Asset Management</a></li>
+                    <li><a href="#" data-module="alms-maintenance-management"  title="Maintenance Management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-wrench'></i>Maintenance Management</a></li>
                 </ul>
             </li>
             @endif
             <!-- Asset Lifecycle & Maintenance btn end -->
             
             <!-- Document Tracking & Logistics Record btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
-                    <div class="flex items-center flex-1 min-w-0">
+                    <div class="flex items-center flex-1 min-w-0" title="Document Tracking & Logistics Record" >
                         <i class="bx bxs-map mr-2 shrink-0"></i>
                         <span class="flex-1">Document Tracking & Logistics Record</span>
                     </div>
                     <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
-                    <li><a href="#" data-module="dtlr-document-tracker" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-file'></i>Document Tracker</a></li>
-                    <li><a href="#" data-module="dtlr-logistics-record" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package'></i>Logistics Record</a></li>
+                    <li><a href="#" data-module="dtlr-document-tracker" title="Document Tracker" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-file'></i>Document Tracker</a></li>
+                    <li><a href="#" data-module="dtlr-logistics-record" title="Logistics Record"" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-package'></i>Logistics Record</a></li>
                 </ul>
             </li>
             @endif
             <!-- Document Tracking & Logistics Record btn end -->
-            
-            <!-- Vendor module btn start -->
-            @if(auth()->guard('sws')->user()->roles === 'vendor')
-            <li class="has-dropdown">
-                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
-                    <div class="flex items-center flex-1 min-w-0">
-                        <i class="bx bxs-user-detail mr-2 shrink-0"></i>
-                        <span class="flex-1">Vendor Module</span>
-                    </div>
-                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
-                </div>
-                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
-                    <li><a href="#" data-module="psm-vendor-quote" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-quote-left' ></i>Vendor Quote</span></a></li>
-                    <li><a href="#" data-module="psm-product-management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-package' ></i>Product Management</span></a></li>
-                    <li><a href="#" data-module="psm-vendor-info" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-account' ></i>Vendor Info</span></a></li>
-                </ul>
-            </li>
-            @endif
-            <!-- Vendor module btn end -->
         </ul>
         <div class="mt-1 flex justify-center space-x-1 opacity-10">
             <img src="{{ asset('images/micrologo.png') }}" alt="Micro logo" class="h-32 w-32 rounded-full object-cover" loading="lazy" />
