@@ -103,7 +103,7 @@ Route::middleware([
         Route::prefix('psm')->group(function () {
             Route::get('/purchases', [PSMController::class, 'getPurchases']);
             Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
-            Route::get('/vendors', [PSMController::class, 'getVendors']);
+            Route::get('/vendor-management', [PSMController::class, 'getVendorManagement']);
         });
         
         // SWS routes

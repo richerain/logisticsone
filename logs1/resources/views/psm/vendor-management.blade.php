@@ -9,59 +9,23 @@
 </div>
 
 <div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- Header Section -->
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-semibold text-gray-800">Vendor List</h3>
-        <button class="btn btn-primary">
-            <i class='bx bx-plus mr-2'></i>Add Vendor
-        </button>
     </div>
 
-    <div class="">
-        <div class="vendor-card bg-gray-100 border-2 rounded-lg p-10 grid grid-cols-4 gap-1">
-            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
-                <h1 class="text-lg font-semibold text-gray-800">
-                    <i class='bx bxs-fridge p-2 bg-gray-300 rounded-full'></i>
-                    Equipmentos
-                </h1>
-                <p class="text-gray-600 bg-gray-300 rounded-lg">Equipment</p>
-                <p class="text-gray-600">Contact: Jorge Lucero</p>
-                <p class="text-gray-600">Email: equipmentos@gmail.com</p>
-                <p class="text-gray-600">Phone: +63 912 345 6789</p>
-                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
-                <p>star</p>
-            </div>
-            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
-                <h1 class="text-lg font-semibold text-gray-800">
-                    <i class='bx bxs-package p-2 bg-gray-300 rounded-full'></i>
-                    Marked Supplies
-                </h1>
-                <p class="text-gray-600 bg-gray-300 rounded-lg">Supplies</p>
-                <p class="text-gray-600">Contact: John Dadap </p>
-                <p class="text-gray-600">Email: markedsupplies@gmail.com</p>
-                <p class="text-gray-600">Phone: +63 912 345 6789</p>
-                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
-            </div>
-            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
-                <h1 class="text-lg font-semibold text-gray-800">
-                    <i class='bx bx-chair p-2 bg-gray-300 rounded-full'></i>
-                    Futureniture
-                </h1>
-                <p class="text-gray-600 bg-gray-300 rounded-lg">Furniture</p>
-                <p class="text-gray-600">Contact: John Doe</p>
-                <p class="text-gray-600">Email: futureniture@gmail.com</p>
-                <p class="text-gray-600">Phone: +63 912 345 6789</p>
-                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
-            </div>
-            <div class="card-1 border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
-                <h1 class="text-lg font-semibold text-gray-800">
-                    <i class='bx bxs-car-mechanic p-2 bg-gray-300 rounded-full'></i>
-                    Autobotstocks
-                </h1>
-                <p class="text-gray-600 bg-gray-300 rounded-lg">Automotive</p>
-                <p class="text-gray-600">Contact: John Doe</p>
-                <p class="text-gray-600">Email: autobotstocks@gmail.com</p>
-                <p class="text-gray-600">Phone: +63 912 345 6789</p>
-                <p class="text-gray-600">Address: 123 Supplier St, Quezon City</p>
-            </div>
+    <!-- Vendors card area -->
+    <div class="bg-gray-100 p-10 rounded-lg">
+        <div id="" class="">
+        <!-- Vendor cards will be loaded here -->
+        </div>
+        <!-- No Vendors Message -->
+        <div id="noVendorsMessage" class="text-center py-8">
+            <i class='bx bx-package text-6xl text-gray-300 mb-4'></i>
+            <p class="text-gray-500 text-lg">No vendors found</p>
         </div>
     </div>
+
+<script>
+ 
+</script>
