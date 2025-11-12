@@ -5,6 +5,7 @@ namespace App\Models\SWS;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -43,6 +44,8 @@ class User extends Authenticatable
         'birthdate' => 'date',
         'email_verified_at' => 'datetime',
         'otp_expires_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function isActive()
@@ -53,6 +56,16 @@ class User extends Authenticatable
     public function hasRole($role)
     {
         return $this->roles === $role;
+    }
+
+    // Check if OTP is expired
+    public function isOtpExpired()
+    {
+        if (!$this->otp_expires_at) {
+            return true;
+        }
+        
+        return Carbon::now()->gt($this->otp_expires_at);
     }
 
     // Specify the guard for this model

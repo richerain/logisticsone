@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->json([
-        'message' => 'Logistics 1 Subsystem API',
+        'message' => 'Logistics 1 Subsystem API Gateway',
         'version' => '1.0.0',
         'modules' => [
             'SWS - Smart Warehousing System',
@@ -29,4 +29,9 @@ Route::get('/test-db', function () {
     } catch (\Exception $e) {
         return response()->json(['database' => 'Connection failed: ' . $e->getMessage()], 500);
     }
+});
+
+// Gateway routes - load module-specific API routes
+Route::prefix('v1')->group(function () {
+    require __DIR__ . '/gateway.php';
 });

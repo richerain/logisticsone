@@ -12,9 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // API middleware
+        // Global middleware - FIXED: Add session middleware for API
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckSessionTimeout::class,
+        ]);
+
         $middleware->api(prepend: [
             \App\Http\Middleware\Cors::class,
+            \Illuminate\Session\Middleware\StartSession::class, // Add session support for API
         ]);
 
         // Route middleware aliases
@@ -31,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
             'role' => \App\Http\Middleware\CheckRole::class,
-            'session.timeout' => \App\Http\Middleware\CheckSessionTimeout::class, // Add this line
+            'session.timeout' => \App\Http\Middleware\CheckSessionTimeout::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

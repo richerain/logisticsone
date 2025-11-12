@@ -11,6 +11,8 @@ use App\Models\SWS\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -62,12 +64,15 @@ class AuthController extends Controller
 
     public function verifyOtp(Request $request)
     {
+        Log::info('OTP verification started', ['email' => $request->email]);
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|exists:sws.users,email',
             'otp' => 'required|string|size:6',
         ]);
 
         if ($validator->fails()) {
+            Log::error('OTP validation failed', ['errors' => $validator->errors()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
@@ -76,6 +81,21 @@ class AuthController extends Controller
         }
 
         $result = $this->authService->verifyOtp($request->email, $request->otp);
+
+        // If OTP verification is successful, ensure session is properly set
+        if ($result['success']) {
+            Log::info('OTP verification successful, ensuring session persistence');
+            
+            try {
+                // Force session save and regeneration
+                $request->session()->save();
+                $request->session()->regenerate();
+                
+                Log::info('Session regenerated and saved after OTP verification');
+            } catch (\Exception $e) {
+                Log::error('Failed to regenerate session after OTP verification', ['error' => $e->getMessage()]);
+            }
+        }
 
         return response()->json($result, $result['success'] ? 200 : 401);
     }
@@ -162,6 +182,29 @@ class AuthController extends Controller
             'success' => false,
             'authenticated' => false,
             'message' => 'Session not found or expired'
+        ], 401);
+    }
+
+    /**
+     * Check if user is authenticated (for splash login redirect)
+     */
+    public function checkAuth(Request $request)
+    {
+        if (Auth::guard('sws')->check()) {
+            return response()->json([
+                'success' => true,
+                'authenticated' => true,
+                'user' => [
+                    'id' => Auth::guard('sws')->id(),
+                    'email' => Auth::guard('sws')->user()->email,
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'authenticated' => false,
+            'message' => 'Not authenticated'
         ], 401);
     }
 }

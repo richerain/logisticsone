@@ -278,217 +278,222 @@
     </div>
 
 <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    handleLogin();
+});
+
+// Terms & Conditions Modal Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const termsLink = document.getElementById('terms-link');
+    const termsModal = document.getElementById('terms-modal');
+    const closeTermsModal = document.getElementById('close-terms-modal');
+    const declineTerms = document.getElementById('decline-terms');
+    const acceptTerms = document.getElementById('accept-terms');
+    const agreeCheckbox = document.getElementById('agree');
+
+    // Open terms modal
+    termsLink.addEventListener('click', function(e) {
         e.preventDefault();
-        handleLogin();
+        termsModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     });
 
-    // Terms & Conditions Modal Functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const termsLink = document.getElementById('terms-link');
-        const termsModal = document.getElementById('terms-modal');
-        const closeTermsModal = document.getElementById('close-terms-modal');
-        const declineTerms = document.getElementById('decline-terms');
-        const acceptTerms = document.getElementById('accept-terms');
-        const agreeCheckbox = document.getElementById('agree');
+    // Close terms modal
+    function closeTermsModalFunc() {
+        termsModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
 
-        // Open terms modal
-        termsLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            termsModal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        });
+    closeTermsModal.addEventListener('click', closeTermsModalFunc);
+    declineTerms.addEventListener('click', closeTermsModalFunc);
 
-        // Close terms modal
-        function closeTermsModalFunc() {
-            termsModal.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-
-        closeTermsModal.addEventListener('click', closeTermsModalFunc);
-        declineTerms.addEventListener('click', closeTermsModalFunc);
-
-        // Accept terms and conditions
-        acceptTerms.addEventListener('click', function() {
-            // Check the checkbox
-            agreeCheckbox.checked = true;
-            agreeCheckbox.setAttribute('aria-checked', 'true');
-            
-            // Close the modal
-            closeTermsModalFunc();
-            
-            // Optional: Show a brief confirmation
-            const originalText = acceptTerms.innerHTML;
-            acceptTerms.innerHTML = '<i class="bx bxs-check-circle mr-2"></i>Accepted!';
-            acceptTerms.disabled = true;
-            
-            setTimeout(() => {
-                acceptTerms.innerHTML = originalText;
-                acceptTerms.disabled = false;
-            }, 1500);
-        });
-
-        // Close modal when clicking outside
-        termsModal.addEventListener('click', function(e) {
-            if (e.target === termsModal) {
-                closeTermsModalFunc();
-            }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !termsModal.classList.contains('hidden')) {
-                closeTermsModalFunc();
-            }
-        });
-    });
-
-    function handleLogin() {
-        // Reset errors
-        document.querySelectorAll('[id$="-error"]').forEach(el => {
-            el.classList.add('hidden');
-        });
-
-        // Hide login error alert
-        const loginError = document.getElementById('login-error');
-        loginError.classList.add('hidden');
-
-        const formData = new FormData(document.getElementById('loginForm'));
+    // Accept terms and conditions
+    acceptTerms.addEventListener('click', function() {
+        // Check the checkbox
+        agreeCheckbox.checked = true;
+        agreeCheckbox.setAttribute('aria-checked', 'true');
         
-        // Basic validation
-        const email = formData.get('email');
-        const password = formData.get('password');
-        const agree = document.getElementById('agree').checked;
+        // Close the modal
+        closeTermsModalFunc();
+        
+        // Optional: Show a brief confirmation
+        const originalText = acceptTerms.innerHTML;
+        acceptTerms.innerHTML = '<i class="bx bxs-check-circle mr-2"></i>Accepted!';
+        acceptTerms.disabled = true;
+        
+        setTimeout(() => {
+            acceptTerms.innerHTML = originalText;
+            acceptTerms.disabled = false;
+        }, 1500);
+    });
 
-        let hasError = false;
-
-        if (!email) {
-            showError('email-error', 'Email is required');
-            hasError = true;
+    // Close modal when clicking outside
+    termsModal.addEventListener('click', function(e) {
+        if (e.target === termsModal) {
+            closeTermsModalFunc();
         }
+    });
 
-        if (!password) {
-            showError('password-error', 'Password is required');
-            hasError = true;
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !termsModal.classList.contains('hidden')) {
+            closeTermsModalFunc();
         }
+    });
+});
 
-        if (!agree) {
-            showError('agree-error', 'You must agree to the terms and conditions');
-            hasError = true;
-        }
+function handleLogin() {
+    // Reset errors
+    document.querySelectorAll('[id$="-error"]').forEach(el => {
+        el.classList.add('hidden');
+    });
 
-        if (hasError) {
-            return;
-        }
+    // Hide login error alert
+    const loginError = document.getElementById('login-error');
+    loginError.classList.add('hidden');
 
-        // Show loading state
-        const loginBtn = document.getElementById('loginBtn');
-        const loginText = document.getElementById('loginText');
-        const loginSpinner = document.getElementById('loginSpinner');
+    const formData = new FormData(document.getElementById('loginForm'));
+    
+    // Basic validation
+    const email = formData.get('email');
+    const password = formData.get('password');
+    const agree = document.getElementById('agree').checked;
 
-        loginBtn.disabled = true;
-        loginText.textContent = 'Logging in...';
-        loginSpinner.classList.remove('hidden');
+    let hasError = false;
 
-        // Get CSRF token from meta tag
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    if (!email) {
+        showError('email-error', 'Email is required');
+        hasError = true;
+    }
 
-        // Make API request with CSRF token
-        fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
+    if (!password) {
+        showError('password-error', 'Password is required');
+        hasError = true;
+    }
+
+    if (!agree) {
+        showError('agree-error', 'You must agree to the terms and conditions');
+        hasError = true;
+    }
+
+    if (hasError) {
+        return;
+    }
+
+    // Show loading state
+    const loginBtn = document.getElementById('loginBtn');
+    const loginText = document.getElementById('loginText');
+    const loginSpinner = document.getElementById('loginSpinner');
+
+    loginBtn.disabled = true;
+    loginText.textContent = 'Logging in...';
+    loginSpinner.classList.remove('hidden');
+
+    // Get CSRF token from meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    console.log('Making login request with CSRF token:', csrfToken ? 'Present' : 'Missing');
+
+    // Make API request with CSRF token - FIXED: Use direct /api/login route
+    fetch('/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        credentials: 'include', // Important: Include cookies for session
+        body: JSON.stringify({
+            email: email,
+            password: password
         })
-        .then(response => {
-            // First check if response is ok, then parse JSON
-            if (!response.ok) {
-                // If response is not ok, try to parse error message
-                return response.json().then(errorData => {
-                    throw new Error(errorData.message || 'Login failed. Please check your credentials and try again.');
-                }).catch(() => {
-                    // If JSON parsing fails, use the exact wording provided
-                    throw new Error('Login failed. Please check your credentials and try again.');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Login response:', data);
-            if (data.success) {
-                if (data.requires_otp) {
-                    // Redirect to OTP verification
-                    window.location.href = `/otp-verification?email=${encodeURIComponent(data.email)}`;
-                } else {
-                    // Direct login success
-                    window.location.href = '/home';
-                }
+    })
+    .then(response => {
+        console.log('Login response status:', response.status);
+        
+        // First check if response is ok, then parse JSON
+        if (!response.ok) {
+            // If response is not ok, try to parse error message
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || `Login failed with status: ${response.status}`);
+            }).catch(() => {
+                // If JSON parsing fails, use the exact wording provided
+                throw new Error(`Login failed with status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Login response data:', data);
+        if (data.success) {
+            if (data.requires_otp) {
+                // Redirect to OTP verification with email parameter
+                window.location.href = `/otp-verification?email=${encodeURIComponent(data.email)}`;
             } else {
-                // Handle API success: false case - use the exact wording provided
-                throw new Error('Login failed. Please check your credentials and try again.');
+                // Direct login success
+                window.location.href = '/splash-login';
             }
-        })
-        .catch(error => {
-            console.error('Login error:', error);
-            
-            // Show login error alert with the exact wording provided
-            const loginError = document.getElementById('login-error');
-            const loginErrorMessage = document.getElementById('login-error-message');
-            
-            loginErrorMessage.textContent = 'Login failed. Please check your credentials and try again.';
-            loginError.classList.remove('hidden');
-            
-            // Scroll to error message
-            loginError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Auto-hide error after 8 seconds
-            setTimeout(() => {
-                loginError.classList.add('hidden');
-            }, 8000);
-        })
-        .finally(() => {
-            // Reset loading state
-            loginBtn.disabled = false;
-            loginText.textContent = 'Login';
-            loginSpinner.classList.add('hidden');
-        });
-    }
-
-    function showError(elementId, message) {
-        const errorElement = document.getElementById(elementId);
-        errorElement.textContent = message;
-        errorElement.classList.remove('hidden');
-    }
-
-    // Toggle password visibility
-    function togglePassword(btn){
-        var input = document.getElementById('password');
-        var icon = btn.querySelector('i');
-        if (!input) return;
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('bx-show-alt');
-            icon.classList.add('bx-hide');
-            btn.setAttribute('aria-pressed', 'true');
-            btn.setAttribute('aria-label', 'Hide password');
         } else {
-            input.type = 'password';
-            icon.classList.remove('bx-hide');
-            icon.classList.add('bx-show-alt');
-            btn.setAttribute('aria-pressed', 'false');
-            btn.setAttribute('aria-label', 'Show password');
+            // Handle API success: false case - use the exact wording provided
+            throw new Error(data.message || 'Login failed. Please check your credentials and try again.');
         }
-    }
+    })
+    .catch(error => {
+        console.error('Login error:', error);
+        
+        // Show login error alert with the exact wording provided
+        const loginError = document.getElementById('login-error');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        
+        loginErrorMessage.textContent = error.message;
+        loginError.classList.remove('hidden');
+        
+        // Scroll to error message
+        loginError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Auto-hide error after 8 seconds
+        setTimeout(() => {
+            loginError.classList.add('hidden');
+        }, 8000);
+    })
+    .finally(() => {
+        // Reset loading state
+        loginBtn.disabled = false;
+        loginText.textContent = 'Login';
+        loginSpinner.classList.add('hidden');
+    });
+}
 
-    // Debug helper - you can remove this after testing
-    console.log('Login form loaded successfully');
+function showError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
+}
+
+// Toggle password visibility
+function togglePassword(btn){
+    var input = document.getElementById('password');
+    var icon = btn.querySelector('i');
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bx-show-alt');
+        icon.classList.add('bx-hide');
+        btn.setAttribute('aria-pressed', 'true');
+        btn.setAttribute('aria-label', 'Hide password');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bx-hide');
+        icon.classList.add('bx-show-alt');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.setAttribute('aria-label', 'Show password');
+    }
+}
+
+// Debug helper - you can remove this after testing
+console.log('Login form loaded successfully');
 </script>
 </body>
 </html>

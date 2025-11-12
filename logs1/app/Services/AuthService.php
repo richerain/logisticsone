@@ -7,7 +7,8 @@ use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class AuthService
 {
@@ -38,16 +39,18 @@ class AuthService
 
         // Generate OTP
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        
+        // Update user with OTP and expiration
         $user->update([
             'otp' => $otp,
-            'otp_expires_at' => now()->addMinutes(10)
+            'otp_expires_at' => Carbon::now()->addMinutes(10)
         ]);
+
+        // Log the OTP for debugging (remove in production)
+        Log::info("OTP generated for {$user->email}: {$otp}, expires at: {$user->otp_expires_at}");
 
         // Send OTP via Email
         $this->sendOtpEmail($user->email, $otp, $user->firstname);
-
-        // Store email in session for OTP verification
-        Session::put('otp_email', $user->email);
 
         return [
             'success' => true,
@@ -69,15 +72,17 @@ class AuthService
         }
 
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        
+        // Update user with OTP and expiration
         $user->update([
             'otp' => $otp,
-            'otp_expires_at' => now()->addMinutes(10)
+            'otp_expires_at' => Carbon::now()->addMinutes(10)
         ]);
 
-        $this->sendOtpEmail($user->email, $otp, $user->firstname);
+        // Log the OTP for debugging (remove in production)
+        Log::info("OTP regenerated for {$user->email}: {$otp}, expires at: {$user->otp_expires_at}");
 
-        // Store email in session for OTP verification
-        Session::put('otp_email', $user->email);
+        $this->sendOtpEmail($user->email, $otp, $user->firstname);
 
         return [
             'success' => true,
@@ -91,28 +96,57 @@ class AuthService
         $user = $this->userRepository->findByEmail($email);
 
         if (!$user) {
+            Log::error("OTP verification failed: User not found for email: {$email}");
             return [
                 'success' => false,
                 'message' => 'User not found'
             ];
         }
 
-        if ($user->otp !== $otp || now()->gt($user->otp_expires_at)) {
+        // Debug logging
+        Log::info("OTP verification attempt for {$email}");
+        Log::info("Stored OTP: {$user->otp}, Input OTP: {$otp}");
+        Log::info("OTP expires at: {$user->otp_expires_at}, Current time: " . Carbon::now());
+
+        // Check if OTP exists
+        if (!$user->otp) {
+            Log::error("OTP verification failed: No OTP found for user: {$email}");
             return [
                 'success' => false,
-                'message' => 'Invalid or expired OTP'
+                'message' => 'No OTP found. Please request a new one.'
             ];
         }
 
-        // Clear OTP
+        // Check if OTP matches
+        if ($user->otp !== $otp) {
+            Log::error("OTP verification failed: OTP mismatch for user: {$email}");
+            return [
+                'success' => false,
+                'message' => 'Invalid OTP code'
+            ];
+        }
+
+        // Check if OTP is expired
+        if (!$user->otp_expires_at || Carbon::now()->gt($user->otp_expires_at)) {
+            Log::error("OTP verification failed: OTP expired for user: {$email}");
+            Log::error("Current time: " . Carbon::now() . ", OTP expires: {$user->otp_expires_at}");
+            return [
+                'success' => false,
+                'message' => 'OTP has expired. Please request a new one.'
+            ];
+        }
+
+        // Clear OTP and update email verification
         $user->update([
             'otp' => null,
             'otp_expires_at' => null,
-            'email_verified_at' => now()
+            'email_verified_at' => Carbon::now()
         ]);
 
-        // Log the user in using the correct guard
-        Auth::guard('sws')->login($user);
+        // Log the user in using the correct guard with "remember" for longer session
+        Auth::guard('sws')->login($user, true);
+
+        Log::info("OTP verification successful for user: {$email}");
 
         return [
             'success' => true,
@@ -132,9 +166,6 @@ class AuthService
     public function logout()
     {
         Auth::guard('sws')->logout();
-        Session::invalidate();
-        Session::regenerateToken();
-
         return [
             'success' => true,
             'message' => 'Successfully logged out'
@@ -181,8 +212,9 @@ class AuthService
                         ->subject('Your OTP Code - Microfinancial Logistics I');
                 $message->from('logistic1.microfinancial@gmail.com', 'Microfinancial Logistics I');
             });
+            Log::info("OTP email sent successfully to: {$email}");
         } catch (\Exception $e) {
-            \Log::error('OTP Email failed: ' . $e->getMessage());
+            Log::error('OTP Email failed: ' . $e->getMessage());
         }
     }
 }

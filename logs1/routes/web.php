@@ -19,40 +19,41 @@ Route::middleware([
     \Illuminate\Routing\Middleware\SubstituteBindings::class,
 ])->group(function () {
     
-    // Authentication Routes
+    // Public Authentication Routes - FIXED: Proper route definitions
     Route::get('/login', function () {
+        // If user is already authenticated, redirect to home
+        if (Auth::guard('sws')->check()) {
+            return redirect('/home');
+        }
         return view('login-auth.login');
     })->name('login');
 
-    Route::get('/otp-verification', function () {
-        return view('login-auth.otp-verification');
+    Route::get('/otp-verification', function (Request $request) {
+        // If user is already authenticated, redirect to home
+        if (Auth::guard('sws')->check()) {
+            return redirect('/home');
+        }
+        
+        // Check if email is provided, otherwise redirect to login
+        if (!$request->has('email')) {
+            return redirect('/login');
+        }
+        
+        return view('login-auth.otp-verification', ['email' => $request->email]);
     })->name('otp.verification');
 
     Route::get('/splash-login', function () {
+        // This route should only be accessible after successful OTP verification
+        // If user is not authenticated, redirect to login
+        if (!Auth::guard('sws')->check()) {
+            return redirect('/login');
+        }
         return view('login-auth.splash-login');
     })->name('splash.login');
 
     Route::get('/splash-logout', function () {
         return view('login-auth.splash-logout');
     })->name('splash.logout');
-
-    // Public API routes for authentication
-    Route::prefix('api')->group(function () {
-        Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/send-otp', [AuthController::class, 'sendOtp']);
-        Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/refresh-session', [AuthController::class, 'refreshSession']);
-        Route::get('/check-session', [AuthController::class, 'checkSession']);
-        Route::get('/csrf-token', [AuthController::class, 'getCsrfToken']);
-    });
-
-    // Vendor Info Routes (Public for now, will add auth later)
-    Route::prefix('vendor-info')->group(function () {
-        Route::get('/data', [PSMController::class, 'getVendorInfo']);
-        Route::post('/update', [PSMController::class, 'updateVendorInfo']);
-    });
 
     // Protected Routes - Using normal Laravel auth with session timeout
     Route::middleware(['auth:sws', 'session.timeout'])->group(function () {
@@ -97,41 +98,11 @@ Route::middleware([
         })->name('module.load');
     });
 
-    // Protected API routes with session timeout
-    Route::prefix('api')->middleware(['auth:sws', 'session.timeout'])->group(function () {
-        // PSM routes
-        Route::prefix('psm')->group(function () {
-            Route::get('/purchases', [PSMController::class, 'getPurchases']);
-            Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
-            Route::get('/vendor-management', [PSMController::class, 'getVendorManagement']);
-        });
-        
-        // SWS routes
-        Route::prefix('sws')->group(function () {
-            Route::get('/inventory-flow', [SWSController::class, 'getInventoryFlow']);
-            Route::get('/digital-inventory', [SWSController::class, 'getDigitalInventory']);
-        });
-        
-        // PLT routes
-        Route::prefix('plt')->group(function () {
-            Route::get('/projects', [PLTController::class, 'getProjects']);
-        });
-
-        // ALMS routes
-        Route::prefix('alms')->group(function () {
-            Route::get('/assets', [ALMSController::class, 'getAssets']);
-            Route::get('/maintenance', [ALMSController::class, 'getMaintenance']);
-        });
-
-        // DTLR routes
-        Route::prefix('dtlr')->group(function () {
-            Route::get('/document-tracker', [DTLRController::class, 'getDocumentTracker']);
-            Route::get('/logistics-record', [DTLRController::class, 'getLogisticsRecord']);
-        });
-    });
-
-    // Redirect root to login
+    // Redirect root to appropriate page
     Route::get('/', function () {
+        if (Auth::guard('sws')->check()) {
+            return redirect('/home');
+        }
         return redirect('/login');
     });
 });
@@ -152,4 +123,23 @@ Route::get('/api/test-db', function () {
     } catch (\Exception $e) {
         return response()->json(['database' => 'Connection failed: ' . $e->getMessage()], 500);
     }
+});
+
+// FIXED: Add explicit API routes for authentication to ensure they're accessible
+// These routes use the session middleware but exclude CSRF verification
+Route::middleware([
+    \App\Http\Middleware\EncryptCookies::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\Routing\Middleware\SubstituteBindings::class,
+])->prefix('api')->group(function () {
+    Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+    Route::post('/send-otp', [App\Http\Controllers\AuthController::class, 'sendOtp']);
+    Route::post('/verify-otp', [App\Http\Controllers\AuthController::class, 'verifyOtp']);
+    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
+    Route::get('/me', [App\Http\Controllers\AuthController::class, 'me']);
+    Route::get('/check-auth', [App\Http\Controllers\AuthController::class, 'checkAuth']);
+    Route::post('/refresh-session', [App\Http\Controllers\AuthController::class, 'refreshSession']);
+    Route::get('/check-session', [App\Http\Controllers\AuthController::class, 'checkSession']);
+    Route::get('/csrf-token', [App\Http\Controllers\AuthController::class, 'getCsrfToken']);
 });
