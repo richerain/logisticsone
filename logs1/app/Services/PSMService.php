@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Repositories\PSMRepository;
 use App\Models\PSM\Vendor;
 use App\Models\PSM\Product;
+use App\Models\PSM\Purchase;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -40,6 +41,72 @@ class PSMService
     }
 
     /**
+     * Get active vendors for purchase orders
+     */
+    public function getActiveVendorsForPurchase()
+    {
+        try {
+            $vendors = Vendor::where('ven_status', 'active')
+                ->with(['products' => function($query) {
+                    $query->where('prod_stock', '>', 0);
+                }])
+                ->get()
+                ->map(function($vendor) {
+                    return [
+                        'id' => $vendor->id,
+                        'ven_id' => $vendor->ven_id,
+                        'company_name' => $vendor->ven_company_name,
+                        'type' => $vendor->ven_type,
+                        'products' => $vendor->products->map(function($product) {
+                            return [
+                                'id' => $product->id,
+                                'prod_id' => $product->prod_id,
+                                'name' => $product->prod_name,
+                                'price' => $product->prod_price,
+                                'stock' => $product->prod_stock,
+                                'type' => $product->prod_type
+                            ];
+                        })
+                    ];
+                });
+
+            return [
+                'success' => true,
+                'data' => $vendors,
+                'message' => 'Active vendors retrieved successfully'
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch active vendors: ' . $e->getMessage(),
+                'data' => []
+            ];
+        }
+    }
+
+    /**
+     * Get all purchases with filters
+     */
+    public function getPurchases($filters = [])
+    {
+        try {
+            $purchases = $this->psmRepository->getPurchases($filters);
+
+            return [
+                'success' => true,
+                'data' => $purchases,
+                'message' => 'Purchases retrieved successfully'
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch purchases: ' . $e->getMessage(),
+                'data' => []
+            ];
+        }
+    }
+
+    /**
      * Get vendor by ID
      */
     public function getVendor($id)
@@ -64,6 +131,36 @@ class PSMService
             return [
                 'success' => false,
                 'message' => 'Failed to fetch vendor: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
+     * Get purchase by ID
+     */
+    public function getPurchase($id)
+    {
+        try {
+            $purchase = $this->psmRepository->getPurchaseById($id);
+            
+            if ($purchase) {
+                return [
+                    'success' => true,
+                    'data' => $purchase,
+                    'message' => 'Purchase retrieved successfully'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Purchase not found',
+                    'data' => null
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch purchase: ' . $e->getMessage(),
                 'data' => null
             ];
         }
@@ -94,6 +191,31 @@ class PSMService
         }
     }
 
+    public function getPurchaseByPurchaseId($purId)
+    {
+        try {
+            $purchase = $this->psmRepository->getPurchaseByPurchaseId($purId);
+            if ($purchase) {
+                return [
+                    'success' => true,
+                    'data' => $purchase,
+                    'message' => 'Purchase retrieved successfully'
+                ];
+            }
+            return [
+                'success' => false,
+                'message' => 'Purchase not found',
+                'data' => null
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch purchase: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
     /**
      * Create new vendor
      */
@@ -117,6 +239,54 @@ class PSMService
             return [
                 'success' => false,
                 'message' => 'Failed to create vendor: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
+     * Create new purchase
+     */
+    public function createPurchase($data)
+    {
+        DB::beginTransaction();
+        try {
+            $data['pur_id'] = $this->generatePurchaseId();
+            
+            // Ensure items is an array with name and price
+            if (isset($data['pur_name_items']) && is_string($data['pur_name_items'])) {
+                $data['pur_name_items'] = json_decode($data['pur_name_items'], true);
+            }
+            
+            // Set default status to pending
+            $data['pur_status'] = 'pending';
+            
+            // Calculate total units and amount from items
+            $items = $data['pur_name_items'] ?? [];
+            $data['pur_unit'] = count($items);
+            
+            $totalAmount = 0;
+            foreach ($items as $item) {
+                if (isset($item['price'])) {
+                    $totalAmount += floatval($item['price']);
+                }
+            }
+            $data['pur_total_amount'] = $totalAmount;
+            
+            $purchase = $this->psmRepository->createPurchase($data);
+            
+            DB::commit();
+            
+            return [
+                'success' => true,
+                'message' => 'Purchase order created successfully',
+                'data' => $purchase
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to create purchase: ' . $e->getMessage(),
                 'data' => null
             ];
         }
@@ -157,6 +327,57 @@ class PSMService
     }
 
     /**
+     * Update purchase
+     */
+    public function updatePurchase($id, $data)
+    {
+        DB::beginTransaction();
+        try {
+            // Ensure items is an array with name and price
+            if (isset($data['pur_name_items']) && is_string($data['pur_name_items'])) {
+                $data['pur_name_items'] = json_decode($data['pur_name_items'], true);
+            }
+            
+            // Calculate total units and amount from items
+            $items = $data['pur_name_items'] ?? [];
+            $data['pur_unit'] = count($items);
+            
+            $totalAmount = 0;
+            foreach ($items as $item) {
+                if (isset($item['price'])) {
+                    $totalAmount += floatval($item['price']);
+                }
+            }
+            $data['pur_total_amount'] = $totalAmount;
+            
+            $purchase = $this->psmRepository->updatePurchase($id, $data);
+            
+            if ($purchase) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'Purchase order updated successfully',
+                    'data' => $purchase
+                ];
+            } else {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Purchase not found',
+                    'data' => null
+                ];
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to update purchase: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
      * Delete vendor
      */
     public function deleteVendor($id)
@@ -187,6 +408,37 @@ class PSMService
         }
     }
 
+    /**
+     * Delete purchase
+     */
+    public function deletePurchase($id)
+    {
+        DB::beginTransaction();
+        try {
+            $result = $this->psmRepository->deletePurchase($id);
+            
+            if ($result) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'Purchase deleted successfully'
+                ];
+            } else {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Purchase not found'
+                ];
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to delete purchase: ' . $e->getMessage()
+            ];
+        }
+    }
+
     public function getVendorStats()
     {
         try {
@@ -200,6 +452,24 @@ class PSMService
             return [
                 'success' => false,
                 'message' => 'Failed to fetch vendor stats: ' . $e->getMessage(),
+                'data' => []
+            ];
+        }
+    }
+
+    public function getPurchaseStats()
+    {
+        try {
+            $stats = $this->psmRepository->getPurchaseStats();
+            return [
+                'success' => true,
+                'data' => $stats,
+                'message' => 'Purchase stats retrieved successfully'
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch purchase stats: ' . $e->getMessage(),
                 'data' => []
             ];
         }
@@ -251,6 +521,19 @@ class PSMService
             ->orderBy('ven_id', 'desc')
             ->first();
         $next = $last ? (int) substr($last->ven_id, strlen($prefix)) + 1 : 1;
+        return $prefix . str_pad($next, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate unique purchase ID
+     */
+    private function generatePurchaseId()
+    {
+        $prefix = 'PURC';
+        $last = Purchase::where('pur_id', 'like', $prefix . '%')
+            ->orderBy('pur_id', 'desc')
+            ->first();
+        $next = $last ? (int) substr($last->pur_id, strlen($prefix)) + 1 : 1;
         return $prefix . str_pad($next, 5, '0', STR_PAD_LEFT);
     }
 

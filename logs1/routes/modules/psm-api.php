@@ -23,6 +23,20 @@ Route::prefix('product-management')->group(function () {
     Route::delete('/{id}', [PSMController::class, 'deleteProduct']);
 });
 
+// PSM Purchase Management Routes
+Route::prefix('purchase-management')->group(function () {
+    Route::get('/', [PSMController::class, 'getPurchases']);
+    Route::get('/stats', [PSMController::class, 'getPurchaseStats']);
+    Route::get('/{id}', [PSMController::class, 'getPurchase']);
+    Route::get('/by-pur-id/{purId}', [PSMController::class, 'getPurchaseByPurchaseId']);
+    Route::post('/', [PSMController::class, 'createPurchase']);
+    Route::put('/{id}', [PSMController::class, 'updatePurchase']);
+    Route::delete('/{id}', [PSMController::class, 'deletePurchase']);
+});
+
+// PSM Active Vendors for Purchase
+Route::get('/active-vendors', [PSMController::class, 'getActiveVendorsForPurchase']);
+
 // Legacy PSM routes
 Route::get('/purchases', [PSMController::class, 'getPurchases']);
 Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);

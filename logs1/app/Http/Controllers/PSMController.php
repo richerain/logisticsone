@@ -14,12 +14,168 @@ class PSMController extends Controller
         $this->psmService = $psMService;
     }
 
-    public function getPurchases()
+    /**
+     * Get active vendors for purchase orders
+     */
+    public function getActiveVendorsForPurchase()
     {
-        return response()->json([
-            'message' => 'PSM Purchases data',
-            'data' => []
-        ]);
+        try {
+            $result = $this->psmService->getActiveVendorsForPurchase();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch active vendors: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all purchases with optional filters
+     */
+    public function getPurchases(Request $request)
+    {
+        try {
+            $filters = [
+                'search' => $request->get('search'),
+                'status' => $request->get('status'),
+                'vendor_type' => $request->get('vendor_type'),
+                'company' => $request->get('company'),
+                'sort_field' => $request->get('sort_field', 'created_at'),
+                'sort_order' => $request->get('sort_order', 'desc')
+            ];
+
+            $result = $this->psmService->getPurchases($filters);
+
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch purchases: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
+
+    /**
+     * Get purchase by ID
+     */
+    public function getPurchase($id)
+    {
+        try {
+            $result = $this->psmService->getPurchase($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch purchase: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Get purchase by purchase ID
+     */
+    public function getPurchaseByPurchaseId($purId)
+    {
+        try {
+            $result = $this->psmService->getPurchaseByPurchaseId($purId);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch purchase: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Create new purchase
+     */
+    public function createPurchase(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'pur_name_items' => 'required|array|min:1',
+                'pur_name_items.*.name' => 'required|string|max:255',
+                'pur_name_items.*.price' => 'required|numeric|min:0',
+                'pur_company_name' => 'required|string|max:255',
+                'pur_ven_type' => 'required|in:equipment,supplies,furniture,automotive',
+                'pur_desc' => 'nullable|string'
+            ]);
+
+            $result = $this->psmService->createPurchase($validated);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create purchase: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Update purchase
+     */
+    public function updatePurchase(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'pur_name_items' => 'sometimes|required|array|min:1',
+                'pur_name_items.*.name' => 'sometimes|required|string|max:255',
+                'pur_name_items.*.price' => 'sometimes|required|numeric|min:0',
+                'pur_company_name' => 'sometimes|required|string|max:255',
+                'pur_ven_type' => 'sometimes|required|in:equipment,supplies,furniture,automotive',
+                'pur_desc' => 'nullable|string'
+            ]);
+
+            $result = $this->psmService->updatePurchase($id, $validated);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update purchase: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete purchase
+     */
+    public function deletePurchase($id)
+    {
+        try {
+            $result = $this->psmService->deletePurchase($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete purchase: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get purchase statistics
+     */
+    public function getPurchaseStats()
+    {
+        try {
+            $result = $this->psmService->getPurchaseStats();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch purchase stats: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
     }
 
     public function getVendorQuotes()
