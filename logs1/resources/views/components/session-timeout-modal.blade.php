@@ -187,7 +187,7 @@ class SessionTimeoutHandler {
             
             const csrfToken = this.getCsrfToken();
             
-            const response = await fetch('/api/refresh-session', {
+            const response = await fetch('/api/v1/auth/refresh-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -250,7 +250,7 @@ class SessionTimeoutHandler {
     
     async checkSessionStatus() {
         try {
-            const response = await fetch('/api/check-session', {
+            const response = await fetch('/api/v1/auth/check-session', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -364,7 +364,7 @@ class SessionTimeoutHandler {
         if (this.countdownInterval) clearInterval(this.countdownInterval);
         this.showTemporaryMessage('Session expired. Logging out...', 'warning');
         try {
-            await fetch('/api/logout', {
+            await fetch('/api/v1/auth/logout', {
                 method: 'POST',
                 headers: { 'Accept': 'application/json' },
                 credentials: 'same-origin'

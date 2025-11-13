@@ -32,7 +32,7 @@
     <script>
         (async function() {
             try {
-                await fetch('/api/logout', {
+                await fetch('/api/v1/auth/logout', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json'
