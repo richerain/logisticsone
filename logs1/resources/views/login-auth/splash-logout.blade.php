@@ -30,10 +30,24 @@
     </main>
 
     <script>
-        // Redirect to login page after 2 seconds
-        setTimeout(() => {
-            window.location.href = '/login';
-        }, 2000);
+        (async function() {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+            } catch (e) {
+                // ignore errors and proceed
+            } finally {
+                try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1000);
+            }
+        })();
     </script>
 </body>
 </html>

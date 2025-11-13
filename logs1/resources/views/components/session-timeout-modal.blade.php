@@ -261,6 +261,9 @@ class SessionTimeoutHandler {
             
             if (response.ok) {
                 const data = await response.json();
+                if (data && data.csrf_token) {
+                    this.updateCsrfToken(data.csrf_token);
+                }
                 return data;
             } else {
                 return { authenticated: false };
@@ -356,18 +359,19 @@ class SessionTimeoutHandler {
         this.startTimeoutTimer();
     }
     
-    logoutDueToTimeout() {
-        // Clear all intervals and timeouts
+    async logoutDueToTimeout() {
         if (this.warningTimeout) clearTimeout(this.warningTimeout);
         if (this.countdownInterval) clearInterval(this.countdownInterval);
-        
-        // Show logout message
         this.showTemporaryMessage('Session expired. Logging out...', 'warning');
-        
-        // Redirect to splash logout after a brief delay
-        setTimeout(() => {
-            window.location.href = '/splash-logout';
-        }, 1000);
+        try {
+            await fetch('/api/logout', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+        } catch (e) {}
+        try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
+        setTimeout(() => { window.location.href = '/splash-logout'; }, 500);
     }
     
     showTemporaryMessage(message, type = 'info') {

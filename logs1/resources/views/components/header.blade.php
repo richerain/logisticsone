@@ -93,8 +93,8 @@
                 </div>
 
                 <!-- Column 2: Personal Information -->
-                <div class="pl-2 border-l border-gray-400 space-y-2">
-                    <h4 class="font-semibold text-gray-800 text-sm border-b border-gray-400 pb-1 flex items-center">
+                <div class="pl-2 space-y-2">
+                    <h4 class="font-semibold text-gray-800 text-sm pb-1 flex items-center">
                         <i class='bx bxs-id-card mr-1 text-green-600 text-sm'></i>
                         Personal Info
                     </h4>
@@ -126,8 +126,8 @@
                 </div>
 
                 <!-- Column 3: Contact Information -->
-                <div class="pl-2 border-l border-gray-400 space-y-2">
-                    <h4 class="font-semibold text-gray-800 text-sm border-b border-gray-400 pb-1 flex items-center">
+                <div class="pl-2 space-y-2">
+                    <h4 class="font-semibold text-gray-800 text-sm pb-1 flex items-center">
                         <i class='bx bxs-contact mr-1 text-green-600 text-sm'></i>
                         Contact
                     </h4>
@@ -399,7 +399,7 @@
             })
             .then(data => {
                 if (data.success) {
-                    // Redirect to splash logout page
+                    try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
                     window.location.href = '/splash-logout';
                 } else {
                     throw new Error(data.message || 'Logout failed');

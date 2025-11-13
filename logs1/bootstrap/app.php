@@ -19,7 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(prepend: [
             \App\Http\Middleware\Cors::class,
-            \Illuminate\Session\Middleware\StartSession::class, // Add session support for API
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
         ]);
 
         // Route middleware aliases
@@ -37,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
             'role' => \App\Http\Middleware\CheckRole::class,
             'session.timeout' => \App\Http\Middleware\CheckSessionTimeout::class,
+            'jwt.auth' => \App\Http\Middleware\JwtAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

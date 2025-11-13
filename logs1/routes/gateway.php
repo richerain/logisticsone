@@ -22,7 +22,7 @@ Route::get('/debug/otp-status/{email}', function ($email) {
     ]);
 });
 
-// Public authentication routes - FIXED: Remove duplicate /api prefix
+// Public authentication routes
 Route::prefix('auth')->group(function () {
     Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
     Route::post('/send-otp', [App\Http\Controllers\AuthController::class, 'sendOtp']);
@@ -35,30 +35,43 @@ Route::prefix('auth')->group(function () {
     Route::get('/csrf-token', [App\Http\Controllers\AuthController::class, 'getCsrfToken']);
 });
 
-// Public vendor info routes
+// Public vendor info routes (for other modules)
 Route::prefix('vendor-info')->group(function () {
     Route::get('/data', [App\Http\Controllers\PSMController::class, 'getVendorInfo']);
     Route::post('/update', [App\Http\Controllers\PSMController::class, 'updateVendorInfo']);
 });
 
-// Protected module routes
-Route::middleware(['auth:sws', 'session.timeout'])->group(function () {
+// Public PSM dataset preview (read-only)
+Route::prefix('psm')->group(function () {
+    Route::get('/vendors', [App\Http\Controllers\PSMController::class, 'getVendorManagement']);
+    Route::get('/products', [App\Http\Controllers\PSMController::class, 'getProducts']);
+});
+
+Route::middleware([
+    'jwt.auth'
+])->group(function () {
+    
+    // PSM Module Routes
     Route::prefix('psm')->group(function () {
         require __DIR__ . '/modules/psm-api.php';
     });
     
+    // SWS Module Routes
     Route::prefix('sws')->group(function () {
         require __DIR__ . '/modules/sws-api.php';
     });
     
+    // PLT Module Routes
     Route::prefix('plt')->group(function () {
         require __DIR__ . '/modules/plt-api.php';
     });
 
+    // ALMS Module Routes
     Route::prefix('alms')->group(function () {
         require __DIR__ . '/modules/alms-api.php';
     });
 
+    // DTLR Module Routes
     Route::prefix('dtlr')->group(function () {
         require __DIR__ . '/modules/dtlr-api.php';
     });

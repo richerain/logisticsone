@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Firebase\JWT\JWT;
 
 class AuthService
 {
@@ -148,9 +149,30 @@ class AuthService
 
         Log::info("OTP verification successful for user: {$email}");
 
+        $secret = config('app.key');
+        if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+            $secret = base64_decode(substr($secret, 7));
+        }
+
+        $expiresAt = Carbon::now()->addHours(2)->timestamp;
+        $payload = [
+            'iss' => config('app.url') ?? 'logs1',
+            'sub' => $user->id,
+            'email' => $user->email,
+            'roles' => $user->roles,
+            'iat' => Carbon::now()->timestamp,
+            'exp' => $expiresAt,
+        ];
+
+        $token = JWT::encode($payload, $secret, 'HS256');
+
         return [
             'success' => true,
             'message' => 'OTP verified successfully',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_at' => Carbon::createFromTimestamp($expiresAt)->toIso8601String(),
+            'expires_in' => 7200,
             'user' => [
                 'id' => $user->id,
                 'employeeid' => $user->employeeid,
@@ -166,6 +188,13 @@ class AuthService
     public function logout()
     {
         Auth::guard('sws')->logout();
+        // Invalidate session and regenerate CSRF token
+        try {
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        } catch (\Exception $e) {
+            // ignore session invalidation errors
+        }
         return [
             'success' => true,
             'message' => 'Successfully logged out'

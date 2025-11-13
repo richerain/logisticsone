@@ -192,7 +192,14 @@
                     const data = await response.json();
                     
                     if (data.success) {
-                        // Redirect to splash login
+                        if (data.token) {
+                            try {
+                                localStorage.setItem('jwt', data.token);
+                                if (data.expires_at) {
+                                    localStorage.setItem('jwt_exp', data.expires_at);
+                                }
+                            } catch (e) {}
+                        }
                         window.location.href = '/splash-login';
                     } else {
                         throw new Error(data.message || 'OTP verification failed');

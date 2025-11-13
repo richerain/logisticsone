@@ -140,7 +140,32 @@
                 return response.text();
             })
             .then(html => {
-                moduleContent.innerHTML = html;
+                const tempContainer = document.createElement('div');
+                tempContainer.innerHTML = html;
+
+                const scriptTags = tempContainer.querySelectorAll('script');
+                scriptTags.forEach(tag => tag.parentNode && tag.parentNode.removeChild(tag));
+
+                moduleContent.innerHTML = tempContainer.innerHTML;
+
+                // Remove previously loaded scripts for this module to avoid duplicates
+                const existingModuleScripts = document.querySelectorAll(`script[data-module="${module}"]`);
+                existingModuleScripts.forEach(s => s.parentNode && s.parentNode.removeChild(s));
+
+                scriptTags.forEach(oldScript => {
+                    if (oldScript.src) {
+                        const newScript = document.createElement('script');
+                        newScript.setAttribute('data-module', module);
+                        newScript.src = oldScript.src;
+                        document.body.appendChild(newScript);
+                    } else {
+                        try {
+                            (new Function(oldScript.textContent))();
+                        } catch (e) {
+                            console.error('Error executing module script:', e);
+                        }
+                    }
+                });
                 
                 // Update browser history if needed
                 if (pushState) {

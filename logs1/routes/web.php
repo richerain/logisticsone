@@ -20,8 +20,7 @@ Route::middleware([
 ])->group(function () {
     
     // Public Authentication Routes - FIXED: Proper route definitions
-    Route::get('/login', function () {
-        // If user is already authenticated, redirect to home
+    Route::get('/login', function (Request $request) {
         if (Auth::guard('sws')->check()) {
             return redirect('/home');
         }
