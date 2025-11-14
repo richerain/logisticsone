@@ -178,6 +178,46 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * Update purchase status
+     */
+    public function updatePurchaseStatus(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'status' => 'required|in:Pending,Approved,Rejected,Cancel,Vendor-Review,In-Progress,Completed',
+                'budget_check' => 'sometimes|boolean'
+            ]);
+
+            $budgetCheck = $validated['budget_check'] ?? false;
+            $result = $this->psmService->updatePurchaseStatus($id, $validated['status'], $budgetCheck);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update purchase status: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel purchase
+     */
+    public function cancelPurchase($id)
+    {
+        try {
+            $result = $this->psmService->cancelPurchase($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel purchase: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
     public function getVendorQuotes()
     {
         return response()->json([
@@ -479,5 +519,78 @@ class PSMController extends Controller
             'success' => false,
             'message' => 'Vendor updates must be done through the PSM module'
         ], 405);
+    }
+
+    /**
+     * Budget Management Endpoints
+     */
+
+    /**
+     * Get current budget
+     */
+    public function getCurrentBudget()
+    {
+        try {
+            $result = $this->psmService->getCurrentBudget();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch budget: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Extend budget validity
+     */
+    public function extendBudgetValidity(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'validity_type' => 'required|in:Week,Month,Year',
+                'additional_amount' => 'nullable|numeric|min:0'
+            ]);
+
+            $result = $this->psmService->extendBudgetValidity(
+                $id, 
+                $validated['validity_type'], 
+                $validated['additional_amount'] ?? 0
+            );
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to extend budget: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
+    }
+
+    /**
+     * Budget approval for purchase
+     */
+    public function budgetApproval(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'action' => 'required|in:approve,reject'
+            ]);
+
+            if ($validated['action'] === 'approve') {
+                $result = $this->psmService->updatePurchaseStatus($id, 'Approved', true);
+            } else {
+                $result = $this->psmService->updatePurchaseStatus($id, 'Rejected', false);
+            }
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process budget approval: ' . $e->getMessage(),
+                'data' => null
+            ], 500);
+        }
     }
 }

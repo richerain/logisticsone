@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\PSM\Vendor;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
+use App\Models\PSM\Budget;
 
 class PSMRepository
 {
@@ -205,21 +206,23 @@ class PSMRepository
     public function getPurchaseStats()
     {
         $totalPurchases = Purchase::count();
-        $pendingPurchases = Purchase::where('pur_status', 'pending')->count();
-        $approvedPurchases = Purchase::where('pur_status', 'approved')->count();
-        $processingPurchases = Purchase::where('pur_status', 'processing')->count();
-        $receivedPurchases = Purchase::where('pur_status', 'received')->count();
-        $cancelledPurchases = Purchase::where('pur_status', 'cancel')->count();
-        $rejectedPurchases = Purchase::where('pur_status', 'rejected')->count();
+        $pendingPurchases = Purchase::where('pur_status', 'Pending')->count();
+        $approvedPurchases = Purchase::where('pur_status', 'Approved')->count();
+        $rejectedPurchases = Purchase::where('pur_status', 'Rejected')->count();
+        $cancelledPurchases = Purchase::where('pur_status', 'Cancel')->count();
+        $vendorReviewPurchases = Purchase::where('pur_status', 'Vendor-Review')->count();
+        $inProgressPurchases = Purchase::where('pur_status', 'In-Progress')->count();
+        $completedPurchases = Purchase::where('pur_status', 'Completed')->count();
 
         return [
             'total_purchases' => $totalPurchases,
             'pending_purchases' => $pendingPurchases,
             'approved_purchases' => $approvedPurchases,
-            'processing_purchases' => $processingPurchases,
-            'received_purchases' => $receivedPurchases,
-            'cancelled_purchases' => $cancelledPurchases,
             'rejected_purchases' => $rejectedPurchases,
+            'cancelled_purchases' => $cancelledPurchases,
+            'vendor_review_purchases' => $vendorReviewPurchases,
+            'in_progress_purchases' => $inProgressPurchases,
+            'completed_purchases' => $completedPurchases,
             'total_amount' => Purchase::sum('pur_total_amount')
         ];
     }
@@ -255,5 +258,81 @@ class PSMRepository
             return $product->delete();
         }
         return false;
+    }
+
+    /**
+     * Budget Methods
+     */
+
+    /**
+     * Get current budget
+     */
+    public function getCurrentBudget()
+    {
+        return Budget::active()
+            ->byDepartmentModule('Logistics 1', 'Procurement & Sourcing Management', 'Purchase Management')
+            ->first();
+    }
+
+    /**
+     * Get budget by ID
+     */
+    public function getBudgetById($id)
+    {
+        return Budget::find($id);
+    }
+
+    /**
+     * Create new budget
+     */
+    public function createBudget($data)
+    {
+        return Budget::create($data);
+    }
+
+    /**
+     * Update budget
+     */
+    public function updateBudget($id, $data)
+    {
+        $budget = Budget::find($id);
+        if ($budget) {
+            $budget->update($data);
+            return $budget;
+        }
+        return null;
+    }
+
+    /**
+     * Extend budget validity
+     */
+    public function extendBudgetValidity($id, $newValidTo, $additionalAmount = 0)
+    {
+        $budget = Budget::find($id);
+        if ($budget) {
+            $budget->bud_valid_to = $newValidTo;
+            if ($additionalAmount > 0) {
+                $budget->bud_allocated_amount += $additionalAmount;
+                $budget->bud_remaining_amount += $additionalAmount;
+            }
+            $budget->updateHealthStatus();
+            return $budget;
+        }
+        return null;
+    }
+
+    /**
+     * Update budget spent amount
+     */
+    public function updateBudgetSpent($id, $amount)
+    {
+        $budget = Budget::find($id);
+        if ($budget) {
+            $budget->bud_spent_amount += $amount;
+            $budget->bud_remaining_amount = $budget->bud_allocated_amount - $budget->bud_spent_amount;
+            $budget->updateHealthStatus();
+            return $budget;
+        }
+        return null;
     }
 }

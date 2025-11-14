@@ -39,7 +39,7 @@ class SessionTimeoutHandler {
         this.extendSessionBtn = document.getElementById('extend-session-btn');
         this.modalContent = this.timeoutModal?.querySelector('.bg-white');
         
-        this.sessionLifetime = 5 * 60 * 1000; // 5 minutes in milliseconds
+        this.sessionLifetime = 40 * 60 * 1000; // 5 minutes in milliseconds
         this.warningTime = 60000; // Show warning 1 minute before expiry
         this.countdownTime = 60000; // 1 minute countdown
         this.countdownInterval = null;

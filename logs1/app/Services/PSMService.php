@@ -6,6 +6,7 @@ use App\Repositories\PSMRepository;
 use App\Models\PSM\Vendor;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
+use App\Models\PSM\Budget;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -258,8 +259,13 @@ class PSMService
                 $data['pur_name_items'] = json_decode($data['pur_name_items'], true);
             }
             
-            // Set default status to pending
-            $data['pur_status'] = 'pending';
+            // Set default status to Pending
+            $data['pur_status'] = 'Pending';
+            
+            // Set department and module information
+            $data['pur_department_from'] = 'Logistics 1';
+            $data['pur_module_from'] = 'Procurement & Sourcing Management';
+            $data['pur_submodule_from'] = 'Purchase Management';
             
             // Calculate total units and amount from items
             $items = $data['pur_name_items'] ?? [];
@@ -631,5 +637,220 @@ class PSMService
             ->first();
         $next = $last ? (int) substr($last->prod_id, strlen($prefix)) + 1 : 1;
         return $prefix . str_pad($next, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Budget Methods
+     */
+
+    /**
+     * Get current budget
+     */
+    public function getCurrentBudget()
+    {
+        try {
+            $budget = $this->psmRepository->getCurrentBudget();
+            
+            if ($budget) {
+                return [
+                    'success' => true,
+                    'data' => $budget,
+                    'message' => 'Budget retrieved successfully'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'No active budget found',
+                    'data' => null
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch budget: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
+     * Extend budget validity
+     */
+    public function extendBudgetValidity($id, $validityType, $additionalAmount = 0)
+    {
+        DB::beginTransaction();
+        try {
+            $budget = $this->psmRepository->getBudgetById($id);
+            
+            if (!$budget) {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Budget not found',
+                    'data' => null
+                ];
+            }
+
+            $newValidTo = $this->calculateNewValidTo($budget->bud_valid_from, $validityType);
+            
+            $updatedBudget = $this->psmRepository->extendBudgetValidity($id, $newValidTo, $additionalAmount);
+            
+            if ($updatedBudget) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'Budget extended successfully',
+                    'data' => $updatedBudget
+                ];
+            } else {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Failed to extend budget',
+                    'data' => null
+                ];
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to extend budget: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
+     * Calculate new valid to date based on validity type
+     */
+    private function calculateNewValidTo($validFrom, $validityType)
+    {
+        $validFrom = \Carbon\Carbon::parse($validFrom);
+        
+        switch ($validityType) {
+            case 'Week':
+                return $validFrom->addWeek()->toDateString();
+            case 'Month':
+                return $validFrom->addMonth()->toDateString();
+            case 'Year':
+                return $validFrom->addYear()->toDateString();
+            default:
+                return $validFrom->addMonth()->toDateString();
+        }
+    }
+
+    /**
+     * Update purchase status with budget check
+     */
+    public function updatePurchaseStatus($id, $status, $budgetCheck = false)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase = $this->psmRepository->getPurchaseById($id);
+            
+            if (!$purchase) {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Purchase not found',
+                    'data' => null
+                ];
+            }
+
+            // If budget check is required and status is being approved
+            if ($budgetCheck && $status === 'Approved') {
+                $budget = $this->psmRepository->getCurrentBudget();
+                
+                if (!$budget) {
+                    DB::rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'No active budget available',
+                        'data' => null
+                    ];
+                }
+
+                // Check if budget has sufficient funds
+                if ($budget->bud_remaining_amount < $purchase->pur_total_amount) {
+                    DB::rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'Insufficient budget. Remaining: ' . formatCurrency($budget->bud_remaining_amount) . ', Required: ' . formatCurrency($purchase->pur_total_amount),
+                        'data' => null
+                    ];
+                }
+
+                // Update budget spent amount
+                $this->psmRepository->updateBudgetSpent($budget->id, $purchase->pur_total_amount);
+            }
+
+            // Update purchase status
+            $purchase->pur_status = $status;
+            $purchase->save();
+
+            DB::commit();
+            
+            return [
+                'success' => true,
+                'message' => 'Purchase status updated successfully',
+                'data' => $purchase
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to update purchase status: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
+     * Cancel purchase (only for Pending status)
+     */
+    public function cancelPurchase($id)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase = $this->psmRepository->getPurchaseById($id);
+            
+            if (!$purchase) {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Purchase not found',
+                    'data' => null
+                ];
+            }
+
+            // Check if purchase can be cancelled
+            if (!$purchase->can_be_cancelled) {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Only purchases with Pending status can be cancelled',
+                    'data' => null
+                ];
+            }
+
+            // Update purchase status to Cancel
+            $purchase->pur_status = 'Cancel';
+            $purchase->save();
+
+            DB::commit();
+            
+            return [
+                'success' => true,
+                'message' => 'Purchase cancelled successfully',
+                'data' => $purchase
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to cancel purchase: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
     }
 }

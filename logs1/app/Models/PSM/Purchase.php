@@ -20,7 +20,9 @@ class Purchase extends Model
         'pur_total_amount',
         'pur_company_name',
         'pur_ven_type',
+        'pur_status',
         'pur_desc',
+        'pur_department_from',
         'pur_module_from',
         'pur_submodule_from'
     ];
@@ -72,12 +74,13 @@ class Purchase extends Model
     public function getStatusBadgeAttribute()
     {
         $statusClasses = [
-            'pending' => 'bg-yellow-100 text-yellow-800',
-            'approved' => 'bg-blue-100 text-blue-800',
-            'processing' => 'bg-purple-100 text-purple-800',
-            'received' => 'bg-green-100 text-green-800',
-            'cancel' => 'bg-red-100 text-red-800',
-            'rejected' => 'bg-red-100 text-red-800'
+            'Pending' => 'bg-yellow-100 text-yellow-800',
+            'Approved' => 'bg-blue-100 text-blue-800',
+            'Rejected' => 'bg-red-100 text-red-800',
+            'Cancel' => 'bg-red-100 text-red-800',
+            'Vendor-Review' => 'bg-purple-100 text-purple-800',
+            'In-Progress' => 'bg-indigo-100 text-indigo-800',
+            'Completed' => 'bg-green-100 text-green-800'
         ];
 
         return $statusClasses[$this->pur_status] ?? 'bg-gray-100 text-gray-800';
@@ -137,5 +140,21 @@ class Purchase extends Model
         }
         
         return $total;
+    }
+
+    /**
+     * Check if purchase can be cancelled (only Pending status)
+     */
+    public function getCanBeCancelledAttribute()
+    {
+        return $this->pur_status === 'Pending';
+    }
+
+    /**
+     * Check if purchase can be approved (only Pending status)
+     */
+    public function getCanBeApprovedAttribute()
+    {
+        return $this->pur_status === 'Pending';
     }
 }
