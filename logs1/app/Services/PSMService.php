@@ -737,6 +737,18 @@ class PSMService
             }
             $quote = $this->psmRepository->updateQuote($id, $data);
             if ($quote) {
+                if ($quote->quo_purchase_id) {
+                    $purchaseUpdates = [];
+                    if (array_key_exists('quo_delivery_date_from', $data)) {
+                        $purchaseUpdates['pur_delivery_date_from'] = $data['quo_delivery_date_from'];
+                    }
+                    if (array_key_exists('quo_delivery_date_to', $data)) {
+                        $purchaseUpdates['pur_delivery_date_to'] = $data['quo_delivery_date_to'];
+                    }
+                    if (!empty($purchaseUpdates)) {
+                        $this->psmRepository->updatePurchase($quote->quo_purchase_id, $purchaseUpdates);
+                    }
+                }
                 if (isset($data['quo_status']) && $quote->quo_purchase_id) {
                     $map = [
                         'Vendor-Review' => 'Vendor-Review',

@@ -122,6 +122,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Units</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Delivery</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ordered By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Approved By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
@@ -890,9 +891,12 @@ function displayPurchases(purchases) {
         // Determine which action buttons to show based on status
         const canCancel = purchase.pur_status === 'Pending';
         const canApprove = purchase.pur_status === 'Pending';
+        const isApproved = purchase.pur_status === 'Approved';
+        const isCompleted = purchase.pur_status === 'Completed';
+        const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
         
         return `
-        <tr class="hover:bg-gray-50 transition-colors" data-purchase-id="${purchase.id}">
+        <tr class="${rowClass}" data-purchase-id="${purchase.id}">
             <td class="px-6 py-4 whitespace-nowrap">
                 <span class="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">${purchase.pur_id}</span>
             </td>
@@ -916,6 +920,9 @@ function displayPurchases(purchases) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                 ${formatCurrency(purchase.pur_total_amount)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                ${formatDateRange(purchase.pur_delivery_date_from, purchase.pur_delivery_date_to) || ''}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div class="flex items-center">
@@ -942,25 +949,24 @@ function displayPurchases(purchases) {
                             title="View Purchase">
                         <i class='bx bx-show-alt text-xl'></i>
                     </button>
+                    ${isApproved || isCompleted ? '' : `
                     <button onclick="editPurchase(${purchase.id})" 
                             class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
                             title="Edit Purchase">
                         <i class='bx bx-edit-alt text-xl'></i>
-                    </button>
-                    ${canApprove ? `
+                    </button>`}
+                    ${isCompleted ? '' : (canApprove ? `
                     <button onclick="openBudgetApproval(${purchase.id})" 
                             class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50 budget-approval-btn"
                             title="Budget Approval">
                         <i class='bx bx-check-circle text-xl'></i>
-                    </button>
-                    ` : ''}
-                    ${canCancel ? `
+                    </button>` : '')}
+                    ${isCompleted ? '' : (canCancel ? `
                     <button onclick="cancelPurchase(${purchase.id})" 
                             class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn"
                             title="Cancel Purchase">
                         <i class='bx bx-x-circle text-xl'></i>
-                    </button>
-                    ` : ''}
+                    </button>` : '')}
                     <button onclick="deletePurchase(${purchase.id})" 
                             class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50"
                             title="Delete Purchase">
@@ -1657,6 +1663,23 @@ function hideLoading() {
 function formatCurrency(value) {
     const num = Number(value || 0);
     return '₱' + num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDate(d) {
+    if (!d) return '';
+    const dt = new Date(d);
+    const mm = dt.getMonth() + 1;
+    const dd = dt.getDate();
+    const yyyy = dt.getFullYear();
+    return `${mm}-${dd}-${yyyy}`;
+}
+
+function formatDateRange(a, b) {
+    const A = formatDate(a);
+    const B = formatDate(b);
+    if (!A && !B) return '';
+    if (A && B) return `${A} to ${B}`;
+    return A || B;
 }
 
 const Toast = Swal.mixin({ 

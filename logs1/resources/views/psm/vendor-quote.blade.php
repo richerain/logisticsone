@@ -1,4 +1,9 @@
 <!-- resources/views/psm/vendor-quote.blade.php -->
+<style>
+    .swal2-container { z-index: 2147483647 !important; }
+    #reviewConfirmModal { z-index: 2147483646 !important; }
+    #reviewConfirmModal::backdrop { z-index: 2147483645 !important; }
+</style>
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
         <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-quote-single-left'></i>Vendor Quote Management</h2>
@@ -137,8 +142,6 @@
                 <option value="Vendor-Review">Vendor Review</option>
                 <option value="In-Progress">In-Progress</option>
                 <option value="Completed">Completed</option>
-                <option value="Reject">Reject</option>
-                <option value="Cancel">Cancel</option>
             </select>
             <div class="flex justify-end gap-2">
                 <button id="confirmUpdateStatusBtn" class="btn btn-primary btn-sm">Update</button>
@@ -301,24 +304,44 @@ function displayNotifications(list) {
             </tr>`;
         return;
     }
-    elements.notifTableBody.innerHTML = list.map(p => `
+    elements.notifTableBody.innerHTML = list.map((p, i) => {
+        const itemsFull = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
+        const notiId = `NOTI${String(i + 1).padStart(5, '0')}`;
+        return `
         <tr>
-            <td>${p.pur_id}</td>
-            <td>${Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}</td>
-            <td>${p.pur_unit} units</td>
-            <td>${formatCurrency(p.pur_total_amount)}</td>
-            <td>${formatDate(p.created_at)}</td>
-            <td>
-                <button class="btn btn-sm btn-primary" data-action="view" data-id="${p.id}">View</button>
-                <button class="btn btn-sm btn-success" data-action="review" data-id="${p.id}">Review</button>
+            <td class="px-3 py-2 font-mono">${notiId}</td>
+            <td class="px-3 py-2" title="${itemsFull}">${truncateItems(p.pur_name_items, 40)}</td>
+            <td class="px-3 py-2">${p.pur_unit} units</td>
+            <td class="px-3 py-2">${formatCurrency(p.pur_total_amount)}</td>
+            <td class="px-3 py-2">${formatDate(p.created_at)}</td>
+            <td class="px-3 py-2">
+                <div class="flex items-center space-x-2">
+                    <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${p.id}" title="View">
+                        <i class='bx bx-show-alt text-xl'></i>
+                    </button>
+                    <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="review" data-id="${p.id}" title="Review Purchase">
+                        <i class='bx bx-check-circle text-xl'></i>
+                    </button>
+                </div>
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 }
 
 window.openReviewConfirm = function(id) {
     selectedPurchaseId = id;
     elements.reviewConfirmModal?.showModal();
+    if (elements.notifModal) elements.notifModal.setAttribute('inert', '');
+    if (elements.confirmReviewBtn) elements.confirmReviewBtn.focus({ preventScroll: true });
+}
+
+function updateNotifIndicatorFromDOM() {
+    try {
+        const rows = elements.notifTableBody ? elements.notifTableBody.querySelectorAll('tr') : [];
+        let activeCount = 0;
+        rows.forEach(r => { if (!r.classList.contains('opacity-60')) activeCount++; });
+        setNotificationIndicator(activeCount);
+    } catch(e) {}
 }
 
 if (elements.confirmReviewBtn) {
@@ -343,24 +366,41 @@ if (elements.confirmReviewBtn) {
                 await loadQuotes();
                 selectedPurchaseId = null;
                 elements.reviewConfirmModal?.close();
+                if (elements.notifModal) elements.notifModal.removeAttribute('inert');
                 updateNotifIndicatorFromDOM();
             }
         } catch(e) {}
     });
 }
 
+if (elements.reviewConfirmModal) {
+    elements.reviewConfirmModal.addEventListener('close', function() {
+        if (elements.notifModal) elements.notifModal.removeAttribute('inert');
+    });
+}
+
 window.viewApprovedPurchase = function(id) {
     const p = currentNotifications.find(x => x.id == id);
     if (!p) return;
-    const items = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
+    const items = Array.isArray(p.pur_name_items) ? p.pur_name_items : [];
+    const itemsHtml = items.map(item => {
+        const itemName = typeof item === 'object' ? item.name : item;
+        const itemPrice = typeof item === 'object' ? formatCurrency(item.price) : 'N/A';
+        return `<li class="flex justify-between py-1 border-b border-gray-100"><span>${itemName}</span><span class="font-semibold">${itemPrice}</span></li>`;
+    }).join('');
     const html = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><span class="text-sm text-gray-500">Purchase ID</span><p class="font-semibold">${p.pur_id}</p></div>
-            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold">${p.pur_status}</p></div>
-            <div class="md:col-span-2"><span class="text-sm text-gray-500">Items</span><p class="font-semibold">${items}</p></div>
+            <div><span class="text-sm text-gray-500">PO Number</span><p class="font-semibold">${p.pur_id}</p></div>
+            <div><span class="text-sm text-gray-500">Company</span><p class="font-semibold">${p.pur_company_name || ''} <small class="text-gray-500">(${p.pur_ven_type || ''})</small></p></div>
+            <div><span class="text-sm text-gray-500">Type</span><p class="font-semibold capitalize">${p.pur_ven_type || ''}</p></div>
             <div><span class="text-sm text-gray-500">Units</span><p class="font-semibold">${p.pur_unit}</p></div>
-            <div><span class="text-sm text-gray-500">Total Amount</span><p class="font-semibold">${formatCurrency(p.pur_total_amount)}</p></div>
-            <div class="md:col-span-2"><span class="text-sm text-gray-500">Created</span><p class="font-semibold">${formatDate(p.created_at)}</p></div>
+            <div><span class="text-sm text-gray-500">Amount</span><p class="font-semibold">${formatCurrency(p.pur_total_amount)}</p></div>
+            <div><span class="text-sm text-gray-500">Ordered By</span><p class="font-semibold">${p.pur_order_by || 'Not specified'}</p></div>
+            <div><span class="text-sm text-gray-500">Approved By</span><p class="font-semibold">${p.pur_approved_by || 'Not approved'}</p></div>
+            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold">${p.pur_status}</p></div>
+            <div class="md:col-span-2"><span class="text-sm text-gray-500">Items (${items.length})</span>
+                <ul class="font-semibold mt-2 bg-gray-50 p-3 rounded-lg">${itemsHtml || '<li class="py-2 text-gray-500">No items</li>'}</ul>
+            </div>
         </div>
     `;
     const m = document.getElementById('viewApprovedPurchaseModal');
@@ -376,9 +416,9 @@ async function loadQuotes() {
             quotesLoadingTimer = setTimeout(function() {
                 elements.quotesTableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="px-6 py-6 text-center text-gray-500">
-                            <div class="flex justify-center items-center gap-2">
-                                <i class='bx bx-time text-xl text-gray-400'></i>
+                        <td colspan="10" class="px-6 py-4 text-center text-gray-500">
+                            <div class="flex justify-center items-center py-4">
+                                <div class="loading loading-spinner mr-3"></div>
                                 Loading quotes...
                             </div>
                         </td>
@@ -402,7 +442,6 @@ async function loadQuotes() {
         if (result.success) {
             currentQuotes = result.data || [];
             displayQuotes(currentQuotes);
-            if (typeof showNotification === 'function') showNotification('Quotes loaded', 'success');
         } else {
             currentQuotes = [];
             displayQuotes([]);
@@ -431,35 +470,39 @@ function displayQuotes(list) {
         `;
         return;
     }
-    elements.quotesTableBody.innerHTML = list.map(q => `
-        <tr>
-            <td>${q.quo_id}</td>
-            <td title="${Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}">${truncateItems(q.quo_items, 40)}</td>
-            <td>${q.quo_units} units</td>
-            <td>${formatCurrency(q.quo_total_amount)}</td>
-            <td>${formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to)}</td>
-            <td>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(q.quo_status)}">
-                    <i class='bx ${getStatusIcon(q.quo_status)} mr-1'></i>
-                    ${q.quo_status}
-                </span>
-            </td>
-            <td>
-                <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${q.id}" title="View">
-                    <i class='bx bx-show-alt text-xl'></i>
-                </button>
-                <button class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50" data-action="update" data-id="${q.id}" data-status="${q.quo_status}" title="Update Status">
-                    <i class='bx bx-edit text-xl'></i>
-                </button>
-                <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="delivery" data-id="${q.id}" data-from="${q.quo_delivery_date_from || ''}" data-to="${q.quo_delivery_date_to || ''}" title="Set Date Delivery">
-                    <i class='bx bx-calendar text-xl'></i>
-                </button>
-                <button class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" data-action="delete" data-id="${q.id}" title="Delete">
-                    <i class='bx bx-trash text-xl'></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    elements.quotesTableBody.innerHTML = list.map(function(q) {
+        const isInProgress = q.quo_status === 'In-Progress';
+        const isCompleted = q.quo_status === 'Completed';
+        const isVendorReview = q.quo_status === 'Vendor-Review';
+        const rowClass = isCompleted ? 'bg-gray-200' : '';
+        const idStr = String(q.id);
+        const statusStr = String(q.quo_status || '');
+        const fromStr = q.quo_delivery_date_from || '';
+        const toStr = q.quo_delivery_date_to || '';
+        let actions = "";
+        const viewBtn = "<button class=\"text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50\" data-action=\"view\" data-id=\"" + idStr + "\" title=\"View\"><i class='bx bx-show-alt text-xl'></i></button>";
+        const updateBtn = "<button class=\"text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50\" data-action=\"update\" data-id=\"" + idStr + "\" data-status=\"" + statusStr + "\" title=\"Update Status\"><i class='bx bx-edit text-xl'></i></button>";
+        const deliveryBtn = "<button class=\"text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50\" data-action=\"delivery\" data-id=\"" + idStr + "\" data-from=\"" + fromStr + "\" data-to=\"" + toStr + "\" title=\"Set Date Delivery\"><i class='bx bx-calendar text-xl'></i></button>";
+        const deleteBtn = "<button class=\"text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50\" data-action=\"delete\" data-id=\"" + idStr + "\" title=\"Delete\"><i class='bx bx-trash text-xl'></i></button>";
+        if (isCompleted) {
+            actions = viewBtn + deleteBtn;
+        } else if (isInProgress) {
+            actions = viewBtn + updateBtn + deliveryBtn + deleteBtn;
+        } else if (isVendorReview) {
+            actions = viewBtn + updateBtn + deleteBtn;
+        } else {
+            actions = viewBtn + updateBtn + deleteBtn;
+        }
+        return "<tr class=\"" + rowClass + "\">" +
+               "<td>" + q.quo_id + "</td>" +
+               "<td title=\"" + (Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '') + "\">" + truncateItems(q.quo_items, 40) + "</td>" +
+               "<td>" + q.quo_units + " units</td>" +
+               "<td>" + formatCurrency(q.quo_total_amount) + "</td>" +
+               "<td>" + formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to) + "</td>" +
+               "<td><span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium " + getStatusBadgeClass(q.quo_status) + "\"><i class='bx " + getStatusIcon(q.quo_status) + " mr-1'></i>" + q.quo_status + "</span></td>" +
+               "<td>" + actions + "</td>" +
+               "</tr>";
+    }).join('');
 }
 
 function viewQuote(id) {
@@ -624,6 +667,7 @@ if (elements.quotesTableBody) {
     elements.quotesTableBody.addEventListener('click', function(e) {
         const btn = e.target.closest('button');
         if (!btn) return;
+        if (btn.disabled) return;
         const id = btn.dataset.id;
         const action = btn.dataset.action;
         if (!id || !action) return;
