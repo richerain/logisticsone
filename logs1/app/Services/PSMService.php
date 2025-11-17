@@ -737,6 +737,19 @@ class PSMService
             }
             $quote = $this->psmRepository->updateQuote($id, $data);
             if ($quote) {
+                if (isset($data['quo_status']) && $quote->quo_purchase_id) {
+                    $map = [
+                        'Vendor-Review' => 'Vendor-Review',
+                        'In-Progress' => 'In-Progress',
+                        'Completed' => 'Completed',
+                        'Cancel' => 'Cancel',
+                        'Reject' => 'Rejected'
+                    ];
+                    $targetStatus = $map[$data['quo_status']] ?? null;
+                    if ($targetStatus) {
+                        $this->updatePurchaseStatus($quote->quo_purchase_id, $targetStatus, false, null);
+                    }
+                }
                 DB::commit();
                 return [
                     'success' => true,
@@ -829,6 +842,7 @@ class PSMService
             $data['quo_submodule_from'] = 'Vendor Quote';
             $data['quo_purchase_id'] = $purchase->id;
             $quote = $this->psmRepository->createQuote($data);
+            $this->updatePurchaseStatus($purchase->id, 'Vendor-Review', false, null);
             DB::commit();
             return [
                 'success' => true,

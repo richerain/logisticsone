@@ -103,6 +103,19 @@
     <!-- pagination section end -->
 </div>
 
+<dialog id="viewApprovedPurchaseModal" class="modal">
+    <div class="modal-box w-11/12 max-w-3xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Approved Purchase Detail</h3>
+            <form method="dialog"><button><i class='bx bx-sm bx-x'></i></button></form>
+        </div>
+        <div id="viewApprovedPurchaseContent" class="space-y-2"></div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
 <dialog id="viewQuoteModal" class="modal">
     <div class="modal-box w-11/12 max-w-3xl">
         <div class="flex justify-between items-center mb-4">
@@ -213,6 +226,17 @@ var elements = {
 
 var currentNotifications = [];
 var currentQuotes = [];
+var quotesLoadingTimer = null;
+
+function safeShowLoading() {
+    try { if (typeof window !== 'undefined' && typeof window.showLoading === 'function') return window.showLoading(); } catch (e) {}
+    document.body.style.cursor = 'wait';
+}
+
+function safeHideLoading() {
+    try { if (typeof window !== 'undefined' && typeof window.hideLoading === 'function') return window.hideLoading(); } catch (e) {}
+    document.body.style.cursor = 'default';
+}
 
 var selectedQuoteId = null;
 var selectedPurchaseId = null;
@@ -268,7 +292,13 @@ async function loadNotifications() {
 function displayNotifications(list) {
     if (!elements.notifTableBody) return;
     if (!list || list.length === 0) {
-        elements.notifTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No approved purchases</td></tr>`;
+        elements.notifTableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="px-6 py-8 text-center text-gray-500">
+                    <i class='bx bxs-purchase-tag text-4xl text-gray-300 mb-3'></i>
+                    <p class="text-lg">No approved purchases</p>
+                </td>
+            </tr>`;
         return;
     }
     elements.notifTableBody.innerHTML = list.map(p => `
@@ -279,14 +309,14 @@ function displayNotifications(list) {
             <td>${formatCurrency(p.pur_total_amount)}</td>
             <td>${formatDate(p.created_at)}</td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="viewApprovedPurchase(${p.id})">View</button>
-                <button class="btn btn-sm btn-success" onclick="openReviewConfirm(${p.id})">Review</button>
+                <button class="btn btn-sm btn-primary" data-action="view" data-id="${p.id}">View</button>
+                <button class="btn btn-sm btn-success" data-action="review" data-id="${p.id}">Review</button>
             </td>
         </tr>
     `).join('');
 }
 
-function openReviewConfirm(id) {
+window.openReviewConfirm = function(id) {
     selectedPurchaseId = id;
     elements.reviewConfirmModal?.showModal();
 }
@@ -308,23 +338,55 @@ if (elements.confirmReviewBtn) {
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const result = await response.json();
             if (result.success) {
-                await loadNotifications();
+                const row = elements.notifTableBody.querySelector(`button[data-id='${selectedPurchaseId}']`)?.closest('tr');
+                if (row) row.classList.add('opacity-60');
                 await loadQuotes();
                 selectedPurchaseId = null;
                 elements.reviewConfirmModal?.close();
+                updateNotifIndicatorFromDOM();
             }
         } catch(e) {}
     });
 }
 
-function viewApprovedPurchase(id) {
+window.viewApprovedPurchase = function(id) {
     const p = currentNotifications.find(x => x.id == id);
     if (!p) return;
-    alert(JSON.stringify(p, null, 2));
+    const items = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
+    const html = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><span class="text-sm text-gray-500">Purchase ID</span><p class="font-semibold">${p.pur_id}</p></div>
+            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold">${p.pur_status}</p></div>
+            <div class="md:col-span-2"><span class="text-sm text-gray-500">Items</span><p class="font-semibold">${items}</p></div>
+            <div><span class="text-sm text-gray-500">Units</span><p class="font-semibold">${p.pur_unit}</p></div>
+            <div><span class="text-sm text-gray-500">Total Amount</span><p class="font-semibold">${formatCurrency(p.pur_total_amount)}</p></div>
+            <div class="md:col-span-2"><span class="text-sm text-gray-500">Created</span><p class="font-semibold">${formatDate(p.created_at)}</p></div>
+        </div>
+    `;
+    const m = document.getElementById('viewApprovedPurchaseModal');
+    const c = document.getElementById('viewApprovedPurchaseContent');
+    if (c) c.innerHTML = html;
+    m?.showModal();
 }
 
 async function loadQuotes() {
     try {
+        if (elements.quotesTableBody) {
+            if (quotesLoadingTimer) { clearTimeout(quotesLoadingTimer); }
+            quotesLoadingTimer = setTimeout(function() {
+                elements.quotesTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="px-6 py-6 text-center text-gray-500">
+                            <div class="flex justify-center items-center gap-2">
+                                <i class='bx bx-time text-xl text-gray-400'></i>
+                                Loading quotes...
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }, 200);
+        }
+        safeShowLoading();
         const response = await fetch(`${PSM_QUOTES_API}`, {
             method: 'GET',
             headers: {
@@ -340,13 +402,19 @@ async function loadQuotes() {
         if (result.success) {
             currentQuotes = result.data || [];
             displayQuotes(currentQuotes);
+            if (typeof showNotification === 'function') showNotification('Quotes loaded', 'success');
         } else {
             currentQuotes = [];
             displayQuotes([]);
+            if (typeof showNotification === 'function') showNotification(result.message || 'Failed to load quotes', 'error');
         }
     } catch(e) {
         currentQuotes = [];
         displayQuotes([]);
+        if (typeof showNotification === 'function') showNotification('Error loading quotes: ' + (e && e.message ? e.message : 'Unknown error'), 'error');
+    } finally {
+        if (quotesLoadingTimer) { clearTimeout(quotesLoadingTimer); quotesLoadingTimer = null; }
+        safeHideLoading();
     }
 }
 
@@ -366,16 +434,29 @@ function displayQuotes(list) {
     elements.quotesTableBody.innerHTML = list.map(q => `
         <tr>
             <td>${q.quo_id}</td>
-            <td>${Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}</td>
+            <td title="${Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}">${truncateItems(q.quo_items, 40)}</td>
             <td>${q.quo_units} units</td>
             <td>${formatCurrency(q.quo_total_amount)}</td>
             <td>${formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to)}</td>
-            <td>${q.quo_status}</td>
             <td>
-                <button class="btn btn-sm" onclick="viewQuote(${q.id})">View</button>
-                <button class="btn btn-sm" onclick="openUpdateStatus(${q.id}, '${q.quo_status}')">Update Status</button>
-                <button class="btn btn-sm" onclick="openSetDelivery(${q.id}, '${q.quo_delivery_date_from || ''}', '${q.quo_delivery_date_to || ''}')">Set Date Delivery</button>
-                <button class="btn btn-sm" onclick="openDeleteQuote(${q.id})">Delete</button>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(q.quo_status)}">
+                    <i class='bx ${getStatusIcon(q.quo_status)} mr-1'></i>
+                    ${q.quo_status}
+                </span>
+            </td>
+            <td>
+                <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${q.id}" title="View">
+                    <i class='bx bx-show-alt text-xl'></i>
+                </button>
+                <button class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50" data-action="update" data-id="${q.id}" data-status="${q.quo_status}" title="Update Status">
+                    <i class='bx bx-edit text-xl'></i>
+                </button>
+                <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="delivery" data-id="${q.id}" data-from="${q.quo_delivery_date_from || ''}" data-to="${q.quo_delivery_date_to || ''}" title="Set Date Delivery">
+                    <i class='bx bx-calendar text-xl'></i>
+                </button>
+                <button class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" data-action="delete" data-id="${q.id}" title="Delete">
+                    <i class='bx bx-trash text-xl'></i>
+                </button>
             </td>
         </tr>
     `).join('');
@@ -426,8 +507,9 @@ if (elements.confirmUpdateStatusBtn) {
                 await loadQuotes();
                 selectedQuoteId = null;
                 elements.updateStatusModal?.close();
+                if (typeof showNotification === 'function') showNotification('Quote status updated', 'success');
             }
-        } catch(e) {}
+        } catch(e) { if (typeof showNotification === 'function') showNotification('Error updating status: ' + (e && e.message ? e.message : 'Unknown error'), 'error'); }
     });
 }
 
@@ -469,4 +551,180 @@ function formatDateRange(a, b) {
     if (A && B) return `${A} to ${B}`;
     return A || B;
 }
+
+function truncateItems(items, maxLen) {
+    try {
+        const text = Array.isArray(items) ? items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
+        if (text.length <= maxLen) return text;
+        return text.substring(0, maxLen - 1) + '…';
+    } catch (e) { return ''; }
+}
+
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: function(toast) {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+    }
+});
+
+function showNotification(message, type) {
+    Toast.fire({
+        icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
+        title: message
+    });
+}
+
+function getStatusBadgeClass(status) {
+    const statusClasses = {
+        'Pending': 'bg-yellow-100 text-yellow-800',
+        'Approved': 'bg-blue-100 text-blue-800',
+        'Rejected': 'bg-red-100 text-red-800',
+        'Cancel': 'bg-red-100 text-red-800',
+        'Vendor-Review': 'bg-purple-100 text-purple-800',
+        'In-Progress': 'bg-indigo-100 text-indigo-800',
+        'Completed': 'bg-green-100 text-green-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+}
+
+function getStatusIcon(status) {
+    const statusIcons = {
+        'Pending': 'bx-time',
+        'Approved': 'bx-check-circle',
+        'Rejected': 'bx-x-circle',
+        'Cancel': 'bx-x-circle',
+        'Vendor-Review': 'bx-user-voice',
+        'In-Progress': 'bx-cog',
+        'Completed': 'bx-check-circle'
+    };
+    return statusIcons[status] || 'bx-question-mark';
+}
+if (elements.notifTableBody) {
+    elements.notifTableBody.addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if (!id) return;
+        if (action === 'view') {
+            window.viewApprovedPurchase(Number(id));
+        } else if (action === 'review') {
+            window.openReviewConfirm(Number(id));
+        }
+    });
+}
+
+// delegate clicks in quotes table
+if (elements.quotesTableBody) {
+    elements.quotesTableBody.addEventListener('click', function(e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (!id || !action) return;
+        if (action === 'view') {
+            window.viewQuote(Number(id));
+        } else if (action === 'update') {
+            window.openUpdateStatus(Number(id), btn.dataset.status);
+        } else if (action === 'delivery') {
+            window.openSetDelivery(Number(id), btn.dataset.from, btn.dataset.to);
+        } else if (action === 'delete') {
+            window.openDeleteQuote(Number(id));
+        }
+    });
+}
+function openSetDelivery(id, from, to) {
+    selectedQuoteId = id;
+    if (elements.deliveryFromInput) elements.deliveryFromInput.value = from ? from.substring(0,10) : '';
+    if (elements.deliveryToInput) elements.deliveryToInput.value = to ? to.substring(0,10) : '';
+    elements.setDeliveryModal?.showModal();
+}
+
+function openDeleteQuote(id) {
+    const q = currentQuotes.find(x => x.id == id);
+    (async function() {
+        const confirmResult = await Swal.fire({
+            title: 'Delete Quote?',
+            text: `Are you sure you want to delete quote "${q ? q.quo_id : id}"? This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Delete',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        });
+        if (!confirmResult.isConfirmed) return;
+        try {
+            const response = await fetch(`${PSM_QUOTES_API}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const result = await response.json();
+            if (result.success) {
+                await loadQuotes();
+                if (typeof showNotification === 'function') showNotification(result.message || 'Quote deleted successfully', 'success');
+            } else {
+                if (typeof showNotification === 'function') showNotification(result.message || 'Failed to delete quote', 'error');
+            }
+        } catch(error) {
+            if (typeof showNotification === 'function') showNotification('Error deleting quote: ' + (error && error.message ? error.message : 'Unknown error'), 'error');
+        }
+    })();
+}
+
+if (elements.confirmSetDeliveryBtn) {
+    elements.confirmSetDeliveryBtn.addEventListener('click', async function() {
+        if (!selectedQuoteId) return;
+        try {
+            const body = {
+                quo_delivery_date_from: elements.deliveryFromInput.value || null,
+                quo_delivery_date_to: elements.deliveryToInput.value || null
+            };
+            const response = await fetch(`${PSM_QUOTES_API}/${selectedQuoteId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include',
+                body: JSON.stringify(body)
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const result = await response.json();
+            if (result.success) {
+                await loadQuotes();
+                selectedQuoteId = null;
+                elements.setDeliveryModal?.close();
+                if (typeof showNotification === 'function') showNotification('Delivery dates updated', 'success');
+            }
+        } catch(e) { if (typeof showNotification === 'function') showNotification('Error updating delivery: ' + (e && e.message ? e.message : 'Unknown error'), 'error'); }
+    });
+}
+
+if (elements.confirmDeleteQuoteBtn) {
+    elements.confirmDeleteQuoteBtn.addEventListener('click', function() {
+        if (!selectedQuoteId) return;
+        window.openDeleteQuote(Number(selectedQuoteId));
+    });
+}
+
+// expose handlers globally for inline calls
+window.viewQuote = viewQuote;
+window.openUpdateStatus = openUpdateStatus;
+window.openSetDelivery = openSetDelivery;
+window.openDeleteQuote = openDeleteQuote;
 </script>

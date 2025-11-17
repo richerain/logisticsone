@@ -872,7 +872,7 @@ function displayPurchases(purchases) {
         elements.purchasesTableBody.innerHTML = `
             <tr>
                 <td colspan="10" class="px-6 py-8 text-center text-gray-500">
-                    <i class='bx bx-package text-4xl text-gray-300 mb-3'></i>
+                    <i class='bx bxs-purchase-tag text-4xl text-gray-300 mb-3'></i>
                     <p class="text-lg">No purchase orders found</p>
                     
                 </td>
