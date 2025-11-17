@@ -23,7 +23,9 @@ class Purchase extends Model
         'pur_status',
         'pur_approved_by',
         'pur_order_by',
+        'pur_cancel_by',
         'pur_desc',
+        'pur_delivery',
         'pur_department_from',
         'pur_module_from',
         'pur_submodule_from'
@@ -33,6 +35,7 @@ class Purchase extends Model
         'pur_name_items' => 'array',
         'pur_unit' => 'integer',
         'pur_total_amount' => 'decimal:2',
+        'pur_delivery' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

@@ -117,3 +117,241 @@
         </div>
     <!-- pagination section end -->
 </div>
+<script>
+var PSM_QUOTES_API = typeof PSM_QUOTES_API !== 'undefined' ? PSM_QUOTES_API : `${API_BASE_URL}/psm/vendor-quote`;
+var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
+
+var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
+
+var elements = {
+    notificationBadge: document.querySelector('.indicator .indicator-item'),
+    notificationCountSpan: document.querySelector('.indicator .indicator-item .relative'),
+    notifModal: document.getElementById('my_modal_4'),
+    notifTableBody: document.querySelector('#my_modal_4 tbody'),
+    quotesTableBody: document.querySelector('table tbody')
+};
+
+var currentNotifications = [];
+var currentQuotes = [];
+
+initVendorQuote();
+
+async function initVendorQuote() {
+    await loadNotifications();
+    await loadQuotes();
+}
+
+function setNotificationIndicator(count) {
+    if (!elements.notificationBadge) return;
+    if (count && count > 0) {
+        elements.notificationBadge.classList.remove('hidden');
+        if (elements.notificationCountSpan) elements.notificationCountSpan.textContent = `+${count}`;
+    } else {
+        elements.notificationBadge.classList.add('hidden');
+    }
+}
+
+async function loadNotifications() {
+    try {
+        const response = await fetch(`${PSM_QUOTES_API}/notifications`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const result = await response.json();
+        if (result.success) {
+            currentNotifications = result.data || [];
+            displayNotifications(currentNotifications);
+            setNotificationIndicator(currentNotifications.length);
+        } else {
+            currentNotifications = [];
+            displayNotifications([]);
+            setNotificationIndicator(0);
+        }
+    } catch(e) {
+        currentNotifications = [];
+        displayNotifications([]);
+        setNotificationIndicator(0);
+    }
+}
+
+function displayNotifications(list) {
+    if (!elements.notifTableBody) return;
+    if (!list || list.length === 0) {
+        elements.notifTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No approved purchases</td></tr>`;
+        return;
+    }
+    elements.notifTableBody.innerHTML = list.map(p => `
+        <tr>
+            <td>${p.pur_id}</td>
+            <td>${Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}</td>
+            <td>${p.pur_unit} units</td>
+            <td>${formatCurrency(p.pur_total_amount)}</td>
+            <td>${formatDate(p.created_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="viewApprovedPurchase(${p.id})">View</button>
+                <button class="btn btn-sm btn-success" onclick="reviewPurchase(${p.id})">Review</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function reviewPurchase(id) {
+    try {
+        const response = await fetch(`${PSM_QUOTES_API}/review-from-purchase/${id}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const result = await response.json();
+        if (result.success) {
+            await loadNotifications();
+            await loadQuotes();
+        }
+    } catch(e) {}
+}
+
+function viewApprovedPurchase(id) {
+    const p = currentNotifications.find(x => x.id == id);
+    if (!p) return;
+    alert(JSON.stringify(p, null, 2));
+}
+
+async function loadQuotes() {
+    try {
+        const response = await fetch(`${PSM_QUOTES_API}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const result = await response.json();
+        if (result.success) {
+            currentQuotes = result.data || [];
+            displayQuotes(currentQuotes);
+        } else {
+            currentQuotes = [];
+            displayQuotes([]);
+        }
+    } catch(e) {
+        currentQuotes = [];
+        displayQuotes([]);
+    }
+}
+
+function displayQuotes(list) {
+    if (!elements.quotesTableBody) return;
+    if (!list || list.length === 0) {
+        elements.quotesTableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">No quotes</td>
+            </tr>
+        `;
+        return;
+    }
+    elements.quotesTableBody.innerHTML = list.map(q => `
+        <tr>
+            <td>${q.quo_id}</td>
+            <td>${Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}</td>
+            <td>${q.quo_units} units</td>
+            <td>${formatCurrency(q.quo_total_amount)}</td>
+            <td>${formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to)}</td>
+            <td>${q.quo_status}</td>
+            <td>
+                <button class="btn btn-sm" onclick="viewQuote(${q.id})">View</button>
+                <button class="btn btn-sm" onclick="updateQuoteStatus(${q.id})">Update Status</button>
+                <button class="btn btn-sm" onclick="deleteQuote(${q.id})">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function viewQuote(id) {
+    const q = currentQuotes.find(x => x.id == id);
+    if (!q) return;
+    alert(JSON.stringify(q, null, 2));
+}
+
+async function updateQuoteStatus(id) {
+    const q = currentQuotes.find(x => x.id == id);
+    if (!q) return;
+    const next = prompt('Set status', q.quo_status);
+    if (!next) return;
+    try {
+        const response = await fetch(`${PSM_QUOTES_API}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({ quo_status: next })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const result = await response.json();
+        if (result.success) {
+            await loadQuotes();
+        }
+    } catch(e) {}
+}
+
+async function deleteQuote(id) {
+    try {
+        const response = await fetch(`${PSM_QUOTES_API}/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const result = await response.json();
+        if (result.success) {
+            await loadQuotes();
+        }
+    } catch(e) {}
+}
+
+function formatCurrency(n) {
+    const val = Number(n || 0);
+    return `₱${val.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatDate(d) {
+    if (!d) return '';
+    const dt = new Date(d);
+    return `${dt.getMonth()+1}-${dt.getDate()}-${dt.getFullYear()}`;
+}
+
+function formatDateRange(a, b) {
+    const A = formatDate(a);
+    const B = formatDate(b);
+    if (!A && !B) return '';
+    if (A && B) return `${A} to ${B}`;
+    return A || B;
+}
+</script>

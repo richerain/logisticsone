@@ -6,6 +6,7 @@ use App\Models\PSM\Vendor;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
 use App\Models\PSM\Budget;
+use App\Models\PSM\Quote;
 
 class PSMRepository
 {
@@ -41,6 +42,15 @@ class PSMRepository
     public function getPurchases($filters = [])
     {
         return Purchase::orderBy('created_at', 'desc')->get();
+    }
+
+    public function getApprovedPurchasesWithoutQuote()
+    {
+        $quotedPurchaseIds = Quote::whereNotNull('quo_purchase_id')->pluck('quo_purchase_id')->toArray();
+        return Purchase::where('pur_status', 'Approved')
+            ->whereNotIn('id', $quotedPurchaseIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     /**
@@ -147,6 +157,45 @@ class PSMRepository
     public function getVendorProducts($venId)
     {
         return Product::where('prod_vendor', $venId)->get();
+    }
+
+    public function getQuotes()
+    {
+        return Quote::orderBy('created_at', 'desc')->get();
+    }
+
+    public function getQuoteById($id)
+    {
+        return Quote::find($id);
+    }
+
+    public function getQuoteByQuoId($quoId)
+    {
+        return Quote::where('quo_id', $quoId)->first();
+    }
+
+    public function createQuote($data)
+    {
+        return Quote::create($data);
+    }
+
+    public function updateQuote($id, $data)
+    {
+        $quote = Quote::find($id);
+        if ($quote) {
+            $quote->update($data);
+            return $quote;
+        }
+        return null;
+    }
+
+    public function deleteQuote($id)
+    {
+        $quote = Quote::find($id);
+        if ($quote) {
+            return $quote->delete();
+        }
+        return false;
     }
 
     public function getProducts($filters = [])

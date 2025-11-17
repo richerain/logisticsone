@@ -926,7 +926,7 @@ function displayPurchases(purchases) {
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div class="flex items-center">
                     <i class='bx bx-check-circle mr-2 text-gray-400'></i>
-                    ${purchase.pur_approved_by || 'Not approved'}
+                    ${purchase.pur_status === 'Cancel' ? (purchase.pur_cancel_by || purchase.pur_approved_by || 'Unknown Approver') : (purchase.pur_approved_by || 'Not approved')}
                 </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1043,18 +1043,6 @@ function displayBudgetContent() {
                     ${currentBudget.bud_amount_status_health}
                 </p>
             </div>
-            <div class="bg-blue-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-blue-600 mb-2">Allocated Amount</h4>
-                <p class="text-2xl font-bold text-blue-800">${formatCurrency(currentBudget.bud_allocated_amount)}</p>
-            </div>
-            <div class="bg-red-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-red-600 mb-2">Spent Amount</h4>
-                <p class="text-2xl font-bold text-red-800">${formatCurrency(currentBudget.bud_spent_amount)}</p>
-            </div>
-            <div class="bg-green-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-green-600 mb-2">Remaining Amount</h4>
-                <p class="text-2xl font-bold text-green-800">${formatCurrency(currentBudget.bud_remaining_amount)}</p>
-            </div>
             <div class="bg-purple-50 p-4 rounded-lg">
                 <h4 class="text-sm font-medium text-purple-600 mb-2">Percentage Used</h4>
                 <p class="text-2xl font-bold text-purple-800">${percentageUsed.toFixed(1)}%</p>
@@ -1064,6 +1052,18 @@ function displayBudgetContent() {
                 <p class="text-lg font-semibold text-yellow-800">
                     ${new Date(currentBudget.bud_valid_from).toLocaleDateString()} - ${new Date(currentBudget.bud_valid_to).toLocaleDateString()}
                 </p>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h4 class="text-sm font-medium text-blue-600 mb-2">Allocated Amount</h4>
+                <p class="text-2xl font-bold text-blue-800">${formatCurrency(currentBudget.bud_allocated_amount)}</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h4 class="text-sm font-medium text-green-600 mb-2">Remaining Amount</h4>
+                <p class="text-2xl font-bold text-green-800">${formatCurrency(currentBudget.bud_remaining_amount)}</p>
+            </div>
+            <div class="bg-red-50 p-4 rounded-lg">
+                <h4 class="text-sm font-medium text-red-600 mb-2">Spent Amount</h4>
+                <p class="text-2xl font-bold text-red-800">${formatCurrency(currentBudget.bud_spent_amount)}</p>
             </div>
             <div class="bg-indigo-50 p-4 rounded-lg">
                 <h4 class="text-sm font-medium text-indigo-600 mb-2">Days Remaining</h4>
@@ -1453,7 +1453,19 @@ async function cancelPurchase(id) {
     
     const confirmResult = await Swal.fire({
         title: 'Cancel Purchase Order?',
-        text: `Are you sure you want to cancel purchase order "${purchase.pur_id}"? This action cannot be undone.`,
+        html: `<div class="text-left">
+                <p class="mb-3">Are you sure you want to cancel purchase order "${purchase.pur_id}"? This action cannot be undone.</p>
+                <label class="block text-sm font-medium mb-1">Cancel By</label>
+                <input id="cancelByInput" type="text" class="swal2-input" placeholder="Enter your name" />
+               </div>`,
+        focusConfirm: false,
+        preConfirm: () => {
+            const val = document.getElementById('cancelByInput').value.trim();
+            if (!val) {
+                Swal.showValidationMessage('Cancel By is required');
+            }
+            return val;
+        },
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Cancel Purchase',
@@ -1461,7 +1473,7 @@ async function cancelPurchase(id) {
         reverseButtons: true
     });
     
-    if (!confirmResult.isConfirmed) return;
+    if (!confirmResult.isConfirmed || !confirmResult.value) return;
     
     showLoading();
     
@@ -1469,12 +1481,14 @@ async function cancelPurchase(id) {
         const response = await fetch(`${PSM_PURCHASES_API}/${id}/cancel`, {
             method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
                 'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
             },
-            credentials: 'include'
+            credentials: 'include',
+            body: JSON.stringify({ cancel_by: confirmResult.value })
         });
         
         if (!response.ok) {

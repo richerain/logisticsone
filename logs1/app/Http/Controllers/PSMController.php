@@ -185,16 +185,109 @@ class PSMController extends Controller
     /**
      * Cancel purchase
      */
-    public function cancelPurchase($id)
+    public function cancelPurchase(Request $request, $id)
     {
         try {
-            $result = $this->psmService->cancelPurchase($id);
+            $validated = $request->validate([
+                'cancel_by' => 'required|string|max:255'
+            ]);
+            $result = $this->psmService->cancelPurchase($id, $validated['cancel_by']);
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to cancel purchase: ' . $e->getMessage(),
                 'data' => null
+            ], 500);
+        }
+    }
+
+    public function listQuotes()
+    {
+        try {
+            $result = $this->psmService->getQuotes();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch quotes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createQuote(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'quo_items' => 'required',
+                'quo_units' => 'nullable|integer',
+                'quo_total_amount' => 'nullable|numeric',
+                'quo_delivery_date_from' => 'nullable|date',
+                'quo_delivery_date_to' => 'nullable|date',
+                'quo_status' => 'nullable|string',
+                'quo_item_drop_to' => 'nullable|string',
+                'quo_payment' => 'nullable|string',
+                'quo_stored_from' => 'nullable|string',
+                'quo_purchase_id' => 'nullable|integer'
+            ]);
+            $result = $this->psmService->createQuote($validated);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create quote: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateQuote(Request $request, $id)
+    {
+        try {
+            $result = $this->psmService->updateQuote($id, $request->all());
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update quote: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteQuote($id)
+    {
+        try {
+            $result = $this->psmService->deleteQuote($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete quote: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function listApprovedPurchasesForQuote()
+    {
+        try {
+            $result = $this->psmService->getApprovedPurchasesForQuote();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch approved purchases: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function reviewPurchaseToQuote($purchaseId)
+    {
+        try {
+            $result = $this->psmService->reviewPurchaseToQuote($purchaseId);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to review purchase: ' . $e->getMessage()
             ], 500);
         }
     }

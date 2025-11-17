@@ -6,6 +6,7 @@ use App\Repositories\PSMRepository;
 use App\Models\PSM\Vendor;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
+use App\Models\PSM\Quote;
 use App\Models\PSM\Budget;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -626,6 +627,16 @@ class PSMService
         return $prefix . str_pad($next, 5, '0', STR_PAD_LEFT);
     }
 
+    private function generateQuoteId()
+    {
+        $prefix = 'QUOT';
+        $last = Quote::where('quo_id', 'like', $prefix . '%')
+            ->orderBy('quo_id', 'desc')
+            ->first();
+        $next = $last ? (int) substr($last->quo_id, strlen($prefix)) + 1 : 1;
+        return $prefix . str_pad($next, 5, '0', STR_PAD_LEFT);
+    }
+
     /**
      * Budget Methods
      */
@@ -655,6 +666,180 @@ class PSMService
             return [
                 'success' => false,
                 'message' => 'Failed to fetch budget: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    public function getQuotes()
+    {
+        try {
+            $quotes = $this->psmRepository->getQuotes();
+            return [
+                'success' => true,
+                'data' => $quotes,
+                'message' => 'Quotes retrieved successfully'
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch quotes: ' . $e->getMessage(),
+                'data' => []
+            ];
+        }
+    }
+
+    public function createQuote($data)
+    {
+        DB::beginTransaction();
+        try {
+            $data['quo_id'] = $this->generateQuoteId();
+            $data['quo_status'] = $data['quo_status'] ?? 'Vendor-Review';
+            $data['quo_stored_from'] = $data['quo_stored_from'] ?? 'Main Warehouse A';
+            $data['quo_department_from'] = 'Logistics 1';
+            $data['quo_module_from'] = 'Procurement & Sourcing Management';
+            $data['quo_submodule_from'] = 'Vendor Quote';
+            if (isset($data['quo_items']) && is_string($data['quo_items'])) {
+                $data['quo_items'] = json_decode($data['quo_items'], true);
+            }
+            $items = $data['quo_items'] ?? [];
+            $data['quo_units'] = $data['quo_units'] ?? count($items);
+            if (!isset($data['quo_total_amount'])) {
+                $total = 0;
+                foreach ($items as $item) {
+                    if (isset($item['price'])) { $total += floatval($item['price']); }
+                }
+                $data['quo_total_amount'] = $total;
+            }
+            $quote = $this->psmRepository->createQuote($data);
+            DB::commit();
+            return [
+                'success' => true,
+                'message' => 'Quote created successfully',
+                'data' => $quote
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to create quote: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    public function updateQuote($id, $data)
+    {
+        DB::beginTransaction();
+        try {
+            if (isset($data['quo_items']) && is_string($data['quo_items'])) {
+                $data['quo_items'] = json_decode($data['quo_items'], true);
+            }
+            $quote = $this->psmRepository->updateQuote($id, $data);
+            if ($quote) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'Quote updated successfully',
+                    'data' => $quote
+                ];
+            }
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Quote not found',
+                'data' => null
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to update quote: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    public function deleteQuote($id)
+    {
+        DB::beginTransaction();
+        try {
+            $result = $this->psmRepository->deleteQuote($id);
+            if ($result) {
+                DB::commit();
+                return [
+                    'success' => true,
+                    'message' => 'Quote deleted successfully'
+                ];
+            }
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Quote not found'
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to delete quote: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function getApprovedPurchasesForQuote()
+    {
+        try {
+            $purchases = $this->psmRepository->getApprovedPurchasesWithoutQuote();
+            return [
+                'success' => true,
+                'data' => $purchases,
+                'message' => 'Approved purchases retrieved successfully'
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch approved purchases: ' . $e->getMessage(),
+                'data' => []
+            ];
+        }
+    }
+
+    public function reviewPurchaseToQuote($purchaseId)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase = $this->psmRepository->getPurchaseById($purchaseId);
+            if (!$purchase || $purchase->pur_status !== 'Approved') {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Purchase not eligible',
+                    'data' => null
+                ];
+            }
+            $data = [];
+            $data['quo_id'] = $this->generateQuoteId();
+            $data['quo_items'] = $purchase->pur_name_items;
+            $data['quo_units'] = $purchase->pur_unit;
+            $data['quo_total_amount'] = $purchase->pur_total_amount;
+            $data['quo_status'] = 'Vendor-Review';
+            $data['quo_stored_from'] = 'Main Warehouse A';
+            $data['quo_department_from'] = 'Logistics 1';
+            $data['quo_module_from'] = 'Procurement & Sourcing Management';
+            $data['quo_submodule_from'] = 'Vendor Quote';
+            $data['quo_purchase_id'] = $purchase->id;
+            $quote = $this->psmRepository->createQuote($data);
+            DB::commit();
+            return [
+                'success' => true,
+                'message' => 'Purchase moved to Vendor Review',
+                'data' => $quote
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to review purchase: ' . $e->getMessage(),
                 'data' => null
             ];
         }
@@ -800,7 +985,7 @@ class PSMService
     /**
      * Cancel purchase (only for Pending status)
      */
-    public function cancelPurchase($id)
+    public function cancelPurchase($id, $cancelBy = null)
     {
         DB::beginTransaction();
         try {
@@ -825,6 +1010,12 @@ class PSMService
                 ];
             }
 
+            // Update cancel fields
+            if ($cancelBy) {
+                $purchase->pur_cancel_by = $cancelBy;
+                // Also reflect in approved_by column for display purposes
+                $purchase->pur_approved_by = $cancelBy;
+            }
             // Update purchase status to Cancel
             $purchase->pur_status = 'Cancel';
             $purchase->save();

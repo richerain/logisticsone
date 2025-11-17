@@ -49,6 +49,16 @@ Route::get('/active-vendors', [PSMController::class, 'getActiveVendorsForPurchas
 Route::get('/purchases', [PSMController::class, 'getPurchases']);
 Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
 
+// PSM Vendor Quote Routes
+Route::prefix('vendor-quote')->group(function () {
+    Route::get('/', [PSMController::class, 'listQuotes']);
+    Route::post('/', [PSMController::class, 'createQuote']);
+    Route::put('/{id}', [PSMController::class, 'updateQuote']);
+    Route::delete('/{id}', [PSMController::class, 'deleteQuote']);
+    Route::get('/notifications', [PSMController::class, 'listApprovedPurchasesForQuote']);
+    Route::post('/review-from-purchase/{purchaseId}', [PSMController::class, 'reviewPurchaseToQuote']);
+});
+
 // list of endpoints links with json file output*
 // provide indicate each working endpoints here (takenote that these ff endpoints should work if i search it through my local browser or using an postman)
 // should indicate all endpoints in a form of this like commented especially the endpoints of the ff below
