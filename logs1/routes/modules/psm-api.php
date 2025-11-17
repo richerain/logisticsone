@@ -26,7 +26,6 @@ Route::prefix('product-management')->group(function () {
 // PSM Purchase Management Routes
 Route::prefix('purchase-management')->group(function () {
     Route::get('/', [PSMController::class, 'getPurchases']);
-    Route::get('/stats', [PSMController::class, 'getPurchaseStats']);
     Route::get('/{id}', [PSMController::class, 'getPurchase']);
     Route::get('/by-pur-id/{purId}', [PSMController::class, 'getPurchaseByPurchaseId']);
     Route::post('/', [PSMController::class, 'createPurchase']);

@@ -40,29 +40,7 @@ class PSMRepository
      */
     public function getPurchases($filters = [])
     {
-        $query = Purchase::query();
-
-        if (!empty($filters['search'])) {
-            $query->search($filters['search']);
-        }
-
-        if (!empty($filters['status'])) {
-            $query->where('pur_status', $filters['status']);
-        }
-
-        if (!empty($filters['vendor_type'])) {
-            $query->where('pur_ven_type', $filters['vendor_type']);
-        }
-
-        if (!empty($filters['company'])) {
-            $query->where('pur_company_name', 'like', "%{$filters['company']}%");
-        }
-
-        $sortField = $filters['sort_field'] ?? 'created_at';
-        $sortOrder = $filters['sort_order'] ?? 'desc';
-        $query->orderBy($sortField, $sortOrder);
-
-        return $query->get();
+        return Purchase::orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -203,29 +181,7 @@ class PSMRepository
         ];
     }
 
-    public function getPurchaseStats()
-    {
-        $totalPurchases = Purchase::count();
-        $pendingPurchases = Purchase::where('pur_status', 'Pending')->count();
-        $approvedPurchases = Purchase::where('pur_status', 'Approved')->count();
-        $rejectedPurchases = Purchase::where('pur_status', 'Rejected')->count();
-        $cancelledPurchases = Purchase::where('pur_status', 'Cancel')->count();
-        $vendorReviewPurchases = Purchase::where('pur_status', 'Vendor-Review')->count();
-        $inProgressPurchases = Purchase::where('pur_status', 'In-Progress')->count();
-        $completedPurchases = Purchase::where('pur_status', 'Completed')->count();
-
-        return [
-            'total_purchases' => $totalPurchases,
-            'pending_purchases' => $pendingPurchases,
-            'approved_purchases' => $approvedPurchases,
-            'rejected_purchases' => $rejectedPurchases,
-            'cancelled_purchases' => $cancelledPurchases,
-            'vendor_review_purchases' => $vendorReviewPurchases,
-            'in_progress_purchases' => $inProgressPurchases,
-            'completed_purchases' => $completedPurchases,
-            'total_amount' => Purchase::sum('pur_total_amount')
-        ];
-    }
+    
 
     /**
      * Create product for vendor

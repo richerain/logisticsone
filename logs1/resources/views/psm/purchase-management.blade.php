@@ -27,7 +27,7 @@
     </div>
 
     <!-- Stats Section -->
-    <div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div id="statsSection" class="hidden grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow">
             <div class="flex items-center">
                 <div class="p-3 bg-blue-500 rounded-lg">
@@ -78,10 +78,10 @@
     </div>
 
     <!-- Filters and Search Section -->
-    <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="hidden mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Search -->
         <div class="md:col-span-2">
-            <input type="text" id="searchInput" placeholder="Search by PO number, company, or items..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <input type="text" id="searchInput" placeholder="Search by PO number, company, items, order by, or approved by..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
         
         <!-- Status Filter -->
@@ -122,13 +122,15 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Units</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ordered By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Approved By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="purchasesTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="10" class="px-6 py-4 text-center text-gray-500">
                             <div class="flex justify-center items-center py-4">
                                 <div class="loading loading-spinner mr-3"></div>
                                 Loading purchases...
@@ -161,6 +163,12 @@
                     <option value="">Select Company</option>
                 </select>
                 <input type="hidden" id="pur_ven_type" name="pur_ven_type">
+            </div>
+            
+            <!-- Order By Field -->
+            <div class="mb-4">
+                <label for="pur_order_by" class="block text-sm font-medium text-gray-700 mb-1">Ordered By *</label>
+                <input type="text" id="pur_order_by" name="pur_order_by" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter name of person placing the order">
             </div>
             
             <!-- Items Selection Section -->
@@ -248,7 +256,7 @@
 
 <!-- Budget Modal -->
 <div id="budgetModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-lg p-6 w-11/12 max-w-5xl overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-semibold">Budget Overview</h3>
             <button id="closeBudgetModal" class="text-gray-500 hover:text-gray-700">
@@ -311,6 +319,10 @@
         <div id="budgetApprovalContent" class="space-y-4 mb-4">
             <!-- Budget approval content will be populated here -->
         </div>
+        <div class="mb-4">
+            <label for="approvedByInput" class="block text-sm font-medium text-gray-700 mb-1">Approved By *</label>
+            <input type="text" id="approvedByInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your name for approval">
+        </div>
         <div class="flex justify-end gap-3">
             <button type="button" id="rejectBudgetBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Reject</button>
             <button type="button" id="approveBudgetBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Approve</button>
@@ -356,6 +368,7 @@ const elements = {
     cancelledOrders: document.getElementById('cancelledOrders'),
     companySelect: document.getElementById('pur_company_name'),
     vendorType: document.getElementById('pur_ven_type'),
+    purOrderBy: document.getElementById('pur_order_by'),
     itemsSection: document.getElementById('itemsSection'),
     addItemBtn: document.getElementById('addItemBtn'),
     selectedItemsContainer: document.getElementById('selectedItemsContainer'),
@@ -380,6 +393,7 @@ const elements = {
     budgetApprovalModal: document.getElementById('budgetApprovalModal'),
     closeBudgetApprovalModal: document.getElementById('closeBudgetApprovalModal'),
     budgetApprovalContent: document.getElementById('budgetApprovalContent'),
+    approvedByInput: document.getElementById('approvedByInput'),
     rejectBudgetBtn: document.getElementById('rejectBudgetBtn'),
     approveBudgetBtn: document.getElementById('approveBudgetBtn')
 };
@@ -390,7 +404,6 @@ function initPurchaseManagement() {
     console.log('Purchases API:', PSM_PURCHASES_API);
     initializeEventListeners();
     loadPurchases();
-    loadStats();
     loadActiveVendors();
     loadCurrentBudget();
 }
@@ -402,10 +415,7 @@ if (document.readyState === 'loading') {
 }
 
 function initializeEventListeners() {
-    // Search and filters
-    if (elements.searchInput) elements.searchInput.addEventListener('input', debounce(loadPurchases, 500));
-    if (elements.statusFilter) elements.statusFilter.addEventListener('change', loadPurchases);
-    if (elements.vendorTypeFilter) elements.vendorTypeFilter.addEventListener('change', loadPurchases);
+    
     
     // Main modal
     if (elements.addPurchaseBtn) elements.addPurchaseBtn.addEventListener('click', openAddModal);
@@ -812,15 +822,12 @@ async function loadPurchases() {
     showLoading();
     
     const params = new URLSearchParams();
-    if (elements.searchInput && elements.searchInput.value) params.append('search', elements.searchInput.value);
-    if (elements.statusFilter && elements.statusFilter.value) params.append('status', elements.statusFilter.value);
-    if (elements.vendorTypeFilter && elements.vendorTypeFilter.value) params.append('vendor_type', elements.vendorTypeFilter.value);
     
     try {
         const purchasesUrl = `${PSM_PURCHASES_API}`;
         console.log('📡 Fetching purchases from:', `${purchasesUrl}?${params}`);
         
-        const response = await fetch(`${purchasesUrl}?${params}`, {
+        const response = await fetch(`${purchasesUrl}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -856,29 +863,7 @@ async function loadPurchases() {
     }
 }
 
-async function loadStats() {
-    try {
-        const response = await fetch(`${PSM_PURCHASES_API}/stats`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include'
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-                displayStats(result.data);
-            }
-        }
-    } catch (error) {
-        console.error('Error loading stats:', error);
-    }
-}
+function loadStats() {}
 
 function displayPurchases(purchases) {
     if (!elements.purchasesTableBody) return;
@@ -886,10 +871,10 @@ function displayPurchases(purchases) {
     if (!purchases || purchases.length === 0) {
         elements.purchasesTableBody.innerHTML = `
             <tr>
-                <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="10" class="px-6 py-8 text-center text-gray-500">
                     <i class='bx bx-package text-4xl text-gray-300 mb-3'></i>
                     <p class="text-lg">No purchase orders found</p>
-                    <p class="text-sm text-gray-400 mt-1">Try adjusting your search or filters</p>
+                    
                 </td>
             </tr>
         `;
@@ -931,6 +916,18 @@ function displayPurchases(purchases) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                 ${formatCurrency(purchase.pur_total_amount)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div class="flex items-center">
+                    <i class='bx bx-user mr-2 text-gray-400'></i>
+                    ${purchase.pur_order_by || 'Not specified'}
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div class="flex items-center">
+                    <i class='bx bx-check-circle mr-2 text-gray-400'></i>
+                    ${purchase.pur_approved_by || 'Not approved'}
+                </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(purchase.pur_status)}">
@@ -977,14 +974,7 @@ function displayPurchases(purchases) {
     elements.purchasesTableBody.innerHTML = purchasesHtml;
 }
 
-function displayStats(stats) {
-    if (!stats || !elements.totalOrders || !elements.approvedOrders || !elements.pendingOrders || !elements.cancelledOrders) return;
-    
-    elements.totalOrders.textContent = stats.total_purchases || 0;
-    elements.approvedOrders.textContent = stats.approved_purchases || 0;
-    elements.pendingOrders.textContent = stats.pending_purchases || 0;
-    elements.cancelledOrders.textContent = stats.cancelled_purchases || 0;
-}
+
 
 function getStatusBadgeClass(status) {
     const statusClasses = {
@@ -1041,7 +1031,7 @@ function displayBudgetContent() {
     }[currentBudget.bud_amount_status_health] || { color: 'text-gray-600 bg-gray-100', icon: 'bx-question-mark' };
     
     elements.budgetContent.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-gray-50 p-4 rounded-lg">
                 <h4 class="text-sm font-medium text-gray-500 mb-2">Budget ID</h4>
                 <p class="text-lg font-semibold">${currentBudget.bud_id}</p>
@@ -1179,6 +1169,7 @@ function openBudgetApproval(purchaseId) {
                     <h4 class="font-semibold text-blue-800">Purchase Details</h4>
                     <p><strong>PO Number:</strong> ${purchase.pur_id}</p>
                     <p><strong>Company:</strong> ${purchase.pur_company_name}</p>
+                    <p><strong>Ordered By:</strong> ${purchase.pur_order_by || 'Not specified'}</p>
                     <p><strong>Total Amount:</strong> ${formatCurrency(purchase.pur_total_amount)}</p>
                 </div>
                 ${currentBudget ? `
@@ -1207,11 +1198,18 @@ function closeBudgetApprovalModal() {
         elements.budgetApprovalModal.classList.add('hidden');
         delete elements.budgetApprovalModal.dataset.purchaseId;
     }
+    if (elements.approvedByInput) elements.approvedByInput.value = '';
 }
 
 async function handleBudgetApproval() {
     const purchaseId = elements.budgetApprovalModal ? elements.budgetApprovalModal.dataset.purchaseId : null;
     if (!purchaseId) return;
+    
+    const approvedBy = elements.approvedByInput ? elements.approvedByInput.value.trim() : '';
+    if (!approvedBy) {
+        showNotification('Please enter your name for approval', 'error');
+        return;
+    }
     
     showLoading();
     
@@ -1226,7 +1224,10 @@ async function handleBudgetApproval() {
                 'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
             },
             credentials: 'include',
-            body: JSON.stringify({ action: 'approve' })
+            body: JSON.stringify({ 
+                action: 'approve',
+                approved_by: approvedBy
+            })
         });
         
         if (!response.ok) {
@@ -1239,7 +1240,6 @@ async function handleBudgetApproval() {
             showNotification('Purchase approved successfully', 'success');
             closeBudgetApprovalModal();
             loadPurchases();
-            loadStats();
             loadCurrentBudget();
             
             // Disable the budget approval button for this purchase
@@ -1264,6 +1264,12 @@ async function handleBudgetRejection() {
     const purchaseId = elements.budgetApprovalModal ? elements.budgetApprovalModal.dataset.purchaseId : null;
     if (!purchaseId) return;
     
+    const approvedBy = elements.approvedByInput ? elements.approvedByInput.value.trim() : '';
+    if (!approvedBy) {
+        showNotification('Please enter your name for rejection', 'error');
+        return;
+    }
+    
     showLoading();
     
     try {
@@ -1277,7 +1283,10 @@ async function handleBudgetRejection() {
                 'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
             },
             credentials: 'include',
-            body: JSON.stringify({ action: 'reject' })
+            body: JSON.stringify({ 
+                action: 'reject',
+                approved_by: approvedBy
+            })
         });
         
         if (!response.ok) {
@@ -1290,7 +1299,6 @@ async function handleBudgetRejection() {
             showNotification('Purchase rejected successfully', 'success');
             closeBudgetApprovalModal();
             loadPurchases();
-            loadStats();
             
             // Disable the budget approval button for this purchase
             const approveBtn = document.querySelector(`[onclick="openBudgetApproval(${purchaseId})"]`);
@@ -1329,6 +1337,7 @@ function openEditModal(purchase) {
     elements.modalTitle.textContent = 'Edit Purchase Order';
     elements.purchaseId.value = purchase.id;
     if (elements.purDesc) elements.purDesc.value = purchase.pur_desc || '';
+    if (elements.purOrderBy) elements.purOrderBy.value = purchase.pur_order_by || '';
     
     // Set company
     if (elements.companySelect) elements.companySelect.value = purchase.pur_company_name;
@@ -1373,9 +1382,15 @@ async function handlePurchaseSubmit(e) {
         return;
     }
     
+    if (!elements.purOrderBy || !elements.purOrderBy.value.trim()) {
+        showNotification('Please enter the name of the person placing the order', 'error');
+        return;
+    }
+    
     const data = {
         pur_company_name: elements.companySelect ? elements.companySelect.value : '',
         pur_ven_type: elements.vendorType ? elements.vendorType.value : '',
+        pur_order_by: elements.purOrderBy ? elements.purOrderBy.value.trim() : '',
         pur_desc: elements.purDesc ? elements.purDesc.value : '',
         pur_name_items: selectedItems.map(item => ({
             name: item.name,
@@ -1413,14 +1428,13 @@ async function handlePurchaseSubmit(e) {
             showNotification(result.message, 'success');
             closePurchaseModal();
             loadPurchases();
-            loadStats();
         } else {
             throw new Error(result.message || 'Failed to save purchase');
         }
         
     } catch (error) {
         console.error('Error saving purchase:', error);
-        showNotification('Error saving purchase: ' . error.message, 'error');
+        showNotification('Error saving purchase: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -1472,7 +1486,6 @@ async function cancelPurchase(id) {
         if (result.success) {
             showNotification(result.message, 'success');
             loadPurchases();
-            loadStats();
             
             // Disable the cancel button for this purchase
             const cancelBtn = document.querySelector(`[onclick="cancelPurchase(${id})"]`);
@@ -1486,7 +1499,7 @@ async function cancelPurchase(id) {
         
     } catch (error) {
         console.error('Error cancelling purchase:', error);
-        showNotification('Error cancelling purchase: ' . error.message, 'error');
+        showNotification('Error cancelling purchase: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -1531,14 +1544,13 @@ async function deletePurchase(id) {
         if (result.success) {
             showNotification(result.message, 'success');
             loadPurchases();
-            loadStats();
         } else {
             throw new Error(result.message || 'Failed to delete purchase');
         }
         
     } catch (error) {
         console.error('Error deleting purchase:', error);
-        showNotification('Error deleting purchase: ' . error.message, 'error');
+        showNotification('Error deleting purchase: ' + error.message, 'error');
     } finally {
         hideLoading();
     }
@@ -1566,6 +1578,8 @@ function viewPurchase(id) {
             <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(purchase.pur_status)}">${purchase.pur_status}</span></p></div>
             <div><span class="text-sm text-gray-500">Total Units</span><p class="font-semibold">${purchase.pur_unit}</p></div>
             <div><span class="text-sm text-gray-500">Total Amount</span><p class="font-semibold">${formatCurrency(purchase.pur_total_amount)}</p></div>
+            <div><span class="text-sm text-gray-500">Ordered By</span><p class="font-semibold">${purchase.pur_order_by || 'Not specified'}</p></div>
+            <div><span class="text-sm text-gray-500">Approved By</span><p class="font-semibold">${purchase.pur_approved_by || 'Not approved'}</p></div>
             <div><span class="text-sm text-gray-500">Department</span><p class="font-semibold">${purchase.pur_department_from || 'Logistics 1'}</p></div>
             <div><span class="text-sm text-gray-500">Module</span><p class="font-semibold">${purchase.pur_module_from || 'Procurement & Sourcing Management'}</p></div>
             <div><span class="text-sm text-gray-500">Submodule</span><p class="font-semibold">${purchase.pur_submodule_from || 'Purchase Management'}</p></div>

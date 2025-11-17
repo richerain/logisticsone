@@ -57,9 +57,6 @@ class SessionTimeoutHandler {
         this.resetTimers();
         this.setupEventListeners();
         this.startTimeoutTimer();
-        
-        // Pre-check session status on load
-        this.checkSessionStatus();
     }
     
     setupEventListeners() {
@@ -209,7 +206,7 @@ class SessionTimeoutHandler {
                 await this.refreshCsrfToken();
                 const newCsrfToken = this.getCsrfToken();
                 
-                const retryResponse = await fetch('/api/refresh-session', {
+                const retryResponse = await fetch('/api/v1/auth/refresh-session', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -294,7 +291,7 @@ class SessionTimeoutHandler {
     
     async refreshCsrfToken() {
         try {
-            const response = await fetch('/api/csrf-token', {
+            const response = await fetch('/api/v1/auth/csrf-token', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json'

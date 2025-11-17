@@ -21,6 +21,8 @@ class Purchase extends Model
         'pur_company_name',
         'pur_ven_type',
         'pur_status',
+        'pur_approved_by',
+        'pur_order_by',
         'pur_desc',
         'pur_department_from',
         'pur_module_from',
@@ -64,6 +66,8 @@ class Purchase extends Model
             $q->where('pur_id', 'like', "%{$search}%")
               ->orWhere('pur_company_name', 'like', "%{$search}%")
               ->orWhere('pur_desc', 'like', "%{$search}%")
+              ->orWhere('pur_approved_by', 'like', "%{$search}%")
+              ->orWhere('pur_order_by', 'like', "%{$search}%")
               ->orWhereJsonContains('pur_name_items', $search);
         });
     }

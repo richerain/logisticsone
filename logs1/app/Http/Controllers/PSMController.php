@@ -37,19 +37,8 @@ class PSMController extends Controller
     public function getPurchases(Request $request)
     {
         try {
-            $filters = [
-                'search' => $request->get('search'),
-                'status' => $request->get('status'),
-                'vendor_type' => $request->get('vendor_type'),
-                'company' => $request->get('company'),
-                'sort_field' => $request->get('sort_field', 'created_at'),
-                'sort_order' => $request->get('sort_order', 'desc')
-            ];
-
-            $result = $this->psmService->getPurchases($filters);
-
+            $result = $this->psmService->getPurchases();
             return response()->json($result);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -105,6 +94,7 @@ class PSMController extends Controller
                 'pur_name_items.*.price' => 'required|numeric|min:0',
                 'pur_company_name' => 'required|string|max:255',
                 'pur_ven_type' => 'required|in:equipment,supplies,furniture,automotive',
+                'pur_order_by' => 'required|string|max:255',
                 'pur_desc' => 'nullable|string'
             ]);
 
@@ -131,6 +121,7 @@ class PSMController extends Controller
                 'pur_name_items.*.price' => 'sometimes|required|numeric|min:0',
                 'pur_company_name' => 'sometimes|required|string|max:255',
                 'pur_ven_type' => 'sometimes|required|in:equipment,supplies,furniture,automotive',
+                'pur_order_by' => 'sometimes|required|string|max:255',
                 'pur_desc' => 'nullable|string'
             ]);
 
@@ -164,19 +155,7 @@ class PSMController extends Controller
     /**
      * Get purchase statistics
      */
-    public function getPurchaseStats()
-    {
-        try {
-            $result = $this->psmService->getPurchaseStats();
-            return response()->json($result);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch purchase stats: ' . $e->getMessage(),
-                'data' => []
-            ], 500);
-        }
-    }
+    
 
     /**
      * Update purchase status
@@ -186,11 +165,13 @@ class PSMController extends Controller
         try {
             $validated = $request->validate([
                 'status' => 'required|in:Pending,Approved,Rejected,Cancel,Vendor-Review,In-Progress,Completed',
-                'budget_check' => 'sometimes|boolean'
+                'budget_check' => 'sometimes|boolean',
+                'approved_by' => 'nullable|string|max:255'
             ]);
 
             $budgetCheck = $validated['budget_check'] ?? false;
-            $result = $this->psmService->updatePurchaseStatus($id, $validated['status'], $budgetCheck);
+            $approvedBy = $validated['approved_by'] ?? null;
+            $result = $this->psmService->updatePurchaseStatus($id, $validated['status'], $budgetCheck, $approvedBy);
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
@@ -575,14 +556,15 @@ class PSMController extends Controller
     {
         try {
             $validated = $request->validate([
-                'action' => 'required|in:approve,reject'
+                'action' => 'required|in:approve,reject',
+                'approved_by' => 'required|string|max:255'
             ]);
 
-            if ($validated['action'] === 'approve') {
-                $result = $this->psmService->updatePurchaseStatus($id, 'Approved', true);
-            } else {
-                $result = $this->psmService->updatePurchaseStatus($id, 'Rejected', false);
-            }
+            $result = $this->psmService->processBudgetApproval(
+                $id, 
+                $validated['action'], 
+                $validated['approved_by']
+            );
 
             return response()->json($result);
         } catch (\Exception $e) {

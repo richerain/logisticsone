@@ -91,7 +91,7 @@ class PSMService
     public function getPurchases($filters = [])
     {
         try {
-            $purchases = $this->psmRepository->getPurchases($filters);
+            $purchases = $this->psmRepository->getPurchases();
 
             return [
                 'success' => true,
@@ -266,6 +266,9 @@ class PSMService
             $data['pur_department_from'] = 'Logistics 1';
             $data['pur_module_from'] = 'Procurement & Sourcing Management';
             $data['pur_submodule_from'] = 'Purchase Management';
+            
+            // Set order_by from authenticated user
+            $data['pur_order_by'] = $data['pur_order_by'] ?? 'System User';
             
             // Calculate total units and amount from items
             $items = $data['pur_name_items'] ?? [];
@@ -463,23 +466,7 @@ class PSMService
         }
     }
 
-    public function getPurchaseStats()
-    {
-        try {
-            $stats = $this->psmRepository->getPurchaseStats();
-            return [
-                'success' => true,
-                'data' => $stats,
-                'message' => 'Purchase stats retrieved successfully'
-            ];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch purchase stats: ' . $e->getMessage(),
-                'data' => []
-            ];
-        }
-    }
+    
 
     public function getProducts($filters = [])
     {
@@ -742,7 +729,7 @@ class PSMService
     /**
      * Update purchase status with budget check
      */
-    public function updatePurchaseStatus($id, $status, $budgetCheck = false)
+    public function updatePurchaseStatus($id, $status, $budgetCheck = false, $approvedBy = null)
     {
         DB::beginTransaction();
         try {
@@ -782,6 +769,11 @@ class PSMService
 
                 // Update budget spent amount
                 $this->psmRepository->updateBudgetSpent($budget->id, $purchase->pur_total_amount);
+            }
+
+            // Set approved by if provided (for both approval and rejection)
+            if ($approvedBy) {
+                $purchase->pur_approved_by = $approvedBy;
             }
 
             // Update purchase status
@@ -849,6 +841,79 @@ class PSMService
             return [
                 'success' => false,
                 'message' => 'Failed to cancel purchase: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
+     * Process budget approval or rejection
+     */
+    public function processBudgetApproval($id, $action, $approvedBy)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase = $this->psmRepository->getPurchaseById($id);
+            
+            if (!$purchase) {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Purchase not found',
+                    'data' => null
+                ];
+            }
+
+            // Set the approver name regardless of action
+            $purchase->pur_approved_by = $approvedBy;
+
+            if ($action === 'approve') {
+                // Check budget for approval
+                $budget = $this->psmRepository->getCurrentBudget();
+                
+                if (!$budget) {
+                    DB::rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'No active budget available',
+                        'data' => null
+                    ];
+                }
+
+                // Check if budget has sufficient funds
+                if ($budget->bud_remaining_amount < $purchase->pur_total_amount) {
+                    DB::rollBack();
+                    return [
+                        'success' => false,
+                        'message' => 'Insufficient budget. Remaining: ' . formatCurrency($budget->bud_remaining_amount) . ', Required: ' . formatCurrency($purchase->pur_total_amount),
+                        'data' => null
+                    ];
+                }
+
+                // Update budget spent amount
+                $this->psmRepository->updateBudgetSpent($budget->id, $purchase->pur_total_amount);
+                
+                // Update purchase status to Approved
+                $purchase->pur_status = 'Approved';
+            } else {
+                // Update purchase status to Rejected
+                $purchase->pur_status = 'Rejected';
+            }
+
+            $purchase->save();
+
+            DB::commit();
+            
+            return [
+                'success' => true,
+                'message' => $action === 'approve' ? 'Purchase approved successfully' : 'Purchase rejected successfully',
+                'data' => $purchase
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to process budget approval: ' . $e->getMessage(),
                 'data' => null
             ];
         }
