@@ -15,6 +15,13 @@ class JwtAuth
     public function handle(Request $request, Closure $next): Response
     {
         $authHeader = $request->headers->get('Authorization');
+
+        // Allow session-authenticated requests as an alternative to JWT
+        if ((!$authHeader || !str_starts_with($authHeader, 'Bearer ')) && \Illuminate\Support\Facades\Auth::guard('sws')->check()) {
+            \Illuminate\Support\Facades\Auth::shouldUse('sws');
+            return $next($request);
+        }
+
         if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
         }

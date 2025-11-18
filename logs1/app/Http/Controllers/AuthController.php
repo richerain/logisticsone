@@ -46,7 +46,7 @@ class AuthController extends Controller
     public function sendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:sws.users,email',
+            'email' => 'required|email|exists:main.users,email',
         ]);
 
         if ($validator->fails()) {
@@ -67,7 +67,7 @@ class AuthController extends Controller
         Log::info('OTP verification started', ['email' => $request->email]);
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:sws.users,email',
+            'email' => 'required|email|exists:main.users,email',
             'otp' => 'required|string|size:6',
         ]);
 

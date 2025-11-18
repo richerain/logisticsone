@@ -74,6 +74,7 @@ Route::middleware([
                 'psm-vendor-management' => 'psm.vendor-management',
                 'sws-inventory-flow' => 'sws.inventory-flow',
                 'sws-digital-inventory' => 'sws.digital-inventory',
+                'sws-warehouse-management' => 'sws.warehouse-management',
                 'plt-logistics-projects' => 'plt.logistics-projects',
                 'alms-asset-management' => 'alms.asset-management',
                 'alms-maintenance-management' => 'alms.maintenance-management',

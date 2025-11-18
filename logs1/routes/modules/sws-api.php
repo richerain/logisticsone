@@ -18,3 +18,9 @@ Route::get('/test', function () {
         ]
     ]);
 });
+
+Route::get('/warehouse', [SWSController::class, 'warehouses']);
+Route::get('/warehouse/{id}', [SWSController::class, 'showWarehouse']);
+Route::post('/warehouse', [SWSController::class, 'createWarehouse']);
+Route::put('/warehouse/{id}', [SWSController::class, 'updateWarehouse']);
+Route::delete('/warehouse/{id}', [SWSController::class, 'deleteWarehouse']);

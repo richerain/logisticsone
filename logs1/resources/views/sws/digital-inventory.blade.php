@@ -72,8 +72,11 @@
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-semibold text-gray-800">Inventory</h3>
         <div class="flex space-x-2">
+            <button class="btn btn-success"><!-- capable of requesting to buy new items in psm -->
+                <i class='bx bxs-purchase-tag mr-2'></i>Purchase New Item
+            </button>
             <button class="btn btn-primary">
-                <i class='bx bx-plus mr-2'></i>Add Item
+                <i class='bx bxs-down-arrow-square mr-2'></i></i>Inventory New Item
             </button>
         </div>
     </div>

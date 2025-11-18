@@ -48,6 +48,7 @@
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
                     <li><a href="#" data-module="sws-inventory-flow"  title="Inventory Flow" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bx-sync'></i>Inventory Flow</span></a></li>
                     <li><a href="#" data-module="sws-digital-inventory"  title="Digital Inventory" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-archive-in'></i>Digital Inventory</span></a></li>
+                    <li><a href="#" data-module="sws-warehouse-management" title="Warehouse Management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bx-store'></i>Warehouse Management</span></a></li>
                 </ul>
             </li>
             @endif
