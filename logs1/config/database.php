@@ -4,7 +4,7 @@ use Illuminate\Support\Str;
 
 return [
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('DB_CONNECTION', 'main'),  // Changed default to 'main' for logs1_main
 
     'connections' => [
 
@@ -12,9 +12,9 @@ return [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', 'forge'),
+            'port' => env('DB_PORT', '4306'),
+            'database' => env('DB_DATABASE', 'logs1_main'),  // Aligned to logs1_main for consistency
+            'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
@@ -32,9 +32,9 @@ return [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_SWS_HOST', '127.0.0.1'),
-            'port' => env('DB_SWS_PORT', '3306'),
-            'database' => env('DB_SWS_DATABASE', 'log1_logs1_sws'),
-            'username' => env('DB_SWS_USERNAME', 'log1_logs1_sws'),
+            'port' => env('DB_SWS_PORT', '4306'),
+            'database' => env('DB_SWS_DATABASE', 'logs1_sws'),
+            'username' => env('DB_SWS_USERNAME', 'root'),
             'password' => env('DB_SWS_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
@@ -51,11 +51,11 @@ return [
         'psm' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '4306'),
+            'host' => env('DB_PSM_HOST', '127.0.0.1'),  // Optimized: Use specific PSM env vars for consistency
+            'port' => env('DB_PSM_PORT', '4306'),        // Added specific port var
             'database' => env('DB_PSM_DATABASE', 'logs1_psm'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'username' => env('DB_PSM_USERNAME', 'root'),
+            'password' => env('DB_PSM_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
@@ -72,9 +72,9 @@ return [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_PLT_HOST', '127.0.0.1'),
-            'port' => env('DB_PLT_PORT', '3306'),
-            'database' => env('DB_PLT_DATABASE', 'log1_logs1_plt'),
-            'username' => env('DB_PLT_USERNAME', 'log1_logs1_plt'),
+            'port' => env('DB_PLT_PORT', '4306'),
+            'database' => env('DB_PLT_DATABASE', 'logs1_plt'),
+            'username' => env('DB_PLT_USERNAME', 'root'),
             'password' => env('DB_PLT_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
@@ -92,9 +92,9 @@ return [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_ALMS_HOST', '127.0.0.1'),
-            'port' => env('DB_ALMS_PORT', '3306'),
-            'database' => env('DB_ALMS_DATABASE', 'log1_logs1_alms'),
-            'username' => env('DB_ALMS_USERNAME', 'log1_logs1_alms'),
+            'port' => env('DB_ALMS_PORT', '4306'),
+            'database' => env('DB_ALMS_DATABASE', 'logs1_alms'),
+            'username' => env('DB_ALMS_USERNAME', 'root'),
             'password' => env('DB_ALMS_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
@@ -112,10 +112,30 @@ return [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_DTLR_HOST', '127.0.0.1'),
-            'port' => env('DB_DTLR_PORT', '3306'),
-            'database' => env('DB_DTLR_DATABASE', 'log1_logs1_dtlr'),
-            'username' => env('DB_DTLR_USERNAME', 'log1_logs1_dtlr'),
+            'port' => env('DB_DTLR_PORT', '4306'),
+            'database' => env('DB_DTLR_DATABASE', 'logs1_dtlr'),
+            'username' => env('DB_DTLR_USERNAME', 'root'),  // Fixed from 'oot' to 'root'
             'password' => env('DB_DTLR_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'main' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_MAIN_HOST', '127.0.0.1'),
+            'port' => env('DB_MAIN_PORT', '4306'),
+            'database' => env('DB_MAIN_DATABASE', 'logs1_main'),
+            'username' => env('DB_MAIN_USERNAME', 'root'),
+            'password' => env('DB_MAIN_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',

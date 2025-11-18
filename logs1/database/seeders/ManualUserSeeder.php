@@ -104,9 +104,9 @@ class ManualUserSeeder extends Seeder
         ];
 
         foreach ($users as $user) {
-            DB::connection('sws')->table('users')->insert($user);
+            DB::connection('main')->table('users')->insert($user);
         }
 
-        $this->command->info('Users seeded successfully in SWS database.');
+        $this->command->info('Users seeded successfully in MAIN database.');
     }
 }

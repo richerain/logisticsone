@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $connection = 'sws';
+    protected $connection = 'main';
     protected $table = 'users';
 
     protected $fillable = [
