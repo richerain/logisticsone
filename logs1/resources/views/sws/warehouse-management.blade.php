@@ -10,8 +10,13 @@
 <div class="bg-white rounded-lg shadow-lg p-6">
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-semibold text-gray-800">Warehouse Overview</h3>
-        <div class="flex gap-2">
-            <button id="addWarehouseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"><i class='bx bx-plus'></i> Add Warehouse</button>
+        <div class="flex gap-2 whitespace-nowrap">
+            <button id="requestMaintenanceBtn" title="Request Maintenance" class="bg-success hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                <i class='bx bxs-traffic-cone'></i> Request Maintenance
+            </button>
+            <button id="addWarehouseBtn" title="Add New Warehouse" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+                <i class='bx bx-plus'></i> Add Warehouse
+            </button>
         </div>
     </div>
 
@@ -47,15 +52,15 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-800 font-bold text-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Warehouse</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Location</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Capacity</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Used</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Free</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Utilization</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Warehouse</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Location</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Capacity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Used</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Free</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Utilization</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="warehousesTableBody" class="bg-white divide-y divide-gray-200">
@@ -96,10 +101,6 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ID</label>
-                    <input type="text" id="ware_code_display" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" placeholder="Auto-generated on save" disabled>
-                </div>
-                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select id="ware_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><option value="active">Active</option><option value="inactive">Inactive</option><option value="maintenance">Maintenance</option></select>
                 </div>
@@ -139,7 +140,7 @@ const els = {
     statCapacity: document.getElementById('statCapacity'),
     statUsed: document.getElementById('statUsed'),
     statFree: document.getElementById('statFree'),
-    addBtn: document.getElementById('addWarehouseBtn'), // This was already present, no change needed here.
+    addBtn: document.getElementById('addWarehouseBtn'),
     tableBody: document.getElementById('warehousesTableBody'),
     modal: document.getElementById('warehouseModal'),
     modalTitle: document.getElementById('warehouseModalTitle'),
@@ -169,10 +170,12 @@ async function loadWarehouses() {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         warehouses = result.data || [];
+        // Sort warehouses by creation date (newest first)
+        warehouses.sort((a, b) => new Date(b.ware_created_at || 0) - new Date(a.ware_created_at || 0));
         renderWarehouses();
         renderStats();
     } catch (e) {
-        els.tableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-600">Failed to load warehouses</td></tr>`;
+        els.tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-red-600">Failed to load warehouses</td></tr>`;
         notify('Error loading warehouses', 'error');
     }
 }
@@ -196,16 +199,37 @@ function renderWarehouses() {
     els.tableBody.innerHTML = '';
     warehouses.forEach(w => {
         const tr = document.createElement('tr');
+        
+        // Determine badge class and icon based on status
+        let badgeClass = '';
+        let statusIcon = '';
+        
+        if (w.ware_status === 'active') {
+            badgeClass = 'badge-success';
+            statusIcon = '<i class="bx bx-check-circle mr-1"></i>';
+        } else if (w.ware_status === 'inactive') {
+            badgeClass = 'badge-error';
+            statusIcon = '<i class="bx bx-x-circle mr-1"></i>';
+        } else if (w.ware_status === 'maintenance') {
+            badgeClass = 'badge-warning';
+            statusIcon = '<i class="bx bx-traffic-cone mr-1"></i>';
+        }
+        
         tr.innerHTML = `
-            <td class="px-6 py-4">${w.ware_id || ''}</td>
-            <td class="px-6 py-4">${w.ware_name || ''}</td>
-            <td class="px-6 py-4"><span class="inline-block max-w-xs truncate" title="${w.ware_location || ''}">${truncate(String(w.ware_location || ''), 28)}</span></td>
-            <td class="px-6 py-4">${formatNumber(w.ware_capacity)}</td>
-            <td class="px-6 py-4">${formatNumber(w.ware_capacity_used)}</td>
-            <td class="px-6 py-4">${formatNumber(w.ware_capacity_free)}</td>
-            <td class="px-6 py-4">${formatPercent(w.ware_utilization)}</td>
-            <td class="px-6 py-4"><span class="badge ${w.ware_status === 'active' ? 'badge-warning' : w.ware_status === 'maintenance' ? 'badge-success' : 'badge-error'}">${w.ware_status}</span></td>
-            <td class="px-6 py-4">
+            <td class="px-6 py-4 whitespace-nowrap">${w.ware_id || ''}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${w.ware_name || ''}</td>
+            <td class="px-6 py-4 whitespace-nowrap"><span class="inline-block max-w-xs truncate" title="${w.ware_location || ''}">${truncate(String(w.ware_location || ''), 28)}</span></td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity_used)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity_free)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatPercent(w.ware_utilization)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="badge ${badgeClass} flex items-center justify-center gap-1 px-3 py-2 rounded-full text-sm font-medium">
+                    ${statusIcon}
+                    ${w.ware_status || ''}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex gap-2">
                     <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="View Detail" data-action="view" data-id="${w.ware_id}"><i class='bx bx-show-alt text-xl'></i></button>
                     <button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Edit Detail" data-action="edit" data-id="${w.ware_id}"><i class='bx bx-edit text-xl'></i></button>
@@ -225,8 +249,6 @@ function openModal(edit = false, w = null) {
     els.wareSupportsFixed.value = edit && w ? ((w.ware_supports_fixed_items ? 1 : 0)) : '1';
     els.wareStatus.value = edit && w ? (w.ware_status || 'active') : 'active';
     els.wareZoneType.value = edit && w ? (w.ware_zone_type || 'general') : 'general';
-    const codeDisplay = document.getElementById('ware_code_display');
-    if (codeDisplay) codeDisplay.value = edit && w ? (w.ware_id || '') : '';
     els.modal.classList.remove('hidden');
 }
 
@@ -239,7 +261,6 @@ async function saveWarehouse(e) {
         ware_name: els.wareName.value.trim(),
         ware_location: els.wareLocation.value.trim() || null,
         ware_capacity: els.wareCapacity.value ? Number(els.wareCapacity.value) : null,
-        // ware_capacity_used is not editable in modal; server keeps existing value
         ware_status: els.wareStatus.value,
         ware_zone_type: els.wareZoneType.value,
         ware_supports_fixed_items: els.wareSupportsFixed.value === '1'
@@ -290,7 +311,7 @@ function initWarehouseManagement() {
     els.addBtn && els.addBtn.addEventListener('click', () => openModal(false));
     els.modalClose && els.modalClose.addEventListener('click', closeModal);
     els.modalCancel && els.modalCancel.addEventListener('click', closeModal);
-    els.form && els.form.addEventListener('submit', saveWarehouse); // This was already present, no change needed here.
+    els.form && els.form.addEventListener('submit', saveWarehouse);
     els.tableBody && els.tableBody.addEventListener('click', handleTableClick);
     const viewModal = document.getElementById('viewWarehouseModal');
     const closeViewBtn = document.getElementById('closeViewWarehouseModal');
@@ -330,6 +351,4 @@ async function viewWarehouse(id) {
         notify('Error loading warehouse', 'error');
     }
 }
-
-
 </script>

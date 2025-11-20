@@ -13,7 +13,7 @@ class SWSRepository
 {
     public function getAllItems()
     {
-        return Item::with('category')->orderBy('item_name')->get();
+        return Item::with('category')->orderBy('item_created_at', 'desc')->get();
     }
 
     public function getItemById($id)
@@ -23,6 +23,21 @@ class SWSRepository
 
     public function createItem(array $data)
     {
+        // Generate item code before creating
+        if (empty($data['item_code'])) {
+            $data['item_code'] = $this->generateItemCode();
+        }
+
+        // Set current_stock equal to total_quantity for new items (backward compatibility)
+        if (empty($data['item_current_stock']) && isset($data['item_total_quantity'])) {
+            $data['item_current_stock'] = $data['item_total_quantity'];
+        }
+
+        // Set default max_stock if not provided
+        if (empty($data['item_max_stock'])) {
+            $data['item_max_stock'] = max(100, ($data['item_current_stock'] ?? $data['item_total_quantity']) * 2);
+        }
+
         return Item::create($data);
     }
 
@@ -30,6 +45,11 @@ class SWSRepository
     {
         $item = Item::find($id);
         if ($item) {
+            // Remove total_quantity from update since we're using current_stock now
+            if (isset($data['item_total_quantity'])) {
+                unset($data['item_total_quantity']);
+            }
+            
             $item->update($data);
             return $item;
         }
@@ -82,39 +102,48 @@ class SWSRepository
     public function getInventoryStats()
     {
         $totalItems = Item::count();
-        $incomingItems = InventorySnapshot::where('snap_alert_level', 'low')->count();
-        $outgoingItems = InventorySnapshot::where('snap_alert_level', 'critical')->count();
-        $lowStockItems = Item::where('item_total_quantity', '<=', 10)->count();
+        
+        // Calculate total value properly using current_stock
+        $totalValue = Item::select(DB::raw('SUM(item_unit_price * item_current_stock) as total_value'))
+            ->first()
+            ->total_value ?? 0;
+            
+        $lowStockItems = Item::where('item_current_stock', '<=', DB::raw('item_max_stock * 0.2'))
+            ->where('item_current_stock', '>', 0)
+            ->count();
+            
+        $outOfStockItems = Item::where('item_current_stock', '<=', 0)->count();
 
         return [
             'total_items' => $totalItems,
-            'incoming_items' => $incomingItems,
-            'outgoing_items' => $outgoingItems,
-            'low_stock_items' => $lowStockItems
+            'total_value' => $totalValue,
+            'low_stock_items' => $lowStockItems,
+            'out_of_stock_items' => $outOfStockItems
         ];
     }
 
     public function getStockLevelsByCategory()
     {
         try {
-            // Get categories with their items and calculate total quantity
+            // Get categories with their items and calculate utilization based on current_stock and max_stock
             $categories = Category::with(['items' => function($query) {
-                $query->select('item_category_id', 'item_total_quantity');
+                $query->select('item_category_id', 'item_current_stock', 'item_max_stock');
             }])->get();
 
             $stockLevels = [];
             
             foreach ($categories as $category) {
-                $totalQuantity = $category->items->sum('item_total_quantity');
+                $totalCurrentStock = $category->items->sum('item_current_stock');
+                $totalMaxStock = $category->items->sum('item_max_stock');
                 
-                // Calculate utilization percentage (assuming max capacity of 100 per category for demo)
-                $maxCapacity = 100;
-                $utilization = $maxCapacity > 0 ? min(($totalQuantity / $maxCapacity) * 100, 100) : 0;
+                // Calculate utilization percentage based on actual max capacity
+                $utilization = $totalMaxStock > 0 ? min(($totalCurrentStock / $totalMaxStock) * 100, 100) : 0;
                 
                 $stockLevels[] = [
                     'name' => $category->cat_name,
                     'utilization' => round($utilization, 2),
-                    'total_quantity' => $totalQuantity
+                    'total_quantity' => $totalCurrentStock,
+                    'max_capacity' => $totalMaxStock
                 ];
             }
 
@@ -129,18 +158,22 @@ class SWSRepository
     {
         try {
             return Item::with('category')
-                ->select('item_id', 'item_name', 'item_stock_keeping_unit', 'item_category_id', 
-                        'item_total_quantity', 'item_updated_at')
+                ->select('item_id', 'item_code', 'item_name', 'item_stock_keeping_unit', 'item_category_id', 
+                        'item_stored_from', 'item_unit_price', 'item_current_stock', 'item_max_stock',
+                        'item_updated_at', 'item_created_at', 'item_item_type', 'item_is_fixed', 
+                        'item_is_collateral', 'item_liquidity_risk_level', 'item_expiration_date', 
+                        'item_warranty_end', 'item_description')
+                ->orderBy('item_created_at', 'desc')
                 ->get()
                 ->map(function($item) {
-                    // Calculate min stock based on business logic (e.g., 20% of current stock)
-                    $minStock = max(1, round($item->item_total_quantity * 0.2));
+                    // Calculate min stock based on max_stock (20% of max_stock)
+                    $minStock = max(1, round($item->item_max_stock * 0.2));
                     
-                    // Determine status
-                    if ($item->item_total_quantity <= 0) {
+                    // Determine status based on current_stock and max_stock
+                    if ($item->item_current_stock <= 0) {
                         $status = 'Out of Stock';
                         $statusClass = 'badge-error';
-                    } elseif ($item->item_total_quantity <= $minStock) {
+                    } elseif ($item->item_current_stock <= $minStock) {
                         $status = 'Low Stock';
                         $statusClass = 'badge-warning';
                     } else {
@@ -148,20 +181,74 @@ class SWSRepository
                         $statusClass = 'badge-success';
                     }
 
+                    // Calculate total value using current_stock
+                    $unitPrice = $item->item_unit_price ?? 0;
+                    $quantity = $item->item_current_stock ?? 0;
+                    $totalValue = $unitPrice * $quantity;
+
+                    // Calculate stock utilization
+                    $utilization = $item->item_max_stock > 0 ? 
+                        min(($item->item_current_stock / $item->item_max_stock) * 100, 100) : 0;
+
                     return [
                         'item_id' => $item->item_id,
-                        'item_code' => $item->item_stock_keeping_unit ?? 'ITM-' . str_pad($item->item_id, 3, '0', STR_PAD_LEFT),
+                        'item_code' => $item->item_code,
                         'item_name' => $item->item_name,
+                        'item_stock_keeping_unit' => $item->item_stock_keeping_unit,
+                        'item_stored_from' => $item->item_stored_from,
                         'category' => $item->category ? $item->category->cat_name : 'Uncategorized',
-                        'current_stock' => $item->item_total_quantity,
+                        'current_stock' => $item->item_current_stock,
+                        'max_stock' => $item->item_max_stock,
+                        'stock_utilization' => round($utilization, 2),
+                        'unit_price' => $unitPrice,
+                        'total_value' => $totalValue,
                         'min_stock' => $minStock,
                         'status' => $status,
                         'status_class' => $statusClass,
-                        'last_updated' => $item->item_updated_at ? $item->item_updated_at->format('Y-m-d') : 'N/A'
+                        'last_updated' => $item->item_updated_at ? $item->item_updated_at->format('Y-m-d H:i:s') : ($item->item_created_at ? $item->item_created_at->format('Y-m-d H:i:s') : 'N/A'),
+                        'item_created_at' => $item->item_created_at,
+                        'item_item_type' => $item->item_item_type,
+                        'item_is_fixed' => $item->item_is_fixed,
+                        'item_is_collateral' => $item->item_is_collateral,
+                        'item_liquidity_risk_level' => $item->item_liquidity_risk_level,
+                        'item_expiration_date' => $item->item_expiration_date,
+                        'item_warranty_end' => $item->item_warranty_end,
+                        'item_description' => $item->item_description
                     ];
                 });
         } catch (\Exception $e) {
             return [];
         }
+    }
+
+    // Generate item code: ITM + YYYY + MM + DD + 5 random alphanumeric characters
+    private function generateItemCode()
+    {
+        $now = now();
+        $year = $now->year;
+        $month = str_pad($now->month, 2, '0', STR_PAD_LEFT);
+        $day = str_pad($now->day, 2, '0', STR_PAD_LEFT);
+        
+        // Generate 5 random alphanumeric characters
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $randomPart = '';
+        for ($i = 0; $i < 5; $i++) {
+            $randomPart .= $chars[rand(0, strlen($chars) - 1)];
+        }
+        
+        $itemCode = "ITM{$year}{$month}{$day}{$randomPart}";
+        
+        // Ensure uniqueness
+        $counter = 1;
+        while (Item::where('item_code', $itemCode)->exists() && $counter <= 10) {
+            $randomPart = '';
+            for ($i = 0; $i < 5; $i++) {
+                $randomPart .= $chars[rand(0, strlen($chars) - 1)];
+            }
+            $itemCode = "ITM{$year}{$month}{$day}{$randomPart}";
+            $counter++;
+        }
+        
+        return $itemCode;
     }
 }

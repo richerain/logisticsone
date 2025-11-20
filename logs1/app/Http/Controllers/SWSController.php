@@ -160,14 +160,17 @@ class SWSController extends Controller
             'item_description' => ['nullable', 'string'],
             'item_stock_keeping_unit' => ['nullable', 'string', 'max:100', 'unique:sws.sws_items,item_stock_keeping_unit'],
             'item_category_id' => ['nullable', 'integer', 'exists:sws.sws_categories,cat_id'],
+            'item_stored_from' => ['nullable', 'string', 'max:100'],
             'item_item_type' => ['required', Rule::in(['liquid', 'illiquid', 'hybrid'])],
             'item_is_fixed' => ['nullable', 'boolean'],
             'item_expiration_date' => ['nullable', 'date'],
             'item_warranty_end' => ['nullable', 'date'],
             'item_unit_price' => ['nullable', 'numeric', 'min:0'],
-            'item_total_quantity' => ['required', 'integer', 'min:0'],
+            'item_current_stock' => ['required', 'integer', 'min:0'],
+            'item_max_stock' => ['nullable', 'integer', 'min:1'],
             'item_liquidity_risk_level' => ['required', Rule::in(['high', 'medium', 'low'])],
             'item_is_collateral' => ['nullable', 'boolean'],
+            'item_code' => ['nullable', 'string', 'max:20', 'unique:sws.sws_items,item_code'],
         ]);
 
         $result = $this->swsService->createItem($validated);
@@ -179,14 +182,15 @@ class SWSController extends Controller
         $validated = $request->validate([
             'item_name' => ['sometimes', 'string', 'max:255'],
             'item_description' => ['sometimes', 'nullable', 'string'],
-            'item_stock_keeping_unit' => ['sometimes', 'nullable', 'string', 'max:100'],
             'item_category_id' => ['sometimes', 'nullable', 'integer', 'exists:sws.sws_categories,cat_id'],
+            'item_stored_from' => ['sometimes', 'nullable', 'string', 'max:100'],
             'item_item_type' => ['sometimes', Rule::in(['liquid', 'illiquid', 'hybrid'])],
             'item_is_fixed' => ['sometimes', 'boolean'],
             'item_expiration_date' => ['sometimes', 'nullable', 'date'],
             'item_warranty_end' => ['sometimes', 'nullable', 'date'],
             'item_unit_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
-            'item_total_quantity' => ['sometimes', 'integer', 'min:0'],
+            'item_current_stock' => ['sometimes', 'integer', 'min:0'],
+            'item_max_stock' => ['sometimes', 'integer', 'min:1'],
             'item_liquidity_risk_level' => ['sometimes', Rule::in(['high', 'medium', 'low'])],
             'item_is_collateral' => ['sometimes', 'boolean'],
         ]);

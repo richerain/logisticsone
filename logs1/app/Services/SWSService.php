@@ -67,7 +67,7 @@ class SWSService
 
             // Generate SKU if not provided
             if (empty($data['item_stock_keeping_unit'])) {
-                $data['item_stock_keeping_unit'] = 'ITM-' . date('YmdHis') . rand(100, 999);
+                $data['item_stock_keeping_unit'] = 'SKU-' . date('YmdHis') . rand(100, 999);
             }
 
             $item = $this->swsRepository->createItem($data);
@@ -168,9 +168,9 @@ class SWSService
                 'success' => false,
                 'data' => [
                     'total_items' => 0,
-                    'incoming_items' => 0,
-                    'outgoing_items' => 0,
-                    'low_stock_items' => 0
+                    'total_value' => 0,
+                    'low_stock_items' => 0,
+                    'out_of_stock_items' => 0
                 ],
                 'message' => 'Failed to retrieve inventory stats'
             ];
@@ -192,10 +192,10 @@ class SWSService
             
             // Return default data for the 4 categories even if there's an error
             $defaultCategories = [
-                ['name' => 'Equipment', 'utilization' => 0, 'total_quantity' => 0],
-                ['name' => 'Supplies', 'utilization' => 0, 'total_quantity' => 0],
-                ['name' => 'Furniture', 'utilization' => 0, 'total_quantity' => 0],
-                ['name' => 'Automotive', 'utilization' => 0, 'total_quantity' => 0],
+                ['name' => 'Equipment', 'utilization' => 0, 'total_quantity' => 0, 'max_capacity' => 100],
+                ['name' => 'Supplies', 'utilization' => 0, 'total_quantity' => 0, 'max_capacity' => 100],
+                ['name' => 'Furniture', 'utilization' => 0, 'total_quantity' => 0, 'max_capacity' => 100],
+                ['name' => 'Automotive', 'utilization' => 0, 'total_quantity' => 0, 'max_capacity' => 100],
             ];
             
             return [
