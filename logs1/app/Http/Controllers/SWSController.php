@@ -4,11 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SWS\Warehouse;
+use App\Services\SWSService;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class SWSController extends Controller
 {
+    protected $swsService;
+
+    public function __construct(SWSService $swsService)
+    {
+        $this->swsService = $swsService;
+    }
+
     public function getInventoryFlow()
     {
         return response()->json([
@@ -25,6 +33,7 @@ class SWSController extends Controller
         ]);
     }
 
+    // Warehouse methods (existing)
     public function warehouses(Request $request)
     {
         $items = Warehouse::query()->orderBy('ware_name')->get();
@@ -117,5 +126,84 @@ class SWSController extends Controller
             $code = 'WH' . str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         } while (Warehouse::where('ware_id', $code)->exists());
         return $code;
+    }
+
+    // Digital Inventory methods
+    public function getInventoryStats()
+    {
+        $result = $this->swsService->getInventoryStats();
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function getStockLevelsByCategory()
+    {
+        $result = $this->swsService->getStockLevelsByCategory();
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function getItems()
+    {
+        $result = $this->swsService->getItemsWithStockInfo();
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function getItem($id)
+    {
+        $result = $this->swsService->getItemById($id);
+        return response()->json($result, $result['success'] ? 200 : 404);
+    }
+
+    public function createItem(Request $request)
+    {
+        $validated = $request->validate([
+            'item_name' => ['required', 'string', 'max:255'],
+            'item_description' => ['nullable', 'string'],
+            'item_stock_keeping_unit' => ['nullable', 'string', 'max:100', 'unique:sws.sws_items,item_stock_keeping_unit'],
+            'item_category_id' => ['nullable', 'integer', 'exists:sws.sws_categories,cat_id'],
+            'item_item_type' => ['required', Rule::in(['liquid', 'illiquid', 'hybrid'])],
+            'item_is_fixed' => ['nullable', 'boolean'],
+            'item_expiration_date' => ['nullable', 'date'],
+            'item_warranty_end' => ['nullable', 'date'],
+            'item_unit_price' => ['nullable', 'numeric', 'min:0'],
+            'item_total_quantity' => ['required', 'integer', 'min:0'],
+            'item_liquidity_risk_level' => ['required', Rule::in(['high', 'medium', 'low'])],
+            'item_is_collateral' => ['nullable', 'boolean'],
+        ]);
+
+        $result = $this->swsService->createItem($validated);
+        return response()->json($result, $result['success'] ? 201 : 500);
+    }
+
+    public function updateItem(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'item_name' => ['sometimes', 'string', 'max:255'],
+            'item_description' => ['sometimes', 'nullable', 'string'],
+            'item_stock_keeping_unit' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'item_category_id' => ['sometimes', 'nullable', 'integer', 'exists:sws.sws_categories,cat_id'],
+            'item_item_type' => ['sometimes', Rule::in(['liquid', 'illiquid', 'hybrid'])],
+            'item_is_fixed' => ['sometimes', 'boolean'],
+            'item_expiration_date' => ['sometimes', 'nullable', 'date'],
+            'item_warranty_end' => ['sometimes', 'nullable', 'date'],
+            'item_unit_price' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'item_total_quantity' => ['sometimes', 'integer', 'min:0'],
+            'item_liquidity_risk_level' => ['sometimes', Rule::in(['high', 'medium', 'low'])],
+            'item_is_collateral' => ['sometimes', 'boolean'],
+        ]);
+
+        $result = $this->swsService->updateItem($id, $validated);
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function deleteItem($id)
+    {
+        $result = $this->swsService->deleteItem($id);
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function getCategories()
+    {
+        $result = $this->swsService->getAllCategories();
+        return response()->json($result, $result['success'] ? 200 : 500);
     }
 }

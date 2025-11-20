@@ -11,31 +11,30 @@
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-semibold text-gray-800">Warehouse Overview</h3>
         <div class="flex gap-2">
-            <button id="addWarehouseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"><i class='bx bx-plus'></i>Add Warehouse</button>
-            <button id="exportWarehousesBtn" class="btn btn-outline"><i class='bx bx-export mr-2'></i>Export</button>
+            <button id="addWarehouseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"><i class='bx bx-plus'></i> Add Warehouse</button>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+        <div class="bg-blue-100 border border-blue-200 rounded-lg p-4">
             <div class="flex items-center">
                 <div class="p-3 bg-blue-500 rounded-lg"><i class='bx bx-store text-white text-2xl'></i></div>
                 <div class="ml-4"><p class="text-sm font-medium text-blue-700">Warehouses</p><p id="statWarehouses" class="text-2xl font-bold text-blue-900">0</p></div>
             </div>
         </div>
-        <div class="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+        <div class="bg-green-100 border border-green-200 rounded-lg p-4">
             <div class="flex items-center">
                 <div class="p-3 bg-green-500 rounded-lg"><i class='bx bx-box text-white text-2xl'></i></div>
                 <div class="ml-4"><p class="text-sm font-medium text-green-700">Capacity</p><p id="statCapacity" class="text-2xl font-bold text-green-900">0</p></div>
             </div>
         </div>
-        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-4">
+        <div class="bg-yellow-100 border border-yellow-200 rounded-lg p-4">
             <div class="flex items-center">
                 <div class="p-3 bg-yellow-500 rounded-lg"><i class='bx bx-data text-white text-2xl'></i></div>
                 <div class="ml-4"><p class="text-sm font-medium text-yellow-700">Used</p><p id="statUsed" class="text-2xl font-bold text-yellow-900">0</p></div>
             </div>
         </div>
-        <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-4">
+        <div class="bg-indigo-100 border border-indigo-200 rounded-lg p-4">
             <div class="flex items-center">
                 <div class="p-3 bg-indigo-500 rounded-lg"><i class='bx bx-bar-chart-alt text-white text-2xl'></i></div>
                 <div class="ml-4"><p class="text-sm font-medium text-indigo-700">Free</p><p id="statFree" class="text-2xl font-bold text-indigo-900">0</p></div>
@@ -140,8 +139,7 @@ const els = {
     statCapacity: document.getElementById('statCapacity'),
     statUsed: document.getElementById('statUsed'),
     statFree: document.getElementById('statFree'),
-    addBtn: document.getElementById('addWarehouseBtn'),
-    exportBtn: document.getElementById('exportWarehousesBtn'),
+    addBtn: document.getElementById('addWarehouseBtn'), // This was already present, no change needed here.
     tableBody: document.getElementById('warehousesTableBody'),
     modal: document.getElementById('warehouseModal'),
     modalTitle: document.getElementById('warehouseModalTitle'),
@@ -206,12 +204,12 @@ function renderWarehouses() {
             <td class="px-6 py-4">${formatNumber(w.ware_capacity_used)}</td>
             <td class="px-6 py-4">${formatNumber(w.ware_capacity_free)}</td>
             <td class="px-6 py-4">${formatPercent(w.ware_utilization)}</td>
-            <td class="px-6 py-4"><span class="badge ${w.ware_status === 'active' ? 'badge-success' : w.ware_status === 'maintenance' ? 'badge-warning' : 'badge-ghost'}">${w.ware_status}</span></td>
+            <td class="px-6 py-4"><span class="badge ${w.ware_status === 'active' ? 'badge-warning' : w.ware_status === 'maintenance' ? 'badge-success' : 'badge-error'}">${w.ware_status}</span></td>
             <td class="px-6 py-4">
                 <div class="flex gap-2">
-                    <button class="px-3 py-1 bg-gray-600 text-white rounded-lg text-sm" data-action="view" data-id="${w.ware_id}"><i class='bx bx-show'></i></button>
-                    <button class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm" data-action="edit" data-id="${w.ware_id}"><i class='bx bx-edit'></i></button>
-                    <button class="px-3 py-1 bg-red-600 text-white rounded-lg text-sm" data-action="delete" data-id="${w.ware_id}"><i class='bx bx-trash'></i></button>
+                    <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="View Detail" data-action="view" data-id="${w.ware_id}"><i class='bx bx-show-alt text-xl'></i></button>
+                    <button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Edit Detail" data-action="edit" data-id="${w.ware_id}"><i class='bx bx-edit text-xl'></i></button>
+                    <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Delete Warehouse" data-action="delete" data-id="${w.ware_id}"><i class='bx bx-trash text-xl'></i></button>
                 </div>
             </td>`;
         els.tableBody.appendChild(tr);
@@ -273,18 +271,6 @@ async function deleteWarehouse(id) {
     }
 }
 
-function exportWarehouses() {
-    if (!warehouses.length) { notify('No data to export', 'warning'); return; }
-    const headers = ['ID','Name','Location','Capacity','Used','Free','Utilization','Status','Zone Type'];
-    const rows = warehouses.map(w => [w.ware_id,w.ware_name,w.ware_location,w.ware_capacity,w.ware_capacity_used,w.ware_capacity_free,w.ware_utilization,w.ware_status,w.ware_zone_type]);
-    const csv = [headers.join(','), ...rows.map(r => r.map(v => (v===null||v===undefined)?'':String(v).replace(/"/g,'""')).join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'warehouses.csv'; a.click();
-    URL.revokeObjectURL(url);
-}
-
 function handleTableClick(e) {
     const btn = e.target.closest('button');
     if (!btn) return;
@@ -304,8 +290,7 @@ function initWarehouseManagement() {
     els.addBtn && els.addBtn.addEventListener('click', () => openModal(false));
     els.modalClose && els.modalClose.addEventListener('click', closeModal);
     els.modalCancel && els.modalCancel.addEventListener('click', closeModal);
-    els.form && els.form.addEventListener('submit', saveWarehouse);
-    els.exportBtn && els.exportBtn.addEventListener('click', exportWarehouses);
+    els.form && els.form.addEventListener('submit', saveWarehouse); // This was already present, no change needed here.
     els.tableBody && els.tableBody.addEventListener('click', handleTableClick);
     const viewModal = document.getElementById('viewWarehouseModal');
     const closeViewBtn = document.getElementById('closeViewWarehouseModal');
