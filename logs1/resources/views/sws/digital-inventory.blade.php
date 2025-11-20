@@ -65,6 +65,15 @@
                     <i class='bx bx-report mr-2'></i>Generate Report
                 </button>
             </div>
+            <hr class="border border-gray-300 mt-5 mb-5"/>
+            <div class="flex justify-between">
+                <button class="btn btn-success px-9"><!-- capable of requesting to buy new items in psm but now keep it untouched for now-->
+                    <i class='bx bxs-purchase-tag mr-2'></i>Purchase New Item
+                </button>
+                <button class="btn btn-primary px-9">
+                    <i class='bx bxs-down-arrow-square mr-2'></i></i>Inventory New Item
+                </button>
+            </div>
         </div>
         <!-- Quick Actions section end -->
     </div>
@@ -73,14 +82,6 @@
 <div class="bg-white rounded-lg shadow-lg p-6 mt-5">
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-semibold text-gray-800">Inventory</h3>
-        <div class="flex space-x-2">
-            <button class="btn btn-success"><!-- capable of requesting to buy new items in psm -->
-                <i class='bx bxs-purchase-tag mr-2'></i>Purchase New Item
-            </button>
-            <button class="btn btn-primary">
-                <i class='bx bxs-down-arrow-square mr-2'></i></i>Inventory New Item
-            </button>
-        </div>
     </div>
     <!-- stats-card section start -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
