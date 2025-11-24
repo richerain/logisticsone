@@ -5,6 +5,9 @@ use App\Http\Controllers\SWSController;
 
 // SWS Module API Routes
 Route::get('/inventory-flow', [SWSController::class, 'getInventoryFlow']);
+Route::get('/inventory-flow/report', [SWSController::class, 'generateInventoryFlowReport']);
+Route::delete('/inventory-flow/{id}', [SWSController::class, 'deleteTransaction']);
+Route::get('/digital-inventory/report', [SWSController::class, 'generateDigitalInventoryReport']);
 Route::get('/digital-inventory', [SWSController::class, 'getDigitalInventory']);
 
 // Additional SWS routes can be added here as the module develops
@@ -34,4 +37,6 @@ Route::get('/items/{id}', [SWSController::class, 'getItem']);
 Route::post('/items', [SWSController::class, 'createItem']);
 Route::put('/items/{id}', [SWSController::class, 'updateItem']);
 Route::delete('/items/{id}', [SWSController::class, 'deleteItem']);
+Route::post('/items/transfer', [SWSController::class, 'transferItem']);
 Route::get('/categories', [SWSController::class, 'getCategories']);
+Route::get('/locations', [SWSController::class, 'getLocations']);

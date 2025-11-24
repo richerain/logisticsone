@@ -52,9 +52,6 @@
         <div class="inventory-section">
             <h4 class="font-semibold mb-4">Quick Actions</h4>
             <div class="grid grid-cols-2 gap-3">
-                <button id="searchItemBtn" class="btn btn-outline">
-                    <i class='bx bx-search mr-2'></i>Search Item
-                </button>
                 <button id="transferBtn" class="btn btn-outline">
                     <i class='bx bx-transfer mr-2'></i>Transfer
                 </button>
@@ -62,18 +59,15 @@
                     <i class='bx bx-barcode mr-2'></i>Scan Barcode
                 </button>
                 <button id="generateReportBtn" class="btn btn-outline">
-                    <i class='bx bx-report mr-2'></i>Generate Report
+                    <i class='bx bxs-report mr-2'></i>Generate Report
                 </button>
-            </div>
-            <hr class="border border-gray-300 mt-5 mb-5"/>
-            <div class="flex justify-between">
                 <button id="purchaseNewItemBtn" class="btn btn-success px-9">
                     <i class='bx bxs-purchase-tag mr-2'></i>Purchase New Item
                 </button>
                 <button id="inventoryNewItemBtn" class="btn btn-primary px-9">
                     <i class='bx bxs-down-arrow-square mr-2'></i>Inventory New Item
                 </button>
-            </div>
+            </div> 
         </div>
         <!-- Quick Actions section end -->
     </div>
@@ -85,7 +79,7 @@
     </div>
     <!-- stats-card section start -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat-card bg-blue-50 p-4 rounded-lg text-center">
+        <div id="di_card_total" class="stat-card bg-blue-50 p-4 rounded-lg text-center cursor-pointer">
             <i class='bx bx-package text-3xl text-blue-600 mb-2'></i>
             <h3 class="font-semibold text-blue-800">Total Items</h3>
             <p id="totalItems" class="text-2xl font-bold text-blue-600">0</p>
@@ -95,12 +89,12 @@
             <h3 class="font-semibold text-green-800">Total Value</h3>
             <p id="totalValue" class="text-2xl font-bold text-green-600">₱0.00</p>
         </div>
-        <div class="stat-card bg-yellow-50 p-4 rounded-lg text-center">
+        <div id="di_card_low" class="stat-card bg-yellow-50 p-4 rounded-lg text-center cursor-pointer">
             <i class='bx bx-error text-3xl text-yellow-600 mb-2'></i>
             <h3 class="font-semibold text-yellow-800">Low Stock</h3>
             <p id="lowStockItems" class="text-2xl font-bold text-yellow-600">0</p>
         </div>
-        <div class="stat-card bg-red-50 p-4 rounded-lg text-center">
+        <div id="di_card_out" class="stat-card bg-red-50 p-4 rounded-lg text-center cursor-pointer">
             <i class='bx bx-error-circle text-3xl text-red-600 mb-2'></i>
             <h3 class="font-semibold text-red-800">Out of Stock</h3>
             <p id="outOfStockItems" class="text-2xl font-bold text-red-600">0</p>
@@ -108,6 +102,16 @@
     </div>
     <!-- stats-card section end -->
     <!-- digital inventory main table area section start -->
+    <div class="mb-4 flex items-center gap-3">
+        <input id="di_search" type="text" placeholder="Search item, code, category, stored from" class="px-3 py-2 border border-gray-300 rounded-lg flex-1" />
+        <div class="flex items-center gap-2">
+            <button class="btn btn-ghost btn-sm" data-di-status="">All</button>
+            <button class="btn btn-ghost btn-sm" data-di-status="In Stock">In Stock</button>
+            <button class="btn btn-ghost btn-sm" data-di-status="Low Stock">Low Stock</button>
+            <button class="btn btn-ghost btn-sm" data-di-status="Out of Stock">Out of Stock</button>
+        </div>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="table table-zebra w-full rounded-lg">
             <thead>
@@ -137,6 +141,14 @@
                 </tr>
             </tbody>
         </table>
+        <div class="flex items-center justify-between mt-3" id="di_pagination">
+            <div class="text-sm text-gray-600" id="di_page_info"></div>
+            <div class="flex items-center gap-2">
+                <button id="di_prev" class="px-3 py-1 bg-gray-200 rounded">Prev</button>
+                <div id="di_pages" class="flex items-center gap-1"></div>
+                <button id="di_next" class="px-3 py-1 bg-gray-200 rounded">Next</button>
+            </div>
+        </div>
     </div>
     <!-- digital inventory main table area section end -->
 </div>
@@ -187,14 +199,16 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select id="item_category_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                    <select id="item_category_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Select Category</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Stored From</label>
-                    <input type="text" id="item_stored_from" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Warehouse A, Supplier X">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stored From *</label>
+                    <select id="item_stored_from" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Warehouse</option>
+                    </select>
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -221,14 +235,14 @@
                     <input type="number" id="item_current_stock" required min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Stock</label>
-                    <input type="number" id="item_max_stock" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="100">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Stock *</label>
+                    <input type="number" id="item_max_stock" required min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="100">
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (₱)</label>
-                    <input type="number" id="item_unit_price" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0.00">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (₱) *</label>
+                    <input type="number" id="item_unit_price" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0.00">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
@@ -274,9 +288,115 @@
             </button>
         </div>
         <div id="viewItemContent"></div>
+</div>
+</div>
+<!-- transfer modal-->
+<div id="transferItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Transfer Inventory Item</h3>
+            <button id="closeTransferItemModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        <form id="transferItemForm">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Select Item *</label>
+                <select id="transfer_item_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
+            </div>
+            <div id="transferItemDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location From</label>
+                    <input type="text" id="transfer_location_from" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location To *</label>
+                    <select id="transfer_location_to" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Transfer Units *</label>
+                <input type="number" id="transfer_units" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <p id="transfer_units_warning" class="text-xs text-red-600 mt-1 hidden">Transfer units exceed current stock</p>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="cancelTransferItemModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                <button type="submit" id="confirmTransferBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Transfer</button>
+            </div>
+</form>
     </div>
 </div>
 
+<!-- Digital Inventory Report Modal -->
+<div id="di_report_modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Generate Digital Inventory Report</h3>
+            <button id="di_report_close" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Select Range</label>
+                <select id="di_report_range" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="year">This Year</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                <input id="di_report_from" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                <input id="di_report_to" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 mb-4">
+            <button id="di_report_preview" class="px-4 py-2 bg-gray-700 text-white rounded-lg"><i class='bx bx-show-alt mr-2'></i>Preview Report</button>
+            <button id="di_report_clear" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg"><i class='bx bx-eraser mr-2'></i>Clear Preview</button>
+            <button id="di_report_download" class="px-4 py-2 bg-blue-600 text-white rounded-lg"><i class='bx bx-download mr-2'></i>Download PDF</button>
+            <button id="di_report_print" class="px-4 py-2 bg-green-600 text-white rounded-lg"><i class='bx bx-printer mr-2'></i>Print Report</button>
+        </div>
+        <div id="di_report_preview_container" class="border rounded-lg p-4 bg-gray-50">
+            <div class="flex items-center justify-center text-gray-500">
+                <i class='bx bx-show-alt text-3xl mr-2'></i>
+                <span>No preview yet</span>
+            </div>
+        </div>
+    </div>
+ </div>
+
+<!-- Downloading Modal -->
+<div id="di_download_modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+        <div class="flex items-center">
+            <div class="loading loading-spinner mr-3"></div>
+            <div>
+                <h4 class="font-semibold">Preparing PDF...</h4>
+                <p class="text-sm text-gray-600">Please wait while we generate your report.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="di_success_modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+        <div class="flex items-center">
+            <i class='bx bx-check-circle text-3xl text-green-600 mr-3'></i>
+            <div>
+                <h4 class="font-semibold">Report Downloaded</h4>
+                <p class="text-sm text-gray-600">Your PDF report has been saved.</p>
+            </div>
+        </div>
+        <div class="flex justify-end mt-4">
+            <button id="di_success_close" class="px-4 py-2 bg-green-600 text-white rounded-lg">OK</button>
+        </div>
+    </div>
+</div>
 <!-- Edit Item Modal -->
 <div id="editItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -320,7 +440,9 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Stored From</label>
-                    <input type="text" id="edit_item_stored_from" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Warehouse A, Supplier X">
+                    <select id="edit_item_stored_from" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Warehouse</option>
+                    </select>
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -390,20 +512,23 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var SWS_DIGITAL_INVENTORY_API = `${API_BASE_URL}/sws/digital-inventory`;
 var SWS_ITEMS_API = `${API_BASE_URL}/sws/items`;
 var SWS_CATEGORIES_API = `${API_BASE_URL}/sws/categories`;
+var SWS_WAREHOUSES_API = `${API_BASE_URL}/sws/warehouse`;
 var SWS_INVENTORY_STATS_API = `${API_BASE_URL}/sws/inventory-stats`;
 var SWS_STOCK_LEVELS_API = `${API_BASE_URL}/sws/stock-levels`;
+var SWS_LOCATIONS_API = `${API_BASE_URL}/sws/locations`;
+var SWS_DIGITAL_INVENTORY_REPORT_API = `${API_BASE_URL}/sws/digital-inventory/report`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
 var inventoryItems = [];
 var categories = [];
+var locations = [];
 
-const els = {
+    const els = {
     // Stock Levels
     stockLevelsContainer: document.getElementById('stockLevelsContainer'),
     
     // Quick Actions
-    searchItemBtn: document.getElementById('searchItemBtn'),
     transferBtn: document.getElementById('transferBtn'),
     scanBarcodeBtn: document.getElementById('scanBarcodeBtn'),
     generateReportBtn: document.getElementById('generateReportBtn'),
@@ -415,6 +540,7 @@ const els = {
     totalValue: document.getElementById('totalValue'),
     lowStockItems: document.getElementById('lowStockItems'),
     outOfStockItems: document.getElementById('outOfStockItems'),
+        diSearch: document.getElementById('di_search'),
     
     // Table
     inventoryTableBody: document.getElementById('inventoryTableBody'),
@@ -437,7 +563,17 @@ const els = {
     editItemModal: document.getElementById('editItemModal'),
     closeEditItemModal: document.getElementById('closeEditItemModal'),
     cancelEditItemModal: document.getElementById('cancelEditItemModal'),
-    editItemForm: document.getElementById('editItemForm')
+    editItemForm: document.getElementById('editItemForm'),
+    transferItemModal: document.getElementById('transferItemModal'),
+    closeTransferItemModal: document.getElementById('closeTransferItemModal'),
+    cancelTransferItemModal: document.getElementById('cancelTransferItemModal'),
+    transferItemForm: document.getElementById('transferItemForm'),
+    transferItemDetails: document.getElementById('transferItemDetails'),
+    transferItemSelect: document.getElementById('transfer_item_id'),
+    transferLocationFrom: document.getElementById('transfer_location_from'),
+    transferLocationTo: document.getElementById('transfer_location_to'),
+    transferUnits: document.getElementById('transfer_units'),
+    transferUnitsWarning: document.getElementById('transfer_units_warning')
 };
 
 const Toast = Swal.mixin({ 
@@ -674,7 +810,24 @@ async function loadInventoryItems() {
 }
 
 function renderInventoryItems() {
-    if (inventoryItems.length === 0) {
+    let filtered = inventoryItems.slice();
+    const statusVal = (window.diActiveStatus || '').trim();
+    const q = (els.diSearch?.value || '').trim().toLowerCase();
+    if (statusVal) {
+        filtered = filtered.filter(i => (i.status || '').toLowerCase() === statusVal.toLowerCase());
+    }
+    if (q) {
+        filtered = filtered.filter(i => {
+            const hay = [
+                i.item_name || '',
+                i.item_code || '',
+                i.category || '',
+                i.item_stored_from || ''
+            ].join(' ').toLowerCase();
+            return hay.includes(q);
+        });
+    }
+    if (filtered.length === 0) {
         els.inventoryTableBody.innerHTML = `
             <tr>
                 <td colspan="12" class="text-center py-4 text-gray-500">
@@ -685,8 +838,16 @@ function renderInventoryItems() {
         return;
     }
     
+    // Pagination
+    const pageSize = 10;
+    window.diPage = Math.max(1, window.diPage || 1);
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+    if (window.diPage > totalPages) window.diPage = totalPages;
+    const startIdx = (window.diPage - 1) * pageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + pageSize);
+
     let html = '';
-    inventoryItems.forEach(item => {
+    pageItems.forEach(item => {
         // Use the actual item_code from database (backend generated)
         const itemCode = item.item_code || 'N/A';
         const sku = item.item_stock_keeping_unit || 'N/A';
@@ -699,6 +860,10 @@ function renderInventoryItems() {
         const totalValue = item.total_value || 0;
         const status = item.status || 'Unknown';
         const statusClass = item.status_class || 'badge-info';
+        const statusIcon = (status === 'In Stock') ? "<i class='bx bx-check-circle mr-1'></i>" :
+                           (status === 'Low Stock') ? "<i class='bx bx-error mr-1'></i>" :
+                           (status === 'Out of Stock') ? "<i class='bx bx-error-circle mr-1'></i>" :
+                           "<i class='bx bx-help-circle mr-1 text-gray-600'></i>";
         const lastUpdated = item.last_updated || 'N/A';
         
         html += `
@@ -713,8 +878,8 @@ function renderInventoryItems() {
                 <td class="text-right whitespace-nowrap">${formatCurrency(unitPrice)}</td>
                 <td class="text-right font-semibold whitespace-nowrap">${formatCurrency(totalValue)}</td>
                 <td class="whitespace-nowrap">
-                    <span class="badge ${statusClass} whitespace-nowrap">
-                        ${status}
+                    <span class="badge ${statusClass} whitespace-nowrap flex items-center">
+                        ${statusIcon}${status}
                     </span>
                 </td>
                 <td class="whitespace-nowrap">${formatDate(lastUpdated)}</td>
@@ -739,6 +904,32 @@ function renderInventoryItems() {
     });
     
     els.inventoryTableBody.innerHTML = html;
+    // Render pagination
+    const info = document.getElementById('di_page_info');
+    const pagesEl = document.getElementById('di_pages');
+    const prevBtn = document.getElementById('di_prev');
+    const nextBtn = document.getElementById('di_next');
+    if (info) info.textContent = `Showing ${filtered.length === 0 ? 0 : (startIdx + 1)}-${Math.min(startIdx + pageSize, filtered.length)} of ${filtered.length}`;
+    if (pagesEl) {
+        let phtml = '';
+        const maxButtons = Math.min(totalPages, 7);
+        let startPage = Math.max(1, window.diPage - Math.floor(maxButtons / 2));
+        if (startPage + maxButtons - 1 > totalPages) startPage = Math.max(1, totalPages - maxButtons + 1);
+        for (let p = startPage; p <= Math.min(totalPages, startPage + maxButtons - 1); p++) {
+            const active = p === window.diPage ? 'bg-gray-300' : 'bg-gray-200';
+            phtml += `<button class="px-3 py-1 ${active} rounded" data-page="${p}">${p}</button>`;
+        }
+        pagesEl.innerHTML = phtml;
+        pagesEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { window.diPage = parseInt(b.getAttribute('data-page')); renderInventoryItems(); }));
+    }
+    if (prevBtn) {
+        prevBtn.disabled = window.diPage <= 1;
+        prevBtn.onclick = () => { if (window.diPage > 1) { window.diPage--; renderInventoryItems(); } };
+    }
+    if (nextBtn) {
+        nextBtn.disabled = window.diPage >= totalPages;
+        nextBtn.onclick = () => { if (window.diPage < totalPages) { window.diPage++; renderInventoryItems(); } };
+    }
     
     // Add event listeners to action buttons
     document.querySelectorAll('.view-item-btn').forEach(btn => {
@@ -784,6 +975,38 @@ async function loadCategories() {
         renderCategoryOptions();
     }
 }
+
+async function loadWarehouses() {
+    try {
+        const response = await fetch(SWS_WAREHOUSES_API, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        const data = (result.data || []).filter(w => String(w.ware_status).toLowerCase() === 'active');
+        const addSelect = document.getElementById('item_stored_from');
+        const editSelect = document.getElementById('edit_item_stored_from');
+        const optionsHtml = ['<option value="">Select Warehouse</option>'].concat(
+            data.map(w => `<option value="${w.ware_name}">${w.ware_name}</option>`)
+        ).join('');
+        if (addSelect) addSelect.innerHTML = optionsHtml;
+        if (editSelect) editSelect.innerHTML = optionsHtml;
+    } catch (e) {
+        const addSelect = document.getElementById('item_stored_from');
+        const editSelect = document.getElementById('edit_item_stored_from');
+        const fallback = '<option value="">Select Warehouse</option>';
+        if (addSelect) addSelect.innerHTML = fallback;
+        if (editSelect) editSelect.innerHTML = fallback;
+    }
+}
+
 
 function renderCategoryOptions() {
     const categorySelect = document.getElementById('item_category_id');
@@ -894,9 +1117,25 @@ async function saveItem(e) {
         notify('Please enter item name', 'error');
         return;
     }
+    if (!formData.item_category_id) {
+        notify('Please select category', 'error');
+        return;
+    }
+    if (!formData.item_stored_from) {
+        notify('Please select stored from', 'error');
+        return;
+    }
     
     if (isNaN(formData.item_current_stock) || formData.item_current_stock < 0) {
         notify('Please enter a valid current stock', 'error');
+        return;
+    }
+    if (isNaN(formData.item_max_stock) || formData.item_max_stock < 1) {
+        notify('Please enter a valid max stock (minimum 1)', 'error');
+        return;
+    }
+    if (formData.item_unit_price === null || isNaN(formData.item_unit_price) || formData.item_unit_price < 0) {
+        notify('Please enter a valid unit price', 'error');
         return;
     }
     
@@ -1170,14 +1409,16 @@ function initDigitalInventory() {
         loadInventoryItems(),
         loadInventoryStats(),
         loadStockLevels(),
-        loadCategories()
+        loadCategories(),
+        loadWarehouses(),
+        loadLocations()
     ]);
     
     // Quick Actions Event Listeners
-    els.searchItemBtn.addEventListener('click', openUnderDevelopmentModal);
-    els.transferBtn.addEventListener('click', openUnderDevelopmentModal);
+    // searchItem quick action removed
+    els.transferBtn.addEventListener('click', openTransferModal);
     els.scanBarcodeBtn.addEventListener('click', openUnderDevelopmentModal);
-    els.generateReportBtn.addEventListener('click', openUnderDevelopmentModal);
+    els.generateReportBtn.addEventListener('click', openDigitalInventoryReportModal);
     els.purchaseNewItemBtn.addEventListener('click', openUnderDevelopmentModal);
     els.inventoryNewItemBtn.addEventListener('click', openAddItemModal);
     
@@ -1194,6 +1435,12 @@ function initDigitalInventory() {
         if (e.target === els.addItemModal) closeAddItemModal();
     });
     els.addItemForm.addEventListener('submit', saveItem);
+    els.closeTransferItemModal.addEventListener('click', closeTransferModal);
+    els.cancelTransferItemModal.addEventListener('click', closeTransferModal);
+    els.transferItemModal.addEventListener('click', function(e) { if (e.target === els.transferItemModal) closeTransferModal(); });
+    els.transferItemSelect.addEventListener('change', onTransferItemSelectChange);
+    els.transferUnits.addEventListener('input', validateTransferUnits);
+    els.transferItemForm.addEventListener('submit', submitTransfer);
     
     els.closeViewItemModal.addEventListener('click', closeViewItemModal);
     els.viewItemModal.addEventListener('click', function(e) {
@@ -1206,6 +1453,37 @@ function initDigitalInventory() {
         if (e.target === els.editItemModal) closeEditItemModal();
     });
     els.editItemForm.addEventListener('submit', updateItem);
+
+    // Filters
+    els.diSearch.addEventListener('input', renderInventoryItems);
+    document.querySelectorAll('[data-di-status]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const val = btn.getAttribute('data-di-status');
+            window.diActiveStatus = val;
+            document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
+            btn.classList.add('bg-gray-200');
+            renderInventoryItems();
+        });
+    });
+    // Stat cards toggle filter
+    document.getElementById('di_card_low').addEventListener('click', () => {
+        window.diActiveStatus = 'Low Stock';
+        document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
+        const target = document.querySelector('[data-di-status="Low Stock"]'); if (target) target.classList.add('bg-gray-200');
+        renderInventoryItems();
+    });
+    document.getElementById('di_card_out').addEventListener('click', () => {
+        window.diActiveStatus = 'Out of Stock';
+        document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
+        const target = document.querySelector('[data-di-status="Out of Stock"]'); if (target) target.classList.add('bg-gray-200');
+        renderInventoryItems();
+    });
+    document.getElementById('di_card_total').addEventListener('click', () => {
+        window.diActiveStatus = '';
+        document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
+        const target = document.querySelector('[data-di-status=""]'); if (target) target.classList.add('bg-gray-200');
+        renderInventoryItems();
+    });
 }
 
 // Initialize when DOM is loaded
@@ -1214,4 +1492,296 @@ if (document.readyState === 'loading') {
 } else {
     initDigitalInventory();
 }
+async function loadLocations() {
+    try {
+        const response = await fetch(SWS_LOCATIONS_API, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        locations = result.success ? (result.data || []) : [];
+        const options = ['<option value="">Select Location</option>'].concat(
+            locations.map(l => `<option value="${l.loc_id}">${l.loc_name}</option>`)
+        ).join('');
+        if (els.transferLocationTo) els.transferLocationTo.innerHTML = options;
+    } catch (e) {
+        locations = [];
+        if (els.transferLocationTo) els.transferLocationTo.innerHTML = '<option value="">Select Location</option>';
+    }
+}
+
+function openTransferModal() {
+    els.transferItemModal.classList.remove('hidden');
+    renderTransferItemOptions();
+    els.transferItemDetails.innerHTML = '';
+    els.transferLocationFrom.value = '';
+    if (els.transferLocationTo) els.transferLocationTo.value = '';
+    els.transferUnits.value = '';
+    els.transferUnitsWarning.classList.add('hidden');
+}
+
+function closeTransferModal() {
+    els.transferItemModal.classList.add('hidden');
+}
+
+function renderTransferItemOptions() {
+    const selectable = inventoryItems.filter(i => i.status === 'In Stock' || i.status === 'Low Stock');
+    const options = ['<option value="">Select Item</option>'].concat(
+        selectable.map(i => `<option value="${i.item_id}">${i.item_name} (${i.item_code || 'N/A'})</option>`)
+    ).join('');
+    els.transferItemSelect.innerHTML = options;
+}
+
+async function onTransferItemSelectChange() {
+    const id = els.transferItemSelect.value;
+    els.transferItemDetails.innerHTML = '';
+    els.transferLocationFrom.value = '';
+    els.transferUnitsWarning.classList.add('hidden');
+    if (!id) return;
+    try {
+        const response = await fetch(`${SWS_ITEMS_API}/${id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        const item = result.data;
+        const unitPrice = parseFloat(item.item_unit_price) || 0;
+        const quantity = parseInt(item.item_current_stock) || 0;
+        els.transferLocationFrom.value = item.item_stored_from || '';
+        els.transferItemDetails.innerHTML = `
+            <div><span class="text-sm text-gray-500">Item Code</span><p class="font-semibold font-mono">${item.item_code || 'N/A'}</p></div>
+            <div><span class="text-sm text-gray-500">SKU</span><p class="font-semibold font-mono">${item.item_stock_keeping_unit || 'N/A'}</p></div>
+            <div><span class="text-sm text-gray-500">Item Name</span><p class="font-semibold">${item.item_name || 'N/A'}</p></div>
+            <div><span class="text-sm text-gray-500">Category</span><p class="font-semibold">${item.category?.cat_name || 'Uncategorized'}</p></div>
+            <div><span class="text-sm text-gray-500">Stored From</span><p class="font-semibold">${item.item_stored_from || 'N/A'}</p></div>
+            <div><span class="text-sm text-gray-500">Item Type</span><p class="font-semibold">${item.item_item_type || 'N/A'}</p></div>
+            <div><span class="text-sm text-gray-500">Liquidity Risk</span><p class="font-semibold">${item.item_liquidity_risk_level || 'N/A'}</p></div>
+            <div><span class="text-sm text-gray-500">Current Stock</span><p class="font-semibold">${formatNumber(quantity)}</p></div>
+            <div><span class="text-sm text-gray-500">Max Stock</span><p class="font-semibold">${formatNumber(item.item_max_stock || 0)}</p></div>
+            <div><span class="text-sm text-gray-500">Unit Price</span><p class="font-semibold">${formatCurrency(unitPrice)}</p></div>
+            <div><span class="text-sm text-gray-500">Expiration Date</span><p class="font-semibold">${formatDate(item.item_expiration_date)}</p></div>
+            <div><span class="text-sm text-gray-500">Warranty End</span><p class="font-semibold">${formatDate(item.item_warranty_end)}</p></div>
+            <div><span class="text-sm text-gray-500">Fixed Asset</span><p class="font-semibold">${item.item_is_fixed ? 'Yes' : 'No'}</p></div>
+            <div><span class="text-sm text-gray-500">Is Collateral</span><p class="font-semibold">${item.item_is_collateral ? 'Yes' : 'No'}</p></div>
+            <div class="md:col-span-2"><span class="text-sm text-gray-500">Description</span><p class="font-semibold break-words">${item.item_description || 'N/A'}</p></div>
+        `;
+        els.transferUnits.setAttribute('max', String(quantity));
+    } catch (e) {
+        els.transferItemDetails.innerHTML = '';
+        els.transferLocationFrom.value = '';
+    }
+}
+
+function validateTransferUnits() {
+    const max = parseInt(els.transferUnits.getAttribute('max') || '0');
+    const val = parseInt(els.transferUnits.value || '0');
+    if (val > max) {
+        els.transferUnitsWarning.classList.remove('hidden');
+        return false;
+    }
+    els.transferUnitsWarning.classList.add('hidden');
+    return true;
+}
+
+async function submitTransfer(e) {
+    e.preventDefault();
+    const itemId = els.transferItemSelect.value;
+    const toLocId = els.transferLocationTo.value;
+    const units = parseInt(els.transferUnits.value || '0');
+    if (!itemId || !toLocId || !units || units < 1) return;
+    if (!validateTransferUnits()) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/sws/items/transfer`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            body: JSON.stringify({ item_id: parseInt(itemId), location_to_id: parseInt(toLocId), transfer_units: units }),
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        if (result.success) {
+            notify('Item transferred successfully', 'success');
+            closeTransferModal();
+            await Promise.all([
+                loadInventoryItems(),
+                loadInventoryStats(),
+                loadStockLevels()
+            ]);
+        } else {
+            notify(result.message || 'Transfer failed', 'error');
+        }
+    } catch (e) {
+        notify('Transfer failed', 'error');
+    }
+}
+function openDigitalInventoryReportModal() {
+    document.getElementById('di_report_modal').classList.remove('hidden');
+    const rangeSel = document.getElementById('di_report_range');
+    const from = document.getElementById('di_report_from');
+    const to = document.getElementById('di_report_to');
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
+    const endOfWeek = new Date(now); endOfWeek.setDate(now.getDate() + (6 - now.getDay()));
+    const startOfMonth = new Date(y, m, 1);
+    const endOfMonth = new Date(y, m + 1, 0);
+    const startOfYear = new Date(y, 0, 1);
+    const endOfYear = new Date(y, 11, 31);
+    const setRange = (r) => {
+        if (r === 'week') { from.value = formatDateForInput(startOfWeek); to.value = formatDateForInput(endOfWeek); }
+        else if (r === 'month') { from.value = formatDateForInput(startOfMonth); to.value = formatDateForInput(endOfMonth); }
+        else if (r === 'year') { from.value = formatDateForInput(startOfYear); to.value = formatDateForInput(endOfYear); }
+    };
+    setRange(rangeSel.value || 'week');
+    rangeSel.addEventListener('change', () => {
+        const r = rangeSel.value;
+        if (r === 'custom') return;
+        setRange(r);
+    });
+}
+
+document.getElementById('di_report_close').addEventListener('click', () => {
+    document.getElementById('di_report_modal').classList.add('hidden');
+});
+
+document.getElementById('di_report_preview').addEventListener('click', () => {
+    const from = document.getElementById('di_report_from').value;
+    const to = document.getElementById('di_report_to').value;
+    const container = document.getElementById('di_report_preview_container');
+    const fromD = from ? new Date(from) : null;
+    const toD = to ? new Date(to) : null;
+    const rows = inventoryItems.filter(i => {
+        const d = i.item_created_at ? new Date(i.item_created_at) : null;
+        if (!d) return false;
+        if (fromD && d < fromD) return false;
+        if (toD && d > toD) return false;
+        return true;
+    }).map(i => `
+        <tr>
+            <td class="font-mono">${i.item_code || ''}</td>
+            <td>${i.item_name || ''}</td>
+            <td>${i.category || ''}</td>
+            <td>${i.item_stored_from || ''}</td>
+            <td class="text-right">${formatNumber(i.current_stock || 0)}</td>
+            <td class="text-right">${formatNumber(i.max_stock || 0)}</td>
+            <td class="text-right">${formatCurrency(i.unit_price || 0)}</td>
+            <td class="text-right font-semibold">${formatCurrency(i.total_value || 0)}</td>
+        </tr>
+    `).join('');
+    container.innerHTML = `
+        <div class="mb-3">
+            <h4 class="font-semibold">Digital Inventory Report</h4>
+            <p class="text-sm text-gray-600">Range: ${from || 'N/A'} to ${to || 'N/A'}</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="bg-gray-700 text-white">
+                        <th>Item Code</th><th>Item</th><th>Category</th><th>Stored From</th>
+                        <th>Current</th><th>Max</th><th>Unit Price</th><th>Total Value</th>
+                    </tr>
+                </thead>
+                <tbody>${rows || '<tr><td colspan="8" class="text-center py-4 text-gray-500">No data</td></tr>'}</tbody>
+            </table>
+        </div>
+    `;
+});
+
+document.getElementById('di_report_clear').addEventListener('click', () => {
+    const container = document.getElementById('di_report_preview_container');
+    container.innerHTML = `
+        <div class="flex items-center justify-center text-gray-500">
+            <i class='bx bx-show-alt text-3xl mr-2'></i>
+            <span>No preview yet</span>
+        </div>
+    `;
+});
+
+document.getElementById('di_report_download').addEventListener('click', () => {
+    const container = document.getElementById('di_report_preview_container');
+    const hasTable = container && container.querySelector('table');
+    if (!hasTable) {
+        notify('Please generate a preview first', 'error');
+        return;
+    }
+    document.getElementById('di_download_modal').classList.remove('hidden');
+    const range = document.getElementById('di_report_range').value;
+    const from = document.getElementById('di_report_from').value;
+    const to = document.getElementById('di_report_to').value;
+    const params = new URLSearchParams();
+    if (range) params.set('range', range);
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    params.set('format', 'pdf');
+    const url = `${SWS_DIGITAL_INVENTORY_REPORT_API}?${params.toString()}`;
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/pdf',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+        },
+        credentials: 'include'
+    }).then(async res => {
+        if (res.status === 401) {
+            throw new Error('unauthorized');
+        }
+        if (!res.ok) {
+            throw new Error('failed');
+        }
+        const blob = await res.blob();
+        const urlObj = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = urlObj;
+        a.download = `digital-inventory-report.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(urlObj);
+        document.getElementById('di_download_modal').classList.add('hidden');
+        document.getElementById('di_success_modal').classList.remove('hidden');
+    }).catch((e) => {
+        document.getElementById('di_download_modal').classList.add('hidden');
+        if ((e && String(e.message).toLowerCase().includes('unauthorized'))) {
+            notify('Unauthorized. Please sign in again.', 'error');
+        } else {
+            notify('Failed to download PDF', 'error');
+        }
+    });
+});
+
+document.getElementById('di_success_close').addEventListener('click', () => {
+    document.getElementById('di_success_modal').classList.add('hidden');
+});
+
+document.getElementById('di_report_print').addEventListener('click', () => {
+    const w = window.open('', '_blank');
+    const content = document.getElementById('di_report_preview_container').innerHTML;
+    w.document.write(`<!doctype html><html><head><title>Digital Inventory Report</title><style>body{font-family:Arial,sans-serif;padding:20px} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ddd;padding:8px} th{background:#333;color:#fff}</style></head><body>${content}</body></html>`);
+    w.document.close();
+    w.focus();
+    w.print();
+});
 </script>

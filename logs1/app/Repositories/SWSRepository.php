@@ -7,6 +7,8 @@ use App\Models\SWS\Category;
 use App\Models\SWS\InventorySnapshot;
 use App\Models\SWS\Location;
 use App\Models\SWS\Warehouse;
+use App\Models\SWS\Transaction;
+use App\Models\SWS\TransactionLog;
 use Illuminate\Support\Facades\DB;
 
 class SWSRepository
@@ -69,6 +71,123 @@ class SWSRepository
     {
         return Category::orderBy('cat_name')->get();
     }
+
+    public function getAllLocations()
+    {
+        return Location::orderBy('loc_name')->get();
+    }
+
+    public function getInventoryFlowSummary()
+    {
+        $incoming = Transaction::whereIn('tra_type', ['inbound', 'drop_off'])->count();
+        $outgoing = Transaction::whereIn('tra_type', ['outbound', 'pick_up'])->count();
+        $transfers = Transaction::where('tra_type', 'transfer')->count();
+        $lowStock = Item::where('item_current_stock', '<=', DB::raw('item_max_stock * 0.2'))
+            ->where('item_current_stock', '>', 0)
+            ->count();
+        $totalItems = Item::count();
+        return [
+            'total_items' => $totalItems,
+            'incoming' => $incoming,
+            'outgoing' => $outgoing,
+            'transfers' => $transfers,
+            'low_stock' => $lowStock,
+        ];
+    }
+
+    public function getRecentTransactions($limit = 50, $filters = [])
+    {
+        $query = Transaction::with(['item', 'fromLocation', 'toLocation', 'warehouse'])
+            ->orderBy('tra_transaction_date', 'desc');
+        if (!empty($filters['range'])) {
+            $now = now();
+            if ($filters['range'] === 'week') {
+                $query->whereBetween('tra_transaction_date', [$now->startOfWeek(), $now->endOfWeek()]);
+            } elseif ($filters['range'] === 'month') {
+                $query->whereBetween('tra_transaction_date', [$now->startOfMonth(), $now->endOfMonth()]);
+            } elseif ($filters['range'] === 'year') {
+                $query->whereBetween('tra_transaction_date', [$now->startOfYear(), $now->endOfYear()]);
+            }
+        }
+        if (!empty($filters['from'])) {
+            $query->where('tra_transaction_date', '>=', $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $query->where('tra_transaction_date', '<=', $filters['to']);
+        }
+        return $query->limit($limit)->get()->map(function ($t) {
+            $warehouseData = null;
+            if ($t->warehouse) {
+                $warehouseData = [
+                    'ware_id' => $t->warehouse->ware_id,
+                    'ware_name' => $t->warehouse->ware_name,
+                ];
+            } elseif ($t->fromLocation) {
+                $w = Warehouse::where('ware_name', $t->fromLocation->loc_name)->first();
+                if ($w) {
+                    $warehouseData = [
+                        'ware_id' => $w->ware_id,
+                        'ware_name' => $w->ware_name,
+                    ];
+                }
+            }
+            return [
+                'tra_id' => $t->tra_id,
+                'type' => $t->tra_type,
+                'quantity' => $t->tra_quantity,
+                'status' => $t->tra_status,
+                'transaction_date' => $t->tra_transaction_date,
+                'reference_id' => $t->tra_reference_id,
+                'item' => $t->item ? [
+                    'item_id' => $t->item->item_id,
+                    'item_code' => $t->item->item_code,
+                    'item_name' => $t->item->item_name,
+                    'category' => $t->item->category ? $t->item->category->cat_name : null,
+                ] : null,
+                'from_location' => $t->fromLocation ? [
+                    'loc_id' => $t->fromLocation->loc_id,
+                    'loc_name' => $t->fromLocation->loc_name,
+                ] : (
+                    $t->item && $t->item->item_stored_from ? [
+                        'loc_id' => null,
+                        'loc_name' => $t->item->item_stored_from,
+                    ] : null
+                ),
+                'to_location' => $t->toLocation ? [
+                    'loc_id' => $t->toLocation->loc_id,
+                    'loc_name' => $t->toLocation->loc_name,
+                ] : null,
+                'warehouse' => $warehouseData,
+            ];
+        });
+    }
+
+    public function getInventoryFlowReportData($filters = [])
+    {
+        $query = Transaction::with(['item', 'fromLocation', 'toLocation', 'warehouse', 'logs'])
+            ->orderBy('tra_transaction_date', 'desc');
+        if (!empty($filters['range'])) {
+            $now = now();
+            if ($filters['range'] === 'week') {
+                $query->whereBetween('tra_transaction_date', [$now->startOfWeek(), $now->endOfWeek()]);
+            } elseif ($filters['range'] === 'month') {
+                $query->whereBetween('tra_transaction_date', [$now->startOfMonth(), $now->endOfMonth()]);
+            } elseif ($filters['range'] === 'year') {
+                $query->whereBetween('tra_transaction_date', [$now->startOfYear(), $now->endOfYear()]);
+            }
+        }
+        if (!empty($filters['from'])) {
+            $query->where('tra_transaction_date', '>=', $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $query->where('tra_transaction_date', '<=', $filters['to']);
+        }
+        if (!empty($filters['warehouse_id'])) {
+            $query->where('tra_warehouse_id', $filters['warehouse_id']);
+        }
+        return $query->get();
+    }
+
 
     public function getCategoryById($id)
     {
@@ -220,6 +339,7 @@ class SWSRepository
             return [];
         }
     }
+
 
     // Generate item code: ITM + YYYY + MM + DD + 5 random alphanumeric characters
     private function generateItemCode()

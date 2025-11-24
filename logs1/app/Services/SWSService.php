@@ -225,6 +225,7 @@ class SWSService
         }
     }
 
+
     public function getAllCategories()
     {
         try {
@@ -243,4 +244,66 @@ class SWSService
             ];
         }
     }
+
+    public function getAllLocations()
+    {
+        try {
+            $locations = $this->swsRepository->getAllLocations();
+            return [
+                'success' => true,
+                'data' => $locations,
+                'message' => 'Locations retrieved successfully'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error retrieving locations: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'data' => [],
+                'message' => 'Failed to retrieve locations'
+            ];
+        }
+    }
+
+    public function getInventoryFlow($filters = [])
+    {
+        try {
+            $summary = $this->swsRepository->getInventoryFlowSummary();
+            $transactions = $this->swsRepository->getRecentTransactions(100, $filters);
+            return [
+                'success' => true,
+                'data' => [
+                    'summary' => $summary,
+                    'transactions' => $transactions,
+                ],
+                'message' => 'Inventory flow retrieved successfully'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error retrieving inventory flow: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'data' => [],
+                'message' => 'Failed to retrieve inventory flow'
+            ];
+        }
+    }
+
+    public function getInventoryFlowReportData($filters = [])
+    {
+        try {
+            $data = $this->swsRepository->getInventoryFlowReportData($filters);
+            return [
+                'success' => true,
+                'data' => $data,
+                'message' => 'Inventory flow report data retrieved successfully'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error retrieving inventory flow report data: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'data' => [],
+                'message' => 'Failed to retrieve inventory flow report data'
+            ];
+        }
+    }
+
 }
