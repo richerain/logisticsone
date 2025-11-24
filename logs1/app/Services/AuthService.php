@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\SWS\User;
+use App\Models\Main\User;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

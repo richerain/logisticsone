@@ -21,7 +21,7 @@ return [
     'providers' => [
         'sws_users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\SWS\User::class,
+            'model' => App\Models\Main\User::class,
         ],
     ],
 

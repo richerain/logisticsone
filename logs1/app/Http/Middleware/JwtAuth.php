@@ -7,7 +7,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\SWS\User;
+use App\Models\Main\User;
 use Illuminate\Support\Facades\Auth;
 
 class JwtAuth
