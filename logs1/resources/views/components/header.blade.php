@@ -5,17 +5,18 @@
             <!-- Sidebar toggle button -->
             <button id="toggle-btn" class="pl-2 focus:outline-none"><i class="bx bx-menu text-2xl cursor-pointer"></i></button>
             <!-- company name & logo button -->
-            <button type="button" onclick="window.location.href='/home'" class="flex items-center pl-2 focus:outline-none">
+            <button type="button" onclick="window.location.href='{{ Auth::guard('vendor')->check() ? '/vendor/home' : '/home' }}'" class="flex items-center pl-2 focus:outline-none">
                 <h1 class="text-2xl font-bold tracking-tight">Microfinancial</h1>
             </button>
         </div>
         <!-- profile section -->
         <div class="relative dropdown dropdown-end" id="profile-dropdown">
+            @php($user = Auth::guard('sws')->user() ?: Auth::guard('vendor')->user())
             <button id="profile-btn" type="button" class="flex items-center btn m-1 bg-transparent border-none hover:bg-white/10 focus:outline-none" aria-expanded="false" aria-controls="profile-menu">
-                <img src="{{ Auth::guard('sws')->user()->picture ?? asset('images/default.jpg') }}" alt="profile" class="h-10 w-10 rounded-full object-cover" loading="lazy" />
+                <img src="{{ optional($user)->picture ?? asset('images/default.jpg') }}" alt="profile" class="h-10 w-10 rounded-full object-cover" loading="lazy" />
                 <div class="text-left ml-2">
-                    <div class="text-sm font-medium text-white">{{ Auth::guard('sws')->user()->firstname ?? 'Firstname' }}</div>
-                    <div class="text-xs text-white/80 capitalize">{{ Auth::guard('sws')->user()->roles ?? 'Role' }}</div>
+                    <div class="text-sm font-medium text-white">{{ optional($user)->firstname ?? 'Firstname' }}</div>
+                    <div class="text-xs text-white/80 capitalize">{{ optional($user)->roles ?? 'Role' }}</div>
                 </div>
                 <i id="profile-chevron" class='bx bx-chevron-down text-white transition-transform duration-200 ml-2'></i>
             </button>
@@ -56,12 +57,12 @@
                     <!-- Profile Picture -->
                     <div class="flex flex-col items-center text-center">
                         <div class="relative mb-2">
-                            <img src="{{ Auth::guard('sws')->user()->picture ?? asset('images/default.jpg') }}" 
+                            <img src="{{ optional($user)->picture ?? asset('images/default.jpg') }}" 
                                  alt="Profile Picture" 
                                  class="w-20 h-20 rounded-full object-cover border-3 border-green-200 shadow">
                         </div>
-                        <h2 class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::guard('sws')->user()->firstname }} {{ Auth::guard('sws')->user()->lastname }}</h2>
-                        <p class="text-green-600 text-xs font-medium capitalize">{{ Auth::guard('sws')->user()->roles }}</p>
+                        <h2 class="text-sm font-bold text-gray-800 leading-tight">{{ optional($user)->firstname }} {{ optional($user)->lastname }}</h2>
+                        <p class="text-green-600 text-xs font-medium capitalize">{{ optional($user)->roles }}</p>
                     </div>
 
                     <!-- Account Status -->
@@ -69,11 +70,11 @@
                         <div class="flex justify-evenly items-center text-xs">
                             <span class="text-gray-600">Status:</span>
                             <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-400 text-green-800 capitalize">
-                                {{ Auth::guard('sws')->user()->status }}
+                                {{ optional($user)->status }}
                             </span> 
                             <span class="text-gray-600">Verified:</span>
-                            <span class="px-2 py-1 rounded-full text-xs font-medium {{ Auth::guard('sws')->user()->email_verified_at ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
-                                {{ Auth::guard('sws')->user()->email_verified_at ? 'Yes' : 'No' }}
+                            <span class="px-2 py-1 rounded-full text-xs font-medium {{ optional($user)->email_verified_at ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                                {{ optional($user)->email_verified_at ? 'Yes' : 'No' }}
                             </span>
                         </div>
                     </div>
@@ -82,12 +83,12 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <label class="text-xs font-medium text-gray-600 block">Member Since</label>
-                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->created_at)->format('M d, Y') }}</p>
+                            <p class="text-gray-800 text-xs">{{ optional(optional($user)->created_at)->format('M d, Y') }}</p>
                         </div>
                         
                         <div>
                             <label class="text-xs font-medium text-gray-600 block">Last Updated</label>
-                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->updated_at)->format('M d, Y') }}</p>
+                            <p class="text-gray-800 text-xs">{{ optional(optional($user)->updated_at)->format('M d, Y') }}</p>
                         </div>
                     </div>
                 </div>
@@ -101,26 +102,26 @@
                     
                     <div class="space-y-2">
                         <div>
-                            <label class="text-xs font-medium text-gray-600 block">Employee ID</label>
-                            <p class="text-gray-800 text-sm font-semibold">{{ Auth::guard('sws')->user()->employeeid }}</p>
+                            <label class="text-xs font-medium text-gray-600 block">{{ isset($user->employeeid) ? 'Employee ID' : 'Vendor ID' }}</label>
+                            <p class="text-gray-800 text-sm font-semibold">{{ isset($user->employeeid) ? $user->employeeid : ($user->vendorid ?? '') }}</p>
                         </div>
                         
                         <div>
                             <label class="text-xs font-medium text-gray-600 block">Full Name</label>
-                            <p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->firstname }} {{ Auth::guard('sws')->user()->middlename }} {{ Auth::guard('sws')->user()->lastname }}</p>
+                            <p class="text-gray-800 text-xs">{{ optional($user)->firstname }} {{ optional($user)->middlename }} {{ optional($user)->lastname }}</p>
                         </div>
                         
                         <div class="space-y-1">
                             <div class="flex justify-start items-center text-xs gap-2">
-                                <label class="text-xs font-medium text-gray-600 block">Sex:</label><p class="text-gray-800 text-xs capitalize">{{ Auth::guard('sws')->user()->sex }}</p>
+                                <label class="text-xs font-medium text-gray-600 block">Sex:</label><p class="text-gray-800 text-xs capitalize">{{ optional($user)->sex }}</p>
 
-                                <label class="text-xs font-medium text-gray-600 block">Age:</label><p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->age }}</p>
+                                <label class="text-xs font-medium text-gray-600 block">Age:</label><p class="text-gray-800 text-xs">{{ optional($user)->age }}</p>
                             </div> 
                         </div>
                         
                         <div>
                             <label class="text-xs font-medium text-gray-600 block">Birthdate</label>
-                            <p class="text-gray-800 text-xs">{{ \Carbon\Carbon::parse(Auth::guard('sws')->user()->birthdate)->format('M d, Y') }}</p>
+                            <p class="text-gray-800 text-xs">{{ optional(optional($user)->birthdate)->format('M d, Y') }}</p>
                         </div>
                     </div>
                 </div>
@@ -135,12 +136,12 @@
                     <div class="space-y-2">
                         <div>
                             <label class="text-xs font-medium text-gray-600 block">Email</label>
-                            <p class="text-gray-800 text-xs break-all">{{ Auth::guard('sws')->user()->email }}</p>
+                            <p class="text-gray-800 text-xs break-all">{{ optional($user)->email }}</p>
                         </div>
                         
                         <div>
                             <label class="text-xs font-medium text-gray-600 block">Phone</label>
-                            <p class="text-gray-800 text-xs">{{ Auth::guard('sws')->user()->contactnum }}</p>
+                            <p class="text-gray-800 text-xs">{{ optional($user)->contactnum }}</p>
                         </div>
 
                         <!-- Address Section -->
@@ -150,8 +151,8 @@
                                 Address
                             </h4>
                             <p class="text-gray-800 text-xs mt-1">
-                                @if(Auth::guard('sws')->user()->address)
-                                    {{ Auth::guard('sws')->user()->address }}
+                                @if(optional($user)->address)
+                                    {{ optional($user)->address }}
                                 @else
                                     <span class="text-gray-500 italic">No address provided</span>
                                 @endif
@@ -382,8 +383,9 @@
             logoutSpinner.classList.remove('hidden');
             confirmLogout.disabled = true;
 
-            // Make logout API call
-            fetch('/api/v1/auth/logout', {
+            const isVendor = {{ Auth::guard('vendor')->check() ? 'true' : 'false' }};
+            const logoutUrl = isVendor ? '/api/vendor/logout' : '/api/logout';
+            fetch(logoutUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -400,7 +402,7 @@
             .then(data => {
                 if (data.success) {
                     try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
-                    window.location.href = '/splash-logout';
+                    window.location.href = isVendor ? '/vendor/splash-logout' : '/splash-logout';
                 } else {
                     throw new Error(data.message || 'Logout failed');
                 }

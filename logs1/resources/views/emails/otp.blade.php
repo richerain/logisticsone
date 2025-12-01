@@ -22,14 +22,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Microfinancial Logistics I</h1>
+            <h1>{{ $brand ?? 'Microfinancial Logistics I' }}</h1>
             <p>OTP Verification Code</p>
         </div>
         
         <div class="content">
             <p>Hello <strong>{{ $name }}</strong>,</p>
             
-            <p>You are attempting to log in to your Microfinancial Logistics I account. 
+            <p>You are attempting to log in to your {{ $brand ?? 'Microfinancial Logistics I' }} account. 
                Please use the following One-Time Password (OTP) to complete your login:</p>
             
             <div class="otp-code">{{ $otp }}</div>
@@ -39,7 +39,7 @@
             <p>If you did not request this OTP, please ignore this email or contact system administrator.</p>
             
             <p>Best regards,<br>
-            Microfinancial Logistics I Team</p>
+            {{ $brand ?? 'Microfinancial Logistics I' }} Team</p>
         </div>
         
         <div class="footer">

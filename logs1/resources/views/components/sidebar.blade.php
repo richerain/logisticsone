@@ -4,9 +4,11 @@
         <h1 class="text-xl font-bold">Logistics I</h1>
     </div>
     <div class="flex-1 overflow-y-auto sidebar-scrollbar px-3 py-5">
+        @php($user = Auth::guard('sws')->user() ?: Auth::guard('vendor')->user())
+        @php($role = optional($user)->roles ?? '')
         <ul class="space-y-1">
             <!-- dashboard sidebar btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['vendor', 'staff', 'manager', 'admin', 'superadmin']))
+            @if(in_array($role, ['vendor', 'staff', 'manager', 'admin', 'superadmin']))
             <li>
                 <a href="#" data-module="dashboard" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word" title="Dashboard">
                     <i class="bx bxs-dashboard mr-2 shrink-0"></i>
@@ -14,10 +16,18 @@
                 </a>
             </li>
             @endif
-            <!-- dashboard sidebar btn end -->
+        <!-- dashboard sidebar btn end -->
+        @if($role === 'vendor')
+        <li>
+            <a href="#" data-module="vendor-quote" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word" title="Vendor Quote">
+                <i class='bx bx-fw bxs-quote-left'></i>
+                <span class="flex-1">Vendor Quote</span>
+            </a>
+        </li>
+        @endif
             
             <!-- Procurement & Sourcing Management btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
+            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Procurement & Sourcing Management">
@@ -28,7 +38,6 @@
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
                     <li><a href="#" data-module="psm-purchase"  title="Purchase Management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-purchase-tag' ></i>Purchase Management</span></a></li>
-                    <li><a href="#" data-module="psm-vendor-quote"  title="Vendor Qoute" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-quote-left' ></i>Vendor Quote</span></a></li>
                     <li><a href="#" data-module="psm-vendor-management"  title="Vendors" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-detail' ></i>Vendors</span></a></li>
                 </ul>
             </li>
@@ -36,7 +45,7 @@
             <!-- Procurement & Sourcing Management btn end -->
             
             <!-- Smart Warehousing System btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
+            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Smart Warehousing System">
@@ -55,7 +64,7 @@
             <!-- Smart Warehousing System btn end -->
             
             <!-- Project Logistics Tracker btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
+            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0"  title="Project Logistics Tracker" >
@@ -72,7 +81,7 @@
             <!-- Project Logistics Tracker btn end -->
             
             <!-- Asset Lifecycle & Maintenance btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
+            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Asset Lifecycle & Maintenance" >
@@ -90,7 +99,7 @@
             <!-- Asset Lifecycle & Maintenance btn end -->
             
             <!-- Document Tracking & Logistics Record btn start -->
-            @if(in_array(auth()->guard('sws')->user()->roles, ['staff', 'manager', 'admin', 'superadmin', 'vendor']))
+            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Document Tracking & Logistics Record" >
@@ -124,8 +133,10 @@
             // Show loading state
             moduleContent.innerHTML = '<div class="flex justify-center items-center h-64"><div class="loading loading-spinner loading-lg"></div></div>';
 
+            const isVendor = {{ Auth::guard('vendor')->check() ? 'true' : 'false' }};
+            const moduleBase = isVendor ? '/vendor/module/' : '/module/';
             // Send AJAX request to load module content
-            fetch(`/module/${module}`, {
+            fetch(`${moduleBase}${module}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -170,7 +181,7 @@
                 
                 // Update browser history if needed
                 if (pushState) {
-                    history.pushState({ module: module }, '', `/module/${module}`);
+                    history.pushState({ module: module }, '', `${moduleBase}${module}`);
                 }
                 
                 // Set active sidebar link
@@ -256,15 +267,14 @@
 
         // Check if we're on a module URL and load the appropriate content
         const currentPath = window.location.pathname;
-        if (currentPath.startsWith('/module/')) {
+        if (currentPath.startsWith('/module/') || currentPath.startsWith('/vendor/module/')) {
             const module = currentPath.split('/').pop();
             loadModuleContent(module, false);
         }
 
         // Handle direct access to home - ensure dashboard is loaded
-        if (currentPath === '/home' || currentPath === '/') {
-            // Dashboard is already loaded via server-side include
-            history.replaceState({ module: 'dashboard' }, '', '/home');
+        if (currentPath === '/home' || currentPath === '/vendor/home' || currentPath === '/') {
+            history.replaceState({ module: 'dashboard' }, '', currentPath);
             setActiveSidebarLink('dashboard');
         }
     });

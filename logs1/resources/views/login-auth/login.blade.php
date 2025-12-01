@@ -95,6 +95,9 @@
                         <span id="loginText">Login</span>
                         <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
                     </button>
+                    <div class="mt-2 ml-4 text-left">
+                        <a href="/login/vendor-portal" class="text-blue-600 hover:underline text-sm">Login My Vendor Account?</a>
+                    </div>
                 </form>
                 <!-- login form end -->
             </div>

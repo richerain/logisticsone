@@ -19,10 +19,10 @@
             <div class="md:w-1/2 bg-gray-900 p-8 flex items-center justify-center">
                 <div class="text-center">
                     <img src="{{ asset('images/micrologo.png') }}"
-                         alt="Microfinancial Logistics Logo"
+                         alt="{{ (request()->get('portal') === 'vendor') ? 'Microfinancial Vendors Logo' : 'Microfinancial Logistics Logo' }}"
                          class="w-20 h-20 sm:w-24 sm:h-24 md:w-40 md:h-40 lg:w-56 lg:h-56 mx-auto mb-4 object-contain" />
-                    <h3 class="text-xl md:text-2xl lg:text-3xl font-bold text-white">Microfinancial Logistics I</h3>
-                    <p class="text-xs sm:text-sm text-green-100 mt-2">Secure access to your Logistics I System.</p>
+                    <h3 class="text-xl md:text-2xl lg:text-3xl font-bold text-white">{{ (request()->get('portal') === 'vendor') ? 'Microfinancial Vendors' : 'Microfinancial Logistics I' }}</h3>
+                    <p class="text-xs sm:text-sm text-green-100 mt-2">{{ (request()->get('portal') === 'vendor') ? 'Secure access to Vendors Portal.' : 'Secure access to your Logistics I System.' }}</p>
                 </div>
             </div>
             <!-- Logo / branding panel end -->
@@ -86,6 +86,7 @@
                 this.cancelBtn = document.getElementById('cancel-btn');
                 this.timerElement = document.getElementById('timer');
                 this.email = document.getElementById('email').value;
+                this.portal = new URLSearchParams(window.location.search).get('portal') || 'employee';
                 
                 this.timer = 60;
                 this.timerInterval = null;
@@ -176,7 +177,7 @@
                 this.setVerifyButtonLoading(true);
                 
                 try {
-                    const response = await fetch('/api/verify-otp', {
+                    const response = await fetch(this.portal === 'vendor' ? '/api/vendor/verify-otp' : '/api/verify-otp', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -200,7 +201,7 @@
                                 }
                             } catch (e) {}
                         }
-                        window.location.href = '/splash-login';
+                        window.location.href = (this.portal === 'vendor') ? '/vendor/splash-login' : '/splash-login';
                     } else {
                         throw new Error(data.message || 'OTP verification failed');
                     }
@@ -216,7 +217,7 @@
                 this.setResendButtonLoading(true);
                 
                 try {
-                    const response = await fetch('/api/send-otp', {
+                    const response = await fetch(this.portal === 'vendor' ? '/api/vendor/send-otp' : '/api/send-otp', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -251,7 +252,11 @@
             }
             
             cancelVerification() {
-                window.location.href = '/login';
+                if (this.portal === 'vendor') {
+                    window.location.href = '/login/vendor-portal';
+                } else {
+                    window.location.href = '/login';
+                }
             }
             
             startTimer() {

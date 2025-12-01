@@ -3,6 +3,7 @@
     .swal2-container { z-index: 2147483647 !important; }
     #reviewConfirmModal { z-index: 2147483646 !important; }
     #reviewConfirmModal::backdrop { z-index: 2147483645 !important; }
+    #notifTable th, #notifTable td, #quotesTable th, #quotesTable td { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 </style>
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
@@ -44,15 +45,15 @@
                 <form method="dialog"><button><i class='bx bx-sm bx-x'></i></button></form>
             </div>
             <div class="overflow-x-auto mt-4 border border-gray-900 rounded-lg">
-                <table class="table table-sm table-zebra w-full">
+                <table id="notifTable" class="table table-sm table-zebra w-full">
                     <thead>
                         <tr class="bg-gray-700 font-bold text-white">
-                            <th>Notification ID</th>
-                            <th>Items</th>
-                            <th>Units</th>
-                            <th>Total Amount</th>
-                            <th>Received Date</th>
-                            <th>Actions</th>
+                            <th class="whitespace-nowrap">Notification ID</th>
+                            <th class="whitespace-nowrap">Items</th>
+                            <th class="whitespace-nowrap">Units</th>
+                            <th class="whitespace-nowrap">Total Amount</th>
+                            <th class="whitespace-nowrap">Received Date</th>
+                            <th class="whitespace-nowrap">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="notifTableBody">
@@ -70,16 +71,16 @@
     <!-- notification purchase order card modal end -->
     <!-- table start -->
     <div class="overflow-x-auto">
-        <table class="table table-sm table-zebra w-full">
+        <table id="quotesTable" class="table table-sm table-zebra w-full">
             <thead>
                 <tr class="bg-gray-700 font-bold text-white">
-                    <th>Quote ID</th>
-                    <th>Items</th>
-                    <th>Units</th>
-                    <th>Total Amount</th>
-                    <th>Estimated Date of Delivery</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th class="whitespace-nowrap">Quote ID</th>
+                    <th class="whitespace-nowrap">Items</th>
+                    <th class="whitespace-nowrap">Units</th>
+                    <th class="whitespace-nowrap">Total Amount</th>
+                    <th class="whitespace-nowrap">Estimated Date of Delivery</th>
+                    <th class="whitespace-nowrap">Status</th>
+                    <th class="whitespace-nowrap">Actions</th>
                 </tr>
             </thead>
             <tbody id="quotesTableBody">
@@ -199,7 +200,12 @@
 </dialog>
 
 <script>
-var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php echo url('/api/v1'); ?>';
+var API_BASE_URL = (function(){
+    try {
+        var isVendor = <?php echo \Auth::guard('vendor')->check() ? 'true' : 'false'; ?>;
+        return isVendor ? '<?php echo url('/api/vendor/v1'); ?>' : '<?php echo url('/api/v1'); ?>';
+    } catch(e) { return '<?php echo url('/api/v1'); ?>'; }
+})();
 var PSM_QUOTES_API = typeof PSM_QUOTES_API !== 'undefined' ? PSM_QUOTES_API : `${API_BASE_URL}/psm/vendor-quote`;
 var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
 
@@ -304,17 +310,17 @@ function displayNotifications(list) {
             </tr>`;
         return;
     }
-    elements.notifTableBody.innerHTML = list.map((p, i) => {
-        const itemsFull = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
-        const notiId = `NOTI${String(i + 1).padStart(5, '0')}`;
-        return `
+        elements.notifTableBody.innerHTML = list.map((p, i) => {
+            const itemsFull = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
+            const notiId = `NOTI${String(i + 1).padStart(5, '0')}`;
+            return `
         <tr>
-            <td class="px-3 py-2 font-mono">${notiId}</td>
-            <td class="px-3 py-2" title="${itemsFull}">${truncateItems(p.pur_name_items, 40)}</td>
-            <td class="px-3 py-2">${p.pur_unit} units</td>
-            <td class="px-3 py-2">${formatCurrency(p.pur_total_amount)}</td>
-            <td class="px-3 py-2">${formatDate(p.created_at)}</td>
-            <td class="px-3 py-2">
+            <td class="px-3 py-2 font-mono whitespace-nowrap">${notiId}</td>
+            <td class="px-3 py-2 whitespace-nowrap" title="${itemsFull}">${truncateItems(p.pur_name_items, 40)}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${p.pur_unit} units</td>
+            <td class="px-3 py-2 whitespace-nowrap">${formatCurrency(p.pur_total_amount)}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${formatDate(p.created_at)}</td>
+            <td class="px-3 py-2 whitespace-nowrap">
                 <div class="flex items-center space-x-2">
                     <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${p.id}" title="View">
                         <i class='bx bx-show-alt text-xl'></i>
@@ -325,7 +331,7 @@ function displayNotifications(list) {
                 </div>
             </td>
         </tr>`;
-    }).join('');
+        }).join('');
 }
 
 window.openReviewConfirm = function(id) {
@@ -455,6 +461,40 @@ async function loadQuotes() {
         if (quotesLoadingTimer) { clearTimeout(quotesLoadingTimer); quotesLoadingTimer = null; }
         safeHideLoading();
     }
+}
+
+function displayQuotes(list) {
+    if (!elements.quotesTableBody) return;
+    if (!list || list.length === 0) {
+        elements.quotesTableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
+                    <i class='bx bxs-quote-left text-4xl text-gray-300 mb-3'></i>
+                    <p class="text-lg">No quotes available</p>
+                </td>
+            </tr>`;
+        return;
+    }
+    elements.quotesTableBody.innerHTML = list.map((q, i) => {
+        const quoId = q.quo_id || `QUO${String(i + 1).padStart(5, '0')}`;
+        const items = Array.isArray(q.quo_items) ? q.quo_items.map(it => typeof it === 'object' ? it.name : it).join(', ') : '';
+        return `
+        <tr>
+            <td class="px-3 py-2 font-mono whitespace-nowrap">${quoId}</td>
+            <td class="px-3 py-2 whitespace-nowrap" title="${items}">${items || ''}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${q.quo_units ?? ''}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${formatCurrency(q.quo_total_amount ?? 0)}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${formatDate(q.quo_delivery_date_from)} - ${formatDate(q.quo_delivery_date_to)}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${q.quo_status ?? ''}</td>
+            <td class="px-3 py-2 whitespace-nowrap">
+                <div class="flex items-center space-x-2">
+                    <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view-quote" data-id="${q.id}" title="View">
+                        <i class='bx bx-show-alt text-xl'></i>
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
 }
 
 function displayQuotes(list) {

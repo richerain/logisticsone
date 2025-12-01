@@ -83,30 +83,33 @@ class ManualUserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'employeeid' => 'EMP00005',
-                'lastname' => 'Tolentino',
-                'firstname' => 'Kristian Icy',
-                'middlename' => 'B.',
-                'sex' => 'male',
-                'age' => 25,
-                'birthdate' => '1998-01-05',
-                'contactnum' => '09123456793',
-                'email' => 'aicy3987@gmail.com',
-                'address' => 'BLK00 LOT00, Streets Barangay Subdivision City 0123',
-                'password' => Hash::make('logs123'),
-                'roles' => 'vendor',
-                'status' => 'active',
-                'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+            // Vendor sample user moved to vendors table seeding below
         ];
 
         foreach ($users as $user) {
             DB::connection('main')->table('users')->insert($user);
         }
 
-        $this->command->info('Users seeded successfully in MAIN database.');
+        // Seed sample vendor to vendors table
+        DB::connection('main')->table('vendors')->insert([
+            'vendorid' => 'VEN00001',
+            'lastname' => 'Tolentino',
+            'firstname' => 'Kristian Icy',
+            'middlename' => 'B.',
+            'sex' => 'male',
+            'age' => 25,
+            'birthdate' => '1998-01-05',
+            'contactnum' => '09123456793',
+            'email' => 'aicy3987@gmail.com',
+            'address' => 'BLK00 LOT00, Streets Barangay Subdivision City 0123',
+            'password' => Hash::make('logs123'),
+            'roles' => 'vendor',
+            'status' => 'active',
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->command->info('Users and vendors seeded successfully in MAIN database.');
     }
 }

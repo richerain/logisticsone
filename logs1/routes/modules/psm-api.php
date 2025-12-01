@@ -49,14 +49,6 @@ Route::get('/active-vendors', [PSMController::class, 'getActiveVendorsForPurchas
 Route::get('/purchases', [PSMController::class, 'getPurchases']);
 Route::get('/vendor-quotes', [PSMController::class, 'getVendorQuotes']);
 
-// PSM Vendor Quote Routes
-Route::prefix('vendor-quote')->group(function () {
-    Route::get('/', [PSMController::class, 'listQuotes']);
-    Route::post('/', [PSMController::class, 'createQuote']);
-    Route::put('/{id}', [PSMController::class, 'updateQuote']);
-    Route::delete('/{id}', [PSMController::class, 'deleteQuote']);
-    Route::get('/notifications', [PSMController::class, 'listApprovedPurchasesForQuote']);
-    Route::post('/review-from-purchase/{purchaseId}', [PSMController::class, 'reviewPurchaseToQuote']);
-});
+// PSM Vendor Quote Routes moved under vendor session API in web.php
 
 // list of endpoints links with json file output*

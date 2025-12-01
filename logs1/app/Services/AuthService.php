@@ -232,7 +232,8 @@ class AuthService
         $data = [
             'name' => $name,
             'otp' => $otp,
-            'expires_in' => 10
+            'expires_in' => 10,
+            'brand' => 'Microfinancial Logistics I'
         ];
 
         try {

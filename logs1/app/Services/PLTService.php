@@ -74,7 +74,7 @@ class PLTService
                 'track_project_id' => $project->pro_id,
                 'track_log_type' => 'milestone_update',
                 'track_description' => 'Project created successfully',
-                'track_logged_by' => auth()->user()->email ?? 'system',
+                'track_logged_by' => auth()->guard('sws')->user()->email ?? 'system',
             ]);
 
             // Auto-generate default milestones
@@ -150,7 +150,7 @@ class PLTService
                 'track_project_id' => $id,
                 'track_log_type' => 'milestone_update',
                 'track_description' => 'Project details updated',
-                'track_logged_by' => auth()->user()->email ?? 'system',
+                'track_logged_by' => auth()->guard('sws')->user()->email ?? 'system',
             ]);
 
             DB::commit();
