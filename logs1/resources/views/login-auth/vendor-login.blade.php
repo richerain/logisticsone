@@ -76,7 +76,7 @@
                         <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
                     </button>
                     <div class="mt-2 ml-4 text-left">
-                        <a href="/login" class="text-purple-600 hover:underline text-sm">Login My Employee Account?</a>
+                        <a href="/login" class="text-purple-600 hover:underline text-sm">Login Employee Account?</a>
                     </div>
                 </form>
             </div>

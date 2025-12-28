@@ -91,22 +91,14 @@
         </table>
     </div>
     <!-- table end -->
-    <!-- pagination section start -->
-        <div class="mt-4 flex justify-between items-center">
-            <div class="text-sm text-gray-600">
-                Showing 1 to 2 of 2 entries
-            </div>
-            <div class="join">
-                <button class="join-item btn btn-sm">
-                    <i class='bx bxs-chevrons-left'></i>
-                </button>
-                <button class="join-item btn btn-sm">1</button>
-                <button class="join-item btn btn-sm">
-                    <i class='bx bxs-chevrons-right'></i>
-                </button>
-            </div>
+    <div id="quotesPager" class="mt-4 flex justify-between items-center">
+        <div id="quotesPagerInfo" class="text-sm text-gray-600"></div>
+        <div class="join">
+            <button class="join-item btn btn-sm" id="quotesPrevBtn" data-action="prev">Prev</button>
+            <span class="join-item btn btn-sm" id="quotesPageDisplay">1 / 1</span>
+            <button class="join-item btn btn-sm" id="quotesNextBtn" data-action="next">Next</button>
         </div>
-    <!-- pagination section end -->
+    </div>
 </div>
 
 <dialog id="viewApprovedPurchaseModal" class="modal">
@@ -236,6 +228,8 @@ var elements = {
 var currentNotifications = [];
 var currentQuotes = [];
 var quotesLoadingTimer = null;
+let currentQuotesPage = 1;
+const quotesPageSize = 10;
 
 function safeShowLoading() {
     try { if (typeof window !== 'undefined' && typeof window.showLoading === 'function') return window.showLoading(); } catch (e) {}
@@ -499,7 +493,8 @@ function displayQuotes(list) {
 
 function displayQuotes(list) {
     if (!elements.quotesTableBody) return;
-    if (!list || list.length === 0) {
+    const total = (list || []).length;
+    if (!list || total === 0) {
         elements.quotesTableBody.innerHTML = `
             <tr>
                 <td colspan="10" class="px-6 py-8 text-center text-gray-500">
@@ -508,9 +503,15 @@ function displayQuotes(list) {
                 </td>
             </tr>
         `;
+        renderQuotesPager(0, 1);
         return;
     }
-    elements.quotesTableBody.innerHTML = list.map(function(q) {
+    const totalPages = Math.max(1, Math.ceil(total / quotesPageSize));
+    if (currentQuotesPage > totalPages) currentQuotesPage = totalPages;
+    if (currentQuotesPage < 1) currentQuotesPage = 1;
+    const startIdx = (currentQuotesPage - 1) * quotesPageSize;
+    const pageItems = list.slice(startIdx, startIdx + quotesPageSize);
+    elements.quotesTableBody.innerHTML = pageItems.map(function(q) {
         const isInProgress = q.quo_status === 'In-Progress';
         const isCompleted = q.quo_status === 'Completed';
         const isVendorReview = q.quo_status === 'Vendor-Review';
@@ -543,7 +544,29 @@ function displayQuotes(list) {
                "<td>" + actions + "</td>" +
                "</tr>";
     }).join('');
+    renderQuotesPager(total, totalPages);
 }
+
+function renderQuotesPager(total, totalPages){
+    const info = document.getElementById('quotesPagerInfo');
+    const display = document.getElementById('quotesPageDisplay');
+    const start = total === 0 ? 0 : ((currentQuotesPage - 1) * quotesPageSize) + 1;
+    const end = Math.min(currentQuotesPage * quotesPageSize, total);
+    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+    if (display) display.textContent = `${currentQuotesPage} / ${totalPages}`;
+    const prev = document.getElementById('quotesPrevBtn');
+    const next = document.getElementById('quotesNextBtn');
+    if (prev) prev.disabled = currentQuotesPage <= 1;
+    if (next) next.disabled = currentQuotesPage >= totalPages;
+}
+
+document.getElementById('quotesPager').addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-action');
+    if(act === 'prev'){ currentQuotesPage = Math.max(1, currentQuotesPage - 1); displayQuotes(currentQuotes); }
+    if(act === 'next'){ const max = Math.max(1, Math.ceil((currentQuotes.length||0)/quotesPageSize)); currentQuotesPage = Math.min(max, currentQuotesPage + 1); displayQuotes(currentQuotes); }
+});
 
 function viewQuote(id) {
     const q = currentQuotes.find(x => x.id == id);

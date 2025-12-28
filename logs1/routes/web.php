@@ -105,6 +105,24 @@ Route::middleware([
             // If it's a direct browser request, return the full home page with the module loaded
             return view('home');
         })->name('module.load');
+
+Route::get('/alms/assets', [ALMSController::class, 'getAssets'])->name('alms.assets.index');
+Route::get('/alms/assets/{id}', [ALMSController::class, 'showAsset'])->name('alms.assets.show');
+Route::put('/alms/assets/{id}/status', [ALMSController::class, 'updateAssetStatus'])->name('alms.assets.status');
+Route::delete('/alms/assets/{id}', [ALMSController::class, 'deleteAsset'])->name('alms.assets.delete');
+
+        Route::get('/alms/repair-personnel', [ALMSController::class, 'getRepairPersonnel'])->name('alms.repair_personnel.index');
+        Route::post('/alms/repair-personnel', [ALMSController::class, 'storeRepairPersonnel'])->name('alms.repair_personnel.store');
+        Route::delete('/alms/repair-personnel/{id}', [ALMSController::class, 'deleteRepairPersonnel'])->name('alms.repair_personnel.delete');
+        Route::get('/alms/maintenance', [ALMSController::class, 'getMaintenance'])->name('alms.maintenance.index');
+        Route::post('/alms/maintenance', [ALMSController::class, 'storeMaintenance'])->name('alms.maintenance.store');
+        Route::put('/alms/maintenance/{id}/status', [ALMSController::class, 'updateMaintenanceStatus'])->name('alms.maintenance.status');
+        Route::delete('/alms/maintenance/{id}', [ALMSController::class, 'deleteMaintenance'])->name('alms.maintenance.delete');
+
+Route::get('/alms/request-maintenance', [ALMSController::class, 'getRequestMaintenance'])->name('alms.request_maintenance.index');
+Route::post('/alms/request-maintenance', [ALMSController::class, 'storeRequestMaintenance'])->name('alms.request_maintenance.store');
+Route::delete('/alms/request-maintenance/{id}', [ALMSController::class, 'deleteRequestMaintenance'])->name('alms.request_maintenance.delete');
+Route::post('/alms/request-maintenance/{id}/processed', [ALMSController::class, 'markRequestProcessed'])->name('alms.request_maintenance.processed');
     });
 
     Route::middleware(['auth:vendor', 'session.timeout'])->group(function () {

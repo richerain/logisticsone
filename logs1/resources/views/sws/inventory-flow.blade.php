@@ -59,7 +59,14 @@
             </thead>
             <tbody id="flow_table_body"></tbody>
         </table>
-        <div id="flow_pagination" class="flex items-center justify-end gap-2 mt-3"></div>
+    </div>
+    <div id="flowPager" class="flex items-center justify-between mt-3">
+        <div id="flowPagerInfo" class="text-sm text-gray-600"></div>
+        <div class="join">
+            <button class="btn btn-sm join-item" id="flowPrevBtn" data-action="prev">Prev</button>
+            <span class="btn btn-sm join-item" id="flowPageDisplay">1 / 1</span>
+            <button class="btn btn-sm join-item" id="flowNextBtn" data-action="next">Next</button>
+        </div>
     </div>
 </div>
 
@@ -68,6 +75,8 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 const FLOW_API = `${API_BASE_URL}/sws/inventory-flow`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
+let currentFlowPage = 1;
+const flowPageSize = 10;
 
 function flowParams() {
     const range = document.getElementById('flow_quick_range').value;
@@ -117,12 +126,12 @@ async function loadInventoryFlow() {
             return hay.includes(q);
         });
     }
-    const pageSize = 10;
-    window.flowPage = Math.max(1, window.flowPage || 1);
-    const totalPages = Math.max(1, Math.ceil(tx.length / pageSize));
-    if (window.flowPage > totalPages) window.flowPage = totalPages;
-    const startIdx = (window.flowPage - 1) * pageSize;
-    const pageItems = tx.slice(startIdx, startIdx + pageSize);
+    const total = tx.length;
+    const totalPages = Math.max(1, Math.ceil(total / flowPageSize));
+    if (currentFlowPage > totalPages) currentFlowPage = totalPages;
+    if (currentFlowPage < 1) currentFlowPage = 1;
+    const startIdx = (currentFlowPage - 1) * flowPageSize;
+    const pageItems = tx.slice(startIdx, startIdx + flowPageSize);
 
     const rows = pageItems.map(t => `
         <tr>
@@ -146,18 +155,7 @@ async function loadInventoryFlow() {
         ? rows.join('') 
         : '<tr><td colspan="9" class="text-center py-4 text-gray-500">No inventory flows</td></tr>';
 
-    const pager = document.getElementById('flow_pagination');
-    const prevDisabled = window.flowPage <= 1 ? 'opacity-50 cursor-not-allowed' : '';
-    const nextDisabled = window.flowPage >= totalPages ? 'opacity-50 cursor-not-allowed' : '';
-    pager.innerHTML = `
-        <button id="flow_prev" class="px-3 py-1 border rounded ${prevDisabled}"><i class='bx bx-chevron-left'></i></button>
-        <span class="px-2">Page ${window.flowPage} of ${totalPages}</span>
-        <button id="flow_next" class="px-3 py-1 border rounded ${nextDisabled}"><i class='bx bx-chevron-right'></i></button>
-    `;
-    const prevBtn = document.getElementById('flow_prev');
-    const nextBtn = document.getElementById('flow_next');
-    prevBtn.addEventListener('click', () => { if (window.flowPage > 1) { window.flowPage--; loadInventoryFlow(); } });
-    nextBtn.addEventListener('click', () => { if (window.flowPage < totalPages) { window.flowPage++; loadInventoryFlow(); } });
+    renderFlowPager(total, totalPages);
 
     window._flowTransactions = {};
     (tx || []).forEach(t => { window._flowTransactions[t.tra_id] = t; });
@@ -178,6 +176,47 @@ async function loadInventoryFlow() {
         });
     });
 }
+
+function renderFlowPager(total, totalPages){
+    const info = document.getElementById('flowPagerInfo');
+    const display = document.getElementById('flowPageDisplay');
+    const start = total === 0 ? 0 : ((currentFlowPage - 1) * flowPageSize) + 1;
+    const end = Math.min(currentFlowPage * flowPageSize, total);
+    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+    if (display) display.textContent = `${currentFlowPage} / ${totalPages}`;
+    const prev = document.getElementById('flowPrevBtn');
+    const next = document.getElementById('flowNextBtn');
+    if (prev) prev.disabled = currentFlowPage <= 1;
+    if (next) next.disabled = currentFlowPage >= totalPages;
+}
+
+function getFlowFiltered(){
+    let list = (window.flowAllTransactions || []).slice();
+    const statusFilter = document.getElementById('flow_status_filter').value.trim().toLowerCase();
+    const q = document.getElementById('flow_search').value.trim().toLowerCase();
+    if (statusFilter) { list = list.filter(t => (t.status || '').toLowerCase() === statusFilter); }
+    if (q) {
+        list = list.filter(t => {
+            const hay = [
+                t.item ? (t.item.item_name || '') : '',
+                t.type || '',
+                t.reference_id || '',
+                t.from_location ? (t.from_location.loc_name || '') : '',
+                t.to_location ? (t.to_location.loc_name || '') : ''
+            ].join(' ').toLowerCase();
+            return hay.includes(q);
+        });
+    }
+    return list;
+}
+
+document.getElementById('flowPager').addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-action');
+    if(act === 'prev'){ currentFlowPage = Math.max(1, currentFlowPage - 1); loadInventoryFlow(); }
+    if(act === 'next'){ const max = Math.max(1, Math.ceil((getFlowFiltered().length||0)/flowPageSize)); currentFlowPage = Math.min(max, currentFlowPage + 1); loadInventoryFlow(); }
+});
 
 function renderStatusBadge(status) {
     const s = String(status || '').toLowerCase();
@@ -254,8 +293,8 @@ async function renderFlowDetails(t) {
     document.getElementById('flow_view_content').innerHTML = base + itemDetailsHtml;
 }
 
-document.getElementById('flow_status_filter').addEventListener('change', () => loadInventoryFlow());
-document.getElementById('flow_search').addEventListener('input', () => loadInventoryFlow());
+document.getElementById('flow_status_filter').addEventListener('change', () => { currentFlowPage = 1; loadInventoryFlow(); });
+document.getElementById('flow_search').addEventListener('input', () => { currentFlowPage = 1; loadInventoryFlow(); });
 
 document.body.insertAdjacentHTML('beforeend', `
 <div id="flow_view_modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">

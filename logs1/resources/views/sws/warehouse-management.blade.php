@@ -71,6 +71,14 @@
             </table>
         </div>
     </div>
+    <div id="warePager" class="flex items-center justify-between mt-3">
+        <div id="warePagerInfo" class="text-sm text-gray-600"></div>
+        <div class="join">
+            <button class="btn btn-sm join-item" id="warePrevBtn" data-action="prev">Prev</button>
+            <span class="btn btn-sm join-item" id="warePageDisplay">1 / 1</span>
+            <button class="btn btn-sm join-item" id="wareNextBtn" data-action="next">Next</button>
+        </div>
+    </div>
 </div>
 
 <div id="warehouseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
@@ -134,6 +142,8 @@ var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.query
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
 var warehouses = [];
+let currentWarePage = 1;
+const warePageSize = 10;
 
 const els = {
     statWarehouses: document.getElementById('statWarehouses'),
@@ -192,53 +202,79 @@ function renderStats() {
 }
 
 function renderWarehouses() {
-    if (warehouses.length === 0) {
+    const total = warehouses.length;
+    const totalPages = Math.max(1, Math.ceil(total / warePageSize));
+    if (currentWarePage > totalPages) currentWarePage = totalPages;
+    if (currentWarePage < 1) currentWarePage = 1;
+    const startIdx = (currentWarePage - 1) * warePageSize;
+    const pageItems = warehouses.slice(startIdx, startIdx + warePageSize);
+
+    if (pageItems.length === 0) {
         els.tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">No warehouses</td></tr>`;
-        return;
+    } else {
+        els.tableBody.innerHTML = '';
+        pageItems.forEach(w => {
+            const tr = document.createElement('tr');
+            let badgeClass = '';
+            let statusIcon = '';
+            if (w.ware_status === 'active') {
+                badgeClass = 'badge-success';
+                statusIcon = '<i class="bx bx-check-circle mr-1"></i>';
+            } else if (w.ware_status === 'inactive') {
+                badgeClass = 'badge-error';
+                statusIcon = '<i class="bx bx-x-circle mr-1"></i>';
+            } else if (w.ware_status === 'maintenance') {
+                badgeClass = 'badge-warning';
+                statusIcon = '<i class="bx bx-traffic-cone mr-1"></i>';
+            }
+            tr.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${w.ware_id || ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${w.ware_name || ''}</td>
+                <td class="px-6 py-4 whitespace-nowrap"><span class="inline-block max-w-xs truncate" title="${w.ware_location || ''}">${truncate(String(w.ware_location || ''), 28)}</span></td>
+                <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity_used)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity_free)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${formatPercent(w.ware_utilization)}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="badge ${badgeClass} flex items-center justify-center gap-1 px-3 py-2 rounded-full text-sm font-medium">
+                        ${statusIcon}
+                        ${w.ware_status || ''}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex gap-2">
+                        <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="View Detail" data-action="view" data-id="${w.ware_id}"><i class='bx bx-show-alt text-xl'></i></button>
+                        <button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Edit Detail" data-action="edit" data-id="${w.ware_id}"><i class='bx bx-edit text-xl'></i></button>
+                        <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Delete Warehouse" data-action="delete" data-id="${w.ware_id}"><i class='bx bx-trash text-xl'></i></button>
+                    </div>
+                </td>`;
+            els.tableBody.appendChild(tr);
+        });
     }
-    els.tableBody.innerHTML = '';
-    warehouses.forEach(w => {
-        const tr = document.createElement('tr');
-        
-        // Determine badge class and icon based on status
-        let badgeClass = '';
-        let statusIcon = '';
-        
-        if (w.ware_status === 'active') {
-            badgeClass = 'badge-success';
-            statusIcon = '<i class="bx bx-check-circle mr-1"></i>';
-        } else if (w.ware_status === 'inactive') {
-            badgeClass = 'badge-error';
-            statusIcon = '<i class="bx bx-x-circle mr-1"></i>';
-        } else if (w.ware_status === 'maintenance') {
-            badgeClass = 'badge-warning';
-            statusIcon = '<i class="bx bx-traffic-cone mr-1"></i>';
-        }
-        
-        tr.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">${w.ware_id || ''}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${w.ware_name || ''}</td>
-            <td class="px-6 py-4 whitespace-nowrap"><span class="inline-block max-w-xs truncate" title="${w.ware_location || ''}">${truncate(String(w.ware_location || ''), 28)}</span></td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity_used)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatNumber(w.ware_capacity_free)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatPercent(w.ware_utilization)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="badge ${badgeClass} flex items-center justify-center gap-1 px-3 py-2 rounded-full text-sm font-medium">
-                    ${statusIcon}
-                    ${w.ware_status || ''}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex gap-2">
-                    <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="View Detail" data-action="view" data-id="${w.ware_id}"><i class='bx bx-show-alt text-xl'></i></button>
-                    <button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Edit Detail" data-action="edit" data-id="${w.ware_id}"><i class='bx bx-edit text-xl'></i></button>
-                    <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Delete Warehouse" data-action="delete" data-id="${w.ware_id}"><i class='bx bx-trash text-xl'></i></button>
-                </div>
-            </td>`;
-        els.tableBody.appendChild(tr);
-    });
+
+    renderWarePager(total, totalPages);
 }
+
+function renderWarePager(total, totalPages){
+    const info = document.getElementById('warePagerInfo');
+    const display = document.getElementById('warePageDisplay');
+    const start = total === 0 ? 0 : ((currentWarePage - 1) * warePageSize) + 1;
+    const end = Math.min(currentWarePage * warePageSize, total);
+    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+    if (display) display.textContent = `${currentWarePage} / ${totalPages}`;
+    const prev = document.getElementById('warePrevBtn');
+    const next = document.getElementById('wareNextBtn');
+    if (prev) prev.disabled = currentWarePage <= 1;
+    if (next) next.disabled = currentWarePage >= totalPages;
+}
+
+document.getElementById('warePager').addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-action');
+    if(act === 'prev'){ currentWarePage = Math.max(1, currentWarePage - 1); renderWarehouses(); }
+    if(act === 'next'){ const max = Math.max(1, Math.ceil((warehouses.length||0)/warePageSize)); currentWarePage = Math.min(max, currentWarePage + 1); renderWarehouses(); }
+});
 
 function openModal(edit = false, w = null) {
     els.modalTitle.textContent = edit ? 'Edit Warehouse' : 'New Warehouse';

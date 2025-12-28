@@ -75,6 +75,14 @@
             </table>
         </div>
     </div>
+    <div id="vendorsPager" class="flex items-center justify-between mt-3">
+        <div id="vendorsPagerInfo" class="text-sm text-gray-600"></div>
+        <div class="join">
+            <button class="btn btn-sm join-item" id="vendorsPrevBtn" data-action="prev">Prev</button>
+            <span class="btn btn-sm join-item" id="vendorsPageDisplay">1 / 1</span>
+            <button class="btn btn-sm join-item" id="vendorsNextBtn" data-action="next">Next</button>
+        </div>
+    </div>
 </div>
 
 <!-- Add/Edit Vendor Modal -->
@@ -263,6 +271,8 @@ var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.query
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
 var currentVendors = typeof currentVendors !== 'undefined' ? currentVendors : [];
+let currentVendorsPage = 1;
+const vendorsPageSize = 10;
 
 // DOM Elements
 const elements = {
@@ -316,9 +326,9 @@ function initializeEventListeners() {
     const cancelProductModalBtn = document.getElementById('cancelProductModal');
     const productForm = document.getElementById('productForm');
 
-    if (searchInput) searchInput.addEventListener('input', debounce(loadVendors, 500));
-    if (statusFilter) statusFilter.addEventListener('change', loadVendors);
-    if (typeFilter) typeFilter.addEventListener('change', loadVendors);
+    if (searchInput) searchInput.addEventListener('input', debounce(function(){ currentVendorsPage = 1; loadVendors(); }, 500));
+    if (statusFilter) statusFilter.addEventListener('change', function(){ currentVendorsPage = 1; loadVendors(); });
+    if (typeFilter) typeFilter.addEventListener('change', function(){ currentVendorsPage = 1; loadVendors(); });
     if (addVendorBtn) addVendorBtn.addEventListener('click', openAddModal);
     if (addFirstVendorBtn) addFirstVendorBtn.addEventListener('click', openAddModal);
     if (closeModal) closeModal.addEventListener('click', closeVendorModal);
@@ -427,7 +437,9 @@ async function loadStats() {
 }
 
 function displayVendors(vendors) {
-    if (!vendors || vendors.length === 0) {
+    const filtered = getVendorsFiltered(vendors);
+    const total = filtered.length;
+    if (!filtered || total === 0) {
         elements.vendorsTableBody.innerHTML = `
             <tr>
                 <td colspan="8" class="px-6 py-8 text-center text-gray-500">
@@ -438,12 +450,16 @@ function displayVendors(vendors) {
             </tr>
         `;
         if (elements.noVendorsMessage) elements.noVendorsMessage.classList.remove('hidden');
+        renderVendorsPager(0, 1);
         return;
     }
-    
     if (elements.noVendorsMessage) elements.noVendorsMessage.classList.add('hidden');
-    
-    const vendorsHtml = vendors.map(vendor => `
+    const totalPages = Math.max(1, Math.ceil(total / vendorsPageSize));
+    if (currentVendorsPage > totalPages) currentVendorsPage = totalPages;
+    if (currentVendorsPage < 1) currentVendorsPage = 1;
+    const startIdx = (currentVendorsPage - 1) * vendorsPageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + vendorsPageSize);
+    const vendorsHtml = pageItems.map(vendor => `
         <tr class="hover:bg-gray-50 transition-colors" data-vendor-id="${vendor.id}">
             <td class="px-6 py-4 whitespace-nowrap">
                 <span class="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">${vendor.ven_id}</span>
@@ -511,7 +527,50 @@ function displayVendors(vendors) {
     `).join('');
     
     elements.vendorsTableBody.innerHTML = vendorsHtml;
+    renderVendorsPager(total, totalPages);
 }
+
+function renderVendorsPager(total, totalPages){
+    const info = document.getElementById('vendorsPagerInfo');
+    const display = document.getElementById('vendorsPageDisplay');
+    const start = total === 0 ? 0 : ((currentVendorsPage - 1) * vendorsPageSize) + 1;
+    const end = Math.min(currentVendorsPage * vendorsPageSize, total);
+    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+    if (display) display.textContent = `${currentVendorsPage} / ${totalPages}`;
+    const prev = document.getElementById('vendorsPrevBtn');
+    const next = document.getElementById('vendorsNextBtn');
+    if (prev) prev.disabled = currentVendorsPage <= 1;
+    if (next) next.disabled = currentVendorsPage >= totalPages;
+}
+
+function getVendorsFiltered(list){
+    let vendors = (list || []).slice();
+    const q = (elements.searchInput?.value || '').trim().toLowerCase();
+    const statusVal = (elements.statusFilter?.value || '').trim().toLowerCase();
+    const typeVal = (elements.typeFilter?.value || '').trim().toLowerCase();
+    if (statusVal) vendors = vendors.filter(v => (v.ven_status || '').toLowerCase() === statusVal);
+    if (typeVal) vendors = vendors.filter(v => (v.ven_type || '').toLowerCase() === typeVal);
+    if (q) {
+        vendors = vendors.filter(v => {
+            const hay = [
+                v.ven_company_name || '',
+                v.ven_contact_person || '',
+                v.ven_email || ''
+            ].join(' ').toLowerCase();
+            return hay.includes(q);
+        });
+    }
+    return vendors;
+}
+
+document.getElementById('vendorsPager').addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-action');
+    if(act === 'prev'){ currentVendorsPage = Math.max(1, currentVendorsPage - 1); displayVendors(currentVendors); }
+    if(act === 'next'){ const max = Math.max(1, Math.ceil((getVendorsFiltered(currentVendors).length||0)/vendorsPageSize)); currentVendorsPage = Math.min(max, currentVendorsPage + 1); displayVendors(currentVendors); }
+});
+
 
 function displayStats(stats) {
     if (!stats) return;

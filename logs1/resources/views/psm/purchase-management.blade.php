@@ -142,6 +142,14 @@
             </table>
         </div>
     </div>
+    <div id="purchasesPager" class="flex items-center justify-between mt-3">
+        <div id="purchasesPagerInfo" class="text-sm text-gray-600"></div>
+        <div class="join">
+            <button class="btn btn-sm join-item" id="purchasesPrevBtn" data-action="prev">Prev</button>
+            <span class="btn btn-sm join-item" id="purchasesPageDisplay">1 / 1</span>
+            <button class="btn btn-sm join-item" id="purchasesNextBtn" data-action="next">Next</button>
+        </div>
+    </div>
 </div>
 
 <!-- Add/Edit Purchase Modal -->
@@ -341,6 +349,8 @@ var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.query
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
 var currentPurchases = typeof currentPurchases !== 'undefined' ? currentPurchases : [];
+let currentPurchasesPage = 1;
+const purchasesPageSize = 10;
 var currentBudget = null;
 var activeVendors = [];
 var selectedVendor = null;
@@ -868,21 +878,26 @@ function loadStats() {}
 
 function displayPurchases(purchases) {
     if (!elements.purchasesTableBody) return;
-    
-    if (!purchases || purchases.length === 0) {
+    const filtered = getPurchasesFiltered(purchases);
+    const total = filtered.length;
+    if (!filtered || total === 0) {
         elements.purchasesTableBody.innerHTML = `
             <tr>
                 <td colspan="10" class="px-6 py-8 text-center text-gray-500">
                     <i class='bx bxs-purchase-tag text-4xl text-gray-300 mb-3'></i>
                     <p class="text-lg">No purchase orders found</p>
-                    
                 </td>
             </tr>
         `;
+        renderPurchasesPager(0, 1);
         return;
     }
-    
-    const purchasesHtml = purchases.map(purchase => {
+    const totalPages = Math.max(1, Math.ceil(total / purchasesPageSize));
+    if (currentPurchasesPage > totalPages) currentPurchasesPage = totalPages;
+    if (currentPurchasesPage < 1) currentPurchasesPage = 1;
+    const startIdx = (currentPurchasesPage - 1) * purchasesPageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + purchasesPageSize);
+    const purchasesHtml = pageItems.map(purchase => {
         const items = Array.isArray(purchase.pur_name_items) ? purchase.pur_name_items : [];
         const itemsString = items.slice(0, 3).map(item => 
             typeof item === 'object' ? item.name : item
@@ -978,7 +993,56 @@ function displayPurchases(purchases) {
     `}).join('');
     
     elements.purchasesTableBody.innerHTML = purchasesHtml;
+    renderPurchasesPager(total, totalPages);
 }
+
+function renderPurchasesPager(total, totalPages){
+    const info = document.getElementById('purchasesPagerInfo');
+    const display = document.getElementById('purchasesPageDisplay');
+    const start = total === 0 ? 0 : ((currentPurchasesPage - 1) * purchasesPageSize) + 1;
+    const end = Math.min(currentPurchasesPage * purchasesPageSize, total);
+    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+    if (display) display.textContent = `${currentPurchasesPage} / ${totalPages}`;
+    const prev = document.getElementById('purchasesPrevBtn');
+    const next = document.getElementById('purchasesNextBtn');
+    if (prev) prev.disabled = currentPurchasesPage <= 1;
+    if (next) next.disabled = currentPurchasesPage >= totalPages;
+}
+
+function getPurchasesFiltered(list){
+    let purchases = (list || []).slice();
+    const statusVal = (elements.statusFilter?.value || '').trim().toLowerCase();
+    const typeVal = (elements.vendorTypeFilter?.value || '').trim().toLowerCase();
+    const q = (elements.searchInput?.value || '').trim().toLowerCase();
+    if (statusVal) purchases = purchases.filter(p => (p.pur_status || '').toLowerCase() === statusVal);
+    if (typeVal) purchases = purchases.filter(p => (p.pur_ven_type || '').toLowerCase() === typeVal);
+    if (q) {
+        purchases = purchases.filter(p => {
+            const items = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? (i.name || '') : (i || '')).join(' ') : '';
+            const hay = [
+                p.pur_id || '',
+                p.pur_company_name || '',
+                items,
+                p.pur_order_by || '',
+                p.pur_approved_by || ''
+            ].join(' ').toLowerCase();
+            return hay.includes(q);
+        });
+    }
+    return purchases;
+}
+
+document.getElementById('purchasesPager').addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-action');
+    if(act === 'prev'){ currentPurchasesPage = Math.max(1, currentPurchasesPage - 1); displayPurchases(currentPurchases); }
+    if(act === 'next'){ const max = Math.max(1, Math.ceil((getPurchasesFiltered(currentPurchases).length||0)/purchasesPageSize)); currentPurchasesPage = Math.min(max, currentPurchasesPage + 1); displayPurchases(currentPurchases); }
+});
+
+if (elements.searchInput) elements.searchInput.addEventListener('input', function(){ currentPurchasesPage = 1; displayPurchases(currentPurchases); });
+if (elements.statusFilter) elements.statusFilter.addEventListener('change', function(){ currentPurchasesPage = 1; displayPurchases(currentPurchases); });
+if (elements.vendorTypeFilter) elements.vendorTypeFilter.addEventListener('change', function(){ currentPurchasesPage = 1; displayPurchases(currentPurchases); });
 
 
 

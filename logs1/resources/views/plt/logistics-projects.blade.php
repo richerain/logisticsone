@@ -92,10 +92,13 @@
                 </tbody>
             </table>
         </div>
-        
-        <!-- Pagination -->
-        <div id="paginationContainer" class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-            <!-- Pagination will be inserted here by JavaScript -->
+    </div>
+    <div id="projectsPager" class="flex items-center justify-between mt-4">
+        <div id="projectsPagerInfo" class="text-sm text-gray-600"></div>
+        <div class="join">
+            <button class="btn btn-sm join-item" id="projectsPrevBtn" data-action="prev">Prev</button>
+            <span class="btn btn-sm join-item" id="projectsPageDisplay">1 / 1</span>
+            <button class="btn btn-sm join-item" id="projectsNextBtn" data-action="next">Next</button>
         </div>
     </div>
 </div>
@@ -278,6 +281,8 @@ var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getI
 var projects = [];
 var currentPage = 1;
 var totalPages = 1;
+var totalItems = 0;
+var perPage = 10;
 
 const els = {
     // Stats
@@ -295,7 +300,7 @@ const els = {
     
     // Table
     tableBody: document.getElementById('projectsTableBody'),
-    paginationContainer: document.getElementById('paginationContainer'),
+    projectsPager: document.getElementById('projectsPager'),
     
     // Modals
     viewProjectModal: document.getElementById('viewProjectModal'),
@@ -472,8 +477,10 @@ async function loadProjects(page = 1) {
             projects = result.data.data || [];
             currentPage = result.data.current_page || 1;
             totalPages = result.data.last_page || 1;
+            totalItems = typeof result.data.total === 'number' ? result.data.total : (projects.length || 0);
+            perPage = typeof result.data.per_page === 'number' ? result.data.per_page : perPage;
             renderProjects();
-            renderPagination();
+            renderProjectsPager(totalItems, totalPages);
         } else {
             throw new Error(result.message);
         }
@@ -551,70 +558,17 @@ function renderProjects() {
     });
 }
 
-function renderPagination() {
-    if (totalPages <= 1) {
-        els.paginationContainer.innerHTML = '';
-        return;
-    }
-
-    let paginationHTML = `
-        <div class="flex items-center justify-between">
-            <div class="flex justify-between flex-1 sm:hidden">
-                ${currentPage > 1 ? `<a href="#" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 pagination-link" data-page="${currentPage - 1}">Previous</a>` : ''}
-                ${currentPage < totalPages ? `<a href="#" class="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 pagination-link" data-page="${currentPage + 1}">Next</a>` : ''}
-            </div>
-            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-sm text-gray-700">
-                        Showing <span class="font-medium">${((currentPage - 1) * 10) + 1}</span> to <span class="font-medium">${Math.min(currentPage * 10, projects.length + ((currentPage - 1) * 10))}</span> of <span class="font-medium">${totalPages * 10}</span> results
-                    </p>
-                </div>
-                <div>
-                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-    `;
-
-    // Previous button
-    if (currentPage > 1) {
-        paginationHTML += `
-            <a href="#" class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 pagination-link" data-page="${currentPage - 1}">
-                <span class="sr-only">Previous</span>
-                <i class='bx bx-chevron-left'></i>
-            </a>
-        `;
-    }
-
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            const isActive = i === currentPage;
-            paginationHTML += `
-                <a href="#" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold ${isActive ? 'bg-blue-600 text-white focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600' : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'} pagination-link" data-page="${i}">
-                    ${i}
-                </a>
-            `;
-        } else if (i === currentPage - 2 || i === currentPage + 2) {
-            paginationHTML += `<span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">...</span>`;
-        }
-    }
-
-    // Next button
-    if (currentPage < totalPages) {
-        paginationHTML += `
-            <a href="#" class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 pagination-link" data-page="${currentPage + 1}">
-                <span class="sr-only">Next</span>
-                <i class='bx bx-chevron-right'></i>
-            </a>
-        `;
-    }
-
-    paginationHTML += `
-                    </nav>
-                </div>
-            </div>
-        </div>
-    `;
-
-    els.paginationContainer.innerHTML = paginationHTML;
+function renderProjectsPager(total, pages) {
+    const info = document.getElementById('projectsPagerInfo');
+    const display = document.getElementById('projectsPageDisplay');
+    const start = total === 0 ? 0 : ((currentPage - 1) * perPage) + 1;
+    const end = Math.min(currentPage * perPage, total);
+    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+    if (display) display.textContent = `${currentPage} / ${Math.max(1, pages)}`;
+    const prev = document.getElementById('projectsPrevBtn');
+    const next = document.getElementById('projectsNextBtn');
+    if (prev) prev.disabled = currentPage <= 1;
+    if (next) next.disabled = currentPage >= pages;
 }
 
 function openProjectModal(edit = false, project = null) {
@@ -1089,16 +1043,14 @@ function handleTableClick(e) {
     }
 }
 
-function handlePaginationClick(e) {
-    e.preventDefault();
-    const link = e.target.closest('.pagination-link');
-    if (link) {
-        const page = parseInt(link.dataset.page);
-        if (page && page !== currentPage) {
-            loadProjects(page);
-        }
-    }
-}
+// Pager interactions
+document.getElementById('projectsPager').addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-action');
+    if(act === 'prev' && currentPage > 1){ loadProjects(currentPage - 1); }
+    if(act === 'next' && currentPage < totalPages){ loadProjects(currentPage + 1); }
+});
 
 function initLogisticsProjects() {
     // Event listeners for buttons
@@ -1119,7 +1071,6 @@ function initLogisticsProjects() {
     
     // Table interactions
     els.tableBody.addEventListener('click', handleTableClick);
-    els.paginationContainer.addEventListener('click', handlePaginationClick);
     els.closeViewProjectModal && els.closeViewProjectModal.addEventListener('click', closeViewProjectModal);
     els.closeMilestoneModal && els.closeMilestoneModal.addEventListener('click', closeMilestoneModal);
     els.addMilestoneBtn && els.addMilestoneBtn.addEventListener('click', () => openMilestoneForm(false));

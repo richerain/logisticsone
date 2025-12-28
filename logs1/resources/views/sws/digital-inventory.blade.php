@@ -141,13 +141,13 @@
                 </tr>
             </tbody>
         </table>
-        <div class="flex items-center justify-between mt-3" id="di_pagination">
-            <div class="text-sm text-gray-600" id="di_page_info"></div>
-            <div class="flex items-center gap-2">
-                <button id="di_prev" class="px-3 py-1 bg-gray-200 rounded">Prev</button>
-                <div id="di_pages" class="flex items-center gap-1"></div>
-                <button id="di_next" class="px-3 py-1 bg-gray-200 rounded">Next</button>
-            </div>
+    </div>
+    <div id="diPager" class="flex items-center justify-between mt-3">
+        <div id="diPagerInfo" class="text-sm text-gray-600"></div>
+        <div class="join">
+            <button class="btn btn-sm join-item" id="diPrevBtn" data-action="prev">Prev</button>
+            <span class="btn btn-sm join-item" id="diPageDisplay">1 / 1</span>
+            <button class="btn btn-sm join-item" id="diNextBtn" data-action="next">Next</button>
         </div>
     </div>
     <!-- digital inventory main table area section end -->
@@ -521,6 +521,8 @@ var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.query
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
 var inventoryItems = [];
+let currentDiPage = 1;
+const diPageSize = 10;
 var categories = [];
 var locations = [];
 
@@ -827,7 +829,8 @@ function renderInventoryItems() {
             return hay.includes(q);
         });
     }
-    if (filtered.length === 0) {
+    const total = filtered.length;
+    if (total === 0) {
         els.inventoryTableBody.innerHTML = `
             <tr>
                 <td colspan="12" class="text-center py-4 text-gray-500">
@@ -835,16 +838,14 @@ function renderInventoryItems() {
                 </td>
             </tr>
         `;
+        renderDiPager(0, 1);
         return;
     }
-    
-    // Pagination
-    const pageSize = 10;
-    window.diPage = Math.max(1, window.diPage || 1);
-    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-    if (window.diPage > totalPages) window.diPage = totalPages;
-    const startIdx = (window.diPage - 1) * pageSize;
-    const pageItems = filtered.slice(startIdx, startIdx + pageSize);
+    const totalPages = Math.max(1, Math.ceil(total / diPageSize));
+    if (currentDiPage > totalPages) currentDiPage = totalPages;
+    if (currentDiPage < 1) currentDiPage = 1;
+    const startIdx = (currentDiPage - 1) * diPageSize;
+    const pageItems = filtered.slice(startIdx, startIdx + diPageSize);
 
     let html = '';
     pageItems.forEach(item => {
@@ -904,32 +905,7 @@ function renderInventoryItems() {
     });
     
     els.inventoryTableBody.innerHTML = html;
-    // Render pagination
-    const info = document.getElementById('di_page_info');
-    const pagesEl = document.getElementById('di_pages');
-    const prevBtn = document.getElementById('di_prev');
-    const nextBtn = document.getElementById('di_next');
-    if (info) info.textContent = `Showing ${filtered.length === 0 ? 0 : (startIdx + 1)}-${Math.min(startIdx + pageSize, filtered.length)} of ${filtered.length}`;
-    if (pagesEl) {
-        let phtml = '';
-        const maxButtons = Math.min(totalPages, 7);
-        let startPage = Math.max(1, window.diPage - Math.floor(maxButtons / 2));
-        if (startPage + maxButtons - 1 > totalPages) startPage = Math.max(1, totalPages - maxButtons + 1);
-        for (let p = startPage; p <= Math.min(totalPages, startPage + maxButtons - 1); p++) {
-            const active = p === window.diPage ? 'bg-gray-300' : 'bg-gray-200';
-            phtml += `<button class="px-3 py-1 ${active} rounded" data-page="${p}">${p}</button>`;
-        }
-        pagesEl.innerHTML = phtml;
-        pagesEl.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { window.diPage = parseInt(b.getAttribute('data-page')); renderInventoryItems(); }));
-    }
-    if (prevBtn) {
-        prevBtn.disabled = window.diPage <= 1;
-        prevBtn.onclick = () => { if (window.diPage > 1) { window.diPage--; renderInventoryItems(); } };
-    }
-    if (nextBtn) {
-        nextBtn.disabled = window.diPage >= totalPages;
-        nextBtn.onclick = () => { if (window.diPage < totalPages) { window.diPage++; renderInventoryItems(); } };
-    }
+    renderDiPager(total, totalPages);
     
     // Add event listeners to action buttons
     document.querySelectorAll('.view-item-btn').forEach(btn => {
@@ -944,6 +920,43 @@ function renderInventoryItems() {
         btn.addEventListener('click', () => deleteItem(btn.dataset.id));
     });
 }
+
+function renderDiPager(total, totalPages){
+    const info = document.getElementById('diPagerInfo');
+    const display = document.getElementById('diPageDisplay');
+    const start = total === 0 ? 0 : ((currentDiPage - 1) * diPageSize) + 1;
+    const end = Math.min(currentDiPage * diPageSize, total);
+    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+    if (display) display.textContent = `${currentDiPage} / ${totalPages}`;
+    const prev = document.getElementById('diPrevBtn');
+    const next = document.getElementById('diNextBtn');
+    if (prev) prev.disabled = currentDiPage <= 1;
+    if (next) next.disabled = currentDiPage >= totalPages;
+}
+
+function getDiFiltered(){
+    let filtered = (inventoryItems || []).slice();
+    const statusVal = (window.diActiveStatus || '').trim();
+    const q = (els.diSearch?.value || '').trim().toLowerCase();
+    if (statusVal) {
+        filtered = filtered.filter(i => (i.status || '').toLowerCase() === statusVal.toLowerCase());
+    }
+    if (q) {
+        filtered = filtered.filter(i => {
+            const hay = [i.item_name || '', i.item_code || '', i.category || '', i.item_stored_from || ''].join(' ').toLowerCase();
+            return hay.includes(q);
+        });
+    }
+    return filtered;
+}
+
+document.getElementById('diPager').addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-action');
+    if(act === 'prev'){ currentDiPage = Math.max(1, currentDiPage - 1); renderInventoryItems(); }
+    if(act === 'next'){ const max = Math.max(1, Math.ceil((getDiFiltered().length||0)/diPageSize)); currentDiPage = Math.min(max, currentDiPage + 1); renderInventoryItems(); }
+});
 
 // Categories Functions
 async function loadCategories() {
@@ -1455,14 +1468,14 @@ function initDigitalInventory() {
     els.editItemForm.addEventListener('submit', updateItem);
 
     // Filters
-    els.diSearch.addEventListener('input', renderInventoryItems);
+    els.diSearch.addEventListener('input', () => { currentDiPage = 1; renderInventoryItems(); });
     document.querySelectorAll('[data-di-status]').forEach(btn => {
         btn.addEventListener('click', () => {
             const val = btn.getAttribute('data-di-status');
             window.diActiveStatus = val;
             document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
             btn.classList.add('bg-gray-200');
-            renderInventoryItems();
+            currentDiPage = 1; renderInventoryItems();
         });
     });
     // Stat cards toggle filter
@@ -1470,19 +1483,19 @@ function initDigitalInventory() {
         window.diActiveStatus = 'Low Stock';
         document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
         const target = document.querySelector('[data-di-status="Low Stock"]'); if (target) target.classList.add('bg-gray-200');
-        renderInventoryItems();
+        currentDiPage = 1; renderInventoryItems();
     });
     document.getElementById('di_card_out').addEventListener('click', () => {
         window.diActiveStatus = 'Out of Stock';
         document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
         const target = document.querySelector('[data-di-status="Out of Stock"]'); if (target) target.classList.add('bg-gray-200');
-        renderInventoryItems();
+        currentDiPage = 1; renderInventoryItems();
     });
     document.getElementById('di_card_total').addEventListener('click', () => {
         window.diActiveStatus = '';
         document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
         const target = document.querySelector('[data-di-status=""]'); if (target) target.classList.add('bg-gray-200');
-        renderInventoryItems();
+        currentDiPage = 1; renderInventoryItems();
     });
 }
 
