@@ -14,7 +14,7 @@ Route::get('/debug/psm', function () {
         'timestamp' => now(),
         'database_connections' => [],
         'routes' => [],
-        'models' => []
+        'models' => [],
     ];
 
     // Check database connections
@@ -24,7 +24,7 @@ Route::get('/debug/psm', function () {
         $debugInfo['vendor_count'] = DB::connection('psm')->table('psm_vendor')->count();
         $debugInfo['product_count'] = DB::connection('psm')->table('psm_product')->count();
     } catch (\Exception $e) {
-        $debugInfo['database_connections']['psm'] = 'Failed: ' . $e->getMessage();
+        $debugInfo['database_connections']['psm'] = 'Failed: '.$e->getMessage();
     }
 
     // Check if models exist

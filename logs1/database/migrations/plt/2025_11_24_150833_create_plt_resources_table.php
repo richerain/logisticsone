@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('res_estimated_cost', 10, 2)->nullable();
             $table->text('res_notes')->nullable();
             $table->timestamps();
-            
+
             $table->index('res_project_id');
         });
     }

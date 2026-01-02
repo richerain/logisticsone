@@ -2,15 +2,17 @@
 
 namespace App\Models\PLT;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class TrackingLog extends Model
 {
     use HasFactory;
 
     protected $connection = 'plt';
+
     protected $table = 'plt_tracking_logs';
+
     protected $primaryKey = 'track_id';
 
     protected $fillable = [

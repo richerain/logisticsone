@@ -10,7 +10,9 @@ class Product extends Model
     use HasFactory;
 
     protected $connection = 'psm';
+
     protected $table = 'psm_product';
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -24,13 +26,13 @@ class Product extends Model
         'prod_expiration',
         'prod_desc',
         'prod_module_from',
-        'prod_submodule_from'
+        'prod_submodule_from',
     ];
 
     protected $casts = [
         'prod_price' => 'decimal:2',
         'prod_stock' => 'integer',
-        'prod_expiration' => 'date'
+        'prod_expiration' => 'date',
     ];
 
     /**

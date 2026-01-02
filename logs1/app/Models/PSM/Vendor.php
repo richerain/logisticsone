@@ -10,7 +10,9 @@ class Vendor extends Model
     use HasFactory;
 
     protected $connection = 'psm';
+
     protected $table = 'psm_vendor';
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -26,14 +28,14 @@ class Vendor extends Model
         'ven_status',
         'ven_desc',
         'ven_module_from',
-        'ven_submodule_from'
+        'ven_submodule_from',
     ];
 
     protected $casts = [
         'ven_rating' => 'integer',
         'ven_product' => 'integer',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -65,14 +67,14 @@ class Vendor extends Model
      */
     public function scopeSearch($query, $search)
     {
-        if (!$search) {
+        if (! $search) {
             return $query;
         }
-        
+
         return $query->where(function ($q) use ($search) {
             $q->where('ven_company_name', 'like', "%{$search}%")
-              ->orWhere('ven_contact_person', 'like', "%{$search}%")
-              ->orWhere('ven_email', 'like', "%{$search}%");
+                ->orWhere('ven_contact_person', 'like', "%{$search}%")
+                ->orWhere('ven_email', 'like', "%{$search}%");
         });
     }
 }

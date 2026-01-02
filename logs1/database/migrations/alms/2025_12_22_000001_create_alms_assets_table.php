@@ -10,7 +10,7 @@ return new class extends Migration
 
     public function up(): void
     {
-        if (!Schema::connection('alms')->hasTable('alms_assets')) {
+        if (! Schema::connection('alms')->hasTable('alms_assets')) {
             Schema::connection('alms')->create('alms_assets', function (Blueprint $table) {
                 $table->id();
                 $table->string('asset_code', 20)->unique();

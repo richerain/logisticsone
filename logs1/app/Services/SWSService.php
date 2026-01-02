@@ -19,17 +19,19 @@ class SWSService
     {
         try {
             $items = $this->swsRepository->getAllItems();
+
             return [
                 'success' => true,
                 'data' => $items,
-                'message' => 'Items retrieved successfully'
+                'message' => 'Items retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving items: ' . $e->getMessage());
+            Log::error('Error retrieving items: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve items'
+                'message' => 'Failed to retrieve items',
             ];
         }
     }
@@ -42,20 +44,22 @@ class SWSService
                 return [
                     'success' => true,
                     'data' => $item,
-                    'message' => 'Item retrieved successfully'
+                    'message' => 'Item retrieved successfully',
                 ];
             }
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Item not found'
+                'message' => 'Item not found',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving item: ' . $e->getMessage());
+            Log::error('Error retrieving item: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to retrieve item'
+                'message' => 'Failed to retrieve item',
             ];
         }
     }
@@ -67,25 +71,26 @@ class SWSService
 
             // Generate SKU if not provided
             if (empty($data['item_stock_keeping_unit'])) {
-                $data['item_stock_keeping_unit'] = 'SKU-' . date('YmdHis') . rand(100, 999);
+                $data['item_stock_keeping_unit'] = 'SKU-'.date('YmdHis').rand(100, 999);
             }
 
             $item = $this->swsRepository->createItem($data);
-            
+
             DB::connection('sws')->commit();
 
             return [
                 'success' => true,
                 'data' => $item,
-                'message' => 'Item created successfully'
+                'message' => 'Item created successfully',
             ];
         } catch (\Exception $e) {
             DB::connection('sws')->rollBack();
-            Log::error('Error creating item: ' . $e->getMessage());
+            Log::error('Error creating item: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to create item'
+                'message' => 'Failed to create item',
             ];
         }
     }
@@ -96,29 +101,32 @@ class SWSService
             DB::connection('sws')->beginTransaction();
 
             $item = $this->swsRepository->updateItem($id, $data);
-            
+
             if ($item) {
                 DB::connection('sws')->commit();
+
                 return [
                     'success' => true,
                     'data' => $item,
-                    'message' => 'Item updated successfully'
+                    'message' => 'Item updated successfully',
                 ];
             }
 
             DB::connection('sws')->rollBack();
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Item not found'
+                'message' => 'Item not found',
             ];
         } catch (\Exception $e) {
             DB::connection('sws')->rollBack();
-            Log::error('Error updating item: ' . $e->getMessage());
+            Log::error('Error updating item: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to update item'
+                'message' => 'Failed to update item',
             ];
         }
     }
@@ -129,26 +137,29 @@ class SWSService
             DB::connection('sws')->beginTransaction();
 
             $result = $this->swsRepository->deleteItem($id);
-            
+
             if ($result) {
                 DB::connection('sws')->commit();
+
                 return [
                     'success' => true,
-                    'message' => 'Item deleted successfully'
+                    'message' => 'Item deleted successfully',
                 ];
             }
 
             DB::connection('sws')->rollBack();
+
             return [
                 'success' => false,
-                'message' => 'Item not found'
+                'message' => 'Item not found',
             ];
         } catch (\Exception $e) {
             DB::connection('sws')->rollBack();
-            Log::error('Error deleting item: ' . $e->getMessage());
+            Log::error('Error deleting item: '.$e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'Failed to delete item'
+                'message' => 'Failed to delete item',
             ];
         }
     }
@@ -157,22 +168,24 @@ class SWSService
     {
         try {
             $stats = $this->swsRepository->getInventoryStats();
+
             return [
                 'success' => true,
                 'data' => $stats,
-                'message' => 'Inventory stats retrieved successfully'
+                'message' => 'Inventory stats retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving inventory stats: ' . $e->getMessage());
+            Log::error('Error retrieving inventory stats: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [
                     'total_items' => 0,
                     'total_value' => 0,
                     'low_stock_items' => 0,
-                    'out_of_stock_items' => 0
+                    'out_of_stock_items' => 0,
                 ],
-                'message' => 'Failed to retrieve inventory stats'
+                'message' => 'Failed to retrieve inventory stats',
             ];
         }
     }
@@ -181,15 +194,16 @@ class SWSService
     {
         try {
             $stockLevels = $this->swsRepository->getStockLevelsByCategory();
+
             return [
                 'success' => true,
                 'data' => $stockLevels,
-                'message' => 'Stock levels by category retrieved successfully'
+                'message' => 'Stock levels by category retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving stock levels by category: ' . $e->getMessage());
-            Log::error('Error trace: ' . $e->getTraceAsString());
-            
+            Log::error('Error retrieving stock levels by category: '.$e->getMessage());
+            Log::error('Error trace: '.$e->getTraceAsString());
+
             // Return default data for the 4 categories even if there's an error
             $defaultCategories = [
                 ['name' => 'Equipment', 'utilization' => 0, 'total_quantity' => 0, 'max_capacity' => 100],
@@ -197,11 +211,11 @@ class SWSService
                 ['name' => 'Furniture', 'utilization' => 0, 'total_quantity' => 0, 'max_capacity' => 100],
                 ['name' => 'Automotive', 'utilization' => 0, 'total_quantity' => 0, 'max_capacity' => 100],
             ];
-            
+
             return [
                 'success' => true,
                 'data' => $defaultCategories,
-                'message' => 'Using default category data'
+                'message' => 'Using default category data',
             ];
         }
     }
@@ -210,37 +224,40 @@ class SWSService
     {
         try {
             $items = $this->swsRepository->getItemsWithStockInfo();
+
             return [
                 'success' => true,
                 'data' => $items,
-                'message' => 'Items with stock info retrieved successfully'
+                'message' => 'Items with stock info retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving items with stock info: ' . $e->getMessage());
+            Log::error('Error retrieving items with stock info: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve items with stock info'
+                'message' => 'Failed to retrieve items with stock info',
             ];
         }
     }
-
 
     public function getAllCategories()
     {
         try {
             $categories = $this->swsRepository->getAllCategories();
+
             return [
                 'success' => true,
                 'data' => $categories,
-                'message' => 'Categories retrieved successfully'
+                'message' => 'Categories retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving categories: ' . $e->getMessage());
+            Log::error('Error retrieving categories: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve categories'
+                'message' => 'Failed to retrieve categories',
             ];
         }
     }
@@ -249,17 +266,19 @@ class SWSService
     {
         try {
             $locations = $this->swsRepository->getAllLocations();
+
             return [
                 'success' => true,
                 'data' => $locations,
-                'message' => 'Locations retrieved successfully'
+                'message' => 'Locations retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving locations: ' . $e->getMessage());
+            Log::error('Error retrieving locations: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve locations'
+                'message' => 'Failed to retrieve locations',
             ];
         }
     }
@@ -269,20 +288,22 @@ class SWSService
         try {
             $summary = $this->swsRepository->getInventoryFlowSummary();
             $transactions = $this->swsRepository->getRecentTransactions(100, $filters);
+
             return [
                 'success' => true,
                 'data' => [
                     'summary' => $summary,
                     'transactions' => $transactions,
                 ],
-                'message' => 'Inventory flow retrieved successfully'
+                'message' => 'Inventory flow retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving inventory flow: ' . $e->getMessage());
+            Log::error('Error retrieving inventory flow: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve inventory flow'
+                'message' => 'Failed to retrieve inventory flow',
             ];
         }
     }
@@ -291,19 +312,20 @@ class SWSService
     {
         try {
             $data = $this->swsRepository->getInventoryFlowReportData($filters);
+
             return [
                 'success' => true,
                 'data' => $data,
-                'message' => 'Inventory flow report data retrieved successfully'
+                'message' => 'Inventory flow report data retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error retrieving inventory flow report data: ' . $e->getMessage());
+            Log::error('Error retrieving inventory flow report data: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve inventory flow report data'
+                'message' => 'Failed to retrieve inventory flow report data',
             ];
         }
     }
-
 }

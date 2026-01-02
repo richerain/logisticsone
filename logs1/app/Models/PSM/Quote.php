@@ -10,7 +10,9 @@ class Quote extends Model
     use HasFactory;
 
     protected $connection = 'psm';
+
     protected $table = 'psm_quote';
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -27,7 +29,7 @@ class Quote extends Model
         'quo_department_from',
         'quo_module_from',
         'quo_submodule_from',
-        'quo_purchase_id'
+        'quo_purchase_id',
     ];
 
     protected $casts = [
@@ -37,6 +39,6 @@ class Quote extends Model
         'quo_delivery_date_from' => 'date',
         'quo_delivery_date_to' => 'date',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 }

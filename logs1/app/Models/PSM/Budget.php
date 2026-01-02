@@ -10,7 +10,9 @@ class Budget extends Model
     use HasFactory;
 
     protected $connection = 'psm';
+
     protected $table = 'psm_budget';
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -26,7 +28,7 @@ class Budget extends Model
         'bud_for_department',
         'bud_for_module',
         'bud_for_submodule',
-        'bud_desc'
+        'bud_desc',
     ];
 
     protected $casts = [
@@ -37,7 +39,7 @@ class Budget extends Model
         'bud_valid_from' => 'date',
         'bud_valid_to' => 'date',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -46,7 +48,7 @@ class Budget extends Model
     public function calculateHealthStatus()
     {
         $percentageUsed = ($this->bud_spent_amount / $this->bud_allocated_amount) * 100;
-        
+
         if ($percentageUsed > 100) {
             return 'Exceeded';
         } elseif ($percentageUsed > 80) {
@@ -76,7 +78,7 @@ class Budget extends Model
             'Healthy' => 'text-green-600 bg-green-100',
             'Stable' => 'text-yellow-600 bg-yellow-100',
             'Alert' => 'text-orange-600 bg-orange-100',
-            'Exceeded' => 'text-red-600 bg-red-100'
+            'Exceeded' => 'text-red-600 bg-red-100',
         ];
 
         return $colors[$this->bud_amount_status_health] ?? 'text-gray-600 bg-gray-100';
@@ -91,7 +93,7 @@ class Budget extends Model
             'Healthy' => 'bx-check-circle',
             'Stable' => 'bx-info-circle',
             'Alert' => 'bx-error',
-            'Exceeded' => 'bx-x-circle'
+            'Exceeded' => 'bx-x-circle',
         ];
 
         return $icons[$this->bud_amount_status_health] ?? 'bx-question-mark';
@@ -135,7 +137,7 @@ class Budget extends Model
     public function scopeByDepartmentModule($query, $department, $module, $submodule)
     {
         return $query->where('bud_for_department', $department)
-                    ->where('bud_for_module', $module)
-                    ->where('bud_for_submodule', $submodule);
+            ->where('bud_for_module', $module)
+            ->where('bud_for_submodule', $submodule);
     }
 }

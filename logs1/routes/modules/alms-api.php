@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ALMSController;
+use Illuminate\Support\Facades\Route;
 
 // ALMS Module API Routes
 Route::get('/assets', [ALMSController::class, 'getAssets']);
@@ -14,7 +14,7 @@ Route::get('/test', function () {
         'status' => 'active',
         'submodules' => [
             'Asset Management',
-            'Maintenance Management'
-        ]
+            'Maintenance Management',
+        ],
     ]);
 });

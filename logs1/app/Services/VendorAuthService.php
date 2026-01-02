@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Repositories\VendorRepository;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class VendorAuthService
 {
@@ -23,7 +23,7 @@ class VendorAuthService
     {
         $vendor = $this->vendors->findByEmail($credentials['email']);
 
-        if (!$vendor || !Hash::check($credentials['password'], $vendor->password)) {
+        if (! $vendor || ! Hash::check($credentials['password'], $vendor->password)) {
             return ['success' => false, 'message' => 'Invalid credentials'];
         }
 
@@ -40,31 +40,42 @@ class VendorAuthService
             'success' => true,
             'message' => 'OTP sent to your email',
             'email' => $vendor->email,
-            'requires_otp' => true
+            'requires_otp' => true,
         ];
     }
 
     public function sendOtp($email)
     {
         $vendor = $this->vendors->findByEmail($email);
-        if (!$vendor) { return ['success' => false, 'message' => 'Vendor not found']; }
+        if (! $vendor) {
+            return ['success' => false, 'message' => 'Vendor not found'];
+        }
 
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $vendor->update(['otp' => $otp, 'otp_expires_at' => Carbon::now()->addMinutes(10)]);
         Log::info("Vendor OTP regenerated for {$vendor->email}: {$otp}, expires at: {$vendor->otp_expires_at}");
         $this->sendOtpEmail($vendor->email, $otp, $vendor->firstname);
+
         return ['success' => true, 'message' => 'OTP sent successfully', 'email' => $vendor->email];
     }
 
     public function verifyOtp($email, $otp)
     {
         $vendor = $this->vendors->findByEmail($email);
-        if (!$vendor) { return ['success' => false, 'message' => 'Vendor not found']; }
+        if (! $vendor) {
+            return ['success' => false, 'message' => 'Vendor not found'];
+        }
 
         Log::info("Vendor OTP verification attempt for {$email}");
-        if (!$vendor->otp) { return ['success' => false, 'message' => 'No OTP found. Please request a new one.']; }
-        if ($vendor->otp !== $otp) { return ['success' => false, 'message' => 'Invalid OTP code']; }
-        if (!$vendor->otp_expires_at || Carbon::now()->gt($vendor->otp_expires_at)) { return ['success' => false, 'message' => 'OTP has expired. Please request a new one.']; }
+        if (! $vendor->otp) {
+            return ['success' => false, 'message' => 'No OTP found. Please request a new one.'];
+        }
+        if ($vendor->otp !== $otp) {
+            return ['success' => false, 'message' => 'Invalid OTP code'];
+        }
+        if (! $vendor->otp_expires_at || Carbon::now()->gt($vendor->otp_expires_at)) {
+            return ['success' => false, 'message' => 'OTP has expired. Please request a new one.'];
+        }
 
         $vendor->update(['otp' => null, 'otp_expires_at' => null, 'email_verified_at' => Carbon::now()]);
         Auth::guard('vendor')->login($vendor, true);
@@ -99,8 +110,8 @@ class VendorAuthService
                 'lastname' => $vendor->lastname,
                 'email' => $vendor->email,
                 'roles' => $vendor->roles,
-                'picture' => $vendor->picture
-            ]
+                'picture' => $vendor->picture,
+            ],
         ];
     }
 
@@ -110,14 +121,19 @@ class VendorAuthService
         try {
             request()->session()->invalidate();
             request()->session()->regenerateToken();
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
+
         return ['success' => true, 'message' => 'Successfully logged out'];
     }
 
     public function getCurrentUser()
     {
         $vendor = Auth::guard('vendor')->user();
-        if (!$vendor) { return ['success' => false, 'message' => 'Not authenticated']; }
+        if (! $vendor) {
+            return ['success' => false, 'message' => 'Not authenticated'];
+        }
+
         return [
             'success' => true,
             'user' => [
@@ -128,8 +144,8 @@ class VendorAuthService
                 'email' => $vendor->email,
                 'roles' => $vendor->roles,
                 'picture' => $vendor->picture,
-                'status' => $vendor->status
-            ]
+                'status' => $vendor->status,
+            ],
         ];
     }
 
@@ -137,14 +153,14 @@ class VendorAuthService
     {
         $data = ['name' => $name, 'otp' => $otp, 'expires_in' => 10, 'brand' => 'Microfinancial Vendors'];
         try {
-            Mail::send('emails.otp', $data, function($message) use ($email, $name) {
+            Mail::send('emails.otp', $data, function ($message) use ($email, $name) {
                 $message->to($email, $name)
-                        ->subject('Your OTP Code - Microfinancial Vendors')
-                        ->from('logistic1.microfinancial@gmail.com', 'Microfinancial Vendors');
+                    ->subject('Your OTP Code - Microfinancial Vendors')
+                    ->from('logistic1.microfinancial@gmail.com', 'Microfinancial Vendors');
             });
             Log::info("Vendor OTP email sent successfully to: {$email}");
         } catch (\Exception $e) {
-            Log::error('Vendor OTP Email failed: ' . $e->getMessage());
+            Log::error('Vendor OTP Email failed: '.$e->getMessage());
         }
     }
 }

@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::connection('main')->hasTable('users')) {
+        if (! Schema::connection('main')->hasTable('users')) {
             Schema::connection('main')->create('users', function (Blueprint $table) {
                 $table->id();
                 $table->string('employeeid')->unique();
@@ -38,7 +38,9 @@ return new class extends Migration
             $rows = DB::connection('sws')->table('users')->get();
             foreach ($rows as $row) {
                 $exists = DB::connection('main')->table('users')->where('employeeid', $row->employeeid)->exists();
-                if ($exists) { continue; }
+                if ($exists) {
+                    continue;
+                }
                 DB::connection('main')->table('users')->insert([
                     'id' => $row->id,
                     'employeeid' => $row->employeeid,

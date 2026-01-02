@@ -10,8 +10,11 @@ class Category extends Model
     use HasFactory;
 
     protected $connection = 'sws';
+
     protected $table = 'sws_categories';
+
     protected $primaryKey = 'cat_id';
+
     public $timestamps = false;
 
     protected $fillable = [

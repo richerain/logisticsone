@@ -2,15 +2,17 @@
 
 namespace App\Models\PLT;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Milestone extends Model
 {
     use HasFactory;
 
     protected $connection = 'plt';
+
     protected $table = 'plt_milestones';
+
     protected $primaryKey = 'mile_id';
 
     protected $fillable = [
@@ -43,6 +45,6 @@ class Milestone extends Model
     public function scopeOverdue($query)
     {
         return $query->where('mile_target_date', '<', now())
-                    ->whereNotIn('mile_status', ['completed']);
+            ->whereNotIn('mile_status', ['completed']);
     }
 }

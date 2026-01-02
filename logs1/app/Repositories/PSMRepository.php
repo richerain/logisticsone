@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\PSM\Vendor;
+use App\Models\PSM\Budget;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
-use App\Models\PSM\Budget;
 use App\Models\PSM\Quote;
+use App\Models\PSM\Vendor;
 
 class PSMRepository
 {
@@ -17,15 +17,15 @@ class PSMRepository
     {
         $query = Vendor::withCount('products');
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->search($filters['search']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('ven_status', $filters['status']);
         }
 
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->where('ven_type', $filters['type']);
         }
 
@@ -47,6 +47,7 @@ class PSMRepository
     public function getApprovedPurchasesWithoutQuote()
     {
         $quotedPurchaseIds = Quote::whereNotNull('quo_purchase_id')->pluck('quo_purchase_id')->toArray();
+
         return Purchase::where('pur_status', 'Approved')
             ->whereNotIn('id', $quotedPurchaseIds)
             ->orderBy('created_at', 'desc')
@@ -109,8 +110,10 @@ class PSMRepository
         $vendor = Vendor::find($id);
         if ($vendor) {
             $vendor->update($data);
+
             return $vendor;
         }
+
         return null;
     }
 
@@ -122,8 +125,10 @@ class PSMRepository
         $purchase = Purchase::find($id);
         if ($purchase) {
             $purchase->update($data);
+
             return $purchase;
         }
+
         return null;
     }
 
@@ -136,6 +141,7 @@ class PSMRepository
         if ($vendor) {
             return $vendor->delete();
         }
+
         return false;
     }
 
@@ -148,6 +154,7 @@ class PSMRepository
         if ($purchase) {
             return $purchase->delete();
         }
+
         return false;
     }
 
@@ -184,8 +191,10 @@ class PSMRepository
         $quote = Quote::find($id);
         if ($quote) {
             $quote->update($data);
+
             return $quote;
         }
+
         return null;
     }
 
@@ -195,28 +204,30 @@ class PSMRepository
         if ($quote) {
             return $quote->delete();
         }
+
         return false;
     }
 
     public function getProducts($filters = [])
     {
         $query = Product::query();
-        if (!empty($filters['vendor'])) {
+        if (! empty($filters['vendor'])) {
             $query->where('prod_vendor', $filters['vendor']);
         }
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->where('prod_type', $filters['type']);
         }
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('prod_name', 'like', "%{$search}%")
-                  ->orWhere('prod_desc', 'like', "%{$search}%");
+                    ->orWhere('prod_desc', 'like', "%{$search}%");
             });
         }
         $sortField = $filters['sort_field'] ?? 'created_at';
         $sortOrder = $filters['sort_order'] ?? 'desc';
         $query->orderBy($sortField, $sortOrder);
+
         return $query->get();
     }
 
@@ -226,11 +237,9 @@ class PSMRepository
             'total_vendors' => Vendor::count(),
             'active_vendors' => Vendor::where('ven_status', 'active')->count(),
             'inactive_vendors' => Vendor::where('ven_status', 'inactive')->count(),
-            'total_products' => Product::count()
+            'total_products' => Product::count(),
         ];
     }
-
-    
 
     /**
      * Create product for vendor
@@ -248,8 +257,10 @@ class PSMRepository
         $product = Product::find($id);
         if ($product) {
             $product->update($data);
+
             return $product;
         }
+
         return null;
     }
 
@@ -262,6 +273,7 @@ class PSMRepository
         if ($product) {
             return $product->delete();
         }
+
         return false;
     }
 
@@ -303,8 +315,10 @@ class PSMRepository
         $budget = Budget::find($id);
         if ($budget) {
             $budget->update($data);
+
             return $budget;
         }
+
         return null;
     }
 
@@ -321,8 +335,10 @@ class PSMRepository
                 $budget->bud_remaining_amount += $additionalAmount;
             }
             $budget->updateHealthStatus();
+
             return $budget;
         }
+
         return null;
     }
 
@@ -336,8 +352,10 @@ class PSMRepository
             $budget->bud_spent_amount += $amount;
             $budget->bud_remaining_amount = $budget->bud_allocated_amount - $budget->bud_spent_amount;
             $budget->updateHealthStatus();
+
             return $budget;
         }
+
         return null;
     }
 }

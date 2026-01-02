@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\SWS\Warehouse;
 use App\Models\SWS\Item;
 use App\Models\SWS\Location;
 use App\Models\SWS\Transaction;
+use App\Models\SWS\Warehouse;
 use App\Services\SWSService;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Barryvdh\DomPDF\Facade\Pdf;
- 
+use Illuminate\Validation\Rule;
 
 class SWSController extends Controller
 {
@@ -33,6 +31,7 @@ class SWSController extends Controller
             'warehouse_id' => request()->get('warehouse_id'),
         ];
         $result = $this->swsService->getInventoryFlow($filters);
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
@@ -40,7 +39,7 @@ class SWSController extends Controller
     {
         return response()->json([
             'message' => 'SWS Digital Inventory data',
-            'data' => []
+            'data' => [],
         ]);
     }
 
@@ -58,17 +57,20 @@ class SWSController extends Controller
                 $w->ware_capacity_used = (int) $used;
                 $w->ware_capacity_free = (int) $free;
                 $w->ware_utilization = $util;
+
                 return $w;
             });
+
         return response()->json(['data' => $warehouses]);
     }
 
     public function showWarehouse(string $id)
     {
         $item = Warehouse::find($id);
-        if (!$item) {
+        if (! $item) {
             return response()->json(['error' => 'Not found'], 404);
         }
+
         return response()->json(['data' => $item]);
     }
 
@@ -88,10 +90,10 @@ class SWSController extends Controller
         $free = max(($capacity - $used), 0);
         $util = $capacity > 0 ? round(($used / $capacity) * 100, 2) : 0.00;
         $wareId = $request->input('ware_id');
-        if (!$wareId) {
+        if (! $wareId) {
             do {
                 $rand = random_int(100000, 999999);
-                $wareId = 'WH' . $rand;
+                $wareId = 'WH'.$rand;
             } while (Warehouse::where('ware_id', $wareId)->exists());
         }
 
@@ -109,7 +111,7 @@ class SWSController extends Controller
     public function updateWarehouse(Request $request, string $id)
     {
         $item = Warehouse::find($id);
-        if (!$item) {
+        if (! $item) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -140,10 +142,11 @@ class SWSController extends Controller
     public function deleteWarehouse(string $id)
     {
         $item = Warehouse::find($id);
-        if (!$item) {
+        if (! $item) {
             return response()->json(['error' => 'Not found'], 404);
         }
         $item->delete();
+
         return response()->json(['deleted' => true]);
     }
 
@@ -162,6 +165,7 @@ class SWSController extends Controller
             $current = (int) ($item->item_current_stock ?? 0);
             if ($units > $current) {
                 DB::connection('sws')->rollBack();
+
                 return response()->json(['success' => false, 'message' => 'Transfer units exceed current stock', 'data' => null], 422);
             }
 
@@ -171,8 +175,8 @@ class SWSController extends Controller
             if ($originName) {
                 $fromLocation = Location::where('loc_name', $originName)->first();
             }
-            $randomTail = sprintf('%d%s%d%s%d', random_int(0,9), chr(random_int(65,90)), random_int(0,9), chr(random_int(65,90)), random_int(0,9));
-            $referenceId = 'RF' . date('Ymd') . $randomTail;
+            $randomTail = sprintf('%d%s%d%s%d', random_int(0, 9), chr(random_int(65, 90)), random_int(0, 9), chr(random_int(65, 90)), random_int(0, 9));
+            $referenceId = 'RF'.date('Ymd').$randomTail;
 
             $transaction = Transaction::create([
                 'tra_item_id' => $item->item_id,
@@ -187,14 +191,16 @@ class SWSController extends Controller
                 'tra_notes' => null,
             ]);
 
-                $item->item_current_stock = $current - $units;
-                $item->save();
+            $item->item_current_stock = $current - $units;
+            $item->save();
 
             DB::connection('sws')->commit();
+
             return response()->json(['success' => true, 'data' => $transaction, 'message' => 'Item transferred successfully'], 201);
         } catch (\Exception $e) {
             DB::connection('sws')->rollBack();
-            Log::error('SWS transfer failed: ' . $e->getMessage());
+            Log::error('SWS transfer failed: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => 'Transfer failed', 'data' => null], 500);
         }
     }
@@ -208,7 +214,7 @@ class SWSController extends Controller
             'warehouse_id' => request()->get('warehouse_id'),
         ];
         $result = $this->swsService->getInventoryFlowReportData($filters);
-        if (!$result['success']) {
+        if (! $result['success']) {
             return response()->json($result, 500);
         }
         $data = $result['data'];
@@ -216,6 +222,7 @@ class SWSController extends Controller
             'transactions' => $data,
             'filters' => $filters,
         ])->setPaper('A4', 'portrait');
+
         return $pdf->download('inventory-flow-report.pdf');
     }
 
@@ -253,12 +260,14 @@ class SWSController extends Controller
 
             if ($request->query('format') === 'pdf') {
                 $pdf = Pdf::loadView('generate-reports.digital-inventory-report', $payload);
+
                 return $pdf->download('digital-inventory-report.pdf');
             }
 
             return view('generate-reports.digital-inventory-report', $payload);
         } catch (\Exception $e) {
-            Log::error('Digital Inventory report failed: ' . $e->getMessage());
+            Log::error('Digital Inventory report failed: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => 'Failed to generate report'], 500);
         }
     }
@@ -267,13 +276,15 @@ class SWSController extends Controller
     {
         try {
             $t = Transaction::find($id);
-            if (!$t) {
+            if (! $t) {
                 return response()->json(['success' => false, 'message' => 'Transaction not found'], 404);
             }
             $t->delete();
+
             return response()->json(['success' => true, 'message' => 'Transaction deleted']);
         } catch (\Exception $e) {
-            Log::error('Delete transaction failed: ' . $e->getMessage());
+            Log::error('Delete transaction failed: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => 'Failed to delete transaction'], 500);
         }
     }
@@ -282,24 +293,28 @@ class SWSController extends Controller
     public function getInventoryStats()
     {
         $result = $this->swsService->getInventoryStats();
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
     public function getStockLevelsByCategory()
     {
         $result = $this->swsService->getStockLevelsByCategory();
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
     public function getItems()
     {
         $result = $this->swsService->getItemsWithStockInfo();
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
     public function getItem($id)
     {
         $result = $this->swsService->getItemById($id);
+
         return response()->json($result, $result['success'] ? 200 : 404);
     }
 
@@ -324,6 +339,7 @@ class SWSController extends Controller
         ]);
 
         $result = $this->swsService->createItem($validated);
+
         return response()->json($result, $result['success'] ? 201 : 500);
     }
 
@@ -346,28 +362,28 @@ class SWSController extends Controller
         ]);
 
         $result = $this->swsService->updateItem($id, $validated);
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
     public function deleteItem($id)
     {
         $result = $this->swsService->deleteItem($id);
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
     public function getCategories()
     {
         $result = $this->swsService->getAllCategories();
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
     public function getLocations()
     {
         $result = $this->swsService->getAllLocations();
+
         return response()->json($result, $result['success'] ? 200 : 500);
     }
-
-    
-
-    
 }

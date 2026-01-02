@@ -2,15 +2,17 @@
 
 namespace App\Models\PLT;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Dispatch extends Model
 {
     use HasFactory;
 
     protected $connection = 'plt';
+
     protected $table = 'plt_dispatches';
+
     protected $primaryKey = 'dis_id';
 
     protected $fillable = [

@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Warehouses (plural)
-        if (!Schema::connection('sws')->hasTable('sws_warehouses')) {
+        if (! Schema::connection('sws')->hasTable('sws_warehouses')) {
             Schema::connection('sws')->create('sws_warehouses', function (Blueprint $table) {
                 $table->increments('ware_id');
                 $table->string('ware_name', 100);
@@ -30,7 +30,7 @@ return new class extends Migration
         }
 
         // Items
-        if (!Schema::connection('sws')->hasTable('sws_items')) {
+        if (! Schema::connection('sws')->hasTable('sws_items')) {
             Schema::connection('sws')->create('sws_items', function (Blueprint $table) {
                 $table->increments('item_id');
                 $table->string('item_code')->nullable();
@@ -55,7 +55,7 @@ return new class extends Migration
         }
 
         // Categories
-        if (!Schema::connection('sws')->hasTable('sws_categories')) {
+        if (! Schema::connection('sws')->hasTable('sws_categories')) {
             Schema::connection('sws')->create('sws_categories', function (Blueprint $table) {
                 $table->increments('cat_id');
                 $table->string('cat_name', 100)->unique();
@@ -65,7 +65,7 @@ return new class extends Migration
         }
 
         // Locations
-        if (!Schema::connection('sws')->hasTable('sws_locations')) {
+        if (! Schema::connection('sws')->hasTable('sws_locations')) {
             Schema::connection('sws')->create('sws_locations', function (Blueprint $table) {
                 $table->increments('loc_id');
                 $table->string('loc_name', 100);
@@ -81,7 +81,7 @@ return new class extends Migration
         }
 
         // Transactions
-        if (!Schema::connection('sws')->hasTable('sws_transactions')) {
+        if (! Schema::connection('sws')->hasTable('sws_transactions')) {
             Schema::connection('sws')->create('sws_transactions', function (Blueprint $table) {
                 $table->increments('tra_id');
                 $table->unsignedInteger('tra_item_id');
@@ -103,7 +103,7 @@ return new class extends Migration
         }
 
         // Transaction logs
-        if (!Schema::connection('sws')->hasTable('sws_transaction_logs')) {
+        if (! Schema::connection('sws')->hasTable('sws_transaction_logs')) {
             Schema::connection('sws')->create('sws_transaction_logs', function (Blueprint $table) {
                 $table->increments('log_id');
                 $table->unsignedInteger('log_transaction_id');
@@ -117,7 +117,7 @@ return new class extends Migration
         }
 
         // Inventory snapshots
-        if (!Schema::connection('sws')->hasTable('sws_inventory_snapshots')) {
+        if (! Schema::connection('sws')->hasTable('sws_inventory_snapshots')) {
             Schema::connection('sws')->create('sws_inventory_snapshots', function (Blueprint $table) {
                 $table->increments('snap_id');
                 $table->unsignedInteger('snap_item_id');
@@ -137,7 +137,7 @@ return new class extends Migration
         }
 
         // Inventory audits
-        if (!Schema::connection('sws')->hasTable('sws_inventory_audits')) {
+        if (! Schema::connection('sws')->hasTable('sws_inventory_audits')) {
             Schema::connection('sws')->create('sws_inventory_audits', function (Blueprint $table) {
                 $table->increments('aud_id');
                 $table->unsignedInteger('aud_item_id')->nullable();
@@ -156,7 +156,7 @@ return new class extends Migration
         }
 
         // Optional: rename old table if present
-        if (Schema::connection('sws')->hasTable('sws_warehouse') && !Schema::connection('sws')->hasTable('sws_warehouses')) {
+        if (Schema::connection('sws')->hasTable('sws_warehouse') && ! Schema::connection('sws')->hasTable('sws_warehouses')) {
             DB::connection('sws')->statement('RENAME TABLE sws_warehouse TO sws_warehouses');
         }
     }

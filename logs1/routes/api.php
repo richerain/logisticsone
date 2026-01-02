@@ -8,11 +8,11 @@ Route::get('/', function () {
         'version' => '1.0.0',
         'modules' => [
             'SWS - Smart Warehousing System',
-            'PSM - Procurement & Sourcing Management', 
+            'PSM - Procurement & Sourcing Management',
             'PLT - Project Logistics Tracker',
             'ALMS - Asset Lifecycle & Maintenance',
-            'DTLR - Document Tracking & Logistics Record'
-        ]
+            'DTLR - Document Tracking & Logistics Record',
+        ],
     ]);
 });
 
@@ -25,13 +25,14 @@ Route::get('/health', function () {
 Route::get('/test-db', function () {
     try {
         DB::connection()->getPdo();
+
         return response()->json(['database' => 'Connected successfully']);
     } catch (\Exception $e) {
-        return response()->json(['database' => 'Connection failed: ' . $e->getMessage()], 500);
+        return response()->json(['database' => 'Connection failed: '.$e->getMessage()], 500);
     }
 });
 
 // Gateway routes - load module-specific API routes
 Route::prefix('v1')->group(function () {
-    require __DIR__ . '/gateway.php';
+    require __DIR__.'/gateway.php';
 });

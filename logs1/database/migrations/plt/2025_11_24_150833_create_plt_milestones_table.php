@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('mile_status', ['pending', 'in_progress', 'completed', 'overdue'])->default('pending');
             $table->enum('mile_priority', ['low', 'medium', 'high'])->default('medium');
             $table->timestamps();
-            
+
             $table->index('mile_project_id');
             $table->index('mile_status');
             $table->index('mile_target_date');

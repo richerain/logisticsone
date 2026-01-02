@@ -2,15 +2,17 @@
 
 namespace App\Models\PLT;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
     use HasFactory;
 
     protected $connection = 'plt';
+
     protected $table = 'plt_projects';
+
     protected $primaryKey = 'pro_id';
 
     protected $fillable = [
@@ -69,16 +71,19 @@ class Project extends Model
     public function scopeDelayed($query)
     {
         return $query->where('pro_end_date', '<', now())
-                    ->whereNotIn('pro_status', ['completed', 'cancelled']);
+            ->whereNotIn('pro_status', ['completed', 'cancelled']);
     }
 
     // Accessors
     public function getProgressAttribute()
     {
         $totalMilestones = $this->milestones()->count();
-        if ($totalMilestones === 0) return 0;
+        if ($totalMilestones === 0) {
+            return 0;
+        }
 
         $completedMilestones = $this->milestones()->where('mile_status', 'completed')->count();
+
         return ($completedMilestones / $totalMilestones) * 100;
     }
 

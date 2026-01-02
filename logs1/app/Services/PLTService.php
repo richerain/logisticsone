@@ -19,18 +19,19 @@ class PLTService
     {
         try {
             $projects = $this->pltRepository->getAllProjects($filters);
-            
+
             return [
                 'success' => true,
                 'data' => $projects,
-                'message' => 'Projects retrieved successfully'
+                'message' => 'Projects retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error fetching projects: ' . $e->getMessage());
+            Log::error('Error fetching projects: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve projects'
+                'message' => 'Failed to retrieve projects',
             ];
         }
     }
@@ -39,26 +40,27 @@ class PLTService
     {
         try {
             $project = $this->pltRepository->getProjectById($id);
-            
-            if (!$project) {
+
+            if (! $project) {
                 return [
                     'success' => false,
                     'data' => null,
-                    'message' => 'Project not found'
+                    'message' => 'Project not found',
                 ];
             }
 
             return [
                 'success' => true,
                 'data' => $project,
-                'message' => 'Project retrieved successfully'
+                'message' => 'Project retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error fetching project: ' . $e->getMessage());
+            Log::error('Error fetching project: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to retrieve project'
+                'message' => 'Failed to retrieve project',
             ];
         }
     }
@@ -68,7 +70,7 @@ class PLTService
         DB::beginTransaction();
         try {
             $project = $this->pltRepository->createProject($data);
-            
+
             // Create initial tracking log
             $this->pltRepository->createTrackingLog([
                 'track_project_id' => $project->pro_id,
@@ -118,15 +120,16 @@ class PLTService
             return [
                 'success' => true,
                 'data' => $project,
-                'message' => 'Project created successfully'
+                'message' => 'Project created successfully',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error creating project: ' . $e->getMessage());
+            Log::error('Error creating project: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to create project'
+                'message' => 'Failed to create project',
             ];
         }
     }
@@ -136,12 +139,12 @@ class PLTService
         DB::beginTransaction();
         try {
             $project = $this->pltRepository->updateProject($id, $data);
-            
-            if (!$project) {
+
+            if (! $project) {
                 return [
                     'success' => false,
                     'data' => null,
-                    'message' => 'Project not found'
+                    'message' => 'Project not found',
                 ];
             }
 
@@ -158,15 +161,16 @@ class PLTService
             return [
                 'success' => true,
                 'data' => $project,
-                'message' => 'Project updated successfully'
+                'message' => 'Project updated successfully',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating project: ' . $e->getMessage());
+            Log::error('Error updating project: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to update project'
+                'message' => 'Failed to update project',
             ];
         }
     }
@@ -176,11 +180,11 @@ class PLTService
         DB::beginTransaction();
         try {
             $result = $this->pltRepository->deleteProject($id);
-            
-            if (!$result) {
+
+            if (! $result) {
                 return [
                     'success' => false,
-                    'message' => 'Project not found'
+                    'message' => 'Project not found',
                 ];
             }
 
@@ -188,14 +192,15 @@ class PLTService
 
             return [
                 'success' => true,
-                'message' => 'Project deleted successfully'
+                'message' => 'Project deleted successfully',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error deleting project: ' . $e->getMessage());
+            Log::error('Error deleting project: '.$e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'Failed to delete project'
+                'message' => 'Failed to delete project',
             ];
         }
     }
@@ -204,18 +209,19 @@ class PLTService
     {
         try {
             $stats = $this->pltRepository->getProjectStats();
-            
+
             return [
                 'success' => true,
                 'data' => $stats,
-                'message' => 'Project statistics retrieved successfully'
+                'message' => 'Project statistics retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error fetching project stats: ' . $e->getMessage());
+            Log::error('Error fetching project stats: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve project statistics'
+                'message' => 'Failed to retrieve project statistics',
             ];
         }
     }
@@ -224,17 +230,19 @@ class PLTService
     {
         try {
             $items = $this->pltRepository->getMilestonesByProject($projectId);
+
             return [
                 'success' => true,
                 'data' => $items,
-                'message' => 'Milestones retrieved successfully'
+                'message' => 'Milestones retrieved successfully',
             ];
         } catch (\Exception $e) {
-            Log::error('Error fetching milestones: ' . $e->getMessage());
+            Log::error('Error fetching milestones: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => [],
-                'message' => 'Failed to retrieve milestones'
+                'message' => 'Failed to retrieve milestones',
             ];
         }
     }
@@ -243,24 +251,26 @@ class PLTService
     {
         DB::beginTransaction();
         try {
-            if (!empty($data['mile_actual_date']) && ($data['mile_status'] ?? '') !== 'completed') {
+            if (! empty($data['mile_actual_date']) && ($data['mile_status'] ?? '') !== 'completed') {
                 $data['mile_status'] = 'in_progress';
             }
             $mile = $this->pltRepository->createMilestone($data);
             $this->recalculateProjectStatusAndProgress($data['mile_project_id'] ?? null);
             DB::commit();
+
             return [
                 'success' => true,
                 'data' => $mile,
-                'message' => 'Milestone created successfully'
+                'message' => 'Milestone created successfully',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error creating milestone: ' . $e->getMessage());
+            Log::error('Error creating milestone: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to create milestone'
+                'message' => 'Failed to create milestone',
             ];
         }
     }
@@ -269,32 +279,35 @@ class PLTService
     {
         DB::beginTransaction();
         try {
-            if (!empty($data['mile_actual_date']) && ($data['mile_status'] ?? '') !== 'completed') {
+            if (! empty($data['mile_actual_date']) && ($data['mile_status'] ?? '') !== 'completed') {
                 $data['mile_status'] = 'in_progress';
             }
             $mile = $this->pltRepository->updateMilestone($id, $data);
-            if (!$mile) {
+            if (! $mile) {
                 DB::rollBack();
+
                 return [
                     'success' => false,
                     'data' => null,
-                    'message' => 'Milestone not found'
+                    'message' => 'Milestone not found',
                 ];
             }
             $this->recalculateProjectStatusAndProgress($mile->mile_project_id);
             DB::commit();
+
             return [
                 'success' => true,
                 'data' => $mile,
-                'message' => 'Milestone updated successfully'
+                'message' => 'Milestone updated successfully',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating milestone: ' . $e->getMessage());
+            Log::error('Error updating milestone: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'data' => null,
-                'message' => 'Failed to update milestone'
+                'message' => 'Failed to update milestone',
             ];
         }
     }
@@ -309,23 +322,27 @@ class PLTService
                 $this->recalculateProjectStatusAndProgress($mile->mile_project_id);
             }
             DB::commit();
+
             return [
                 'success' => (bool) $ok,
-                'message' => $ok ? 'Milestone deleted successfully' : 'Milestone not found'
+                'message' => $ok ? 'Milestone deleted successfully' : 'Milestone not found',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error deleting milestone: ' . $e->getMessage());
+            Log::error('Error deleting milestone: '.$e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'Failed to delete milestone'
+                'message' => 'Failed to delete milestone',
             ];
         }
     }
 
     private function recalculateProjectStatusAndProgress($projectId)
     {
-        if (!$projectId) return;
+        if (! $projectId) {
+            return;
+        }
         $milestones = $this->pltRepository->getMilestonesByProject($projectId);
         $total = $milestones->count();
         $completed = $milestones->where('mile_status', 'completed')->count();
@@ -345,5 +362,4 @@ class PLTService
 
         $this->pltRepository->updateProject($projectId, ['pro_status' => $status]);
     }
-
 }

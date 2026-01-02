@@ -2,15 +2,17 @@
 
 namespace App\Models\PLT;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Allocation extends Model
 {
     use HasFactory;
 
     protected $connection = 'plt';
+
     protected $table = 'plt_allocations';
+
     protected $primaryKey = 'allo_id';
 
     protected $fillable = [

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class PSMVendorSeeder extends Seeder
 {
@@ -81,7 +81,7 @@ class PSMVendorSeeder extends Seeder
                 'ven_submodule_from' => 'vendor-management',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
+            ],
         ];
 
         // Insert vendors

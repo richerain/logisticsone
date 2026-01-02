@@ -10,8 +10,11 @@ class InventorySnapshot extends Model
     use HasFactory;
 
     protected $connection = 'sws';
+
     protected $table = 'sws_inventory_snapshots';
+
     protected $primaryKey = 'snap_id';
+
     public $timestamps = false;
 
     protected $fillable = [

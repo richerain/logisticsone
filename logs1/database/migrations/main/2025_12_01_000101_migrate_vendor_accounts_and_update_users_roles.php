@@ -14,7 +14,9 @@ return new class extends Migration
             $vendors = DB::connection('main')->table('users')->where('roles', 'vendor')->get();
             foreach ($vendors as $u) {
                 $exists = DB::connection('main')->table('vendors')->where('email', $u->email)->exists();
-                if ($exists) { continue; }
+                if ($exists) {
+                    continue;
+                }
                 DB::connection('main')->table('vendors')->insert([
                     'id' => $u->id,
                     'vendorid' => $u->employeeid,
@@ -66,7 +68,9 @@ return new class extends Migration
             $vendors = DB::connection('main')->table('vendors')->get();
             foreach ($vendors as $v) {
                 $exists = DB::connection('main')->table('users')->where('email', $v->email)->exists();
-                if ($exists) { continue; }
+                if ($exists) {
+                    continue;
+                }
                 DB::connection('main')->table('users')->insert([
                     'id' => $v->id,
                     'employeeid' => $v->vendorid,

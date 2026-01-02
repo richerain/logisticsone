@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\PLTService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class PLTController extends Controller
@@ -23,14 +23,14 @@ class PLTController extends Controller
         ];
 
         $result = $this->pltService->getAllProjects($filters);
-        
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
 
     public function getProject($id)
     {
         $result = $this->pltService->getProject($id);
-        
+
         return response()->json($result, $result['success'] ? 200 : 404);
     }
 
@@ -50,12 +50,12 @@ class PLTController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $result = $this->pltService->createProject($request->all());
-        
+
         return response()->json($result, $result['success'] ? 201 : 400);
     }
 
@@ -75,33 +75,33 @@ class PLTController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $result = $this->pltService->updateProject($id, $request->all());
-        
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
 
     public function deleteProject($id)
     {
         $result = $this->pltService->deleteProject($id);
-        
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
 
     public function getProjectStats()
     {
         $result = $this->pltService->getProjectStats();
-        
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
-
 
     public function getProjectMilestones($projectId)
     {
         $result = $this->pltService->getProjectMilestones($projectId);
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
 
@@ -120,7 +120,7 @@ class PLTController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -129,6 +129,7 @@ class PLTController extends Controller
         ]);
 
         $result = $this->pltService->createMilestone($payload);
+
         return response()->json($result, $result['success'] ? 201 : 400);
     }
 
@@ -147,17 +148,19 @@ class PLTController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         $result = $this->pltService->updateMilestone($id, $request->all());
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
 
     public function deleteMilestone($id)
     {
         $result = $this->pltService->deleteMilestone($id);
+
         return response()->json($result, $result['success'] ? 200 : 400);
     }
 }

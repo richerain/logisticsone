@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('pro_budget_allocated', 10, 2)->default(0.00);
             $table->integer('pro_assigned_manager_id');
             $table->timestamps();
-            
+
             $table->index('pro_status');
             $table->index('pro_start_date');
             $table->index('pro_end_date');

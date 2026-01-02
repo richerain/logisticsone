@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        if (!Schema::connection('plt')->hasTable('plt_tracking_logs')) {
+        if (! Schema::connection('plt')->hasTable('plt_tracking_logs')) {
             Schema::connection('plt')->create('plt_tracking_logs', function (Blueprint $table) {
                 $table->id('track_id');
                 $table->foreignId('track_project_id')->constrained('plt_projects', 'pro_id');

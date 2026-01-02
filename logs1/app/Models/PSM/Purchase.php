@@ -10,7 +10,9 @@ class Purchase extends Model
     use HasFactory;
 
     protected $connection = 'psm';
+
     protected $table = 'psm_purchase';
+
     protected $primaryKey = 'id';
 
     protected $fillable = [
@@ -29,7 +31,7 @@ class Purchase extends Model
         'pur_delivery_date_to',
         'pur_department_from',
         'pur_module_from',
-        'pur_submodule_from'
+        'pur_submodule_from',
     ];
 
     protected $casts = [
@@ -39,7 +41,7 @@ class Purchase extends Model
         'pur_delivery_date_from' => 'date',
         'pur_delivery_date_to' => 'date',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -63,17 +65,17 @@ class Purchase extends Model
      */
     public function scopeSearch($query, $search)
     {
-        if (!$search) {
+        if (! $search) {
             return $query;
         }
-        
+
         return $query->where(function ($q) use ($search) {
             $q->where('pur_id', 'like', "%{$search}%")
-              ->orWhere('pur_company_name', 'like', "%{$search}%")
-              ->orWhere('pur_desc', 'like', "%{$search}%")
-              ->orWhere('pur_approved_by', 'like', "%{$search}%")
-              ->orWhere('pur_order_by', 'like', "%{$search}%")
-              ->orWhereJsonContains('pur_name_items', $search);
+                ->orWhere('pur_company_name', 'like', "%{$search}%")
+                ->orWhere('pur_desc', 'like', "%{$search}%")
+                ->orWhere('pur_approved_by', 'like', "%{$search}%")
+                ->orWhere('pur_order_by', 'like', "%{$search}%")
+                ->orWhereJsonContains('pur_name_items', $search);
         });
     }
 
@@ -89,7 +91,7 @@ class Purchase extends Model
             'Cancel' => 'bg-red-100 text-red-800',
             'Vendor-Review' => 'bg-purple-100 text-purple-800',
             'In-Progress' => 'bg-indigo-100 text-indigo-800',
-            'Completed' => 'bg-green-100 text-green-800'
+            'Completed' => 'bg-green-100 text-green-800',
         ];
 
         return $statusClasses[$this->pur_status] ?? 'bg-gray-100 text-gray-800';
@@ -101,7 +103,8 @@ class Purchase extends Model
     public function getItemsStringAttribute()
     {
         $items = $this->pur_name_items ?? [];
-        return implode(', ', array_slice($items, 0, 3)) . (count($items) > 3 ? '...' : '');
+
+        return implode(', ', array_slice($items, 0, 3)).(count($items) > 3 ? '...' : '');
     }
 
     /**
@@ -111,7 +114,7 @@ class Purchase extends Model
     {
         $items = $this->pur_name_items ?? [];
         $itemsWithDetails = [];
-        
+
         foreach ($items as $item) {
             if (is_array($item) && isset($item['name']) && isset($item['price'])) {
                 $itemsWithDetails[] = $item;
@@ -119,11 +122,11 @@ class Purchase extends Model
                 // Handle legacy string items
                 $itemsWithDetails[] = [
                     'name' => $item,
-                    'price' => 0
+                    'price' => 0,
                 ];
             }
         }
-        
+
         return $itemsWithDetails;
     }
 
@@ -133,6 +136,7 @@ class Purchase extends Model
     public function calculateTotalUnits()
     {
         $items = $this->pur_name_items ?? [];
+
         return count($items);
     }
 
@@ -143,11 +147,11 @@ class Purchase extends Model
     {
         $items = $this->items_with_details;
         $total = 0;
-        
+
         foreach ($items as $item) {
             $total += floatval($item['price']);
         }
-        
+
         return $total;
     }
 

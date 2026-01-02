@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PSMController;
+use Illuminate\Support\Facades\Route;
 
 // PSM Vendor Management Routes
 Route::prefix('vendor-management')->group(function () {

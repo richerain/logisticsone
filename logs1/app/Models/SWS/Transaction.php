@@ -10,8 +10,11 @@ class Transaction extends Model
     use HasFactory;
 
     protected $connection = 'sws';
+
     protected $table = 'sws_transactions';
+
     protected $primaryKey = 'tra_id';
+
     public $timestamps = false;
 
     protected $fillable = [

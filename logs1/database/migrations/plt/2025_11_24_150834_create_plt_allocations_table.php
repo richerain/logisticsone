@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('allo_allocated_date');
             $table->enum('allo_status', ['allocated', 'dispatched', 'delivered'])->default('allocated');
             $table->timestamps();
-            
+
             $table->index(['allo_project_id', 'allo_milestone_id']);
             $table->index('allo_status');
         });

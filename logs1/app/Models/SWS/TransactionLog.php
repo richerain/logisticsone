@@ -10,8 +10,11 @@ class TransactionLog extends Model
     use HasFactory;
 
     protected $connection = 'sws';
+
     protected $table = 'sws_transaction_logs';
+
     protected $primaryKey = 'log_id';
+
     public $timestamps = false;
 
     protected $fillable = [

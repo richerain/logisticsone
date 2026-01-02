@@ -10,8 +10,11 @@ class Item extends Model
     use HasFactory;
 
     protected $connection = 'sws';
+
     protected $table = 'sws_items';
+
     protected $primaryKey = 'item_id';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -76,6 +79,7 @@ class Item extends Model
         if ($this->item_max_stock > 0) {
             return min(($this->item_current_stock / $this->item_max_stock) * 100, 100);
         }
+
         return 0;
     }
 }

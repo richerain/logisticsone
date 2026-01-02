@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ALMSController extends Controller
 {
@@ -22,9 +22,11 @@ class ALMSController extends Controller
                     ->where('asset_name', $it->item_name)
                     ->where('asset_location', $it->item_stored_from)
                     ->exists();
-                if ($exists) { continue; }
+                if ($exists) {
+                    continue;
+                }
 
-                $code = 'AST' . now()->format('Ymd') . strtoupper(Str::random(5));
+                $code = 'AST'.now()->format('Ymd').strtoupper(Str::random(5));
                 DB::connection('alms')->table('alms_assets')->insert([
                     'asset_code' => $code,
                     'asset_name' => $it->item_name,
@@ -57,9 +59,10 @@ class ALMSController extends Controller
             ->orderByDesc('m.mnt_created_at')
             ->select('m.*', 'rp.firstname as rp_firstname', 'rp.middlename as rp_middlename', 'rp.lastname as rp_lastname', 'rp.position as rp_position')
             ->get();
+
         return response()->json([
             'message' => 'ALMS Maintenance data',
-            'data' => $rows
+            'data' => $rows,
         ]);
     }
 
@@ -68,17 +71,17 @@ class ALMSController extends Controller
         $rows = DB::connection('alms')->table('alms_request_maintenance')
             ->orderByDesc('id')
             ->get();
+
         return response()->json(['data' => $rows]);
     }
-
-    
 
     public function showAsset($id)
     {
         $asset = DB::connection('alms')->table('alms_assets')->where('id', $id)->first();
-        if (!$asset) {
+        if (! $asset) {
             return response()->json(['message' => 'Asset not found'], 404);
         }
+
         return response()->json(['asset' => $asset]);
     }
 
@@ -91,29 +94,33 @@ class ALMSController extends Controller
             'asset_status' => $validated['asset_status'],
             'updated_at' => now(),
         ]);
-        if (!$updated) {
+        if (! $updated) {
             return response()->json(['message' => 'Update failed'], 400);
         }
         $asset = DB::connection('alms')->table('alms_assets')->where('id', $id)->first();
+
         return response()->json(['message' => 'Status updated', 'asset' => $asset]);
     }
 
     public function deleteAsset($id)
     {
         $deleted = DB::connection('alms')->table('alms_assets')->where('id', $id)->delete();
-        if (!$deleted) {
+        if (! $deleted) {
             return response()->json(['message' => 'Delete failed'], 400);
         }
+
         return response()->json(['message' => 'Asset deleted']);
     }
-
 
     public function getRepairPersonnel()
     {
         $status = request()->query('status');
         $query = DB::connection('alms')->table('almns_repair_personnel');
-        if ($status) { $query->where('status', $status); }
+        if ($status) {
+            $query->where('status', $status);
+        }
         $rows = $query->orderByDesc('id')->get();
+
         return response()->json(['data' => $rows]);
     }
 
@@ -129,12 +136,12 @@ class ALMSController extends Controller
         ]);
 
         do {
-            $code = 'MTN' . now()->format('Ymd')
-                . random_int(1,9)
-                . chr(random_int(65,90))
-                . random_int(1,9)
-                . chr(random_int(65,90))
-                . random_int(1,9);
+            $code = 'MTN'.now()->format('Ymd')
+                .random_int(1, 9)
+                .chr(random_int(65, 90))
+                .random_int(1, 9)
+                .chr(random_int(65, 90))
+                .random_int(1, 9);
             $exists = DB::connection('alms')->table('alms_maintenance')->where('mnt_code', $code)->exists();
         } while ($exists);
 
@@ -162,7 +169,7 @@ class ALMSController extends Controller
         ]);
 
         do {
-            $reqId = 'REQ' . strtoupper(Str::random(5));
+            $reqId = 'REQ'.strtoupper(Str::random(5));
             $exists = DB::connection('alms')->table('alms_request_maintenance')->where('req_id', $reqId)->exists();
         } while ($exists);
 
@@ -180,9 +187,10 @@ class ALMSController extends Controller
     public function deleteRequestMaintenance($id)
     {
         $deleted = DB::connection('alms')->table('alms_request_maintenance')->where('req_id', $id)->delete();
-        if (!$deleted) {
+        if (! $deleted) {
             return response()->json(['message' => 'Delete failed'], 400);
         }
+
         return response()->json(['message' => 'Request deleted']);
     }
 
@@ -191,9 +199,10 @@ class ALMSController extends Controller
         $updated = DB::connection('alms')->table('alms_request_maintenance')->where('req_id', $id)->update([
             'req_processed' => 1,
         ]);
-        if (!$updated) {
+        if (! $updated) {
             return response()->json(['message' => 'Mark processed failed'], 400);
         }
+
         return response()->json(['message' => 'Request marked as processed']);
     }
 
@@ -206,19 +215,21 @@ class ALMSController extends Controller
             'mnt_status' => $validated['mnt_status'],
             'mnt_updated_at' => now(),
         ]);
-        if (!$updated) {
+        if (! $updated) {
             return response()->json(['message' => 'Update failed'], 400);
         }
         $row = DB::connection('alms')->table('alms_maintenance')->where('mnt_code', $id)->first();
+
         return response()->json(['message' => 'Status updated', 'maintenance' => $row]);
     }
 
     public function deleteMaintenance($id)
     {
         $deleted = DB::connection('alms')->table('alms_maintenance')->where('mnt_code', $id)->delete();
-        if (!$deleted) {
+        if (! $deleted) {
             return response()->json(['message' => 'Delete failed'], 400);
         }
+
         return response()->json(['message' => 'Maintenance deleted']);
     }
 
@@ -234,7 +245,7 @@ class ALMSController extends Controller
 
         $repId = null;
         do {
-            $repId = 'RPL' . random_int(1,9) . chr(random_int(65,90)) . random_int(1,9) . chr(random_int(65,90)) . random_int(1,9);
+            $repId = 'RPL'.random_int(1, 9).chr(random_int(65, 90)).random_int(1, 9).chr(random_int(65, 90)).random_int(1, 9);
             $exists = DB::connection('alms')->table('almns_repair_personnel')->where('rep_id', $repId)->exists();
         } while ($exists);
 
@@ -253,9 +264,10 @@ class ALMSController extends Controller
     public function deleteRepairPersonnel($id)
     {
         $deleted = DB::connection('alms')->table('almns_repair_personnel')->where('id', $id)->delete();
-        if (!$deleted) {
+        if (! $deleted) {
             return response()->json(['message' => 'Delete failed'], 400);
         }
+
         return response()->json(['message' => 'Repair personnel deleted']);
     }
 }

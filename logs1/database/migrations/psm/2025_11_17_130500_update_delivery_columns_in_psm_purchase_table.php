@@ -12,7 +12,7 @@ return new class extends Migration
             if (Schema::connection('psm')->hasColumn('psm_purchase', 'pur_delivery')) {
                 $table->renameColumn('pur_delivery', 'pur_delivery_date_from');
             }
-            if (!Schema::connection('psm')->hasColumn('psm_purchase', 'pur_delivery_date_to')) {
+            if (! Schema::connection('psm')->hasColumn('psm_purchase', 'pur_delivery_date_to')) {
                 $table->date('pur_delivery_date_to')->nullable()->after('pur_delivery_date_from');
             }
         });

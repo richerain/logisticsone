@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('dis_tracking_code', 100)->nullable();
             $table->enum('dis_status', ['prepared', 'in_transit', 'delivered', 'returned'])->default('prepared');
             $table->timestamps();
-            
+
             $table->index('dis_allocation_id');
             $table->index('dis_status');
             $table->index('dis_dispatch_number');

@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SWSController;
+use Illuminate\Support\Facades\Route;
 
 // SWS Module API Routes
 Route::get('/inventory-flow', [SWSController::class, 'getInventoryFlow']);
@@ -17,8 +17,8 @@ Route::get('/test', function () {
         'status' => 'active',
         'submodules' => [
             'Inventory Flow',
-            'Digital Inventory'
-        ]
+            'Digital Inventory',
+        ],
     ]);
 });
 

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('prod_module_from')->default('psm');
             $table->string('prod_submodule_from')->default('vendor-management');
             $table->timestamps();
-            
+
             $table->foreign('prod_vendor')->references('ven_id')->on('psm_vendor')->onDelete('cascade');
         });
     }

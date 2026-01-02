@@ -10,8 +10,11 @@ class Location extends Model
     use HasFactory;
 
     protected $connection = 'sws';
+
     protected $table = 'sws_locations';
+
     protected $primaryKey = 'loc_id';
+
     public $timestamps = false;
 
     protected $fillable = [

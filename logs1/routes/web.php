@@ -1,14 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PSMController;
-use App\Http\Controllers\SWSController;
-use App\Http\Controllers\PLTController;
 use App\Http\Controllers\ALMSController;
-use App\Http\Controllers\DTLRController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VendorAuthController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // Simple session setup for auth routes
 Route::middleware([
@@ -19,12 +14,13 @@ Route::middleware([
     \App\Http\Middleware\VerifyCsrfToken::class,
     \Illuminate\Routing\Middleware\SubstituteBindings::class,
 ])->group(function () {
-    
+
     // Public Authentication Routes - FIXED: Proper route definitions
     Route::get('/login', function (Request $request) {
         if (Auth::guard('sws')->check()) {
             return redirect('/home');
         }
+
         return view('login-auth.login');
     })->name('login');
 
@@ -32,27 +28,42 @@ Route::middleware([
         if (Auth::guard('vendor')->check()) {
             return redirect('/vendor/home');
         }
+
         return view('login-auth.vendor-login');
     })->name('login.vendor');
 
     Route::get('/otp-verification', function (Request $request) {
-        if (Auth::guard('sws')->check()) { return redirect('/home'); }
-        if (Auth::guard('vendor')->check()) { return redirect('/vendor/home'); }
-        if (!$request->has('email')) {
+        if (Auth::guard('sws')->check()) {
+            return redirect('/home');
+        }
+        if (Auth::guard('vendor')->check()) {
+            return redirect('/vendor/home');
+        }
+        if (! $request->has('email')) {
             $portal = $request->get('portal');
-            if ($portal === 'vendor') { return redirect('/login/vendor-portal'); }
+            if ($portal === 'vendor') {
+                return redirect('/login/vendor-portal');
+            }
+
             return redirect('/login');
         }
+
         return view('login-auth.otp-verification', ['email' => $request->email, 'portal' => $request->get('portal')]);
     })->name('otp.verification');
 
     Route::get('/splash-login', function () {
-        if (!Auth::guard('sws')->check()) { return redirect('/login'); }
+        if (! Auth::guard('sws')->check()) {
+            return redirect('/login');
+        }
+
         return view('login-auth.splash-login');
     })->name('splash.login');
 
     Route::get('/vendor/splash-login', function () {
-        if (!Auth::guard('vendor')->check()) { return redirect('/login/vendor-portal'); }
+        if (! Auth::guard('vendor')->check()) {
+            return redirect('/login/vendor-portal');
+        }
+
         return view('login-auth.vendor-splash-login');
     })->name('vendor.splash.login');
 
@@ -92,24 +103,24 @@ Route::middleware([
             ];
 
             $view = $moduleViews[$module] ?? 'components.module-not-found';
-            
-            if (!view()->exists($view)) {
+
+            if (! view()->exists($view)) {
                 return response()->view('components.module-under-construction', ['module' => $module], 404);
             }
-            
+
             // If it's an AJAX request, return just the module content
             if (request()->ajax()) {
                 return view($view);
             }
-            
+
             // If it's a direct browser request, return the full home page with the module loaded
             return view('home');
         })->name('module.load');
 
-Route::get('/alms/assets', [ALMSController::class, 'getAssets'])->name('alms.assets.index');
-Route::get('/alms/assets/{id}', [ALMSController::class, 'showAsset'])->name('alms.assets.show');
-Route::put('/alms/assets/{id}/status', [ALMSController::class, 'updateAssetStatus'])->name('alms.assets.status');
-Route::delete('/alms/assets/{id}', [ALMSController::class, 'deleteAsset'])->name('alms.assets.delete');
+        Route::get('/alms/assets', [ALMSController::class, 'getAssets'])->name('alms.assets.index');
+        Route::get('/alms/assets/{id}', [ALMSController::class, 'showAsset'])->name('alms.assets.show');
+        Route::put('/alms/assets/{id}/status', [ALMSController::class, 'updateAssetStatus'])->name('alms.assets.status');
+        Route::delete('/alms/assets/{id}', [ALMSController::class, 'deleteAsset'])->name('alms.assets.delete');
 
         Route::get('/alms/repair-personnel', [ALMSController::class, 'getRepairPersonnel'])->name('alms.repair_personnel.index');
         Route::post('/alms/repair-personnel', [ALMSController::class, 'storeRepairPersonnel'])->name('alms.repair_personnel.store');
@@ -119,15 +130,19 @@ Route::delete('/alms/assets/{id}', [ALMSController::class, 'deleteAsset'])->name
         Route::put('/alms/maintenance/{id}/status', [ALMSController::class, 'updateMaintenanceStatus'])->name('alms.maintenance.status');
         Route::delete('/alms/maintenance/{id}', [ALMSController::class, 'deleteMaintenance'])->name('alms.maintenance.delete');
 
-Route::get('/alms/request-maintenance', [ALMSController::class, 'getRequestMaintenance'])->name('alms.request_maintenance.index');
-Route::post('/alms/request-maintenance', [ALMSController::class, 'storeRequestMaintenance'])->name('alms.request_maintenance.store');
-Route::delete('/alms/request-maintenance/{id}', [ALMSController::class, 'deleteRequestMaintenance'])->name('alms.request_maintenance.delete');
-Route::post('/alms/request-maintenance/{id}/processed', [ALMSController::class, 'markRequestProcessed'])->name('alms.request_maintenance.processed');
+        Route::get('/alms/request-maintenance', [ALMSController::class, 'getRequestMaintenance'])->name('alms.request_maintenance.index');
+        Route::post('/alms/request-maintenance', [ALMSController::class, 'storeRequestMaintenance'])->name('alms.request_maintenance.store');
+        Route::delete('/alms/request-maintenance/{id}', [ALMSController::class, 'deleteRequestMaintenance'])->name('alms.request_maintenance.delete');
+        Route::post('/alms/request-maintenance/{id}/processed', [ALMSController::class, 'markRequestProcessed'])->name('alms.request_maintenance.processed');
     });
 
     Route::middleware(['auth:vendor', 'session.timeout'])->group(function () {
-        Route::get('/vendor/home', function () { return view('home'); })->name('vendor.home');
-        Route::get('/vendor/dashboard', function () { return view('dashboard.index'); })->name('vendor.dashboard');
+        Route::get('/vendor/home', function () {
+            return view('home');
+        })->name('vendor.home');
+        Route::get('/vendor/dashboard', function () {
+            return view('dashboard.index');
+        })->name('vendor.dashboard');
         Route::get('/vendor/module/{module}', function ($module) {
             $moduleViews = [
                 'dashboard' => 'dashboard.index',
@@ -136,7 +151,7 @@ Route::post('/alms/request-maintenance/{id}/processed', [ALMSController::class, 
 
             $view = $moduleViews[$module] ?? 'components.module-not-found';
 
-            if (!view()->exists($view)) {
+            if (! view()->exists($view)) {
                 return response()->view('components.module-under-construction', ['module' => $module], 404);
             }
 
@@ -150,8 +165,13 @@ Route::post('/alms/request-maintenance/{id}/processed', [ALMSController::class, 
 
     // Redirect root to appropriate page
     Route::get('/', function () {
-        if (Auth::guard('sws')->check()) { return redirect('/home'); }
-        if (Auth::guard('vendor')->check()) { return redirect('/vendor/home'); }
+        if (Auth::guard('sws')->check()) {
+            return redirect('/home');
+        }
+        if (Auth::guard('vendor')->check()) {
+            return redirect('/vendor/home');
+        }
+
         return redirect('/login');
     });
 });
@@ -168,9 +188,10 @@ Route::get('/api/health', function () {
 Route::get('/api/test-db', function () {
     try {
         DB::connection('sws')->getPdo();
+
         return response()->json(['database' => 'Connected successfully']);
     } catch (\Exception $e) {
-        return response()->json(['database' => 'Connection failed: ' . $e->getMessage()], 500);
+        return response()->json(['database' => 'Connection failed: '.$e->getMessage()], 500);
     }
 });
 

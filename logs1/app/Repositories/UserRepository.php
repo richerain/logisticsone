@@ -21,8 +21,10 @@ class UserRepository
         $user = User::find($id);
         if ($user) {
             $user->update($data);
+
             return $user;
         }
+
         return null;
     }
 

@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\PLT\Project;
-use App\Models\PLT\Milestone;
-use App\Models\PLT\Resource;
 use App\Models\PLT\Allocation;
 use App\Models\PLT\Dispatch;
+use App\Models\PLT\Milestone;
+use App\Models\PLT\Project;
+use App\Models\PLT\Resource;
 use App\Models\PLT\TrackingLog;
 use Illuminate\Support\Facades\DB;
 
@@ -16,15 +16,15 @@ class PLTRepository
     {
         $query = Project::with(['milestones', 'resources', 'manager']);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('pro_project_name', 'like', "%{$search}%")
-                  ->orWhere('pro_description', 'like', "%{$search}%");
+                    ->orWhere('pro_description', 'like', "%{$search}%");
             });
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('pro_status', $filters['status']);
         }
 
@@ -34,10 +34,10 @@ class PLTRepository
     public function getProjectById($id)
     {
         return Project::with([
-            'milestones', 
-            'resources', 
+            'milestones',
+            'resources',
             'trackingLogs',
-            'manager'
+            'manager',
         ])->find($id);
     }
 
@@ -52,6 +52,7 @@ class PLTRepository
         if ($project) {
             $project->update($data);
         }
+
         return $project;
     }
 
@@ -60,8 +61,9 @@ class PLTRepository
         DB::beginTransaction();
         try {
             $project = Project::find($id);
-            if (!$project) {
+            if (! $project) {
                 DB::rollBack();
+
                 return false;
             }
 
@@ -77,9 +79,11 @@ class PLTRepository
             $project->delete();
 
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
+
             return false;
         }
     }
@@ -113,6 +117,7 @@ class PLTRepository
         if ($mile) {
             $mile->update($data);
         }
+
         return $mile;
     }
 

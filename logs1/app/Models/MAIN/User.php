@@ -2,16 +2,17 @@
 
 namespace App\Models\Main;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Carbon\Carbon;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $connection = 'main';
+
     protected $table = 'users';
 
     protected $fillable = [
@@ -31,13 +32,13 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
         'otp',
-        'otp_expires_at'
+        'otp_expires_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
-        'otp'
+        'otp',
     ];
 
     protected $casts = [
@@ -61,10 +62,10 @@ class User extends Authenticatable
     // Check if OTP is expired
     public function isOtpExpired()
     {
-        if (!$this->otp_expires_at) {
+        if (! $this->otp_expires_at) {
             return true;
         }
-        
+
         return Carbon::now()->gt($this->otp_expires_at);
     }
 

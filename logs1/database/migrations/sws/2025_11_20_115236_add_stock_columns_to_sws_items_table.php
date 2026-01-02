@@ -15,9 +15,9 @@ return new class extends Migration
             // Add new stock columns
             $table->integer('item_current_stock')->default(0)->after('item_total_quantity');
             $table->integer('item_max_stock')->default(100)->after('item_current_stock');
-            
+
             // Add item_code if not exists
-            if (!Schema::connection('sws')->hasColumn('sws_items', 'item_code')) {
+            if (! Schema::connection('sws')->hasColumn('sws_items', 'item_code')) {
                 $table->string('item_code', 20)->unique()->nullable()->after('item_id');
             }
         });

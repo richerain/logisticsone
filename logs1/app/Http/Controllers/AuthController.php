@@ -2,17 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Main\User;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use App\Models\Main\User;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -34,7 +30,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -53,7 +49,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -73,10 +69,11 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             Log::error('OTP validation failed', ['errors' => $validator->errors()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -85,12 +82,12 @@ class AuthController extends Controller
         // If OTP verification is successful, ensure session is properly set
         if ($result['success']) {
             Log::info('OTP verification successful, ensuring session persistence');
-            
+
             try {
                 // Force session save and regeneration
                 $request->session()->save();
                 $request->session()->regenerate();
-                
+
                 Log::info('Session regenerated and saved after OTP verification');
             } catch (\Exception $e) {
                 Log::error('Failed to regenerate session after OTP verification', ['error' => $e->getMessage()]);
@@ -122,28 +119,28 @@ class AuthController extends Controller
         if (Auth::guard('sws')->check()) {
             // Force session regeneration and save
             $request->session()->regenerate(true);
-            
+
             // Update last activity timestamp in session
             $request->session()->put('last_activity', time());
-            
+
             // Force immediate session save
             $request->session()->save();
 
             // Get fresh CSRF token
             $newToken = csrf_token();
-            
+
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'message' => 'Session refreshed successfully',
                 'csrf_token' => $newToken,
-                'session_refreshed_at' => now()->toDateTimeString()
+                'session_refreshed_at' => now()->toDateTimeString(),
             ]);
         }
 
         return response()->json([
-            'success' => false, 
+            'success' => false,
             'message' => 'Not authenticated',
-            'requires_relogin' => true
+            'requires_relogin' => true,
         ], 401);
     }
 
@@ -153,7 +150,7 @@ class AuthController extends Controller
     public function getCsrfToken(Request $request)
     {
         return response()->json([
-            'csrf_token' => csrf_token()
+            'csrf_token' => csrf_token(),
         ]);
     }
 
@@ -165,7 +162,7 @@ class AuthController extends Controller
         if (Auth::guard('sws')->check()) {
             // Update last activity
             $request->session()->put('last_activity', time());
-            
+
             return response()->json([
                 'success' => true,
                 'authenticated' => true,
@@ -174,14 +171,14 @@ class AuthController extends Controller
                     'email' => Auth::guard('sws')->user()->email,
                 ],
                 'csrf_token' => csrf_token(),
-                'session_lifetime' => config('session.lifetime', 40)
+                'session_lifetime' => config('session.lifetime', 40),
             ]);
         }
 
         return response()->json([
             'success' => false,
             'authenticated' => false,
-            'message' => 'Session not found or expired'
+            'message' => 'Session not found or expired',
         ], 401);
     }
 
@@ -197,14 +194,14 @@ class AuthController extends Controller
                 'user' => [
                     'id' => Auth::guard('sws')->id(),
                     'email' => Auth::guard('sws')->user()->email,
-                ]
+                ],
             ]);
         }
 
         return response()->json([
             'success' => false,
             'authenticated' => false,
-            'message' => 'Not authenticated'
+            'message' => 'Not authenticated',
         ], 401);
     }
 }

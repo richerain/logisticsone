@@ -10,10 +10,15 @@ class Warehouse extends Model
     use HasFactory;
 
     protected $connection = 'sws';
+
     protected $table = 'sws_warehouse';
+
     protected $primaryKey = 'ware_id';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
+
     public $timestamps = false;
 
     protected $fillable = [

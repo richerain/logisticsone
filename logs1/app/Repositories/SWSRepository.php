@@ -2,13 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\SWS\Item;
 use App\Models\SWS\Category;
-use App\Models\SWS\InventorySnapshot;
+use App\Models\SWS\Item;
 use App\Models\SWS\Location;
-use App\Models\SWS\Warehouse;
 use App\Models\SWS\Transaction;
-use App\Models\SWS\TransactionLog;
+use App\Models\SWS\Warehouse;
 use Illuminate\Support\Facades\DB;
 
 class SWSRepository
@@ -51,10 +49,12 @@ class SWSRepository
             if (isset($data['item_total_quantity'])) {
                 unset($data['item_total_quantity']);
             }
-            
+
             $item->update($data);
+
             return $item;
         }
+
         return null;
     }
 
@@ -64,6 +64,7 @@ class SWSRepository
         if ($item) {
             return $item->delete();
         }
+
         return false;
     }
 
@@ -86,6 +87,7 @@ class SWSRepository
             ->where('item_current_stock', '>', 0)
             ->count();
         $totalItems = Item::count();
+
         return [
             'total_items' => $totalItems,
             'incoming' => $incoming,
@@ -99,7 +101,7 @@ class SWSRepository
     {
         $query = Transaction::with(['item', 'fromLocation', 'toLocation', 'warehouse'])
             ->orderBy('tra_transaction_date', 'desc');
-        if (!empty($filters['range'])) {
+        if (! empty($filters['range'])) {
             $now = now();
             if ($filters['range'] === 'week') {
                 $query->whereBetween('tra_transaction_date', [$now->startOfWeek(), $now->endOfWeek()]);
@@ -109,12 +111,13 @@ class SWSRepository
                 $query->whereBetween('tra_transaction_date', [$now->startOfYear(), $now->endOfYear()]);
             }
         }
-        if (!empty($filters['from'])) {
+        if (! empty($filters['from'])) {
             $query->where('tra_transaction_date', '>=', $filters['from']);
         }
-        if (!empty($filters['to'])) {
+        if (! empty($filters['to'])) {
             $query->where('tra_transaction_date', '<=', $filters['to']);
         }
+
         return $query->limit($limit)->get()->map(function ($t) {
             $warehouseData = null;
             if ($t->warehouse) {
@@ -131,6 +134,7 @@ class SWSRepository
                     ];
                 }
             }
+
             return [
                 'tra_id' => $t->tra_id,
                 'type' => $t->tra_type,
@@ -166,7 +170,7 @@ class SWSRepository
     {
         $query = Transaction::with(['item', 'fromLocation', 'toLocation', 'warehouse', 'logs'])
             ->orderBy('tra_transaction_date', 'desc');
-        if (!empty($filters['range'])) {
+        if (! empty($filters['range'])) {
             $now = now();
             if ($filters['range'] === 'week') {
                 $query->whereBetween('tra_transaction_date', [$now->startOfWeek(), $now->endOfWeek()]);
@@ -176,18 +180,18 @@ class SWSRepository
                 $query->whereBetween('tra_transaction_date', [$now->startOfYear(), $now->endOfYear()]);
             }
         }
-        if (!empty($filters['from'])) {
+        if (! empty($filters['from'])) {
             $query->where('tra_transaction_date', '>=', $filters['from']);
         }
-        if (!empty($filters['to'])) {
+        if (! empty($filters['to'])) {
             $query->where('tra_transaction_date', '<=', $filters['to']);
         }
-        if (!empty($filters['warehouse_id'])) {
+        if (! empty($filters['warehouse_id'])) {
             $query->where('tra_warehouse_id', $filters['warehouse_id']);
         }
+
         return $query->get();
     }
-
 
     public function getCategoryById($id)
     {
@@ -204,8 +208,10 @@ class SWSRepository
         $category = Category::find($id);
         if ($category) {
             $category->update($data);
+
             return $category;
         }
+
         return null;
     }
 
@@ -215,29 +221,30 @@ class SWSRepository
         if ($category) {
             return $category->delete();
         }
+
         return false;
     }
 
     public function getInventoryStats()
     {
         $totalItems = Item::count();
-        
+
         // Calculate total value properly using current_stock
         $totalValue = Item::select(DB::raw('SUM(item_unit_price * item_current_stock) as total_value'))
             ->first()
             ->total_value ?? 0;
-            
+
         $lowStockItems = Item::where('item_current_stock', '<=', DB::raw('item_max_stock * 0.2'))
             ->where('item_current_stock', '>', 0)
             ->count();
-            
+
         $outOfStockItems = Item::where('item_current_stock', '<=', 0)->count();
 
         return [
             'total_items' => $totalItems,
             'total_value' => $totalValue,
             'low_stock_items' => $lowStockItems,
-            'out_of_stock_items' => $outOfStockItems
+            'out_of_stock_items' => $outOfStockItems,
         ];
     }
 
@@ -245,24 +252,24 @@ class SWSRepository
     {
         try {
             // Get categories with their items and calculate utilization based on current_stock and max_stock
-            $categories = Category::with(['items' => function($query) {
+            $categories = Category::with(['items' => function ($query) {
                 $query->select('item_category_id', 'item_current_stock', 'item_max_stock');
             }])->get();
 
             $stockLevels = [];
-            
+
             foreach ($categories as $category) {
                 $totalCurrentStock = $category->items->sum('item_current_stock');
                 $totalMaxStock = $category->items->sum('item_max_stock');
-                
+
                 // Calculate utilization percentage based on actual max capacity
                 $utilization = $totalMaxStock > 0 ? min(($totalCurrentStock / $totalMaxStock) * 100, 100) : 0;
-                
+
                 $stockLevels[] = [
                     'name' => $category->cat_name,
                     'utilization' => round($utilization, 2),
                     'total_quantity' => $totalCurrentStock,
-                    'max_capacity' => $totalMaxStock
+                    'max_capacity' => $totalMaxStock,
                 ];
             }
 
@@ -277,17 +284,17 @@ class SWSRepository
     {
         try {
             return Item::with('category')
-                ->select('item_id', 'item_code', 'item_name', 'item_stock_keeping_unit', 'item_category_id', 
-                        'item_stored_from', 'item_unit_price', 'item_current_stock', 'item_max_stock',
-                        'item_updated_at', 'item_created_at', 'item_item_type', 'item_is_fixed', 
-                        'item_is_collateral', 'item_liquidity_risk_level', 'item_expiration_date', 
-                        'item_warranty_end', 'item_description')
+                ->select('item_id', 'item_code', 'item_name', 'item_stock_keeping_unit', 'item_category_id',
+                    'item_stored_from', 'item_unit_price', 'item_current_stock', 'item_max_stock',
+                    'item_updated_at', 'item_created_at', 'item_item_type', 'item_is_fixed',
+                    'item_is_collateral', 'item_liquidity_risk_level', 'item_expiration_date',
+                    'item_warranty_end', 'item_description')
                 ->orderBy('item_created_at', 'desc')
                 ->get()
-                ->map(function($item) {
+                ->map(function ($item) {
                     // Calculate min stock based on max_stock (20% of max_stock)
                     $minStock = max(1, round($item->item_max_stock * 0.2));
-                    
+
                     // Determine status based on current_stock and max_stock
                     if ($item->item_current_stock <= 0) {
                         $status = 'Out of Stock';
@@ -306,7 +313,7 @@ class SWSRepository
                     $totalValue = $unitPrice * $quantity;
 
                     // Calculate stock utilization
-                    $utilization = $item->item_max_stock > 0 ? 
+                    $utilization = $item->item_max_stock > 0 ?
                         min(($item->item_current_stock / $item->item_max_stock) * 100, 100) : 0;
 
                     return [
@@ -332,14 +339,13 @@ class SWSRepository
                         'item_liquidity_risk_level' => $item->item_liquidity_risk_level,
                         'item_expiration_date' => $item->item_expiration_date,
                         'item_warranty_end' => $item->item_warranty_end,
-                        'item_description' => $item->item_description
+                        'item_description' => $item->item_description,
                     ];
                 });
         } catch (\Exception $e) {
             return [];
         }
     }
-
 
     // Generate item code: ITM + YYYY + MM + DD + 5 random alphanumeric characters
     private function generateItemCode()
@@ -348,16 +354,16 @@ class SWSRepository
         $year = $now->year;
         $month = str_pad($now->month, 2, '0', STR_PAD_LEFT);
         $day = str_pad($now->day, 2, '0', STR_PAD_LEFT);
-        
+
         // Generate 5 random alphanumeric characters
         $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $randomPart = '';
         for ($i = 0; $i < 5; $i++) {
             $randomPart .= $chars[rand(0, strlen($chars) - 1)];
         }
-        
+
         $itemCode = "ITM{$year}{$month}{$day}{$randomPart}";
-        
+
         // Ensure uniqueness
         $counter = 1;
         while (Item::where('item_code', $itemCode)->exists() && $counter <= 10) {
@@ -368,7 +374,7 @@ class SWSRepository
             $itemCode = "ITM{$year}{$month}{$day}{$randomPart}";
             $counter++;
         }
-        
+
         return $itemCode;
     }
 }

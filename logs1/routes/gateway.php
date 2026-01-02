@@ -1,24 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\Authenticate;
-use App\Http\Middleware\CheckSessionTimeout;
 
 // Debug route to check OTP status
 Route::get('/debug/otp-status/{email}', function ($email) {
     $user = \App\Models\Main\User::where('email', $email)->first();
-    
-    if (!$user) {
+
+    if (! $user) {
         return response()->json(['error' => 'User not found'], 404);
     }
-    
+
     return response()->json([
         'email' => $user->email,
         'otp' => $user->otp,
         'otp_expires_at' => $user->otp_expires_at,
         'current_time' => \Carbon\Carbon::now(),
         'is_expired' => $user->isOtpExpired(),
-        'timezone' => config('app.timezone')
+        'timezone' => config('app.timezone'),
     ]);
 });
 
@@ -48,31 +46,31 @@ Route::prefix('psm')->group(function () {
 });
 
 Route::middleware([
-    'jwt.auth'
+    'jwt.auth',
 ])->group(function () {
-    
+
     // PSM Module Routes
     Route::prefix('psm')->group(function () {
-        require __DIR__ . '/modules/psm-api.php';
+        require __DIR__.'/modules/psm-api.php';
     });
-    
+
     // SWS Module Routes
     Route::prefix('sws')->group(function () {
-        require __DIR__ . '/modules/sws-api.php';
+        require __DIR__.'/modules/sws-api.php';
     });
-    
+
     // PLT Module Routes
     Route::prefix('plt')->group(function () {
-        require __DIR__ . '/modules/plt-api.php';
+        require __DIR__.'/modules/plt-api.php';
     });
 
     // ALMS Module Routes
     Route::prefix('alms')->group(function () {
-        require __DIR__ . '/modules/alms-api.php';
+        require __DIR__.'/modules/alms-api.php';
     });
 
     // DTLR Module Routes
     Route::prefix('dtlr')->group(function () {
-        require __DIR__ . '/modules/dtlr-api.php';
+        require __DIR__.'/modules/dtlr-api.php';
     });
 });

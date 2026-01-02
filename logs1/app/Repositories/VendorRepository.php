@@ -21,8 +21,10 @@ class VendorRepository
         $vendor = Vendor::find($id);
         if ($vendor) {
             $vendor->update($data);
+
             return $vendor;
         }
+
         return null;
     }
 

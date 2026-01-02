@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\VendorAuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class VendorAuthController extends Controller
 {
@@ -26,6 +26,7 @@ class VendorAuthController extends Controller
             return response()->json(['success' => false, 'message' => 'Validation error', 'errors' => $validator->errors()], 422);
         }
         $result = $this->authService->login($request->only('email', 'password'));
+
         return response()->json($result, $result['success'] ? 200 : 401);
     }
 
@@ -38,6 +39,7 @@ class VendorAuthController extends Controller
             return response()->json(['success' => false, 'message' => 'Validation error', 'errors' => $validator->errors()], 422);
         }
         $result = $this->authService->sendOtp($request->email);
+
         return response()->json($result);
     }
 
@@ -52,20 +54,27 @@ class VendorAuthController extends Controller
         }
         $result = $this->authService->verifyOtp($request->email, $request->otp);
         if ($result['success']) {
-            try { $request->session()->save(); $request->session()->regenerate(); } catch (\Exception $e) {}
+            try {
+                $request->session()->save();
+                $request->session()->regenerate();
+            } catch (\Exception $e) {
+            }
         }
+
         return response()->json($result, $result['success'] ? 200 : 401);
     }
 
     public function logout(Request $request)
     {
         $result = $this->authService->logout();
+
         return response()->json($result);
     }
 
     public function me(Request $request)
     {
         $result = $this->authService->getCurrentUser();
+
         return response()->json($result, $result['success'] ? 200 : 401);
     }
 
@@ -75,8 +84,10 @@ class VendorAuthController extends Controller
             $request->session()->regenerate(true);
             $request->session()->put('last_activity', time());
             $request->session()->save();
+
             return response()->json(['success' => true, 'message' => 'Session refreshed successfully', 'csrf_token' => csrf_token(), 'session_refreshed_at' => now()->toDateTimeString()]);
         }
+
         return response()->json(['success' => false, 'message' => 'Not authenticated', 'requires_relogin' => true], 401);
     }
 
@@ -89,6 +100,7 @@ class VendorAuthController extends Controller
     {
         if (Auth::guard('vendor')->check()) {
             $request->session()->put('last_activity', time());
+
             return response()->json([
                 'success' => true,
                 'authenticated' => true,
@@ -97,9 +109,10 @@ class VendorAuthController extends Controller
                     'email' => Auth::guard('vendor')->user()->email,
                 ],
                 'csrf_token' => csrf_token(),
-                'session_lifetime' => config('session.lifetime', 40)
+                'session_lifetime' => config('session.lifetime', 40),
             ]);
         }
+
         return response()->json(['success' => false, 'authenticated' => false, 'message' => 'Session not found or expired'], 401);
     }
 
@@ -111,6 +124,7 @@ class VendorAuthController extends Controller
                 'email' => Auth::guard('vendor')->user()->email,
             ]]);
         }
+
         return response()->json(['success' => false, 'authenticated' => false, 'message' => 'Not authenticated'], 401);
     }
 }

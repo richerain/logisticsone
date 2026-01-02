@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\PSMService;
+use Illuminate\Http\Request;
 
 class PSMController extends Controller
 {
@@ -21,12 +21,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getActiveVendorsForPurchase();
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch active vendors: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Failed to fetch active vendors: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }
@@ -38,12 +39,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getPurchases();
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch purchases: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Failed to fetch purchases: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }
@@ -55,12 +57,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getPurchase($id);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch purchase: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to fetch purchase: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -72,12 +75,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getPurchaseByPurchaseId($purId);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch purchase: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to fetch purchase: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -95,16 +99,17 @@ class PSMController extends Controller
                 'pur_company_name' => 'required|string|max:255',
                 'pur_ven_type' => 'required|in:equipment,supplies,furniture,automotive',
                 'pur_order_by' => 'required|string|max:255',
-                'pur_desc' => 'nullable|string'
+                'pur_desc' => 'nullable|string',
             ]);
 
             $result = $this->psmService->createPurchase($validated);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create purchase: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to create purchase: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -122,16 +127,17 @@ class PSMController extends Controller
                 'pur_company_name' => 'sometimes|required|string|max:255',
                 'pur_ven_type' => 'sometimes|required|in:equipment,supplies,furniture,automotive',
                 'pur_order_by' => 'sometimes|required|string|max:255',
-                'pur_desc' => 'nullable|string'
+                'pur_desc' => 'nullable|string',
             ]);
 
             $result = $this->psmService->updatePurchase($id, $validated);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update purchase: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to update purchase: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -143,11 +149,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->deletePurchase($id);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete purchase: ' . $e->getMessage()
+                'message' => 'Failed to delete purchase: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -155,7 +162,6 @@ class PSMController extends Controller
     /**
      * Get purchase statistics
      */
-    
 
     /**
      * Update purchase status
@@ -166,18 +172,19 @@ class PSMController extends Controller
             $validated = $request->validate([
                 'status' => 'required|in:Pending,Approved,Rejected,Cancel,Vendor-Review,In-Progress,Completed',
                 'budget_check' => 'sometimes|boolean',
-                'approved_by' => 'nullable|string|max:255'
+                'approved_by' => 'nullable|string|max:255',
             ]);
 
             $budgetCheck = $validated['budget_check'] ?? false;
             $approvedBy = $validated['approved_by'] ?? null;
             $result = $this->psmService->updatePurchaseStatus($id, $validated['status'], $budgetCheck, $approvedBy);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update purchase status: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to update purchase status: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -189,15 +196,16 @@ class PSMController extends Controller
     {
         try {
             $validated = $request->validate([
-                'cancel_by' => 'required|string|max:255'
+                'cancel_by' => 'required|string|max:255',
             ]);
             $result = $this->psmService->cancelPurchase($id, $validated['cancel_by']);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to cancel purchase: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to cancel purchase: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -206,11 +214,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getQuotes();
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch quotes: ' . $e->getMessage()
+                'message' => 'Failed to fetch quotes: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -228,14 +237,15 @@ class PSMController extends Controller
                 'quo_item_drop_to' => 'nullable|string',
                 'quo_payment' => 'nullable|string',
                 'quo_stored_from' => 'nullable|string',
-                'quo_purchase_id' => 'nullable|integer'
+                'quo_purchase_id' => 'nullable|integer',
             ]);
             $result = $this->psmService->createQuote($validated);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create quote: ' . $e->getMessage()
+                'message' => 'Failed to create quote: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -244,11 +254,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->updateQuote($id, $request->all());
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update quote: ' . $e->getMessage()
+                'message' => 'Failed to update quote: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -257,11 +268,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->deleteQuote($id);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete quote: ' . $e->getMessage()
+                'message' => 'Failed to delete quote: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -270,11 +282,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getApprovedPurchasesForQuote();
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch approved purchases: ' . $e->getMessage()
+                'message' => 'Failed to fetch approved purchases: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -283,11 +296,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->reviewPurchaseToQuote($purchaseId);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to review purchase: ' . $e->getMessage()
+                'message' => 'Failed to review purchase: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -296,7 +310,7 @@ class PSMController extends Controller
     {
         return response()->json([
             'message' => 'PSM Vendor Quotes data',
-            'data' => []
+            'data' => [],
         ]);
     }
 
@@ -304,7 +318,7 @@ class PSMController extends Controller
     {
         return response()->json([
             'message' => 'PSM Vendors data',
-            'data' => []
+            'data' => [],
         ]);
     }
 
@@ -319,7 +333,7 @@ class PSMController extends Controller
                 'status' => $request->get('status'),
                 'type' => $request->get('type'),
                 'sort_field' => $request->get('sort_field', 'created_at'),
-                'sort_order' => $request->get('sort_order', 'desc')
+                'sort_order' => $request->get('sort_order', 'desc'),
             ];
 
             $result = $this->psmService->getVendors($filters);
@@ -329,8 +343,8 @@ class PSMController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch vendors: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Failed to fetch vendors: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }
@@ -342,12 +356,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getVendor($id);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch vendor: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to fetch vendor: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -356,12 +371,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getVendorByVendorId($venId);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch vendor: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to fetch vendor: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -381,16 +397,17 @@ class PSMController extends Controller
                 'ven_rating' => 'nullable|integer|min:1|max:5',
                 'ven_type' => 'required|in:equipment,supplies,furniture,automotive',
                 'ven_status' => 'nullable|in:active,inactive',
-                'ven_desc' => 'nullable|string'
+                'ven_desc' => 'nullable|string',
             ]);
 
             $result = $this->psmService->createVendor($validated);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create vendor: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to create vendor: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -410,16 +427,17 @@ class PSMController extends Controller
                 'ven_rating' => 'nullable|integer|min:1|max:5',
                 'ven_type' => 'sometimes|required|in:equipment,supplies,furniture,automotive',
                 'ven_status' => 'sometimes|required|in:active,inactive',
-                'ven_desc' => 'nullable|string'
+                'ven_desc' => 'nullable|string',
             ]);
 
             $result = $this->psmService->updateVendor($id, $validated);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update vendor: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to update vendor: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -428,12 +446,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getVendorStats();
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch vendor stats: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Failed to fetch vendor stats: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }
@@ -446,16 +465,17 @@ class PSMController extends Controller
                 'search' => $request->get('search'),
                 'type' => $request->get('type'),
                 'sort_field' => $request->get('sort_field', 'created_at'),
-                'sort_order' => $request->get('sort_order', 'desc')
+                'sort_order' => $request->get('sort_order', 'desc'),
             ];
 
             $result = $this->psmService->getProducts($filters);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch products: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Failed to fetch products: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }
@@ -464,12 +484,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getVendorProducts($venId);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch vendor products: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Failed to fetch vendor products: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }
@@ -481,11 +502,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->deleteVendor($id);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete vendor: ' . $e->getMessage()
+                'message' => 'Failed to delete vendor: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -504,16 +526,17 @@ class PSMController extends Controller
                 'prod_type' => 'required|in:equipment,supplies,furniture,automotive',
                 'prod_warranty' => 'nullable|string|max:255',
                 'prod_expiration' => 'nullable|date',
-                'prod_desc' => 'nullable|string'
+                'prod_desc' => 'nullable|string',
             ]);
 
             $result = $this->psmService->createProduct($validated);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create product: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to create product: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -529,16 +552,17 @@ class PSMController extends Controller
                 'prod_type' => 'sometimes|required|in:equipment,supplies,furniture,automotive',
                 'prod_warranty' => 'nullable|string|max:255',
                 'prod_expiration' => 'nullable|date',
-                'prod_desc' => 'nullable|string'
+                'prod_desc' => 'nullable|string',
             ]);
 
             $result = $this->psmService->updateProduct($id, $validated);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update product: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to update product: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -547,11 +571,12 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->deleteProduct($id);
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete product: ' . $e->getMessage()
+                'message' => 'Failed to delete product: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -565,21 +590,21 @@ class PSMController extends Controller
             $filters = [
                 'search' => $request->get('search'),
                 'status' => 'active',
-                'type' => $request->get('type')
+                'type' => $request->get('type'),
             ];
 
             $result = $this->psmService->getVendors($filters);
-            
+
             return response()->json([
                 'success' => $result['success'],
                 'data' => $result['data'] ?? [],
-                'message' => $result['message'] ?? 'Vendor data retrieved successfully'
+                'message' => $result['message'] ?? 'Vendor data retrieved successfully',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch vendor info: ' . $e->getMessage(),
-                'data' => []
+                'message' => 'Failed to fetch vendor info: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }
@@ -591,7 +616,7 @@ class PSMController extends Controller
     {
         return response()->json([
             'success' => false,
-            'message' => 'Vendor updates must be done through the PSM module'
+            'message' => 'Vendor updates must be done through the PSM module',
         ], 405);
     }
 
@@ -606,12 +631,13 @@ class PSMController extends Controller
     {
         try {
             $result = $this->psmService->getCurrentBudget();
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch budget: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to fetch budget: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -624,20 +650,21 @@ class PSMController extends Controller
         try {
             $validated = $request->validate([
                 'validity_type' => 'required|in:Week,Month,Year',
-                'additional_amount' => 'nullable|numeric|min:0'
+                'additional_amount' => 'nullable|numeric|min:0',
             ]);
 
             $result = $this->psmService->extendBudgetValidity(
-                $id, 
-                $validated['validity_type'], 
+                $id,
+                $validated['validity_type'],
                 $validated['additional_amount'] ?? 0
             );
+
             return response()->json($result);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to extend budget: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to extend budget: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }
@@ -650,12 +677,12 @@ class PSMController extends Controller
         try {
             $validated = $request->validate([
                 'action' => 'required|in:approve,reject',
-                'approved_by' => 'required|string|max:255'
+                'approved_by' => 'required|string|max:255',
             ]);
 
             $result = $this->psmService->processBudgetApproval(
-                $id, 
-                $validated['action'], 
+                $id,
+                $validated['action'],
                 $validated['approved_by']
             );
 
@@ -663,8 +690,8 @@ class PSMController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to process budget approval: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to process budget approval: '.$e->getMessage(),
+                'data' => null,
             ], 500);
         }
     }

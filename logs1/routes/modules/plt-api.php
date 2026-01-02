@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PLTController;
+use Illuminate\Support\Facades\Route;
 
 // PLT Module API Routes
 Route::get('/projects', [PLTController::class, 'getProjects']);
@@ -23,7 +23,7 @@ Route::get('/test', function () {
         'module' => 'PLT - Project Logistics Tracker',
         'status' => 'active',
         'submodules' => [
-            'Logistics Projects'
-        ]
+            'Logistics Projects',
+        ],
     ]);
 });
