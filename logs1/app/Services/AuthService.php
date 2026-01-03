@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Main\User;
+use App\Models\EmployeeAccount;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
@@ -150,6 +151,13 @@ class AuthService
 
         // Log the user in using the correct guard with "remember" for longer session
         Auth::guard('sws')->login($user, true);
+
+        // Update EmployeeAccount last_login
+        try {
+            EmployeeAccount::where('email', $user->email)->update(['last_login' => Carbon::now()]);
+        } catch (\Exception $e) {
+            Log::error("Failed to update EmployeeAccount last_login: " . $e->getMessage());
+        }
 
         Log::info("OTP verification successful for user: {$email}");
 

@@ -184,6 +184,7 @@
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
+                        credentials: 'include', // Ensure session cookies are handled
                         body: JSON.stringify({
                             email: this.email,
                             otp: otpCode

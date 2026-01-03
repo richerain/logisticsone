@@ -115,6 +115,24 @@
             </li>
             @endif
             <!-- Document Tracking & Logistics Record btn end -->
+            
+            <!-- User Management btn start -->
+            @if($role === 'superadmin')
+            <li class="has-dropdown">
+                <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
+                    <div class="flex items-center flex-1 min-w-0" title="User Management">
+                        <i class="bx bxs-user-account mr-2 shrink-0"></i>
+                        <span class="flex-1">User Management</span>
+                    </div>
+                    <i class="bx bx-chevron-down text-2xl transition-transform duration-300 shrink-0 ml-2"></i>
+                </div>
+                <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
+                    <li><a href="#" data-module="um-account-management" title="Account Management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bxs-user-detail'></i>Account Management</a></li>
+                    <li><a href="#" data-module="um-audit-trail" title="Audit Trail" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><i class='bx bx-fw bx-history'></i>Audit Trail</a></li>
+                </ul>
+            </li>
+            @endif
+            <!-- User Management btn end -->
         </ul>
         <div class="mt-1 flex justify-center space-x-1 opacity-10">
             <img src="{{ asset('images/micrologo.png') }}" alt="Micro logo" class="h-32 w-32 rounded-full object-cover" loading="lazy" />

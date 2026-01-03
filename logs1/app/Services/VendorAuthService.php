@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\VendorRepository;
+use App\Models\VendorAccount;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Auth;
@@ -79,6 +80,14 @@ class VendorAuthService
 
         $vendor->update(['otp' => null, 'otp_expires_at' => null, 'email_verified_at' => Carbon::now()]);
         Auth::guard('vendor')->login($vendor, true);
+        
+        // Update VendorAccount last_login
+        try {
+            VendorAccount::where('email', $vendor->email)->update(['last_login' => Carbon::now()]);
+        } catch (\Exception $e) {
+            Log::error("Failed to update VendorAccount last_login: " . $e->getMessage());
+        }
+
         Log::info("Vendor OTP verification successful for user: {$email}");
 
         $secret = config('app.key');

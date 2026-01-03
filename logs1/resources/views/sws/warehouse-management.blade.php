@@ -1,6 +1,6 @@
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
-        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-warehouse'></i>Warehouse Management</h2>
+        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-store'></i>Warehouse Management</h2>
     </div>
     <div class="text-right">
         <span class="text-md text-gray-600">Smart Warehousing System</span>

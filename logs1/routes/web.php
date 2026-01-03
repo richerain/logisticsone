@@ -6,23 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Simple session setup for auth routes
-Route::middleware([
-    \App\Http\Middleware\EncryptCookies::class,
-    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \App\Http\Middleware\VerifyCsrfToken::class,
-    \Illuminate\Routing\Middleware\SubstituteBindings::class,
-])->group(function () {
+// Middleware is already applied by bootstrap/app.php
+// Public Authentication Routes - FIXED: Proper route definitions
+Route::get('/login', function (Request $request) {
+    if (Auth::guard('sws')->check()) {
+        return redirect('/home');
+    }
 
-    // Public Authentication Routes - FIXED: Proper route definitions
-    Route::get('/login', function (Request $request) {
-        if (Auth::guard('sws')->check()) {
-            return redirect('/home');
-        }
-
-        return view('login-auth.login');
-    })->name('login');
+    return view('login-auth.login');
+})->name('login');
 
     Route::get('/login/vendor-portal', function (Request $request) {
         if (Auth::guard('vendor')->check()) {
@@ -100,6 +92,8 @@ Route::middleware([
                 'alms-maintenance-management' => 'alms.maintenance-management',
                 'dtlr-document-tracker' => 'dtlr.document-tracker',
                 'dtlr-logistics-record' => 'dtlr.logistics-record',
+                'um-account-management' => 'user-management.account-management',
+                'um-audit-trail' => 'user-management.audit-trail',
             ];
 
             $view = $moduleViews[$module] ?? 'components.module-not-found';
@@ -134,6 +128,16 @@ Route::middleware([
         Route::post('/alms/request-maintenance', [ALMSController::class, 'storeRequestMaintenance'])->name('alms.request_maintenance.store');
         Route::delete('/alms/request-maintenance/{id}', [ALMSController::class, 'deleteRequestMaintenance'])->name('alms.request_maintenance.delete');
         Route::post('/alms/request-maintenance/{id}/processed', [ALMSController::class, 'markRequestProcessed'])->name('alms.request_maintenance.processed');
+
+        // User Management Routes
+        Route::get('/user-management/accounts', [App\Http\Controllers\UserManagementController::class, 'getAccounts'])->name('user-management.accounts');
+        Route::get('/user-management/stats', [App\Http\Controllers\UserManagementController::class, 'getStats'])->name('user-management.stats');
+        Route::post('/user-management/accounts/employee', [App\Http\Controllers\UserManagementController::class, 'createEmployee'])->name('user-management.accounts.createEmployee');
+        Route::post('/user-management/accounts/vendor', [App\Http\Controllers\UserManagementController::class, 'createVendor'])->name('user-management.accounts.createVendor');
+        Route::put('/user-management/accounts/{id}/role', [App\Http\Controllers\UserManagementController::class, 'updateRole'])->name('user-management.accounts.updateRole');
+        Route::put('/user-management/accounts/{id}/status', [App\Http\Controllers\UserManagementController::class, 'updateStatus'])->name('user-management.accounts.updateStatus');
+        Route::delete('/user-management/accounts/{id}', [App\Http\Controllers\UserManagementController::class, 'destroy'])->name('user-management.accounts.destroy');
+        Route::get('/user-management/accounts/{id}', [App\Http\Controllers\UserManagementController::class, 'show'])->name('user-management.accounts.show');
     });
 
     Route::middleware(['auth:vendor', 'session.timeout'])->group(function () {
@@ -174,7 +178,6 @@ Route::middleware([
 
         return redirect('/login');
     });
-});
 
 // Health check endpoints (outside session middleware)
 Route::get('/up', function () {
@@ -196,13 +199,8 @@ Route::get('/api/test-db', function () {
 });
 
 // FIXED: Add explicit API routes for authentication to ensure they're accessible
-// These routes use the session middleware but exclude CSRF verification
-Route::middleware([
-    \App\Http\Middleware\EncryptCookies::class,
-    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\Routing\Middleware\SubstituteBindings::class,
-])->prefix('api')->group(function () {
+// These routes use the session middleware (inherited from web group) but exclude CSRF verification (handled in bootstrap/app.php)
+Route::prefix('api')->group(function () {
     Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
     Route::post('/send-otp', [App\Http\Controllers\AuthController::class, 'sendOtp']);
     Route::post('/verify-otp', [App\Http\Controllers\AuthController::class, 'verifyOtp']);
