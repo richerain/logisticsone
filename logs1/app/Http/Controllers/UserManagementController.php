@@ -95,6 +95,10 @@ class UserManagementController extends Controller
         $account->firstname = $request->firstname;
         $account->middlename = $request->middlename;
         $account->lastname = $request->lastname;
+        $account->sex = $user->sex;
+        $account->age = $user->age;
+        $account->birthdate = $user->birthdate;
+        $account->contactnum = $user->contactnum;
         $account->email = $request->email;
         $account->password = $request->password; // Save plain text as requested
         $account->roles = $request->role;

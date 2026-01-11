@@ -9,8 +9,10 @@ return new class extends Migration
     public function up()
     {
         Schema::connection('psm')->table('psm_purchase', function (Blueprint $table) {
-            // Remove pur_status_timeline column
-            $table->dropColumn('pur_status_timeline');
+            // Remove pur_status_timeline column if it exists
+            if (Schema::connection('psm')->hasColumn('psm_purchase', 'pur_status_timeline')) {
+                $table->dropColumn('pur_status_timeline');
+            }
 
             // Add pur_department_from column
             $table->string('pur_department_from')->default('Logistics 1');

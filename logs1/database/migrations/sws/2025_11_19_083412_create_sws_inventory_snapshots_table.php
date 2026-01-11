@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sws_inventory_snapshots', function (Blueprint $table) {
+        Schema::connection('sws')->create('sws_inventory_snapshots', function (Blueprint $table) {
             $table->id('snap_id');
-            $table->unsignedInteger('snap_item_id');
-            $table->unsignedInteger('snap_location_id');
-            $table->unsignedInteger('snap_warehouse_id')->nullable();
+            $table->unsignedBigInteger('snap_item_id'); // Changed to BigInteger
+            $table->unsignedBigInteger('snap_location_id'); // Changed to BigInteger
+            $table->unsignedBigInteger('snap_warehouse_id')->nullable(); // Changed to BigInteger
             $table->integer('snap_current_quantity');
             $table->integer('snap_min_threshold')->default(0);
             $table->enum('snap_alert_level', ['normal', 'low', 'critical'])->default('normal');
@@ -23,9 +23,7 @@ return new class extends Migration
             $table->string('snap_recorded_by', 100)->nullable();
             $table->text('snap_notes')->nullable();
 
-            $table->foreign('snap_item_id')->references('item_id')->on('sws_items');
-            $table->foreign('snap_location_id')->references('loc_id')->on('sws_locations');
-            $table->foreign('snap_warehouse_id')->references('ware_id')->on('sws_warehouses');
+            // Foreign keys removed to avoid circular dependency/creation order issues
         });
     }
 
@@ -34,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sws_inventory_snapshots');
+        Schema::connection('sws')->dropIfExists('sws_inventory_snapshots');
     }
 };

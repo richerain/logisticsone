@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sws_items', function (Blueprint $table) {
+        Schema::connection('sws')->create('sws_items', function (Blueprint $table) {
             $table->id('item_id');
             $table->string('item_name', 255);
             $table->text('item_description')->nullable();
             $table->string('item_stock_keeping_unit', 100)->unique()->nullable();
-            $table->unsignedInteger('item_category_id')->nullable();
+            $table->unsignedBigInteger('item_category_id')->nullable();
             $table->enum('item_item_type', ['liquid', 'illiquid', 'hybrid'])->default('illiquid');
             $table->boolean('item_is_fixed')->default(false);
             $table->date('item_expiration_date')->nullable();
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->timestamp('item_created_at')->useCurrent();
             $table->timestamp('item_updated_at')->nullable()->useCurrentOnUpdate();
 
-            $table->foreign('item_category_id')->references('cat_id')->on('sws_categories');
+            // Foreign keys removed to avoid circular dependency/creation order issues
         });
     }
 
@@ -37,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sws_items');
+        Schema::connection('sws')->dropIfExists('sws_items');
     }
 };

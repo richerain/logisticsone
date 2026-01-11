@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sws_categories', function (Blueprint $table) {
+        Schema::connection('sws')->create('sws_categories', function (Blueprint $table) {
             $table->id('cat_id');
             $table->string('cat_name', 100)->unique();
             $table->text('cat_description')->nullable();
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sws_categories');
+        Schema::connection('sws')->dropIfExists('sws_categories');
     }
 };

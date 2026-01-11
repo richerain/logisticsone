@@ -16,6 +16,7 @@ return new class extends Migration
                 $table->text('track_description');
                 $table->string('track_logged_by', 100);
                 $table->string('track_reference_id', 100)->nullable();
+                $table->timestamp('track_log_date')->useCurrent();
                 $table->timestamps();
 
                 $table->index('track_project_id');

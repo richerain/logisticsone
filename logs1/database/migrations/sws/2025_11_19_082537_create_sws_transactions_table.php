@@ -11,23 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sws_transactions', function (Blueprint $table) {
+        Schema::connection('sws')->create('sws_transactions', function (Blueprint $table) {
             $table->id('tra_id');
-            $table->unsignedInteger('tra_item_id');
+            $table->unsignedBigInteger('tra_item_id');
             $table->enum('tra_type', ['inbound', 'outbound', 'transfer', 'pick_up', 'drop_off', 'adjustment']);
             $table->integer('tra_quantity');
-            $table->unsignedInteger('tra_from_location_id')->nullable();
-            $table->unsignedInteger('tra_to_location_id')->nullable();
-            $table->unsignedInteger('tra_warehouse_id')->nullable();
+            $table->unsignedBigInteger('tra_from_location_id')->nullable();
+            $table->unsignedBigInteger('tra_to_location_id')->nullable();
+            $table->unsignedBigInteger('tra_warehouse_id')->nullable();
             $table->timestamp('tra_transaction_date')->useCurrent();
             $table->string('tra_reference_id', 100)->nullable();
             $table->enum('tra_status', ['pending', 'in_transit', 'completed', 'cancelled'])->default('pending');
             $table->text('tra_notes')->nullable();
 
-            $table->foreign('tra_item_id')->references('item_id')->on('sws_items');
-            $table->foreign('tra_from_location_id')->references('loc_id')->on('sws_locations');
-            $table->foreign('tra_to_location_id')->references('loc_id')->on('sws_locations');
-            $table->foreign('tra_warehouse_id')->references('ware_id')->on('sws_warehouses');
+            // Foreign keys removed to avoid circular dependency/creation order issues
+            // They should be added in a separate migration after all tables exist
         });
     }
 
@@ -36,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sws_transactions');
+        Schema::connection('sws')->dropIfExists('sws_transactions');
     }
 };
