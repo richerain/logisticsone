@@ -52,19 +52,22 @@
         <div class="inventory-section">
             <h4 class="font-semibold mb-4">Quick Actions</h4>
             <div class="grid grid-cols-2 gap-3">
-                <button id="transferBtn" class="btn btn-outline">
+                <button id="transferBtn" class="btn btn-info text-white">
                     <i class='bx bx-transfer mr-2'></i>Transfer
                 </button>
-                <button id="scanBarcodeBtn" class="btn btn-outline">
-                    <i class='bx bx-barcode mr-2'></i>Scan Barcode
+                <button id="viewLocationsBtn" class="btn btn-warning text-white">
+                    <i class='bx bx-map mr-2'></i>Location
                 </button>
-                <button id="generateReportBtn" class="btn btn-outline">
+                <button id="viewCategoriesBtn" class="btn btn-warning text-white">
+                    <i class='bx bx-category-alt mr-2'></i>Category
+                </button>
+                <button id="generateReportBtn" class="btn btn-secondary text-white">
                     <i class='bx bxs-report mr-2'></i>Generate Report
                 </button>
-                <button id="purchaseNewItemBtn" class="btn btn-success px-9">
+                <button id="purchaseNewItemBtn" class="btn btn-success px-9 text-white">
                     <i class='bx bxs-purchase-tag mr-2'></i>Purchase New Item
                 </button>
-                <button id="inventoryNewItemBtn" class="btn btn-primary px-9">
+                <button id="inventoryNewItemBtn" class="btn btn-primary px-9 text-white">
                     <i class='bx bxs-down-arrow-square mr-2'></i>Inventory New Item
                 </button>
             </div> 
@@ -328,6 +331,169 @@
     </div>
 </div>
 
+
+<!-- View Locations Modal -->
+<div id="viewLocationsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Warehouse Locations</h3>
+            <button id="closeViewLocationsModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        
+        <div class="mb-4">
+            <button id="addNewLocationBtn" class="btn btn-primary btn-sm text-white">
+                <i class='bx bx-plus mr-1'></i>Add New Location
+            </button>
+        </div>
+
+        <div class="overflow-x-auto mb-4 border rounded-lg">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="bg-gray-700 text-white">
+                        <th class="whitespace-nowrap">ID</th>
+                        <th class="whitespace-nowrap">Name</th>
+                        <th class="whitespace-nowrap">Type</th>
+                        <th class="whitespace-nowrap">Zone</th>
+                        <th class="whitespace-nowrap">Fixed Asset Support</th>
+                        <th class="whitespace-nowrap">Capacity</th>
+                        <th class="whitespace-nowrap">Parent Location</th>
+                        <th class="whitespace-nowrap">Department</th>
+                        <th class="whitespace-nowrap">Status</th>
+                        <th class="whitespace-nowrap">Created At</th>
+                    </tr>
+                </thead>
+                <tbody id="locationsTableBody">
+                    <tr>
+                        <td colspan="10" class="text-center py-8 text-gray-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class='bx bx-fw bx-map-alt text-4xl text-gray-400 mb-2'></i>
+                                <p>No locations found</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="locationsPager" class="flex items-center justify-between mt-3">
+            <div id="locationsPagerInfo" class="text-sm text-gray-600"></div>
+            <div class="join">
+                <button class="btn btn-sm join-item" id="locationsPrevBtn" data-action="prev">Prev</button>
+                <span class="btn btn-sm join-item" id="locationsPageDisplay">1 / 1</span>
+                <button class="btn btn-sm join-item" id="locationsNextBtn" data-action="next">Next</button>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <button id="closeViewLocationsModalBtn" class="btn btn-ghost">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Location Modal -->
+<div id="addLocationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[60]">
+    <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Add New Location</h3>
+            <button id="closeAddLocationModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        <form id="addLocationForm">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Location ID</label>
+                <input type="text" id="new_loc_id" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg font-mono font-bold">
+                <p class="text-xs text-gray-500 mt-1">Auto-generated unique identifier</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location Name *</label>
+                    <input type="text" id="new_loc_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <input type="text" id="new_loc_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Zone Type</label>
+                    <input type="text" id="new_loc_zone_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+                    <input type="number" id="new_loc_capacity" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+            <div class="flex items-center mb-4">
+                <input type="checkbox" id="new_loc_supports_fixed" class="mr-2">
+                <label class="text-sm font-medium text-gray-700">Supports Fixed Items</label>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="cancelAddLocationModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Location</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View Categories Modal -->
+<div id="viewCategoriesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Inventory Categories</h3>
+            <button id="closeViewCategoriesModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        
+        <div class="mb-4">
+            <button id="addNewCategoryBtn" class="btn btn-primary btn-sm text-white">
+                <i class='bx bx-plus mr-1'></i>Add New Category
+            </button>
+        </div>
+
+        <div class="overflow-x-auto mb-4 border rounded-lg">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="bg-gray-700 text-white">
+                        <th class="whitespace-nowrap">ID</th>
+                        <th class="whitespace-nowrap">Name</th>
+                        <th class="whitespace-nowrap">Description</th>
+                        <th class="whitespace-nowrap">Created At</th>
+                    </tr>
+                </thead>
+                <tbody id="categoriesTableBody">
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-gray-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class='bx bx-fw bx-category-alt text-4xl text-gray-400 mb-2'></i>
+                                <p>No categories found</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="categoriesPager" class="flex items-center justify-between mt-3">
+            <div id="categoriesPagerInfo" class="text-sm text-gray-600"></div>
+            <div class="join">
+                <button class="btn btn-sm join-item" id="categoriesPrevBtn" data-action="prev">Prev</button>
+                <span class="btn btn-sm join-item" id="categoriesPageDisplay">1 / 1</span>
+                <button class="btn btn-sm join-item" id="categoriesNextBtn" data-action="next">Next</button>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <button id="closeViewCategoriesModalBtn" class="btn btn-ghost">Close</button>
+            <button id="saveCategoryBtn" class="btn btn-success text-white">Save Category</button>
+        </div>
+    </div>
+</div>
+
 <!-- Digital Inventory Report Modal -->
 <div id="di_report_modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto">
@@ -525,6 +691,10 @@ let currentDiPage = 1;
 const diPageSize = 10;
 var categories = [];
 var locations = [];
+let currentLocationsPage = 1;
+const locationsPageSize = 10;
+let currentCategoriesPage = 1;
+const categoriesPageSize = 10;
 
     const els = {
     // Stock Levels
@@ -532,7 +702,8 @@ var locations = [];
     
     // Quick Actions
     transferBtn: document.getElementById('transferBtn'),
-    scanBarcodeBtn: document.getElementById('scanBarcodeBtn'),
+    viewLocationsBtn: document.getElementById('viewLocationsBtn'),
+    viewCategoriesBtn: document.getElementById('viewCategoriesBtn'),
     generateReportBtn: document.getElementById('generateReportBtn'),
     purchaseNewItemBtn: document.getElementById('purchaseNewItemBtn'),
     inventoryNewItemBtn: document.getElementById('inventoryNewItemBtn'),
@@ -575,7 +746,35 @@ var locations = [];
     transferLocationFrom: document.getElementById('transfer_location_from'),
     transferLocationTo: document.getElementById('transfer_location_to'),
     transferUnits: document.getElementById('transfer_units'),
-    transferUnitsWarning: document.getElementById('transfer_units_warning')
+    transferUnitsWarning: document.getElementById('transfer_units_warning'),
+    
+    // View Locations Modal
+    viewLocationsModal: document.getElementById('viewLocationsModal'),
+    closeViewLocationsModal: document.getElementById('closeViewLocationsModal'),
+    closeViewLocationsModalBtn: document.getElementById('closeViewLocationsModalBtn'),
+    locationsTableBody: document.getElementById('locationsTableBody'),
+    locationsPagerInfo: document.getElementById('locationsPagerInfo'),
+    locationsPageDisplay: document.getElementById('locationsPageDisplay'),
+    locationsPrevBtn: document.getElementById('locationsPrevBtn'),
+    locationsNextBtn: document.getElementById('locationsNextBtn'),
+    addNewLocationBtn: document.getElementById('addNewLocationBtn'),
+    
+    // Add Location Modal
+    addLocationModal: document.getElementById('addLocationModal'),
+    closeAddLocationModal: document.getElementById('closeAddLocationModal'),
+    cancelAddLocationModal: document.getElementById('cancelAddLocationModal'),
+    addLocationForm: document.getElementById('addLocationForm'),
+    newLocId: document.getElementById('new_loc_id'),
+
+    // View Categories Modal
+    viewCategoriesModal: document.getElementById('viewCategoriesModal'),
+    closeViewCategoriesModal: document.getElementById('closeViewCategoriesModal'),
+    closeViewCategoriesModalBtn: document.getElementById('closeViewCategoriesModalBtn'),
+    categoriesTableBody: document.getElementById('categoriesTableBody'),
+    categoriesPagerInfo: document.getElementById('categoriesPagerInfo'),
+    categoriesPageDisplay: document.getElementById('categoriesPageDisplay'),
+    categoriesPrevBtn: document.getElementById('categoriesPrevBtn'),
+    categoriesNextBtn: document.getElementById('categoriesNextBtn')
 };
 
 const Toast = Swal.mixin({ 
@@ -653,6 +852,23 @@ function generateSKU(itemName, category) {
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     
     return `${cat}-${base}-${random}`;
+}
+
+function generateLocationId() {
+    const now = new Date();
+    const year = String(now.getFullYear()).slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    
+    // Generate 3 random alphanumeric characters
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomPart = '';
+    for (let i = 0; i < 3; i++) {
+        randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    // Final ID is 10 characters: L + YYMMDD + XXX
+    return `L${year}${month}${day}${randomPart}`;
 }
 
 // Update item code preview
@@ -833,8 +1049,11 @@ function renderInventoryItems() {
     if (total === 0) {
         els.inventoryTableBody.innerHTML = `
             <tr>
-                <td colspan="12" class="text-center py-4 text-gray-500">
-                    No inventory items found
+                <td colspan="12" class="text-center py-8 text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class='bx bx-fw bxs-store text-4xl text-gray-400 mb-2'></i>
+                        <p>No inventory items found</p>
+                    </div>
                 </td>
             </tr>
         `;
@@ -1041,6 +1260,36 @@ function renderCategoryOptions() {
         editCategorySelect.innerHTML = html;
     }
 }
+
+document.getElementById('locationsPager')?.addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if (!btn) return;
+    const act = btn.getAttribute('data-action');
+    if (act === 'prev') {
+        currentLocationsPage = Math.max(1, currentLocationsPage - 1);
+        renderLocationsTable();
+    }
+    if (act === 'next') {
+        const max = Math.max(1, Math.ceil((locations.length || 0) / locationsPageSize));
+        currentLocationsPage = Math.min(max, currentLocationsPage + 1);
+        renderLocationsTable();
+    }
+});
+
+document.getElementById('categoriesPager')?.addEventListener('click', function(ev){
+    const btn = ev.target.closest('button[data-action]');
+    if (!btn) return;
+    const act = btn.getAttribute('data-action');
+    if (act === 'prev') {
+        currentCategoriesPage = Math.max(1, currentCategoriesPage - 1);
+        renderCategoriesTable();
+    }
+    if (act === 'next') {
+        const max = Math.max(1, Math.ceil((categories.length || 0) / categoriesPageSize));
+        currentCategoriesPage = Math.min(max, currentCategoriesPage + 1);
+        renderCategoriesTable();
+    }
+});
 
 // Modal Functions
 function openUnderDevelopmentModal() {
@@ -1430,7 +1679,26 @@ function initDigitalInventory() {
     // Quick Actions Event Listeners
     // searchItem quick action removed
     els.transferBtn.addEventListener('click', openTransferModal);
-    els.scanBarcodeBtn.addEventListener('click', openUnderDevelopmentModal);
+    els.viewLocationsBtn.addEventListener('click', openViewLocationsModal);
+    els.viewCategoriesBtn.addEventListener('click', openViewCategoriesModal);
+    els.closeViewLocationsModal.addEventListener('click', closeViewLocationsModalFunc);
+    els.closeViewLocationsModalBtn.addEventListener('click', closeViewLocationsModalFunc);
+    
+    // Add Location Modal Listeners
+    if(els.addNewLocationBtn) els.addNewLocationBtn.addEventListener('click', openAddLocationModal);
+    if(els.closeAddLocationModal) els.closeAddLocationModal.addEventListener('click', closeAddLocationModalFunc);
+    if(els.cancelAddLocationModal) els.cancelAddLocationModal.addEventListener('click', closeAddLocationModalFunc);
+    if(els.addLocationModal) {
+        els.addLocationModal.addEventListener('click', function(e) {
+            if (e.target === els.addLocationModal) closeAddLocationModalFunc();
+        });
+    }
+    if(els.addLocationForm) {
+        els.addLocationForm.addEventListener('submit', saveLocation);
+    }
+
+    els.closeViewCategoriesModal.addEventListener('click', closeViewCategoriesModalFunc);
+    els.closeViewCategoriesModalBtn.addEventListener('click', closeViewCategoriesModalFunc);
     els.generateReportBtn.addEventListener('click', openDigitalInventoryReportModal);
     els.purchaseNewItemBtn.addEventListener('click', openUnderDevelopmentModal);
     els.inventoryNewItemBtn.addEventListener('click', openAddItemModal);
@@ -1505,6 +1773,171 @@ if (document.readyState === 'loading') {
 } else {
     initDigitalInventory();
 }
+function openViewLocationsModal() {
+    els.viewLocationsModal.classList.remove('hidden');
+    currentLocationsPage = 1;
+    fetchLocationsForTable();
+}
+
+function closeViewLocationsModalFunc() {
+    els.viewLocationsModal.classList.add('hidden');
+}
+
+function openAddLocationModal() {
+    if(els.newLocId) els.newLocId.value = generateLocationId();
+    els.addLocationModal.classList.remove('hidden');
+}
+
+async function saveLocation(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('new_loc_id').value;
+    const name = document.getElementById('new_loc_name').value.trim();
+    const typeInput = document.getElementById('new_loc_type').value.trim();
+    const zoneInput = document.getElementById('new_loc_zone_type').value.trim();
+    const capacityInput = document.getElementById('new_loc_capacity').value;
+    const supportsFixed = document.getElementById('new_loc_supports_fixed').checked;
+    
+    const payload = {
+        loc_id: id,
+        loc_name: name,
+        loc_type: typeInput !== '' ? typeInput : null,
+        loc_zone_type: zoneInput !== '' ? zoneInput : null,
+        loc_capacity: capacityInput !== '' ? Number(capacityInput) : null,
+        loc_supports_fixed_items: supportsFixed ? 1 : 0
+    };
+    
+    try {
+        const response = await fetch(SWS_LOCATIONS_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            body: JSON.stringify(payload),
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            notify('Location added successfully', 'success');
+            closeAddLocationModalFunc();
+            fetchLocationsForTable();
+        } else {
+            notify(result.message || 'Error adding location', 'error');
+        }
+    } catch (e) {
+        console.error('Error adding location:', e);
+        notify('Error adding location', 'error');
+    }
+}
+
+function closeAddLocationModalFunc() {
+    els.addLocationModal.classList.add('hidden');
+    if(els.addLocationForm) els.addLocationForm.reset();
+}
+
+async function fetchLocationsForTable() {
+    els.locationsTableBody.innerHTML = '<tr><td colspan="11" class="text-center py-4">Loading locations...</td></tr>';
+    try {
+        const response = await fetch(SWS_LOCATIONS_API, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        locations = result.success ? (result.data || []) : [];
+        renderLocationsTable();
+    } catch (e) {
+        console.error('Error loading locations:', e);
+        els.locationsTableBody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-red-600">Error loading locations</td></tr>';
+        if (els.locationsPagerInfo) els.locationsPagerInfo.textContent = '';
+        if (els.locationsPageDisplay) els.locationsPageDisplay.textContent = '1 / 1';
+        notify('Error loading locations', 'error');
+    }
+}
+
+function renderLocationsTable() {
+    const total = locations.length;
+    if (!total) {
+        els.locationsTableBody.innerHTML = `
+            <tr>
+                <td colspan="11" class="text-center py-8 text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class='bx bx-fw bx-map-alt text-4xl text-gray-400 mb-2'></i>
+                        <p>No locations found</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        renderLocationsPager(0, 1);
+        return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(total / locationsPageSize));
+    if (currentLocationsPage > totalPages) currentLocationsPage = totalPages;
+    if (currentLocationsPage < 1) currentLocationsPage = 1;
+    const startIdx = (currentLocationsPage - 1) * locationsPageSize;
+    const pageItems = locations.slice(startIdx, startIdx + locationsPageSize);
+
+    const html = pageItems.map(l => `
+        <tr>
+            <td class="whitespace-nowrap font-mono">${l.loc_id || 'N/A'}</td>
+            <td class="whitespace-nowrap font-semibold">${l.loc_name || 'N/A'}</td>
+            <td class="whitespace-nowrap">${l.loc_type || 'N/A'}</td>
+            <td class="whitespace-nowrap">${l.loc_zone_type || 'N/A'}</td>
+            <td class="whitespace-nowrap text-center">${l.loc_supports_fixed_items ? '<i class="bx bx-check text-green-600"></i>' : '<i class="bx bx-x text-red-600"></i>'}</td>
+            <td class="whitespace-nowrap text-center">${l.loc_capacity ? formatNumber(l.loc_capacity) : 'Unlimited'}</td>
+            <td class="whitespace-nowrap">${l.loc_parent_id || '-'}</td>
+            <td class="whitespace-nowrap">${l.loc_department_code || '-'}</td>
+            <td class="whitespace-nowrap">
+                <span class="badge ${l.loc_is_active ? 'badge-success' : 'badge-error'} badge-sm text-white">
+                    ${l.loc_is_active ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td class="whitespace-nowrap">${formatDate(l.loc_created_at)}</td>
+        </tr>
+    `).join('');
+
+    els.locationsTableBody.innerHTML = html;
+    renderLocationsPager(total, totalPages);
+
+    // Add event listeners to action buttons
+    els.locationsTableBody.querySelectorAll('.view-location-btn').forEach(btn => {
+        btn.addEventListener('click', () => notify('View Location feature coming soon: ' + btn.dataset.id));
+    });
+    
+    els.locationsTableBody.querySelectorAll('.edit-location-btn').forEach(btn => {
+        btn.addEventListener('click', () => notify('Edit Location feature coming soon: ' + btn.dataset.id));
+    });
+    
+    els.locationsTableBody.querySelectorAll('.delete-location-btn').forEach(btn => {
+        btn.addEventListener('click', () => notify('Delete Location feature coming soon: ' + btn.dataset.id));
+    });
+}
+
+function renderLocationsPager(total, totalPages) {
+    if (!els.locationsPagerInfo || !els.locationsPageDisplay) return;
+    const start = total === 0 ? 0 : ((currentLocationsPage - 1) * locationsPageSize) + 1;
+    const end = Math.min(currentLocationsPage * locationsPageSize, total);
+    els.locationsPagerInfo.textContent = `Showing ${start}-${end} of ${total}`;
+    els.locationsPageDisplay.textContent = `${currentLocationsPage} / ${totalPages}`;
+    if (els.locationsPrevBtn) els.locationsPrevBtn.disabled = currentLocationsPage <= 1;
+    if (els.locationsNextBtn) els.locationsNextBtn.disabled = currentLocationsPage >= totalPages;
+}
+
 async function loadLocations() {
     try {
         const response = await fetch(SWS_LOCATIONS_API, {
@@ -1528,6 +1961,89 @@ async function loadLocations() {
         locations = [];
         if (els.transferLocationTo) els.transferLocationTo.innerHTML = '<option value="">Select Location</option>';
     }
+}
+
+function openViewCategoriesModal() {
+    els.viewCategoriesModal.classList.remove('hidden');
+    currentCategoriesPage = 1;
+    fetchCategoriesForTable();
+}
+
+function closeViewCategoriesModalFunc() {
+    els.viewCategoriesModal.classList.add('hidden');
+}
+
+async function fetchCategoriesForTable() {
+    els.categoriesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading categories...</td></tr>';
+    try {
+        const response = await fetch(SWS_CATEGORIES_API, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        categories = result.success ? (result.data || []) : [];
+        renderCategoriesTable();
+    } catch (e) {
+        console.error('Error loading categories:', e);
+        els.categoriesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-600">Error loading categories</td></tr>';
+        if (els.categoriesPagerInfo) els.categoriesPagerInfo.textContent = '';
+        if (els.categoriesPageDisplay) els.categoriesPageDisplay.textContent = '1 / 1';
+        notify('Error loading categories', 'error');
+    }
+}
+
+function renderCategoriesTable() {
+    const total = categories.length;
+    if (!total) {
+        els.categoriesTableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center py-8 text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class='bx bx-fw bx-category-alt text-4xl text-gray-400 mb-2'></i>
+                        <p>No categories found</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        renderCategoriesPager(0, 1);
+        return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(total / categoriesPageSize));
+    if (currentCategoriesPage > totalPages) currentCategoriesPage = totalPages;
+    if (currentCategoriesPage < 1) currentCategoriesPage = 1;
+    const startIdx = (currentCategoriesPage - 1) * categoriesPageSize;
+    const pageItems = categories.slice(startIdx, startIdx + categoriesPageSize);
+
+    const html = pageItems.map(c => `
+        <tr>
+            <td class="whitespace-nowrap font-mono">${c.cat_id || 'N/A'}</td>
+            <td class="whitespace-nowrap font-semibold">${c.cat_name || 'N/A'}</td>
+            <td class="whitespace-nowrap">${c.cat_description || '-'}</td>
+            <td class="whitespace-nowrap">${formatDate(c.cat_created_at)}</td>
+        </tr>
+    `).join('');
+
+    els.categoriesTableBody.innerHTML = html;
+    renderCategoriesPager(total, totalPages);
+}
+
+function renderCategoriesPager(total, totalPages) {
+    if (!els.categoriesPagerInfo || !els.categoriesPageDisplay) return;
+    const start = total === 0 ? 0 : ((currentCategoriesPage - 1) * categoriesPageSize) + 1;
+    const end = Math.min(currentCategoriesPage * categoriesPageSize, total);
+    els.categoriesPagerInfo.textContent = `Showing ${start}-${end} of ${total}`;
+    els.categoriesPageDisplay.textContent = `${currentCategoriesPage} / ${totalPages}`;
+    if (els.categoriesPrevBtn) els.categoriesPrevBtn.disabled = currentCategoriesPage <= 1;
+    if (els.categoriesNextBtn) els.categoriesNextBtn.disabled = currentCategoriesPage >= totalPages;
 }
 
 function openTransferModal() {

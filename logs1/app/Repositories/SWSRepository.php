@@ -78,6 +78,40 @@ class SWSRepository
         return Location::orderBy('loc_name')->get();
     }
 
+    public function createLocation(array $data)
+    {
+        // Add timestamps
+        if (!isset($data['loc_created_at'])) {
+            $data['loc_created_at'] = now();
+        }
+        
+        // Default active status
+        if (!isset($data['loc_is_active'])) {
+            $data['loc_is_active'] = true;
+        }
+
+        return Location::create($data);
+    }
+
+    public function updateLocation($id, array $data)
+    {
+        $location = Location::find($id);
+        if ($location) {
+            $location->update($data);
+            return $location;
+        }
+        return null;
+    }
+
+    public function deleteLocation($id)
+    {
+        $location = Location::find($id);
+        if ($location) {
+            return $location->delete();
+        }
+        return false;
+    }
+
     public function getInventoryFlowSummary()
     {
         $incoming = Transaction::whereIn('tra_type', ['inbound', 'drop_off'])->count();

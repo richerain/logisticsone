@@ -8,18 +8,6 @@
 </div>
 
 <div class="bg-white rounded-lg shadow-lg p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">Warehouse Overview</h3>
-        <div class="flex gap-2 whitespace-nowrap">
-            <button id="requestMaintenanceBtn" title="Request Maintenance" class="bg-success hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
-                <i class='bx bxs-traffic-cone'></i> Request Maintenance
-            </button>
-            <button id="addWarehouseBtn" title="Add New Warehouse" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
-                <i class='bx bx-plus'></i> Add Warehouse
-            </button>
-        </div>
-    </div>
-
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-blue-100 border border-blue-200 rounded-lg p-4">
             <div class="flex items-center">
@@ -47,12 +35,18 @@
         </div>
     </div>
 
+    <div class="flex justify-end mb-4">
+        <button id="addWarehouseBtn" title="Add New Warehouse" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+            <i class='bx bx-plus'></i> Add Warehouse
+        </button>
+    </div>
+
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-800 font-bold text-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Warehouse ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Warehouse</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Location</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Capacity</th>
@@ -210,7 +204,15 @@ function renderWarehouses() {
     const pageItems = warehouses.slice(startIdx, startIdx + warePageSize);
 
     if (pageItems.length === 0) {
-        els.tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">No warehouses</td></tr>`;
+        els.tableBody.innerHTML = `
+            <tr>
+                <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <i class='bx bx-fw bxs-store text-4xl text-gray-400'></i>
+                        <div>No Warehouses</div>
+                    </div>
+                </td>
+            </tr>`;
     } else {
         els.tableBody.innerHTML = '';
         pageItems.forEach(w => {
@@ -238,7 +240,7 @@ function renderWarehouses() {
                 <td class="px-6 py-4 whitespace-nowrap">
                     <span class="badge ${badgeClass} flex items-center justify-center gap-1 px-3 py-2 rounded-full text-sm font-medium">
                         ${statusIcon}
-                        ${w.ware_status || ''}
+                        ${(w.ware_status || '').charAt(0).toUpperCase() + (w.ware_status || '').slice(1)}
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">

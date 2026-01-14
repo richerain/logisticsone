@@ -76,36 +76,42 @@ class SWSController extends Controller
 
     public function createWarehouse(Request $request)
     {
-        $validated = $request->validate([
-            'ware_name' => ['required', 'string', 'max:100'],
-            'ware_location' => ['nullable', 'string', 'max:255'],
-            'ware_capacity' => ['nullable', 'integer', 'min:0'],
-            'ware_status' => ['nullable', Rule::in(['active', 'inactive', 'maintenance'])],
-            'ware_zone_type' => ['nullable', Rule::in(['liquid', 'illiquid', 'climate_controlled', 'general'])],
-            'ware_supports_fixed_items' => ['nullable', 'boolean'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'ware_name' => ['required', 'string', 'max:100'],
+                'ware_location' => ['nullable', 'string', 'max:255'],
+                'ware_capacity' => ['nullable', 'integer', 'min:0'],
+                'ware_status' => ['nullable', Rule::in(['active', 'inactive', 'maintenance'])],
+                'ware_zone_type' => ['nullable', Rule::in(['liquid', 'illiquid', 'climate_controlled', 'general'])],
+                'ware_supports_fixed_items' => ['nullable', 'boolean'],
+            ]);
 
-        $capacity = $validated['ware_capacity'] ?? 0;
-        $used = 0;
-        $free = max(($capacity - $used), 0);
-        $util = $capacity > 0 ? round(($used / $capacity) * 100, 2) : 0.00;
-        $wareId = $request->input('ware_id');
-        if (! $wareId) {
-            do {
-                $rand = random_int(100000, 999999);
-                $wareId = 'WH'.$rand;
-            } while (Warehouse::where('ware_id', $wareId)->exists());
+            $capacity = $validated['ware_capacity'] ?? 0;
+            $used = 0;
+            $free = max(($capacity - $used), 0);
+            $util = $capacity > 0 ? round(($used / $capacity) * 100, 2) : 0.00;
+            $wareId = $request->input('ware_id');
+            if (! $wareId) {
+                do {
+                    $datePart = now()->format('Ymd');
+                    $randomTail = sprintf('%d%s%d%s%d', random_int(0, 9), chr(random_int(65, 90)), random_int(0, 9), chr(random_int(65, 90)), random_int(0, 9));
+                    $wareId = 'WRHS'.$datePart.$randomTail;
+                } while (Warehouse::where('ware_id', $wareId)->exists());
+            }
+
+            $item = Warehouse::create(array_merge($validated, [
+                'ware_id' => $wareId,
+                'ware_capacity' => $capacity,
+                'ware_capacity_used' => $used,
+                'ware_capacity_free' => $free,
+                'ware_utilization' => $util,
+            ]));
+
+            return response()->json(['data' => $item], 201);
+        } catch (\Exception $e) {
+            Log::error('Create Warehouse Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to create warehouse'], 500);
         }
-
-        $item = Warehouse::create(array_merge($validated, [
-            'ware_id' => $wareId,
-            'ware_capacity' => $capacity,
-            'ware_capacity_used' => $used,
-            'ware_capacity_free' => $free,
-            'ware_utilization' => $util,
-        ]));
-
-        return response()->json(['data' => $item], 201);
     }
 
     public function updateWarehouse(Request $request, string $id)
@@ -383,6 +389,45 @@ class SWSController extends Controller
     public function getLocations()
     {
         $result = $this->swsService->getAllLocations();
+
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function createLocation(Request $request)
+    {
+        $validated = $request->validate([
+            'loc_id' => ['required', 'string', 'max:10', 'unique:sws.sws_locations,loc_id'],
+            'loc_name' => ['required', 'string', 'max:100'],
+            'loc_type' => ['nullable', 'string', 'max:50'],
+            'loc_zone_type' => ['nullable', 'string', 'max:50'],
+            'loc_capacity' => ['nullable', 'integer', 'min:0'],
+            'loc_supports_fixed_items' => ['required', 'boolean'],
+        ]);
+
+        $result = $this->swsService->createLocation($validated);
+
+        return response()->json($result, $result['success'] ? 201 : 500);
+    }
+
+    public function updateLocation(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'loc_name' => ['sometimes', 'string', 'max:100'],
+            'loc_type' => ['sometimes', 'string', 'max:50'],
+            'loc_zone_type' => ['sometimes', 'string', 'max:50'],
+            'loc_capacity' => ['sometimes', 'integer', 'min:1'],
+            'loc_supports_fixed_items' => ['sometimes', 'boolean'],
+            'loc_is_active' => ['sometimes', 'boolean'],
+        ]);
+
+        $result = $this->swsService->updateLocation($id, $validated);
+
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function deleteLocation($id)
+    {
+        $result = $this->swsService->deleteLocation($id);
 
         return response()->json($result, $result['success'] ? 200 : 500);
     }

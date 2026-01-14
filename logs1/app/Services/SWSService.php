@@ -283,6 +283,107 @@ class SWSService
         }
     }
 
+    public function createLocation($data)
+    {
+        try {
+            foreach ($data as $key => $value) {
+                if ($value === '') {
+                    $data[$key] = null;
+                }
+            }
+
+            DB::connection('sws')->beginTransaction();
+
+            $location = $this->swsRepository->createLocation($data);
+
+            DB::connection('sws')->commit();
+
+            return [
+                'success' => true,
+                'data' => $location,
+                'message' => 'Location created successfully',
+            ];
+        } catch (\Exception $e) {
+            DB::connection('sws')->rollBack();
+            Log::error('Error creating location: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to create location',
+            ];
+        }
+    }
+
+    public function updateLocation($id, $data)
+    {
+        try {
+            DB::connection('sws')->beginTransaction();
+
+            $location = $this->swsRepository->updateLocation($id, $data);
+
+            if ($location) {
+                DB::connection('sws')->commit();
+
+                return [
+                    'success' => true,
+                    'data' => $location,
+                    'message' => 'Location updated successfully',
+                ];
+            }
+
+            DB::connection('sws')->rollBack();
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Location not found',
+            ];
+        } catch (\Exception $e) {
+            DB::connection('sws')->rollBack();
+            Log::error('Error updating location: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to update location',
+            ];
+        }
+    }
+
+    public function deleteLocation($id)
+    {
+        try {
+            DB::connection('sws')->beginTransaction();
+
+            $result = $this->swsRepository->deleteLocation($id);
+
+            if ($result) {
+                DB::connection('sws')->commit();
+
+                return [
+                    'success' => true,
+                    'message' => 'Location deleted successfully',
+                ];
+            }
+
+            DB::connection('sws')->rollBack();
+
+            return [
+                'success' => false,
+                'message' => 'Location not found',
+            ];
+        } catch (\Exception $e) {
+            DB::connection('sws')->rollBack();
+            Log::error('Error deleting location: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => 'Failed to delete location',
+            ];
+        }
+    }
+
     public function getInventoryFlow($filters = [])
     {
         try {

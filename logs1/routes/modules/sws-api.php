@@ -40,3 +40,6 @@ Route::delete('/items/{id}', [SWSController::class, 'deleteItem']);
 Route::post('/items/transfer', [SWSController::class, 'transferItem']);
 Route::get('/categories', [SWSController::class, 'getCategories']);
 Route::get('/locations', [SWSController::class, 'getLocations']);
+Route::post('/locations', [SWSController::class, 'createLocation']);
+Route::put('/locations/{id}', [SWSController::class, 'updateLocation']);
+Route::delete('/locations/{id}', [SWSController::class, 'deleteLocation']);
