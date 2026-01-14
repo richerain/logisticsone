@@ -2,15 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\MAIN\User;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class EmployeeAccount extends Model
+class EmployeeAccount extends Authenticatable
 {
+    use Notifiable;
+
     protected $connection = 'main';
     protected $table = 'employee_account';
-    
+
     protected $guarded = [];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'otp',
+    ];
 
     protected $casts = [
         'birthdate' => 'date',
@@ -18,9 +26,4 @@ class EmployeeAccount extends Model
         'email_verified_at' => 'datetime',
         'last_login' => 'datetime',
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 }

@@ -49,7 +49,7 @@ class Project extends Model
 
     public function manager()
     {
-        return $this->belongsTo(\App\Models\Main\User::class, 'pro_assigned_manager_id', 'id');
+        return $this->belongsTo(\App\Models\EmployeeAccount::class, 'pro_assigned_manager_id', 'id');
     }
 
     // Scopes

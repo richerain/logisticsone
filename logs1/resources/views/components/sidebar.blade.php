@@ -4,11 +4,12 @@
         <h1 class="text-xl font-bold">Logistics I</h1>
     </div>
     <div class="flex-1 overflow-y-auto sidebar-scrollbar px-3 py-5">
-        @php($user = Auth::guard('sws')->user() ?: Auth::guard('vendor')->user())
-        @php($role = optional($user)->roles ?? '')
+        @php($isVendor = Auth::guard('vendor')->check())
+        @php($user = $isVendor ? Auth::guard('vendor')->user() : Auth::guard('sws')->user())
+        @php($role = strtolower(optional($user)->roles ?? ''))
         <ul class="space-y-1">
             <!-- dashboard sidebar btn start -->
-            @if(in_array($role, ['vendor', 'staff', 'manager', 'admin', 'superadmin']))
+            @if($isVendor || in_array($role, ['vendor', 'staff', 'manager', 'admin', 'superadmin']))
             <li>
                 <a href="#" data-module="dashboard" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word" title="Dashboard">
                     <i class="bx bxs-dashboard mr-2 shrink-0"></i>
@@ -17,7 +18,7 @@
             </li>
             @endif
         <!-- dashboard sidebar btn end -->
-        @if($role === 'vendor')
+        @if($isVendor)
         <li>
             <a href="#" data-module="vendor-quote" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word" title="Vendor Quote">
                 <i class='bx bx-fw bxs-quote-left'></i>
@@ -27,7 +28,7 @@
         @endif
             
             <!-- Procurement & Sourcing Management btn start -->
-            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(!$isVendor && in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Procurement & Sourcing Management">
@@ -45,7 +46,7 @@
             <!-- Procurement & Sourcing Management btn end -->
             
             <!-- Smart Warehousing System btn start -->
-            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(!$isVendor && in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Smart Warehousing System">
@@ -64,7 +65,7 @@
             <!-- Smart Warehousing System btn end -->
             
             <!-- Project Logistics Tracker btn start -->
-            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(!$isVendor && in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0"  title="Project Logistics Tracker" >
@@ -81,7 +82,7 @@
             <!-- Project Logistics Tracker btn end -->
             
             <!-- Asset Lifecycle & Maintenance btn start -->
-            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(!$isVendor && in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Asset Lifecycle & Maintenance" >
@@ -99,7 +100,7 @@
             <!-- Asset Lifecycle & Maintenance btn end -->
             
             <!-- Document Tracking & Logistics Record btn start -->
-            @if(in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
+            @if(!$isVendor && in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
             <li class="has-dropdown">
                 <div class="flex items-center font-medium justify-between text-sm hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-words cursor-pointer">
                     <div class="flex items-center flex-1 min-w-0" title="Document Tracking & Logistics Record" >

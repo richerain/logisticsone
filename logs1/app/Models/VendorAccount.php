@@ -2,15 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\MAIN\Vendor;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class VendorAccount extends Model
+class VendorAccount extends Authenticatable
 {
+    use Notifiable;
+
     protected $connection = 'main';
     protected $table = 'vendor_account';
 
     protected $guarded = [];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'otp',
+    ];
 
     protected $casts = [
         'birthdate' => 'date',
@@ -18,9 +26,4 @@ class VendorAccount extends Model
         'email_verified_at' => 'datetime',
         'last_login' => 'datetime',
     ];
-
-    public function vendor()
-    {
-        return $this->belongsTo(Vendor::class);
-    }
 }

@@ -33,7 +33,7 @@ class VendorAuthController extends Controller
     public function sendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:main.vendors,email',
+            'email' => 'required|email|exists:main.vendor_account,email',
         ]);
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => 'Validation error', 'errors' => $validator->errors()], 422);
@@ -46,7 +46,7 @@ class VendorAuthController extends Controller
     public function verifyOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:main.vendors,email',
+            'email' => 'required|email|exists:main.vendor_account,email',
             'otp' => 'required|string|size:6',
         ]);
         if ($validator->fails()) {

@@ -2,23 +2,23 @@
 
 namespace App\Repositories;
 
-use App\Models\Main\User;
+use App\Models\EmployeeAccount;
 
 class UserRepository
 {
     public function findByEmail($email)
     {
-        return User::where('email', $email)->first();
+        return EmployeeAccount::where('email', $email)->first();
     }
 
     public function createUser(array $data)
     {
-        return User::create($data);
+        return EmployeeAccount::create($data);
     }
 
     public function updateUser($id, array $data)
     {
-        $user = User::find($id);
+        $user = EmployeeAccount::find($id);
         if ($user) {
             $user->update($data);
 
@@ -30,16 +30,16 @@ class UserRepository
 
     public function findById($id)
     {
-        return User::find($id);
+        return EmployeeAccount::find($id);
     }
 
     public function getAllUsers()
     {
-        return User::all();
+        return EmployeeAccount::all();
     }
 
     public function getUsersByRole($role)
     {
-        return User::where('roles', $role)->get();
+        return EmployeeAccount::where('roles', $role)->get();
     }
 }

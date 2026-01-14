@@ -2,23 +2,23 @@
 
 namespace App\Repositories;
 
-use App\Models\Main\Vendor;
+use App\Models\VendorAccount;
 
 class VendorRepository
 {
     public function findByEmail($email)
     {
-        return Vendor::where('email', $email)->first();
+        return VendorAccount::where('email', $email)->first();
     }
 
     public function create(array $data)
     {
-        return Vendor::create($data);
+        return VendorAccount::create($data);
     }
 
     public function update($id, array $data)
     {
-        $vendor = Vendor::find($id);
+        $vendor = VendorAccount::find($id);
         if ($vendor) {
             $vendor->update($data);
 
@@ -30,16 +30,16 @@ class VendorRepository
 
     public function findById($id)
     {
-        return Vendor::find($id);
+        return VendorAccount::find($id);
     }
 
     public function getAll()
     {
-        return Vendor::all();
+        return VendorAccount::all();
     }
 
     public function getActive()
     {
-        return Vendor::where('status', 'active')->get();
+        return VendorAccount::where('status', 'active')->get();
     }
 }

@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Main\User;
 use App\Models\EmployeeAccount;
-use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Auth;
@@ -14,18 +12,21 @@ use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
-    protected $userRepository;
-
-    public function __construct(UserRepository $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
-
     public function login($credentials)
     {
-        $user = $this->userRepository->findByEmail($credentials['email']);
+        $user = EmployeeAccount::where('email', $credentials['email'])->first();
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        if (! $user) {
+            return [
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ];
+        }
+
+        $passwordValid = Hash::check($credentials['password'], $user->password)
+            || $user->password === $credentials['password'];
+
+        if (! $passwordValid) {
             return [
                 'success' => false,
                 'message' => 'Invalid credentials',
@@ -64,7 +65,7 @@ class AuthService
 
     public function sendOtp($email)
     {
-        $user = $this->userRepository->findByEmail($email);
+        $user = EmployeeAccount::where('email', $email)->first();
 
         if (! $user) {
             return [
@@ -95,7 +96,7 @@ class AuthService
 
     public function verifyOtp($email, $otp)
     {
-        $user = $this->userRepository->findByEmail($email);
+        $user = EmployeeAccount::where('email', $email)->first();
 
         if (! $user) {
             Log::error("OTP verification failed: User not found for email: {$email}");
@@ -142,22 +143,15 @@ class AuthService
             ];
         }
 
-        // Clear OTP and update email verification
         $user->update([
             'otp' => null,
             'otp_expires_at' => null,
             'email_verified_at' => Carbon::now(),
         ]);
 
-        // Log the user in using the correct guard with "remember" for longer session
         Auth::guard('sws')->login($user, true);
 
-        // Update EmployeeAccount last_login
-        try {
-            EmployeeAccount::where('email', $user->email)->update(['last_login' => Carbon::now()]);
-        } catch (\Exception $e) {
-            Log::error("Failed to update EmployeeAccount last_login: " . $e->getMessage());
-        }
+        $user->update(['last_login' => Carbon::now()]);
 
         Log::info("OTP verification successful for user: {$email}");
 

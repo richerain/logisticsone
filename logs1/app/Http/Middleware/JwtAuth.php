@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Main\User;
+use App\Models\EmployeeAccount;
 use Closure;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -31,7 +31,7 @@ class JwtAuth
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
             }
 
-            $user = User::find($payload->sub);
+            $user = EmployeeAccount::find($payload->sub);
             if (! $user) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
             }

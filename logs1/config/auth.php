@@ -25,11 +25,11 @@ return [
     'providers' => [
         'sws_users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Main\User::class,
+            'model' => App\Models\EmployeeAccount::class,
         ],
         'main_vendors' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Main\Vendor::class,
+            'model' => App\Models\VendorAccount::class,
         ],
     ],
 

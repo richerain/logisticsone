@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 // Debug route to check OTP status
 Route::get('/debug/otp-status/{email}', function ($email) {
-    $user = \App\Models\Main\User::where('email', $email)->first();
+    $user = \App\Models\EmployeeAccount::where('email', $email)->first();
 
     if (! $user) {
         return response()->json(['error' => 'User not found'], 404);
@@ -15,7 +15,7 @@ Route::get('/debug/otp-status/{email}', function ($email) {
         'otp' => $user->otp,
         'otp_expires_at' => $user->otp_expires_at,
         'current_time' => \Carbon\Carbon::now(),
-        'is_expired' => $user->isOtpExpired(),
+        'is_expired' => $user->otp_expires_at ? \Carbon\Carbon::now()->gt($user->otp_expires_at) : true,
         'timezone' => config('app.timezone'),
     ]);
 });

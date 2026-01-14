@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Main\User;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,7 +41,7 @@ class AuthController extends Controller
     public function sendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:main.users,email',
+            'email' => 'required|email|exists:main.employee_account,email',
         ]);
 
         if ($validator->fails()) {
@@ -63,7 +62,7 @@ class AuthController extends Controller
         Log::info('OTP verification started', ['email' => $request->email]);
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:main.users,email',
+            'email' => 'required|email|exists:main.employee_account,email',
             'otp' => 'required|string|size:6',
         ]);
 
