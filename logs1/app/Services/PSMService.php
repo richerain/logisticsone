@@ -558,6 +558,10 @@ class PSMService
         DB::beginTransaction();
         try {
             $data['prod_id'] = $this->generateProductId();
+            
+            // Add default module info if not present
+            $data['prod_module_from'] = $data['prod_module_from'] ?? 'psm';
+            $data['prod_submodule_from'] = $data['prod_submodule_from'] ?? 'vendor-management';
 
             $product = $this->psmRepository->createProduct($data);
 

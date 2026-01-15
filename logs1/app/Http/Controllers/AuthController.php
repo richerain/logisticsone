@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EmployeeAccount;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -108,6 +110,89 @@ class AuthController extends Controller
         $result = $this->authService->getCurrentUser();
 
         return response()->json($result, $result['success'] ? 200 : 401);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        if (! Auth::guard('sws')->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Not authenticated',
+            ], 401);
+        }
+
+        /** @var EmployeeAccount $user */
+        $user = Auth::guard('sws')->user();
+
+        $rules = [
+            'firstname' => ['required', 'string', 'max:255'],
+            'middlename' => ['nullable', 'string', 'max:255'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'sex' => ['nullable', 'in:male,female'],
+            'age' => ['nullable', 'integer', 'min:0', 'max:150'],
+            'birthdate' => ['nullable', 'date'],
+            'contactnum' => ['nullable', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:255', 'unique:main.employee_account,email,'.$user->id],
+            'address' => ['nullable', 'string'],
+            'picture' => ['nullable', 'image', 'max:2048'],
+            'remove_picture' => ['nullable', 'boolean'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $data = $validator->validated();
+
+        if (! empty($data['remove_picture'])) {
+            if ($user->picture) {
+                $path = $user->picture;
+                if (str_starts_with($path, 'storage/')) {
+                    $path = substr($path, 8);
+                }
+                if ($path && Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            }
+            $user->picture = null;
+        }
+
+        if ($request->hasFile('picture')) {
+            $file = $request->file('picture');
+            $storedPath = $file->store('profile-pictures', 'public');
+            if ($user->picture) {
+                $oldPath = $user->picture;
+                if (str_starts_with($oldPath, 'storage/')) {
+                    $oldPath = substr($oldPath, 8);
+                }
+                if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+            $user->picture = 'storage/'.$storedPath;
+        }
+
+        $user->firstname = $data['firstname'];
+        $user->middlename = $data['middlename'] ?? null;
+        $user->lastname = $data['lastname'];
+        $user->sex = $data['sex'] ?? null;
+        $user->age = $data['age'] ?? null;
+        $user->birthdate = $data['birthdate'] ?? null;
+        $user->contactnum = $data['contactnum'] ?? null;
+        $user->email = $data['email'];
+        $user->address = $data['address'] ?? null;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'user' => $user->fresh(),
+        ]);
     }
 
     /**

@@ -25,6 +25,12 @@
                 <span class="flex-1">Vendor Quote</span>
             </a>
         </li>
+        <li>
+            <a href="#" data-module="vendor-products" class="sidebar-link flex items-center font-medium text-md hover:bg-white/30 px-3 py-2.5 rounded-lg whitespace-normal wrap-break-word" title="Vendor Products">
+                <i class='bx bx-fw bx-cube-alt'></i>
+                <span class="flex-1">Vendor Products</span>
+            </a>
+        </li>
         @endif
             
             <!-- Procurement & Sourcing Management btn start -->

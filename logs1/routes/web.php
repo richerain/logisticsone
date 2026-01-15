@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ALMSController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VendorAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -138,6 +139,8 @@ Route::get('/login', function (Request $request) {
         Route::put('/user-management/accounts/{id}/status', [App\Http\Controllers\UserManagementController::class, 'updateStatus'])->name('user-management.accounts.updateStatus');
         Route::delete('/user-management/accounts/{id}', [App\Http\Controllers\UserManagementController::class, 'destroy'])->name('user-management.accounts.destroy');
         Route::get('/user-management/accounts/{id}', [App\Http\Controllers\UserManagementController::class, 'show'])->name('user-management.accounts.show');
+
+        Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
     });
 
     Route::middleware(['auth:vendor', 'session.timeout'])->group(function () {
@@ -151,6 +154,7 @@ Route::get('/login', function (Request $request) {
             $moduleViews = [
                 'dashboard' => 'dashboard.index',
                 'vendor-quote' => 'psm.vendor-quote',
+                'vendor-products' => 'psm.vendor-products',
             ];
 
             $view = $moduleViews[$module] ?? 'components.module-not-found';
@@ -200,7 +204,7 @@ Route::get('/api/test-db', function () {
 
 // FIXED: Add explicit API routes for authentication to ensure they're accessible
 // These routes use the session middleware (inherited from web group) but exclude CSRF verification (handled in bootstrap/app.php)
-Route::prefix('api')->group(function () {
+    Route::prefix('api')->group(function () {
     Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
     Route::post('/send-otp', [App\Http\Controllers\AuthController::class, 'sendOtp']);
     Route::post('/verify-otp', [App\Http\Controllers\AuthController::class, 'verifyOtp']);
@@ -222,13 +226,22 @@ Route::prefix('api')->group(function () {
         Route::get('/check-session', [VendorAuthController::class, 'checkSession']);
         Route::get('/csrf-token', [VendorAuthController::class, 'getCsrfToken']);
 
-        // Vendor-accessible PSM Vendor Quote APIs (session-based)
+        Route::post('/profile/update', [VendorAuthController::class, 'updateProfile'])->name('vendor.profile.update');
+
         Route::middleware(['auth:vendor'])->prefix('v1/psm/vendor-quote')->group(function () {
             Route::get('/', [\App\Http\Controllers\PSMController::class, 'listQuotes']);
             Route::get('/notifications', [\App\Http\Controllers\PSMController::class, 'listApprovedPurchasesForQuote']);
             Route::post('/review-from-purchase/{purchaseId}', [\App\Http\Controllers\PSMController::class, 'reviewPurchaseToQuote']);
             Route::put('/{id}', [\App\Http\Controllers\PSMController::class, 'updateQuote']);
             Route::delete('/{id}', [\App\Http\Controllers\PSMController::class, 'deleteQuote']);
+        });
+
+        Route::middleware(['auth:vendor'])->prefix('v1/psm/product-management')->group(function () {
+            Route::get('/', [\App\Http\Controllers\PSMController::class, 'getProducts']);
+            Route::get('/by-vendor/{venId}', [\App\Http\Controllers\PSMController::class, 'getProductsByVendor']);
+            Route::post('/', [\App\Http\Controllers\PSMController::class, 'createProduct']);
+            Route::put('/{id}', [\App\Http\Controllers\PSMController::class, 'updateProduct']);
+            Route::delete('/{id}', [\App\Http\Controllers\PSMController::class, 'deleteProduct']);
         });
     });
 });
