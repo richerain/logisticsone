@@ -542,12 +542,14 @@ class PSMService
     private function generatePurchaseId()
     {
         $prefix = 'PURC';
-        $last = Purchase::where('pur_id', 'like', $prefix.'%')
-            ->orderBy('pur_id', 'desc')
-            ->first();
-        $next = $last ? (int) substr($last->pur_id, strlen($prefix)) + 1 : 1;
+        $datePart = now()->format('Ymd');
 
-        return $prefix.str_pad($next, 5, '0', STR_PAD_LEFT);
+        do {
+            $randomPart = $this->generateRandomAlphanumeric(5);
+            $purId = $prefix.$datePart.$randomPart;
+        } while (Purchase::where('pur_id', $purId)->exists());
+
+        return $purId;
     }
 
     /**
@@ -656,6 +658,22 @@ class PSMService
         $next = $last ? (int) substr($last->prod_id, strlen($prefix)) + 1 : 1;
 
         return $prefix.str_pad($next, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate random alphanumeric string
+     */
+    private function generateRandomAlphanumeric($length = 5)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $charactersLength = strlen($characters);
+        $result = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $result .= $characters[random_int(0, $charactersLength - 1)];
+        }
+
+        return $result;
     }
 
     private function generateQuoteId()

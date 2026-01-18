@@ -13,12 +13,6 @@
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-semibold text-gray-800">Purchase Orders</h3>
         <div class="flex gap-3">
-            <!-- Budget Button -->
-            <button id="budgetBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-money'></i>
-                Budget
-            </button>
-            <!-- Add Purchase Button -->
             <button id="addPurchaseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
                 <i class='bx bx-plus'></i>
                 New Purchase Order
@@ -263,59 +257,6 @@
     </div>
 </div>
 
-<!-- Budget Modal -->
-<div id="budgetModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-11/12 max-w-5xl overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Budget Overview</h3>
-            <button id="closeBudgetModal" class="text-gray-500 hover:text-gray-700">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        <div id="budgetContent" class="space-y-4">
-            <!-- Budget content will be populated here -->
-        </div>
-        <div class="flex justify-end gap-3 mt-6">
-            <button type="button" id="extendBudgetBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Extend Budget</button>
-            <button type="button" id="closeBudgetBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Close</button>
-        </div>
-    </div>
-</div>
-
-<!-- Extend Budget Modal -->
-<div id="extendBudgetModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Extend Budget</h3>
-            <button id="closeExtendBudgetModal" class="text-gray-500 hover:text-gray-700">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        <form id="extendBudgetForm">
-            <input type="hidden" id="budgetId">
-            <div class="mb-4">
-                <label for="validityType" class="block text-sm font-medium text-gray-700 mb-1">Extend Validity</label>
-                <select id="validityType" name="validity_type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="Week">1 Week</option>
-                    <option value="Month">1 Month</option>
-                    <option value="Year">1 Year</option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="additionalAmount" class="block text-sm font-medium text-gray-700 mb-1">Additional Amount (Optional)</label>
-                <div class="flex items-center border border-gray-300 rounded-lg">
-                    <span class="px-3 text-gray-700">₱</span>
-                    <input type="number" id="additionalAmount" name="additional_amount" step="0.01" min="0" class="w-full px-3 py-2 border-0 focus:ring-2 focus:ring-blue-500" placeholder="0.00">
-                </div>
-            </div>
-            <div class="flex justify-end gap-3">
-                <button type="button" id="cancelExtendBudget" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Extend Budget</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- Budget Approval Modal -->
 <div id="budgetApprovalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
@@ -343,7 +284,6 @@
 // API Configuration
 var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php echo url('/api/v1'); ?>';
 var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
-var PSM_BUDGET_API = `${API_BASE_URL}/psm/budget-management`;
 var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
@@ -351,7 +291,6 @@ var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getI
 var currentPurchases = typeof currentPurchases !== 'undefined' ? currentPurchases : [];
 let currentPurchasesPage = 1;
 const purchasesPageSize = 10;
-var currentBudget = null;
 var activeVendors = [];
 var selectedVendor = null;
 var selectedItems = [];
@@ -364,7 +303,6 @@ const elements = {
     statusFilter: document.getElementById('statusFilter'),
     vendorTypeFilter: document.getElementById('vendorTypeFilter'),
     addPurchaseBtn: document.getElementById('addPurchaseBtn'),
-    budgetBtn: document.getElementById('budgetBtn'),
     purchaseModal: document.getElementById('purchaseModal'),
     purchaseForm: document.getElementById('purchaseForm'),
     modalTitle: document.getElementById('modalTitle'),
@@ -391,16 +329,6 @@ const elements = {
     itemSearch: document.getElementById('itemSearch'),
     availableItemsList: document.getElementById('availableItemsList'),
     purDesc: document.getElementById('pur_desc'),
-    budgetModal: document.getElementById('budgetModal'),
-    closeBudgetModal: document.getElementById('closeBudgetModal'),
-    budgetContent: document.getElementById('budgetContent'),
-    extendBudgetBtn: document.getElementById('extendBudgetBtn'),
-    closeBudgetBtn: document.getElementById('closeBudgetBtn'),
-    extendBudgetModal: document.getElementById('extendBudgetModal'),
-    closeExtendBudgetModal: document.getElementById('closeExtendBudgetModal'),
-    extendBudgetForm: document.getElementById('extendBudgetForm'),
-    budgetId: document.getElementById('budgetId'),
-    cancelExtendBudget: document.getElementById('cancelExtendBudget'),
     budgetApprovalModal: document.getElementById('budgetApprovalModal'),
     closeBudgetApprovalModal: document.getElementById('closeBudgetApprovalModal'),
     budgetApprovalContent: document.getElementById('budgetApprovalContent'),
@@ -416,7 +344,6 @@ function initPurchaseManagement() {
     initializeEventListeners();
     loadPurchases();
     loadActiveVendors();
-    loadCurrentBudget();
 }
 
 if (document.readyState === 'loading') {
@@ -445,15 +372,6 @@ function initializeEventListeners() {
     if (elements.cancelAddItemModal) elements.cancelAddItemModal.addEventListener('click', closeAddItemModal);
     if (elements.itemSearch) elements.itemSearch.addEventListener('input', debounce(filterAvailableItems, 300));
     
-    // Budget modals
-    if (elements.budgetBtn) elements.budgetBtn.addEventListener('click', openBudgetModal);
-    if (elements.closeBudgetModal) elements.closeBudgetModal.addEventListener('click', closeBudgetModal);
-    if (elements.closeBudgetBtn) elements.closeBudgetBtn.addEventListener('click', closeBudgetModal);
-    if (elements.extendBudgetBtn) elements.extendBudgetBtn.addEventListener('click', openExtendBudgetModal);
-    if (elements.closeExtendBudgetModal) elements.closeExtendBudgetModal.addEventListener('click', closeExtendBudgetModal);
-    if (elements.cancelExtendBudget) elements.cancelExtendBudget.addEventListener('click', closeExtendBudgetModal);
-    if (elements.extendBudgetForm) elements.extendBudgetForm.addEventListener('submit', handleExtendBudget);
-    
     // Budget approval modal
     if (elements.closeBudgetApprovalModal) elements.closeBudgetApprovalModal.addEventListener('click', closeBudgetApprovalModal);
     if (elements.rejectBudgetBtn) elements.rejectBudgetBtn.addEventListener('click', handleBudgetRejection);
@@ -472,22 +390,6 @@ function initializeEventListeners() {
         elements.addItemModal.addEventListener('click', function(e) {
             if (e.target === elements.addItemModal) {
                 closeAddItemModal();
-            }
-        });
-    }
-    
-    if (elements.budgetModal) {
-        elements.budgetModal.addEventListener('click', function(e) {
-            if (e.target === elements.budgetModal) {
-                closeBudgetModal();
-            }
-        });
-    }
-    
-    if (elements.extendBudgetModal) {
-        elements.extendBudgetModal.addEventListener('click', function(e) {
-            if (e.target === elements.extendBudgetModal) {
-                closeExtendBudgetModal();
             }
         });
     }
@@ -514,30 +416,6 @@ function initializeEventListeners() {
                 closeViewPurchaseModal();
             }
         });
-    }
-}
-
-async function loadCurrentBudget() {
-    try {
-        const response = await fetch(`${PSM_BUDGET_API}/current`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include'
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-                currentBudget = result.data;
-            }
-        }
-    } catch (error) {
-        console.error('Error loading budget:', error);
     }
 }
 
@@ -1072,161 +950,6 @@ function getStatusIcon(status) {
     return statusIcons[status] || 'bx-question-mark';
 }
 
-// Budget Modal Functions
-function openBudgetModal() {
-    if (!currentBudget) {
-        showNotification('No active budget found', 'warning');
-        return;
-    }
-    
-    displayBudgetContent();
-    if (elements.budgetModal) elements.budgetModal.classList.remove('hidden');
-}
-
-function closeBudgetModal() {
-    if (elements.budgetModal) elements.budgetModal.classList.add('hidden');
-}
-
-function displayBudgetContent() {
-    if (!elements.budgetContent || !currentBudget) return;
-    
-    const percentageUsed = (currentBudget.bud_spent_amount / currentBudget.bud_allocated_amount) * 100;
-    const daysRemaining = Math.max(0, Math.ceil((new Date(currentBudget.bud_valid_to) - new Date()) / (1000 * 60 * 60 * 24)));
-    
-    const healthStatus = {
-        'Healthy': { color: 'text-green-600 bg-green-100', icon: 'bx-check-circle' },
-        'Stable': { color: 'text-yellow-600 bg-yellow-100', icon: 'bx-info-circle' },
-        'Alert': { color: 'text-orange-600 bg-orange-100', icon: 'bx-error' },
-        'Exceeded': { color: 'text-red-600 bg-red-100', icon: 'bx-x-circle' }
-    }[currentBudget.bud_amount_status_health] || { color: 'text-gray-600 bg-gray-100', icon: 'bx-question-mark' };
-    
-    elements.budgetContent.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-gray-500 mb-2">Budget ID</h4>
-                <p class="text-lg font-semibold">${currentBudget.bud_id}</p>
-            </div>
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-gray-500 mb-2">Health Status</h4>
-                <p class="text-lg font-semibold ${healthStatus.color} px-2 py-1 rounded inline-flex items-center gap-1">
-                    <i class='bx ${healthStatus.icon}'></i>
-                    ${currentBudget.bud_amount_status_health}
-                </p>
-            </div>
-            <div class="bg-purple-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-purple-600 mb-2">Percentage Used</h4>
-                <p class="text-2xl font-bold text-purple-800">${percentageUsed.toFixed(1)}%</p>
-            </div>
-            <div class="bg-yellow-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-yellow-600 mb-2">Validity Period</h4>
-                <p class="text-lg font-semibold text-yellow-800">
-                    ${new Date(currentBudget.bud_valid_from).toLocaleDateString()} - ${new Date(currentBudget.bud_valid_to).toLocaleDateString()}
-                </p>
-            </div>
-            <div class="bg-blue-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-blue-600 mb-2">Allocated Amount</h4>
-                <p class="text-2xl font-bold text-blue-800">${formatCurrency(currentBudget.bud_allocated_amount)}</p>
-            </div>
-            <div class="bg-green-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-green-600 mb-2">Remaining Amount</h4>
-                <p class="text-2xl font-bold text-green-800">${formatCurrency(currentBudget.bud_remaining_amount)}</p>
-            </div>
-            <div class="bg-red-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-red-600 mb-2">Spent Amount</h4>
-                <p class="text-2xl font-bold text-red-800">${formatCurrency(currentBudget.bud_spent_amount)}</p>
-            </div>
-            <div class="bg-indigo-50 p-4 rounded-lg">
-                <h4 class="text-sm font-medium text-indigo-600 mb-2">Days Remaining</h4>
-                <p class="text-2xl font-bold text-indigo-800">${daysRemaining} days</p>
-            </div>
-        </div>
-        <div class="mt-4">
-            <div class="w-full bg-gray-200 rounded-full h-4">
-                <div class="h-4 rounded-full ${getProgressBarColor(percentageUsed)}" style="width: ${Math.min(percentageUsed, 100)}%"></div>
-            </div>
-            <div class="flex justify-between text-xs text-gray-600 mt-1">
-                <span>0%</span>
-                <span>${percentageUsed.toFixed(1)}%</span>
-                <span>100%</span>
-            </div>
-        </div>
-        <div class="mt-4 text-sm text-gray-600">
-            <p><strong>Validity Type:</strong> ${currentBudget.bud_validity_type}</p>
-            <p><strong>Department:</strong> ${currentBudget.bud_for_department}</p>
-            <p><strong>Module:</strong> ${currentBudget.bud_for_module}</p>
-            <p><strong>Submodule:</strong> ${currentBudget.bud_for_submodule}</p>
-            ${currentBudget.bud_desc ? `<p><strong>Description:</strong> ${currentBudget.bud_desc}</p>` : ''}
-        </div>
-    `;
-}
-
-function getProgressBarColor(percentage) {
-    if (percentage > 100) return 'bg-red-600';
-    if (percentage > 80) return 'bg-orange-500';
-    if (percentage > 50) return 'bg-yellow-500';
-    return 'bg-green-500';
-}
-
-function openExtendBudgetModal() {
-    if (!currentBudget) return;
-    
-    if (elements.budgetId) elements.budgetId.value = currentBudget.id;
-    if (elements.extendBudgetModal) elements.extendBudgetModal.classList.remove('hidden');
-}
-
-function closeExtendBudgetModal() {
-    if (elements.extendBudgetModal) elements.extendBudgetModal.classList.add('hidden');
-    if (elements.extendBudgetForm) elements.extendBudgetForm.reset();
-}
-
-async function handleExtendBudget(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(elements.extendBudgetForm);
-    const data = {
-        validity_type: formData.get('validity_type'),
-        additional_amount: parseFloat(formData.get('additional_amount') || 0)
-    };
-    
-    showLoading();
-    
-    try {
-        const response = await fetch(`${PSM_BUDGET_API}/${currentBudget.id}/extend`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include',
-            body: JSON.stringify(data)
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification('Budget extended successfully', 'success');
-            closeExtendBudgetModal();
-            loadCurrentBudget();
-            displayBudgetContent();
-        } else {
-            throw new Error(result.message || 'Failed to extend budget');
-        }
-        
-    } catch (error) {
-        console.error('Error extending budget:', error);
-        showNotification('Error extending budget: ' + error.message, 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
 // Budget Approval Functions
 function openBudgetApproval(purchaseId) {
     const purchase = currentPurchases.find(p => p.id == purchaseId);
@@ -1242,16 +965,6 @@ function openBudgetApproval(purchaseId) {
                     <p><strong>Ordered By:</strong> ${purchase.pur_order_by || 'Not specified'}</p>
                     <p><strong>Total Amount:</strong> ${formatCurrency(purchase.pur_total_amount)}</p>
                 </div>
-                ${currentBudget ? `
-                <div class="bg-green-50 p-3 rounded-lg">
-                    <h4 class="font-semibold text-green-800">Budget Status</h4>
-                    <p><strong>Remaining Budget:</strong> ${formatCurrency(currentBudget.bud_remaining_amount)}</p>
-                    <p><strong>After Approval:</strong> ${formatCurrency(currentBudget.bud_remaining_amount - purchase.pur_total_amount)}</p>
-                    <p class="${purchase.pur_total_amount > currentBudget.bud_remaining_amount ? 'text-red-600 font-semibold' : 'text-green-600'}">
-                        ${purchase.pur_total_amount > currentBudget.bud_remaining_amount ? '⚠️ Insufficient budget!' : '✓ Sufficient budget available'}
-                    </p>
-                </div>
-                ` : '<div class="bg-red-50 p-3 rounded-lg"><p class="text-red-600">No active budget found!</p></div>'}
             </div>
         `;
     }
@@ -1310,7 +1023,6 @@ async function handleBudgetApproval() {
             showNotification('Purchase approved successfully', 'success');
             closeBudgetApprovalModal();
             loadPurchases();
-            loadCurrentBudget();
             
             // Disable the budget approval button for this purchase
             const approveBtn = document.querySelector(`[onclick="openBudgetApproval(${purchaseId})"]`);
