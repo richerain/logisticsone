@@ -110,10 +110,9 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-800 font-bold text-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">PO Number</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Purchase Order No.</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Items</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Company</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Company / Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Units</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Delivery</th>
@@ -168,11 +167,7 @@
                 <input type="hidden" id="pur_ven_type" name="pur_ven_type">
             </div>
             
-            <!-- Order By Field -->
-            <div class="mb-4">
-                <label for="pur_order_by" class="block text-sm font-medium text-gray-700 mb-1">Ordered By *</label>
-                <input type="text" id="pur_order_by" name="pur_order_by" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter name of person placing the order">
-            </div>
+            <input type="hidden" id="pur_order_by" name="pur_order_by">
             
             <!-- Items Selection Section -->
             <div id="itemsSection" class="mb-4 hidden">
@@ -269,13 +264,28 @@
         <div id="budgetApprovalContent" class="space-y-4 mb-4">
             <!-- Budget approval content will be populated here -->
         </div>
-        <div class="mb-4">
-            <label for="approvedByInput" class="block text-sm font-medium text-gray-700 mb-1">Approved By *</label>
-            <input type="text" id="approvedByInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your name for approval">
-        </div>
         <div class="flex justify-end gap-3">
             <button type="button" id="rejectBudgetBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Reject</button>
             <button type="button" id="approveBudgetBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Approve</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Purchase Modal -->
+<div id="cancelPurchaseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Cancel Purchase Order</h3>
+            <button id="closeCancelPurchaseModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        <div id="cancelPurchaseContent" class="space-y-4 mb-4">
+            <!-- Cancel purchase content will be populated here -->
+        </div>
+        <div class="flex justify-end gap-3">
+            <button type="button" id="cancelCancelPurchaseBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Close</button>
+            <button type="button" id="confirmCancelPurchaseBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Cancel Purchase</button>
         </div>
     </div>
 </div>
@@ -287,6 +297,17 @@ var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES
 var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
+
+var CURRENT_USER_NAME = '<?php echo e(auth()->check() ? trim((auth()->user()->firstname ?? '').' '.(auth()->user()->lastname ?? '')) : ''); ?>';
+var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? (auth()->user()->roles ?? '') : ''); ?>';
+var CURRENT_USER_LABEL = (function() {
+    var name = (CURRENT_USER_NAME || '').trim();
+    var role = (CURRENT_USER_ROLE || '').trim();
+    if (name && role) return name + ' - ' + role;
+    if (name) return name;
+    if (role) return role;
+    return '';
+})();
 
 var currentPurchases = typeof currentPurchases !== 'undefined' ? currentPurchases : [];
 let currentPurchasesPage = 1;
@@ -332,9 +353,13 @@ const elements = {
     budgetApprovalModal: document.getElementById('budgetApprovalModal'),
     closeBudgetApprovalModal: document.getElementById('closeBudgetApprovalModal'),
     budgetApprovalContent: document.getElementById('budgetApprovalContent'),
-    approvedByInput: document.getElementById('approvedByInput'),
     rejectBudgetBtn: document.getElementById('rejectBudgetBtn'),
-    approveBudgetBtn: document.getElementById('approveBudgetBtn')
+    approveBudgetBtn: document.getElementById('approveBudgetBtn'),
+    cancelPurchaseModal: document.getElementById('cancelPurchaseModal'),
+    closeCancelPurchaseModal: document.getElementById('closeCancelPurchaseModal'),
+    cancelPurchaseContent: document.getElementById('cancelPurchaseContent'),
+    cancelCancelPurchaseBtn: document.getElementById('cancelCancelPurchaseBtn'),
+    confirmCancelPurchaseBtn: document.getElementById('confirmCancelPurchaseBtn')
 };
 
 function initPurchaseManagement() {
@@ -377,6 +402,11 @@ function initializeEventListeners() {
     if (elements.rejectBudgetBtn) elements.rejectBudgetBtn.addEventListener('click', handleBudgetRejection);
     if (elements.approveBudgetBtn) elements.approveBudgetBtn.addEventListener('click', handleBudgetApproval);
     
+    // Cancel purchase modal
+    if (elements.closeCancelPurchaseModal) elements.closeCancelPurchaseModal.addEventListener('click', closeCancelPurchaseModal);
+    if (elements.cancelCancelPurchaseBtn) elements.cancelCancelPurchaseBtn.addEventListener('click', closeCancelPurchaseModal);
+    if (elements.confirmCancelPurchaseBtn) elements.confirmCancelPurchaseBtn.addEventListener('click', handleConfirmCancelPurchase);
+    
     // Close modals when clicking outside
     if (elements.purchaseModal) {
         elements.purchaseModal.addEventListener('click', function(e) {
@@ -398,6 +428,14 @@ function initializeEventListeners() {
         elements.budgetApprovalModal.addEventListener('click', function(e) {
             if (e.target === elements.budgetApprovalModal) {
                 closeBudgetApprovalModal();
+            }
+        });
+    }
+    
+    if (elements.cancelPurchaseModal) {
+        elements.cancelPurchaseModal.addEventListener('click', function(e) {
+            if (e.target === elements.cancelPurchaseModal) {
+                closeCancelPurchaseModal();
             }
         });
     }
@@ -788,10 +826,23 @@ function displayPurchases(purchases) {
         const isCompleted = purchase.pur_status === 'Completed';
         const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
         
+        const orderedByHtml = formatUserLabelDisplay(purchase.pur_order_by, 'Not specified');
+        const approvedSource = purchase.pur_status === 'Cancel'
+            ? (purchase.pur_cancel_by || purchase.pur_approved_by || 'Unknown Approver')
+            : (purchase.pur_approved_by || 'Not approved');
+        const approvedByHtml = formatUserLabelDisplay(approvedSource, purchase.pur_status === 'Cancel' ? 'Unknown Approver' : 'Not approved');
+        
+        const companyTypeHtml = `
+            <div class="flex flex-col leading-tight">
+                <span class="text-sm font-semibold text-gray-900">${purchase.pur_company_name}</span>
+                <span class="text-xs text-gray-500 capitalize">${purchase.pur_ven_type}</span>
+            </div>
+        `;
+        
         return `
         <tr class="${rowClass}" data-purchase-id="${purchase.id}">
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">${purchase.pur_id}</span>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                ${purchase.pur_id}
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
                 <div class="max-w-xs truncate" title="${items.map(item => typeof item === 'object' ? item.name : item).join(', ')}">
@@ -799,14 +850,8 @@ function displayPurchases(purchases) {
                 </div>
                 <small class="text-xs text-gray-500">${items.length} item(s)</small>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                ${purchase.pur_company_name}
-            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                    <i class='bx bx-category mr-1'></i>
-                    ${purchase.pur_ven_type}
-                </span>
+                ${companyTypeHtml}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                 ${purchase.pur_unit}
@@ -818,16 +863,10 @@ function displayPurchases(purchases) {
                 ${formatDateRange(purchase.pur_delivery_date_from, purchase.pur_delivery_date_to) || ''}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <div class="flex items-center">
-                    <i class='bx bx-user mr-2 text-gray-400'></i>
-                    ${purchase.pur_order_by || 'Not specified'}
-                </div>
+                ${orderedByHtml}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <div class="flex items-center">
-                    <i class='bx bx-check-circle mr-2 text-gray-400'></i>
-                    ${purchase.pur_status === 'Cancel' ? (purchase.pur_cancel_by || purchase.pur_approved_by || 'Unknown Approver') : (purchase.pur_approved_by || 'Not approved')}
-                </div>
+                ${approvedByHtml}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(purchase.pur_status)}">
@@ -950,6 +989,30 @@ function getStatusIcon(status) {
     return statusIcons[status] || 'bx-question-mark';
 }
 
+function formatUserLabelDisplay(label, fallback) {
+    const raw = (label || '').trim();
+    if (!raw) {
+        return `<span class="text-sm text-gray-500">${fallback}</span>`;
+    }
+    
+    const parts = raw.split('-');
+    const name = parts[0].trim();
+    const roleRaw = parts.slice(1).join('-').trim();
+    
+    if (!roleRaw) {
+        return `<span class="text-sm font-semibold text-gray-900">${name}</span>`;
+    }
+    
+    const role = roleRaw.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    
+    return `
+        <div class="flex flex-col leading-tight">
+            <span class="text-sm font-semibold text-gray-900">${name}</span>
+            <span class="text-xs text-gray-500">${role}</span>
+        </div>
+    `;
+}
+
 // Budget Approval Functions
 function openBudgetApproval(purchaseId) {
     const purchase = currentPurchases.find(p => p.id == purchaseId);
@@ -981,16 +1044,15 @@ function closeBudgetApprovalModal() {
         elements.budgetApprovalModal.classList.add('hidden');
         delete elements.budgetApprovalModal.dataset.purchaseId;
     }
-    if (elements.approvedByInput) elements.approvedByInput.value = '';
 }
 
 async function handleBudgetApproval() {
     const purchaseId = elements.budgetApprovalModal ? elements.budgetApprovalModal.dataset.purchaseId : null;
     if (!purchaseId) return;
     
-    const approvedBy = elements.approvedByInput ? elements.approvedByInput.value.trim() : '';
+    const approvedBy = (CURRENT_USER_LABEL || '').trim();
     if (!approvedBy) {
-        showNotification('Please enter your name for approval', 'error');
+        showNotification('Unable to determine approving user', 'error');
         return;
     }
     
@@ -1046,9 +1108,9 @@ async function handleBudgetRejection() {
     const purchaseId = elements.budgetApprovalModal ? elements.budgetApprovalModal.dataset.purchaseId : null;
     if (!purchaseId) return;
     
-    const approvedBy = elements.approvedByInput ? elements.approvedByInput.value.trim() : '';
+    const approvedBy = (CURRENT_USER_LABEL || '').trim();
     if (!approvedBy) {
-        showNotification('Please enter your name for rejection', 'error');
+        showNotification('Unable to determine rejecting user', 'error');
         return;
     }
     
@@ -1107,6 +1169,9 @@ function openAddModal() {
     elements.modalTitle.textContent = 'New Purchase Order';
     elements.purchaseId.value = '';
     if (elements.purchaseForm) elements.purchaseForm.reset();
+    if (elements.purOrderBy && CURRENT_USER_LABEL) {
+        elements.purOrderBy.value = CURRENT_USER_LABEL;
+    }
     if (elements.itemsSection) elements.itemsSection.classList.add('hidden');
     clearSelectedItems();
     selectedVendor = null;
@@ -1164,8 +1229,11 @@ async function handlePurchaseSubmit(e) {
         return;
     }
     
+    if (elements.purOrderBy && !elements.purOrderBy.value.trim() && CURRENT_USER_LABEL) {
+        elements.purOrderBy.value = CURRENT_USER_LABEL;
+    }
     if (!elements.purOrderBy || !elements.purOrderBy.value.trim()) {
-        showNotification('Please enter the name of the person placing the order', 'error');
+        showNotification('Unable to determine ordering user', 'error');
         return;
     }
     
@@ -1229,38 +1297,63 @@ function editPurchase(id) {
     }
 }
 
-async function cancelPurchase(id) {
+function openCancelPurchaseModal(id) {
     const purchase = currentPurchases.find(p => p.id == id);
-    if (!purchase) return;
+    if (!purchase || !elements.cancelPurchaseModal || !elements.cancelPurchaseContent) return;
     
-    const confirmResult = await Swal.fire({
-        title: 'Cancel Purchase Order?',
-        html: `<div class="text-left">
-                <p class="mb-3">Are you sure you want to cancel purchase order "${purchase.pur_id}"? This action cannot be undone.</p>
-                <label class="block text-sm font-medium mb-1">Cancel By</label>
-                <input id="cancelByInput" type="text" class="swal2-input" placeholder="Enter your name" />
-               </div>`,
-        focusConfirm: false,
-        preConfirm: () => {
-            const val = document.getElementById('cancelByInput').value.trim();
-            if (!val) {
-                Swal.showValidationMessage('Cancel By is required');
-            }
-            return val;
-        },
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Cancel Purchase',
-        cancelButtonText: 'Keep Purchase',
-        reverseButtons: true
-    });
+    elements.cancelPurchaseContent.innerHTML = `
+        <div class="space-y-3">
+            <div class="bg-blue-50 p-3 rounded-lg">
+                <h4 class="font-semibold text-blue-800">Purchase Details</h4>
+                <p><strong>PO Number:</strong> ${purchase.pur_id}</p>
+                <p><strong>Company:</strong> ${purchase.pur_company_name}</p>
+                <p><strong>Ordered By:</strong> ${purchase.pur_order_by || 'Not specified'}</p>
+                <p><strong>Total Amount:</strong> ${formatCurrency(purchase.pur_total_amount)}</p>
+            </div>
+            <div class="bg-red-50 p-3 rounded-lg">
+                <h4 class="font-semibold text-red-800">Warning</h4>
+                <p>Are you sure you want to cancel purchase order "${purchase.pur_id}"? This action cannot be undone.</p>
+            </div>
+        </div>
+    `;
     
-    if (!confirmResult.isConfirmed || !confirmResult.value) return;
+    elements.cancelPurchaseModal.dataset.purchaseId = id;
+    elements.cancelPurchaseModal.dataset.userLabel = CURRENT_USER_LABEL || '';
+    elements.cancelPurchaseModal.classList.remove('hidden');
+}
+
+function closeCancelPurchaseModal() {
+    if (!elements.cancelPurchaseModal) return;
     
+    elements.cancelPurchaseModal.classList.add('hidden');
+    delete elements.cancelPurchaseModal.dataset.purchaseId;
+    delete elements.cancelPurchaseModal.dataset.userLabel;
+    
+    if (elements.cancelPurchaseContent) {
+        elements.cancelPurchaseContent.innerHTML = '';
+    }
+}
+
+async function handleConfirmCancelPurchase() {
+    if (!elements.cancelPurchaseModal) return;
+    
+    const purchaseId = elements.cancelPurchaseModal.dataset.purchaseId;
+    if (!purchaseId) {
+        closeCancelPurchaseModal();
+        return;
+    }
+    
+    const cancelBy = elements.cancelPurchaseModal.dataset.userLabel || CURRENT_USER_LABEL || '';
+    if (!cancelBy) {
+        showNotification('Unable to determine cancelling user', 'error');
+        return;
+    }
+    
+    closeCancelPurchaseModal();
     showLoading();
     
     try {
-        const response = await fetch(`${PSM_PURCHASES_API}/${id}/cancel`, {
+        const response = await fetch(`${PSM_PURCHASES_API}/${purchaseId}/cancel`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1270,7 +1363,7 @@ async function cancelPurchase(id) {
                 'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
             },
             credentials: 'include',
-            body: JSON.stringify({ cancel_by: confirmResult.value })
+            body: JSON.stringify({ cancel_by: cancelBy })
         });
         
         if (!response.ok) {
@@ -1283,8 +1376,7 @@ async function cancelPurchase(id) {
             showNotification(result.message, 'success');
             loadPurchases();
             
-            // Disable the cancel button for this purchase
-            const cancelBtn = document.querySelector(`[onclick="cancelPurchase(${id})"]`);
+            const cancelBtn = document.querySelector(`[onclick="cancelPurchase(${purchaseId})"]`);
             if (cancelBtn) {
                 cancelBtn.disabled = true;
                 cancelBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -1299,6 +1391,10 @@ async function cancelPurchase(id) {
     } finally {
         hideLoading();
     }
+}
+
+function cancelPurchase(id) {
+    openCancelPurchaseModal(id);
 }
 
 async function deletePurchase(id) {
