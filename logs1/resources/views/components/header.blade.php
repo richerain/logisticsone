@@ -6,7 +6,11 @@
             <button id="toggle-btn" class="pl-2 focus:outline-none"><i class="bx bx-menu text-2xl cursor-pointer"></i></button>
             <!-- company name & logo button -->
             <button type="button" onclick="window.location.href='{{ Auth::guard('vendor')->check() ? '/vendor/home' : '/home' }}'" class="flex items-center pl-2 focus:outline-none">
-                <h1 class="text-2xl font-bold tracking-tight">Microfinancial</h1>
+                <img src="{{ asset('images/micrologo.png') }}" alt="Logo" class="h-10 w-auto mr-2">
+                <div class="flex flex-col items-start">
+                    <h1 class="text-xl font-bold tracking-tight leading-none">Microfinancial</h1>
+                    <span class="text-xs font-medium text-gray-200 tracking-wide">Logistics I</span>
+                </div>
             </button>
         </div>
         <!-- profile section -->

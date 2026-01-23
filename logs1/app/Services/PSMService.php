@@ -7,6 +7,7 @@ use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
 use App\Models\PSM\Quote;
 use App\Models\PSM\Vendor;
+use App\Models\VendorAccount;
 use App\Repositories\PSMRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,40 @@ class PSMService
     public function getVendors($filters = [])
     {
         try {
-            $vendors = $this->psmRepository->getVendors($filters);
+            $query = VendorAccount::where('status', 'active');
+
+            if (isset($filters['search']) && $filters['search']) {
+                $search = $filters['search'];
+                $query->where(function ($q) use ($search) {
+                    $q->where('company_name', 'like', "%{$search}%")
+                      ->orWhere('firstname', 'like', "%{$search}%")
+                      ->orWhere('lastname', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            if (isset($filters['type']) && $filters['type']) {
+                $query->where('company_type', $filters['type']);
+            }
+
+            $vendors = $query->get()->map(function ($vendor) {
+                return [
+                    'id' => $vendor->id,
+                    'ven_id' => $vendor->vendorid,
+                    'ven_company_name' => $vendor->company_name,
+                    'ven_contact_person' => trim($vendor->firstname . ' ' . $vendor->lastname),
+                    'ven_email' => $vendor->email,
+                    'ven_phone' => $vendor->contactnum,
+                    'ven_address' => $vendor->address,
+                    'ven_type' => $vendor->company_type ?? 'Unknown',
+                    'ven_rating' => $vendor->rating ?? 0,
+                    'ven_status' => $vendor->status,
+                    'ven_picture' => $vendor->picture,
+                    'ven_desc' => '',
+                    'created_at' => $vendor->created_at,
+                    'updated_at' => $vendor->updated_at,
+                ];
+            });
 
             return [
                 'success' => true,
@@ -48,33 +82,35 @@ class PSMService
     public function getActiveVendorsForPurchase()
     {
         try {
-            $vendors = Vendor::where('ven_status', 'active')
-                ->with(['products' => function ($query) {
-                    $query->where('prod_stock', '>', 0);
-                }])
-                ->get()
-                ->map(function ($vendor) {
-                    return [
-                        'id' => $vendor->id,
-                        'ven_id' => $vendor->ven_id,
-                        'company_name' => $vendor->ven_company_name,
-                        'type' => $vendor->ven_type,
-                        'products' => $vendor->products->map(function ($product) {
-                            return [
-                                'id' => $product->id,
-                                'prod_id' => $product->prod_id,
-                                'name' => $product->prod_name,
-                                'price' => $product->prod_price,
-                                'stock' => $product->prod_stock,
-                                'type' => $product->prod_type,
-                            ];
-                        }),
-                    ];
-                });
+            $vendors = VendorAccount::where('status', 'active')->get();
+            
+            $data = $vendors->map(function ($vendor) {
+                // Find products where prod_vendor matches vendorid (cross-db)
+                $products = Product::where('prod_vendor', $vendor->vendorid)
+                    ->where('prod_stock', '>', 0)
+                    ->get();
+
+                return [
+                    'id' => $vendor->id,
+                    'ven_id' => $vendor->vendorid,
+                    'company_name' => $vendor->company_name,
+                    'type' => $vendor->company_type,
+                    'products' => $products->map(function ($product) {
+                        return [
+                            'id' => $product->id,
+                            'prod_id' => $product->prod_id,
+                            'name' => $product->prod_name,
+                            'price' => $product->prod_price,
+                            'stock' => $product->prod_stock,
+                            'type' => $product->prod_type,
+                        ];
+                    }),
+                ];
+            });
 
             return [
                 'success' => true,
-                'data' => $vendors,
+                'data' => $data,
                 'message' => 'Active vendors retrieved successfully',
             ];
         } catch (Exception $e) {
@@ -114,12 +150,29 @@ class PSMService
     public function getVendor($id)
     {
         try {
-            $vendor = $this->psmRepository->getVendorById($id);
+            $vendor = VendorAccount::find($id);
 
             if ($vendor) {
+                $data = [
+                    'id' => $vendor->id,
+                    'ven_id' => $vendor->vendorid,
+                    'ven_company_name' => $vendor->company_name,
+                    'ven_contact_person' => trim($vendor->firstname . ' ' . $vendor->lastname),
+                    'ven_email' => $vendor->email,
+                    'ven_phone' => $vendor->contactnum,
+                    'ven_address' => $vendor->address,
+                    'ven_type' => $vendor->company_type ?? 'Unknown',
+                    'ven_rating' => $vendor->rating ?? 0,
+                    'ven_status' => $vendor->status,
+                    'ven_picture' => $vendor->picture,
+                    'ven_desc' => '',
+                    'created_at' => $vendor->created_at,
+                    'updated_at' => $vendor->updated_at,
+                ];
+
                 return [
                     'success' => true,
-                    'data' => $vendor,
+                    'data' => $data,
                     'message' => 'Vendor retrieved successfully',
                 ];
             } else {
@@ -171,11 +224,27 @@ class PSMService
     public function getVendorByVendorId($venId)
     {
         try {
-            $vendor = $this->psmRepository->getVendorByVendorId($venId);
+            $vendor = VendorAccount::where('vendorid', $venId)->first();
             if ($vendor) {
+                $data = [
+                    'id' => $vendor->id,
+                    'ven_id' => $vendor->vendorid,
+                    'ven_company_name' => $vendor->company_name,
+                    'ven_contact_person' => trim($vendor->firstname . ' ' . $vendor->lastname),
+                    'ven_email' => $vendor->email,
+                    'ven_phone' => $vendor->contactnum,
+                    'ven_address' => $vendor->address,
+                    'ven_type' => $vendor->company_type ?? 'Unknown',
+                    'ven_rating' => $vendor->rating ?? 0,
+                    'ven_status' => $vendor->status,
+                    'ven_desc' => '',
+                    'created_at' => $vendor->created_at,
+                    'updated_at' => $vendor->updated_at,
+                ];
+
                 return [
                     'success' => true,
-                    'data' => $vendor,
+                    'data' => $data,
                     'message' => 'Vendor retrieved successfully',
                 ];
             }
@@ -468,7 +537,25 @@ class PSMService
     public function getVendorStats()
     {
         try {
-            $stats = $this->psmRepository->getVendorStats();
+            $activeVendors = VendorAccount::where('status', 'active');
+            
+            $totalVendors = $activeVendors->count();
+            
+            $vendorsByType = VendorAccount::where('status', 'active')
+                ->select('company_type', DB::raw('count(*) as count'))
+                ->groupBy('company_type')
+                ->pluck('count', 'company_type')
+                ->toArray();
+
+            $activeVendorIds = VendorAccount::where('status', 'active')->pluck('vendorid');
+            $totalProducts = Product::whereIn('prod_vendor', $activeVendorIds)->count();
+
+            $stats = [
+                'total_vendors' => $totalVendors,
+                'active_vendors' => $totalVendors,
+                'vendors_by_type' => $vendorsByType,
+                'total_products' => $totalProducts,
+            ];
 
             return [
                 'success' => true,
@@ -563,7 +650,14 @@ class PSMService
             
             // Add default module info if not present
             $data['prod_module_from'] = $data['prod_module_from'] ?? 'psm';
-            $data['prod_submodule_from'] = $data['prod_submodule_from'] ?? 'vendor-management';
+            $data['prod_submodule_from'] = $data['prod_submodule_from'] ?? 'vendor-product-management';
+
+            if (isset($data['prod_picture']) && $data['prod_picture'] instanceof \Illuminate\Http\UploadedFile) {
+                $file = $data['prod_picture'];
+                $filename = 'prod_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('storage/products'), $filename);
+                $data['prod_picture'] = 'storage/products/' . $filename;
+            }
 
             $product = $this->psmRepository->createProduct($data);
 
@@ -589,6 +683,37 @@ class PSMService
     {
         DB::beginTransaction();
         try {
+            // Handle image removal if requested
+            if (isset($data['remove_picture']) && $data['remove_picture']) {
+                $product = $this->psmRepository->getProduct($id);
+                if ($product && $product->prod_picture) {
+                    $path = public_path($product->prod_picture);
+                    if (file_exists($path)) {
+                        @unlink($path);
+                    }
+                    $data['prod_picture'] = null;
+                }
+                unset($data['remove_picture']);
+            }
+
+            // Handle new image upload
+            if (isset($data['prod_picture']) && $data['prod_picture'] instanceof \Illuminate\Http\UploadedFile) {
+                $product = $this->psmRepository->getProduct($id);
+                
+                // Delete old image if exists
+                if ($product && $product->prod_picture) {
+                    $path = public_path($product->prod_picture);
+                    if (file_exists($path)) {
+                        @unlink($path);
+                    }
+                }
+
+                $file = $data['prod_picture'];
+                $filename = 'prod_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('storage/products'), $filename);
+                $data['prod_picture'] = 'storage/products/' . $filename;
+            }
+
             $product = $this->psmRepository->updateProduct($id, $data);
             if ($product) {
                 DB::commit();
@@ -652,12 +777,14 @@ class PSMService
     private function generateProductId()
     {
         $prefix = 'PROD';
-        $last = Product::where('prod_id', 'like', $prefix.'%')
-            ->orderBy('prod_id', 'desc')
-            ->first();
-        $next = $last ? (int) substr($last->prod_id, strlen($prefix)) + 1 : 1;
+        $datePart = now()->format('Ymd');
 
-        return $prefix.str_pad($next, 5, '0', STR_PAD_LEFT);
+        do {
+            $randomPart = $this->generateRandomAlphanumeric(5);
+            $prodId = $prefix.$datePart.$randomPart;
+        } while (Product::where('prod_id', $prodId)->exists());
+
+        return $prodId;
     }
 
     /**
@@ -1045,7 +1172,7 @@ class PSMService
 
                     return [
                         'success' => false,
-                        'message' => 'Insufficient budget. Remaining: '.formatCurrency($budget->bud_remaining_amount).', Required: '.formatCurrency($purchase->pur_total_amount),
+                        'message' => 'Insufficient budget. Remaining: '.number_format($budget->bud_remaining_amount, 2).', Required: '.number_format($purchase->pur_total_amount, 2),
                         'data' => null,
                     ];
                 }
@@ -1181,7 +1308,7 @@ class PSMService
 
                     return [
                         'success' => false,
-                        'message' => 'Insufficient budget. Remaining: '.formatCurrency($budget->bud_remaining_amount).', Required: '.formatCurrency($purchase->pur_total_amount),
+                        'message' => 'Insufficient budget. Remaining: '.number_format($budget->bud_remaining_amount, 2).', Required: '.number_format($purchase->pur_total_amount, 2),
                         'data' => null,
                     ];
                 }

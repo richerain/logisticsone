@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\PSMService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PSMController extends Controller
 {
@@ -518,21 +519,30 @@ class PSMController extends Controller
     public function createProduct(Request $request)
     {
         try {
+            \Log::info('Creating product payload:', $request->all());
+
+            if (\Auth::guard('vendor')->check()) {
+                \Log::info('Vendor Authenticated: ' . \Auth::guard('vendor')->id());
+            } else {
+                \Log::info('Vendor NOT Authenticated in Controller');
+            }
+
             $validated = $request->validate([
-                'prod_vendor' => 'required|string|exists:psm.psm_vendor,ven_id',
+                'prod_vendor' => ['required', 'string', 'exists:main.vendor_account,vendorid'],
                 'prod_name' => 'required|string|max:255',
                 'prod_price' => 'required|numeric|min:0',
                 'prod_stock' => 'required|integer|min:0',
                 'prod_type' => 'required|in:equipment,supplies,furniture,automotive',
-                'prod_warranty' => 'nullable|string|max:255',
+                'prod_warranty' => 'required|string|max:255',
                 'prod_expiration' => 'nullable|date',
                 'prod_desc' => 'nullable|string',
+                'prod_picture' => 'nullable|image|max:2048', // 2MB max
             ]);
 
             $result = $this->psmService->createProduct($validated);
-
             return response()->json($result);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Log::error('Product creation failed: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create product: '.$e->getMessage(),
@@ -545,14 +555,16 @@ class PSMController extends Controller
     {
         try {
             $validated = $request->validate([
-                'prod_vendor' => 'sometimes|required|string|exists:psm.psm_vendor,ven_id',
+                'prod_vendor' => 'sometimes|required|string|exists:main.vendor_account,vendorid',
                 'prod_name' => 'sometimes|required|string|max:255',
                 'prod_price' => 'sometimes|required|numeric|min:0',
                 'prod_stock' => 'sometimes|required|integer|min:0',
                 'prod_type' => 'sometimes|required|in:equipment,supplies,furniture,automotive',
-                'prod_warranty' => 'nullable|string|max:255',
+                'prod_warranty' => 'sometimes|required|string|max:255',
                 'prod_expiration' => 'nullable|date',
                 'prod_desc' => 'nullable|string',
+                'prod_picture' => 'nullable|image|max:2048', // 2MB max
+                'remove_picture' => 'nullable|boolean',
             ]);
 
             $result = $this->psmService->updateProduct($id, $validated);

@@ -32,7 +32,20 @@ Route::get('/test-db', function () {
     }
 });
 
+
+
 // Gateway routes - load module-specific API routes
 Route::prefix('v1')->group(function () {
     require __DIR__.'/gateway.php';
 });
+
+Route::get('/test-vendor-model', function () {
+    try {
+        $vendor = \App\Models\VendorAccount::first();
+        return response()->json(['status' => 'success', 'vendor' => $vendor]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
+

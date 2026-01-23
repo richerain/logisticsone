@@ -1,297 +1,404 @@
 <!-- resources/views/dashboard/index.blade.php -->
-<div class="mb-6 flex items-center justify-between gap-4">
-    <div class="flex items-center">
-        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Dashboard</h2>
-    </div>
-    <div class="text-right">
-        <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('sws')->user()->firstname }} - {{ ucfirst(Auth::guard('sws')->user()->roles) }}</span>
-    </div>
-</div>
-
-<!-- announcement board section start -->
-<div class="bg-green-100 shadow-lg rounded-lg p-5 mb-3 overflow-visible min-h-[200px] flex flex-col">
-    <div class="flex items-center mb-4 space-x-2 text-gray-700">
-        <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
+@if(Auth::guard('vendor')->check())
+    <div class="mb-6 flex items-center justify-between gap-4">
+        <div class="flex items-center">
+            <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Vendor Dashboard</h2>
+        </div>
+        <div class="text-right">
+            <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('vendor')->user()->ven_contact_person ?? Auth::guard('vendor')->user()->ven_company_name ?? 'Vendor' }} - Vendor</span>
+        </div>
     </div>
 
-    <div class="flex-1 flex items-start">
-        <div class="w-full stat card bg-transparent p-4">
-            <!-- Announcements grid: show max 3 per page, responsive columns (no overlap when sidebar toggles) -->
-            <div id="announcements-grid" class="announcements-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Latest (left-most) -->
-                <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 3" class="h-36 w-full object-cover" loading="lazy" />
-                    <div class="p-4">
-                        <h3 class="font-semibold text-gray-800 truncate">New Warehouse Integration Launched</h3>
-                        <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">We are excited to announce the rollout of the new warehouse integration that will streamline inventory updates in real-time across all hubs.</p>
-                        <div class="mt-3 text-xs text-gray-500">Posted: Oct 28, 2025</div>
+    <!-- Vendor Statistics Section start -->
+    <div class="mb-3 bg-blue-100 p-5 rounded-lg shadow-xl overflow-visible">
+        <div class="flex items-center mb-2 space-x-2 text-gray-700">
+            <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>Overview Metrics</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <!-- Stats 01: Active Quotes -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-blue-900">Active Quotes</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-900 shadow-sm">
+                        <i class="bx bxs-file-find text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-blue-900">12</div>
+                <div class="stat-desc text-blue-700">3 Pending Review</div>
+            </div>
+
+            <!-- Stats 02: My Products -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-green-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-green-900">My Products</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-900 shadow-sm">
+                        <i class="bx bxs-package text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-green-900">45</div>
+                <div class="stat-desc text-green-700">Updated Recently</div>
+            </div>
+
+            <!-- Stats 03: Purchase Orders -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-purple-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-purple-900">Purchase Orders</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-900 shadow-sm">
+                        <i class="bx bxs-purchase-tag text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-purple-900">8</div>
+                <div class="stat-desc text-purple-700">2 New Orders</div>
+            </div>
+        </div>
+    </div>
+    <!-- Vendor Statistics Section end -->
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Recent RFQs -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Recent RFQs</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div>
+                        <h4 class="font-medium text-gray-900">Office Furniture Supply</h4>
+                        <p class="text-sm text-gray-500">ID: RFQ-2025-001</p>
                     </div>
-                    <span class="absolute top-3 left-3 bg-green-600 text-white text-xs px-2 py-1 rounded">Latest</span>
-                </article>
-
-                <!-- Announcement 2 -->
-                <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 2" class="h-36 w-full object-cover" loading="lazy" />
-                    <div class="p-4">
-                        <h3 class="font-semibold text-gray-800 truncate">Maintenance Window Scheduled</h3>
-                        <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">Planned maintenance will occur this weekend. Some services may be intermittently unavailable during this period.</p>
-                        <div class="mt-3 text-xs text-gray-500">Posted: Oct 20, 2025</div>
+                    <span class="px-3 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">Open</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div>
+                        <h4 class="font-medium text-gray-900">Laptop Procurement</h4>
+                        <p class="text-sm text-gray-500">ID: RFQ-2025-002</p>
                     </div>
-                </article>
-
-                <!-- Announcement 1 -->
-                <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 1" class="h-36 w-full object-cover" loading="lazy" />
-                    <div class="p-4">
-                        <h3 class="font-semibold text-gray-800 truncate">Quarterly Logistics Review</h3>
-                        <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">Join the Q3 logistics review to discuss performance metrics, bottlenecks, and improvement plans for the next quarter.</p>
-                        <div class="mt-3 text-xs text-gray-500">Posted: Oct 10, 2025</div>
+                    <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Awarded</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div>
+                        <h4 class="font-medium text-gray-900">Network Equipment</h4>
+                        <p class="text-sm text-gray-500">ID: RFQ-2025-003</p>
                     </div>
-                </article>
+                    <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pending</span>
+                </div>
             </div>
+        </div>
 
-            <!-- Pagination controls: show 3 per page, can view previous announcements on next pages -->
-            <div class="join justify-center gap-0.5 mt-4">
-                <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-left'></i></button>
-                <button class="join-item btn btn-sm">Page 1</button>
-                <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-right'></i></button>
+        <!-- Notifications -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Notifications</h3>
+            <div class="space-y-4">
+                <div class="flex items-start p-3 bg-blue-50 rounded-lg">
+                    <i class='bx bx-info-circle text-blue-500 text-xl mr-3 mt-0.5'></i>
+                    <div>
+                        <p class="text-sm text-gray-800">Your quote for <strong>Office Chairs</strong> has been viewed.</p>
+                        <span class="text-xs text-gray-500">2 hours ago</span>
+                    </div>
+                </div>
+                <div class="flex items-start p-3 bg-green-50 rounded-lg">
+                    <i class='bx bx-check-circle text-green-500 text-xl mr-3 mt-0.5'></i>
+                    <div>
+                        <p class="text-sm text-gray-800">New Purchase Order received #PO-4821.</p>
+                        <span class="text-xs text-gray-500">Yesterday</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<!-- announcement board section end -->
- 
-<!-- Statistics Section start -->
-<div class="mb-3 bg-green-100 p-5 rounded-lg shadow-xl overflow-visible">
-    <div class="flex items-center mb-2 space-x-2 text-gray-700">
-        <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>System Overview Metrics</h2>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-        <!-- Stats 01: Total Purchase Orders -->
-        <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700">
-            <div class="stat-title flex items-center justify-between">
-                <span class="font-semibold text-blue-900">Purchase Orders</span>
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-900 shadow-sm">
-                    <i class="bx bxs-purchase-tag text-xl" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div class="stat-value text-blue-900">47</div>
-            <div class="stat-desc text-blue-700">12 Pending Approval</div>
+@else
+    <div class="mb-6 flex items-center justify-between gap-4">
+        <div class="flex items-center">
+            <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Dashboard</h2>
         </div>
-
-        <!-- Stats 02: Active Vendors -->
-        <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-green-700">
-            <div class="stat-title flex items-center justify-between">
-                <span class="font-semibold text-green-900">Active Vendors</span>
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-900 shadow-sm">
-                    <i class="bx bxs-user-detail text-xl" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div class="stat-value text-green-900">28</div>
-            <div class="stat-desc text-green-700">5 New This Month</div>
-        </div>
-
-        <!-- Stats 03: Warehouse Inventory -->
-        <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-purple-700">
-            <div class="stat-title flex items-center justify-between">
-                <span class="font-semibold text-purple-900">Total Inventory</span>
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-900 shadow-sm">
-                    <i class="bx bxs-archive-in text-xl" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div class="stat-value text-purple-900">1,247</div>
-            <div class="stat-desc text-purple-700">45 Low Stock Items</div>
-        </div>
-
-        <!-- Stats 04: Active Projects -->
-        <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-orange-700">
-            <div class="stat-title flex items-center justify-between">
-                <span class="font-semibold text-orange-900">Active Projects</span>
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 text-orange-900 shadow-sm">
-                    <i class="bx bxs-package text-xl" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div class="stat-value text-orange-900">15</div>
-            <div class="stat-desc text-orange-700">5 Behind Schedule</div>
-        </div>
-
-        <!-- Stats 05: Total Assets -->
-        <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-cyan-700">
-            <div class="stat-title flex items-center justify-between">
-                <span class="font-semibold text-cyan-900">Managed Assets</span>
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-cyan-100 text-cyan-900 shadow-sm">
-                    <i class="bx bxs-archive text-xl" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div class="stat-value text-cyan-900">284</div>
-            <div class="stat-desc text-cyan-700">18 Under Maintenance</div>
-        </div>
-
-        <!-- Stats 06: Pending Documents -->
-        <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-red-700">
-            <div class="stat-title flex items-center justify-between">
-                <span class="font-semibold text-red-900">Pending Docs</span>
-                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 text-red-900 shadow-sm">
-                    <i class="bx bxs-file text-xl" aria-hidden="true"></i>
-                </span>
-            </div>
-            <div class="stat-value text-red-900">387</div>
-            <div class="stat-desc text-red-700">Require Attention</div>
+        <div class="text-right">
+            <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('sws')->user()->firstname }} - {{ ucfirst(Auth::guard('sws')->user()->roles) }}</span>
         </div>
     </div>
 
-    <!-- Quick Module Status Overview -->
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <!-- PSM Status -->
-        <div class="bg-white/80 rounded-lg p-3 shadow-sm">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">PSM</span>
-                <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    <i class='bx bxs-circle text-xs mr-1'></i>Active
-                </span>
-            </div>
-            <p class="text-xs text-gray-600 mt-1">Procurement & Sourcing</p>
-            <div class="mt-2 flex justify-between text-xs">
-                <span>23 Active PO</span>
-                <span class="text-orange-600">5 Pending</span>
-            </div>
+    <!-- announcement board section start -->
+    <div class="bg-green-100 shadow-lg rounded-lg p-5 mb-3 overflow-visible min-h-[200px] flex flex-col">
+        <div class="flex items-center mb-4 space-x-2 text-gray-700">
+            <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
         </div>
 
-        <!-- SWS Status -->
-        <div class="bg-white/80 rounded-lg p-3 shadow-sm">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">SWS</span>
-                <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    <i class='bx bxs-circle text-xs mr-1'></i>Active
-                </span>
-            </div>
-            <p class="text-xs text-gray-600 mt-1">Smart Warehousing</p>
-            <div class="mt-2 flex justify-between text-xs">
-                <span>1.2K Items</span>
-                <span class="text-red-600">45 Low</span>
-            </div>
-        </div>
+        <div class="flex-1 flex items-start">
+            <div class="w-full stat card bg-transparent p-4">
+                <!-- Announcements grid: show max 3 per page, responsive columns (no overlap when sidebar toggles) -->
+                <div id="announcements-grid" class="announcements-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Latest (left-most) -->
+                    <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
+                        <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 3" class="h-36 w-full object-cover" loading="lazy" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-800 truncate">New Warehouse Integration Launched</h3>
+                            <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">We are excited to announce the rollout of the new warehouse integration that will streamline inventory updates in real-time across all hubs.</p>
+                            <div class="mt-3 text-xs text-gray-500">Posted: Oct 28, 2025</div>
+                        </div>
+                        <span class="absolute top-3 left-3 bg-green-600 text-white text-xs px-2 py-1 rounded">Latest</span>
+                    </article>
 
-        <!-- PLT Status -->
-        <div class="bg-white/80 rounded-lg p-3 shadow-sm">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">PLT</span>
-                <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    <i class='bx bxs-circle text-xs mr-1'></i>Active
-                </span>
-            </div>
-            <p class="text-xs text-gray-600 mt-1">Project Logistics</p>
-            <div class="mt-2 flex justify-between text-xs">
-                <span>15 Projects</span>
-                <span class="text-yellow-600">5 Ongoing</span>
-            </div>
-        </div>
+                    <!-- Announcement 2 -->
+                    <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
+                        <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 2" class="h-36 w-full object-cover" loading="lazy" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-800 truncate">Maintenance Window Scheduled</h3>
+                            <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">Planned maintenance will occur this weekend. Some services may be intermittently unavailable during this period.</p>
+                            <div class="mt-3 text-xs text-gray-500">Posted: Oct 20, 2025</div>
+                        </div>
+                    </article>
 
-        <!-- ALMS Status -->
-        <div class="bg-white/80 rounded-lg p-3 shadow-sm">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">ALMS</span>
-                <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    <i class='bx bxs-circle text-xs mr-1'></i>Active
-                </span>
-            </div>
-            <p class="text-xs text-gray-600 mt-1">Asset Management</p>
-            <div class="mt-2 flex justify-between text-xs">
-                <span>284 Assets</span>
-                <span class="text-blue-600">18 Maintenance</span>
-            </div>
-        </div>
+                    <!-- Announcement 1 -->
+                    <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
+                        <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 1" class="h-36 w-full object-cover" loading="lazy" />
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-800 truncate">Quarterly Logistics Review</h3>
+                            <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">Join the Q3 logistics review to discuss performance metrics, bottlenecks, and improvement plans for the next quarter.</p>
+                            <div class="mt-3 text-xs text-gray-500">Posted: Oct 10, 2025</div>
+                        </div>
+                    </article>
+                </div>
 
-        <!-- DTLR Status -->
-        <div class="bg-white/80 rounded-lg p-3 shadow-sm">
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold text-gray-700">DTLR</span>
-                <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    <i class='bx bxs-circle text-xs mr-1'></i>Active
-                </span>
-            </div>
-            <p class="text-xs text-gray-600 mt-1">Document Tracking</p>
-            <div class="mt-2 flex justify-between text-xs">
-                <span>1.8K Docs</span>
-                <span class="text-red-600">387 Pending</span>
+                <!-- Pagination controls: show 3 per page, can view previous announcements on next pages -->
+                <div class="join justify-center gap-0.5 mt-4">
+                    <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-left'></i></button>
+                    <button class="join-item btn btn-sm">Page 1</button>
+                    <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-right'></i></button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<!-- Statistics Section end -->
+    <!-- announcement board section end -->
+    
+    <!-- Statistics Section start -->
+    <div class="mb-3 bg-green-100 p-5 rounded-lg shadow-xl overflow-visible">
+        <div class="flex items-center mb-2 space-x-2 text-gray-700">
+            <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>System Overview Metrics</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <!-- Stats 01: Total Purchase Orders -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-blue-900">Purchase Orders</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-900 shadow-sm">
+                        <i class="bx bxs-purchase-tag text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-blue-900">47</div>
+                <div class="stat-desc text-blue-700">12 Pending Approval</div>
+            </div>
 
-<!-- statistics charts section start -->
-<div class="bg-green-100 rounded-lg p-5 shadow-xl overflow-visible mb-3">
-    <h2 class="text-gray-700 text-lg font-semibold mb-4"><i class='bx bx-fw bxs-pie-chart-alt-2'></i>Module Performance Charts</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Chart 1: Purchase Order Status (PSM) -->
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold text-gray-800 flex items-center">
-                <i class='bx bxs-purchase-tag mr-2 text-blue-600'></i>
-                PO Status Distribution
-            </h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="poStatusChart" style="width:100%;height:160px;"></canvas>
+            <!-- Stats 02: Active Vendors -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-green-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-green-900">Active Vendors</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-900 shadow-sm">
+                        <i class="bx bxs-user-detail text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-green-900">28</div>
+                <div class="stat-desc text-green-700">5 New This Month</div>
+            </div>
+
+            <!-- Stats 03: Warehouse Inventory -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-purple-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-purple-900">Total Inventory</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 text-purple-900 shadow-sm">
+                        <i class="bx bxs-archive-in text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-purple-900">1,247</div>
+                <div class="stat-desc text-purple-700">45 Low Stock Items</div>
+            </div>
+
+            <!-- Stats 04: Active Projects -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-orange-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-orange-900">Active Projects</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 text-orange-900 shadow-sm">
+                        <i class="bx bxs-package text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-orange-900">15</div>
+                <div class="stat-desc text-orange-700">5 Behind Schedule</div>
+            </div>
+
+            <!-- Stats 05: Total Assets -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-cyan-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-cyan-900">Managed Assets</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-cyan-100 text-cyan-900 shadow-sm">
+                        <i class="bx bxs-archive text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-cyan-900">284</div>
+                <div class="stat-desc text-cyan-700">18 Under Maintenance</div>
+            </div>
+
+            <!-- Stats 06: Pending Documents -->
+            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-red-700">
+                <div class="stat-title flex items-center justify-between">
+                    <span class="font-semibold text-red-900">Pending Docs</span>
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-100 text-red-900 shadow-sm">
+                        <i class="bx bxs-file text-xl" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="stat-value text-red-900">387</div>
+                <div class="stat-desc text-red-700">Require Attention</div>
             </div>
         </div>
 
-        <!-- Chart 2: Inventory Categories (SWS) -->
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold text-gray-800 flex items-center">
-                <i class='bx bxs-archive-in mr-2 text-purple-600'></i>
-                Inventory by Category
-            </h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="inventoryChart" style="width:100%;height:160px;"></canvas>
+        <!-- Quick Module Status Overview -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- PSM Status -->
+            <div class="bg-white/80 rounded-lg p-3 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">PSM</span>
+                    <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+                        <i class='bx bxs-circle text-xs mr-1'></i>Active
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">Procurement & Sourcing</p>
+                <div class="mt-2 flex justify-between text-xs">
+                    <span>23 Active PO</span>
+                    <span class="text-orange-600">5 Pending</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Chart 3: Project Progress (PLT) -->
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold text-gray-800 flex items-center">
-                <i class='bx bxs-package mr-2 text-orange-600'></i>
-                Project Progress
-            </h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="projectProgressChart" style="width:100%;height:160px;"></canvas>
+            <!-- SWS Status -->
+            <div class="bg-white/80 rounded-lg p-3 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">SWS</span>
+                    <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+                        <i class='bx bxs-circle text-xs mr-1'></i>Active
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">Smart Warehousing</p>
+                <div class="mt-2 flex justify-between text-xs">
+                    <span>1.2K Items</span>
+                    <span class="text-red-600">45 Low</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Chart 4: Asset Status (ALMS) -->
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold text-gray-800 flex items-center">
-                <i class='bx bxs-archive mr-2 text-cyan-600'></i>
-                Asset Status Overview
-            </h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="assetStatusChart" style="width:100%;height:160px;"></canvas>
+            <!-- PLT Status -->
+            <div class="bg-white/80 rounded-lg p-3 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">PLT</span>
+                    <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+                        <i class='bx bxs-circle text-xs mr-1'></i>Active
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">Project Logistics</p>
+                <div class="mt-2 flex justify-between text-xs">
+                    <span>15 Projects</span>
+                    <span class="text-yellow-600">5 Ongoing</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Chart 5: Document Status (DTLR) -->
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold text-gray-800 flex items-center">
-                <i class='bx bxs-file mr-2 text-red-600'></i>
-                Document Status
-            </h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="documentStatusChart" style="width:100%;height:160px;"></canvas>
+            <!-- ALMS Status -->
+            <div class="bg-white/80 rounded-lg p-3 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">ALMS</span>
+                    <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+                        <i class='bx bxs-circle text-xs mr-1'></i>Active
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">Asset Management</p>
+                <div class="mt-2 flex justify-between text-xs">
+                    <span>284 Assets</span>
+                    <span class="text-blue-600">18 Maintenance</span>
+                </div>
             </div>
-        </div>
 
-        <!-- Chart 6: Vendor Performance (PSM) -->
-        <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
-            <h3 class="font-bold text-gray-800 flex items-center">
-                <i class='bx bxs-user-detail mr-2 text-green-600'></i>
-                Vendor Performance
-            </h3>
-            <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
-                <canvas id="vendorPerformanceChart" style="width:100%;height:160px;"></canvas>
+            <!-- DTLR Status -->
+            <div class="bg-white/80 rounded-lg p-3 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">DTLR</span>
+                    <span class="flex items-center text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+                        <i class='bx bxs-circle text-xs mr-1'></i>Active
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">Document Tracking</p>
+                <div class="mt-2 flex justify-between text-xs">
+                    <span>1.8K Docs</span>
+                    <span class="text-red-600">387 Pending</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<!-- statistics charts section end -->
+    <!-- Statistics Section end -->
+
+    <!-- statistics charts section start -->
+    <div class="bg-green-100 rounded-lg p-5 shadow-xl overflow-visible mb-3">
+        <h2 class="text-gray-700 text-lg font-semibold mb-4"><i class='bx bx-fw bxs-pie-chart-alt-2'></i>Module Performance Charts</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Chart 1: Purchase Order Status (PSM) -->
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold text-gray-800 flex items-center">
+                    <i class='bx bxs-purchase-tag mr-2 text-blue-600'></i>
+                    PO Status Distribution
+                </h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="poStatusChart" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Inventory Categories (SWS) -->
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold text-gray-800 flex items-center">
+                    <i class='bx bxs-archive-in mr-2 text-purple-600'></i>
+                    Inventory by Category
+                </h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="inventoryChart" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 3: Project Progress (PLT) -->
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold text-gray-800 flex items-center">
+                    <i class='bx bxs-package mr-2 text-orange-600'></i>
+                    Project Progress
+                </h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="projectProgressChart" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 4: Asset Status (ALMS) -->
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold text-gray-800 flex items-center">
+                    <i class='bx bxs-archive mr-2 text-cyan-600'></i>
+                    Asset Status Overview
+                </h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="assetStatusChart" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 5: Document Status (DTLR) -->
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold text-gray-800 flex items-center">
+                    <i class='bx bxs-file mr-2 text-red-600'></i>
+                    Document Status
+                </h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="documentStatusChart" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 6: Vendor Performance (PSM) -->
+            <div class="chart-card bg-gray-50 p-4 rounded-lg shadow">
+                <h3 class="font-bold text-gray-800 flex items-center">
+                    <i class='bx bxs-user-detail mr-2 text-green-600'></i>
+                    Vendor Performance
+                </h3>
+                <div class="chart-placeholder h-32 bg-gray-200 rounded-lg p-1">
+                    <canvas id="vendorPerformanceChart" style="width:100%;height:160px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- statistics charts section end -->
+@endif
 
 <script>
 // Module Charts Data Initialization start

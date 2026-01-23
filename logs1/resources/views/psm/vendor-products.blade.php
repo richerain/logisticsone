@@ -9,7 +9,7 @@
 </style>
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
-        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bx-cube-alt'></i>Vendor Products Management</h2>
+        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bx-package'></i>Products Management</h2>
     </div>
     <div class="text-right">
         <span class="text-md text-gray-600">Procurement &amp; Sourcing Management</span>
@@ -29,26 +29,19 @@
         <table id="vendorProductsTable" class="table table-sm table-zebra w-full">
             <thead>
                 <tr class="bg-gray-700 font-bold text-white">
-                    <th class="whitespace-nowrap">ID</th>
                     <th class="whitespace-nowrap">Product ID</th>
-                    <th class="whitespace-nowrap">Vendor ID</th>
                     <th class="whitespace-nowrap">Name</th>
                     <th class="whitespace-nowrap">Price</th>
                     <th class="whitespace-nowrap">Stock</th>
-                    <th class="whitespace-nowrap">Type</th>
                     <th class="whitespace-nowrap">Warranty</th>
                     <th class="whitespace-nowrap">Expiration</th>
                     <th class="whitespace-nowrap">Description</th>
-                    <th class="whitespace-nowrap">Module From</th>
-                    <th class="whitespace-nowrap">Submodule From</th>
-                    <th class="whitespace-nowrap">Created At</th>
-                    <th class="whitespace-nowrap">Updated At</th>
                     <th class="whitespace-nowrap">Actions</th>
                 </tr>
             </thead>
             <tbody id="vendorProductsTableBody">
                 <tr>
-                    <td colspan="15" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
+                    <td colspan="9" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
                         <div class="flex justify-center items-center py-4">
                             <div class="loading loading-spinner mr-3"></div>
                             Loading products...
@@ -97,25 +90,27 @@
                     <input type="number" id="prod_stock" name="prod_stock" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label for="prod_type" class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-                    <select id="prod_type" name="prod_type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Select Type</option>
-                        <option value="equipment">Equipment</option>
-                        <option value="supplies">Supplies</option>
-                        <option value="furniture">Furniture</option>
-                        <option value="automotive">Automotive</option>
-                    </select>
+                    <label for="prod_warranty" class="block text-sm font-medium text-gray-700 mb-1">Warranty *</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="prod_warranty_num" required min="0" placeholder="e.g. 9" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select id="prod_warranty_unit" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="Day">Day</option>
+                            <option value="Month">Month</option>
+                            <option value="Year">Year</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="prod_warranty" name="prod_warranty">
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="prod_warranty" class="block text-sm font-medium text-gray-700 mb-1">Warranty</label>
-                    <input type="text" id="prod_warranty" name="prod_warranty" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="prod_expiration" class="block text-sm font-medium text-gray-700 mb-1">Expiration</label>
-                    <input type="date" id="prod_expiration" name="prod_expiration" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
+            <div>
+                <label for="prod_expiration" class="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
+                <input type="date" id="prod_expiration" name="prod_expiration" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <!-- Type field removed as per requirement -->
+            <input type="hidden" id="prod_type_hidden" name="prod_type">
+            <div>
+                <label for="prod_picture" class="block text-sm font-medium text-gray-700 mb-1">Product Picture</label>
+                <input type="file" id="prod_picture" name="prod_picture" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div>
                 <label for="prod_desc" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -156,10 +151,24 @@ var PSM_PRODUCTS_API = typeof PSM_PRODUCTS_API !== 'undefined' ? PSM_PRODUCTS_AP
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 var CURRENT_VENDOR_ID = <?php echo json_encode(optional(Auth::guard('vendor')->user())->vendorid ?? ''); ?>;
+var CURRENT_VENDOR_TYPE = <?php echo json_encode(optional(Auth::guard('vendor')->user())->company_type ?? ''); ?>;
 
 var vendorProducts = [];
 var currentProductsPage = 1;
 var productsPageSize = 10;
+var removePictureFlag = false; // Flag to track image removal
+
+var Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+});
 
 var vendorProductsElements = {
     tableBody: document.getElementById('vendorProductsTableBody'),
@@ -180,7 +189,7 @@ function initVendorProducts() {
         if (vendorProductsElements.tableBody) {
             vendorProductsElements.tableBody.innerHTML = `
                 <tr>
-                    <td colspan="15" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
+                    <td colspan="9" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
                         Unable to determine vendor account. Please relogin.
                     </td>
                 </tr>
@@ -266,8 +275,8 @@ function renderVendorProducts(list) {
     if (!total) {
         vendorProductsElements.tableBody.innerHTML = `
             <tr>
-                <td colspan="15" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
-                    <i class='bx bx-cube-alt text-4xl text-gray-300 mb-3'></i>
+                <td colspan="9" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
+                    <i class='bx bx-package text-4xl text-gray-300 mb-3'></i>
                     <p class="text-lg">No products found</p>
                 </td>
             </tr>
@@ -281,24 +290,15 @@ function renderVendorProducts(list) {
     var startIdx = (currentProductsPage - 1) * productsPageSize;
     var pageItems = list.slice(startIdx, startIdx + productsPageSize);
     var rows = pageItems.map(function (p) {
-        var createdAt = p.created_at ? new Date(p.created_at).toLocaleString() : '';
-        var updatedAt = p.updated_at ? new Date(p.updated_at).toLocaleString() : '';
         return `
             <tr>
-                <td class="px-3 py-2 font-mono whitespace-nowrap">${p.id || ''}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${p.prod_id || ''}</td>
-                <td class="px-3 py-2 whitespace-nowrap">${p.prod_vendor || ''}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${p.prod_name || ''}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${formatCurrency(p.prod_price)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${p.prod_stock ?? ''}</td>
-                <td class="px-3 py-2 whitespace-nowrap capitalize">${p.prod_type || ''}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${p.prod_warranty || ''}</td>
-                <td class="px-3 py-2 whitespace-nowrap">${p.prod_expiration || ''}</td>
-                <td class="px-3 py-2 whitespace-nowrap" title="${p.prod_desc || ''}">${p.prod_desc || ''}</td>
-                <td class="px-3 py-2 whitespace-nowrap">${p.prod_module_from || ''}</td>
-                <td class="px-3 py-2 whitespace-nowrap">${p.prod_submodule_from || ''}</td>
-                <td class="px-3 py-2 whitespace-nowrap">${createdAt}</td>
-                <td class="px-3 py-2 whitespace-nowrap">${updatedAt}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${p.prod_expiration ? String(p.prod_expiration).split('T')[0] : 'None'}</td>
+                <td class="px-3 py-2 max-w-xs truncate" title="${p.prod_desc || ''}">${p.prod_desc || ''}</td>
                 <td class="px-3 py-2 whitespace-nowrap">
                     <div class="flex items-center space-x-2">
                         <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${p.id}" title="View">
@@ -357,6 +357,19 @@ function openAddProductModal() {
         form.reset();
         document.getElementById('productId').value = '';
         document.getElementById('prod_vendor').value = CURRENT_VENDOR_ID || '';
+
+        // Reset file input and preview/remove button
+        var prodPic = document.getElementById('prod_picture');
+        if (prodPic) prodPic.value = '';
+        removePictureFlag = false;
+        var previewContainer = document.getElementById('prod_picture_preview_container');
+        if (previewContainer) previewContainer.remove();
+
+        // Reset warranty fields
+        var wNum = document.getElementById('prod_warranty_num');
+        if (wNum) wNum.value = '';
+        var wUnit = document.getElementById('prod_warranty_unit');
+        if (wUnit) wUnit.value = 'Month';
     }
     if (vendorProductsElements.productModal && typeof vendorProductsElements.productModal.showModal === 'function') {
         vendorProductsElements.productModal.showModal();
@@ -366,15 +379,65 @@ function openAddProductModal() {
 function openEditProductModal(product) {
     if (!vendorProductsElements.productModalTitle) return;
     vendorProductsElements.productModalTitle.textContent = 'Edit Product';
+    
+    if (vendorProductsElements.productForm) vendorProductsElements.productForm.reset();
+
     document.getElementById('productId').value = product.id;
     document.getElementById('prod_vendor').value = product.prod_vendor || CURRENT_VENDOR_ID || '';
     document.getElementById('prod_name').value = product.prod_name || '';
     document.getElementById('prod_price').value = product.prod_price || '';
     document.getElementById('prod_stock').value = product.prod_stock || 0;
-    document.getElementById('prod_type').value = product.prod_type || '';
-    document.getElementById('prod_warranty').value = product.prod_warranty || '';
+    
+    // Warranty split
+    if (product.prod_warranty) {
+        var parts = product.prod_warranty.split(' ');
+        if (parts.length >= 2) {
+            document.getElementById('prod_warranty_num').value = parts[0];
+            document.getElementById('prod_warranty_unit').value = parts[1];
+        } else {
+             document.getElementById('prod_warranty_num').value = '';
+             document.getElementById('prod_warranty_unit').value = 'Month';
+        }
+    } else {
+        document.getElementById('prod_warranty_num').value = '';
+        document.getElementById('prod_warranty_unit').value = 'Month';
+    }
+
     document.getElementById('prod_expiration').value = product.prod_expiration ? String(product.prod_expiration).substring(0, 10) : '';
     document.getElementById('prod_desc').value = product.prod_desc || '';
+
+    // Handle Image Preview and Remove Button
+    removePictureFlag = false;
+    var prodPicInput = document.getElementById('prod_picture');
+    if (prodPicInput) {
+        prodPicInput.value = ''; // clear any previous selection
+        var previewContainer = document.getElementById('prod_picture_preview_container');
+        if (previewContainer) previewContainer.remove();
+
+        if (product.prod_picture) {
+            var container = document.createElement('div');
+            container.id = 'prod_picture_preview_container';
+            container.className = 'mt-2 flex items-center gap-4';
+            
+            var img = document.createElement('img');
+            img.src = product.prod_picture.startsWith('http') || product.prod_picture.startsWith('/') ? product.prod_picture : '/' + product.prod_picture;
+            img.className = 'w-16 h-16 object-cover rounded border';
+            
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'text-red-500 hover:text-red-700 text-sm';
+            removeBtn.innerText = 'Remove Picture';
+            removeBtn.onclick = function() {
+                removePictureFlag = true;
+                container.remove();
+            };
+
+            container.appendChild(img);
+            container.appendChild(removeBtn);
+            prodPicInput.parentNode.appendChild(container);
+        }
+    }
+
     if (vendorProductsElements.productModal && typeof vendorProductsElements.productModal.showModal === 'function') {
         vendorProductsElements.productModal.showModal();
     }
@@ -392,55 +455,87 @@ async function handleProductSubmit(e) {
     var form = vendorProductsElements.productForm;
     if (!form) return;
     var formData = new FormData(form);
-    var data = {};
-    formData.forEach(function (value, key) {
-        data[key] = value;
-    });
-    data.prod_vendor = CURRENT_VENDOR_ID;
-    data.prod_price = parseFloat(data.prod_price);
-    data.prod_stock = parseInt(data.prod_stock);
+    
+    formData.set('prod_vendor', CURRENT_VENDOR_ID);
+    
+    // Auto-fill Type with Vendor's Company Type
+    formData.set('prod_type', CURRENT_VENDOR_TYPE ? CURRENT_VENDOR_TYPE.toLowerCase() : '');
+
+    // Combine warranty fields
+    var wNum = document.getElementById('prod_warranty_num').value;
+    var wUnit = document.getElementById('prod_warranty_unit').value;
+    if (wNum) {
+        formData.set('prod_warranty', `${wNum} ${wUnit}`);
+    } else {
+        formData.set('prod_warranty', '');
+    }
+
     var id = document.getElementById('productId').value;
     var url = id ? PSM_PRODUCTS_API + '/' + id : PSM_PRODUCTS_API;
-    var method = id ? 'PUT' : 'POST';
+    
+    if (id) {
+        formData.append('_method', 'PUT');
+    }
+
+    if (removePictureFlag) {
+        formData.append('remove_picture', '1');
+    }
+
     try {
         var response = await fetch(url, {
-            method: method,
+            method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
                 'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include',
-            body: JSON.stringify(data)
+            body: formData
         });
         if (!response.ok) {
             throw new Error('HTTP ' + response.status + ': ' + response.statusText);
         }
         var result = await response.json();
         if (result.success) {
-            if (typeof showNotification === 'function') {
-                showNotification(result.message || 'Product saved successfully', 'success');
-            }
+            Toast.fire({
+                icon: 'success',
+                title: result.message || 'Product saved successfully'
+            });
             closeProductModal();
             await loadVendorProducts();
         } else {
             throw new Error(result.message || 'Failed to save product');
         }
     } catch (error) {
-        if (typeof showNotification === 'function') {
-            showNotification('Error saving product: ' + error.message, 'error');
-        } else {
-            console.error('Error saving product:', error);
-        }
+        Toast.fire({
+            icon: 'error',
+            title: 'Error saving product: ' + error.message
+        });
     }
 }
 
 function viewProduct(id) {
     var p = vendorProducts.find(function (x) { return String(x.id) === String(id); });
     if (!p) return;
+    
+    var imageHtml = '';
+    if (p.prod_picture) {
+        var imgSrc = p.prod_picture.startsWith('http') || p.prod_picture.startsWith('/') ? p.prod_picture : '/' + p.prod_picture;
+        imageHtml = `<div class="mb-4 text-center">
+            <img src="${imgSrc}" alt="${p.prod_name}" class="max-w-full h-auto max-h-64 mx-auto rounded-lg shadow-md object-contain">
+        </div>`;
+    } else {
+        imageHtml = `<div class="mb-4 text-center">
+            <div class="flex flex-col items-center justify-center p-8 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
+                <i class='bx bx-image text-4xl text-gray-400 mb-2'></i>
+                <span class="text-sm text-gray-500">No image available</span>
+            </div>
+        </div>`;
+    }
+
     var html = `
+        ${imageHtml}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><span class="text-sm text-gray-500">Product ID</span><p class="font-semibold">${p.prod_id || ''}</p></div>
             <div><span class="text-sm text-gray-500">Name</span><p class="font-semibold">${p.prod_name || ''}</p></div>
@@ -448,9 +543,8 @@ function viewProduct(id) {
             <div><span class="text-sm text-gray-500">Stock</span><p class="font-semibold">${p.prod_stock ?? ''}</p></div>
             <div><span class="text-sm text-gray-500">Type</span><p class="font-semibold capitalize">${p.prod_type || ''}</p></div>
             <div><span class="text-sm text-gray-500">Warranty</span><p class="font-semibold">${p.prod_warranty || ''}</p></div>
-            <div><span class="text-sm text-gray-500">Expiration</span><p class="font-semibold">${p.prod_expiration || ''}</p></div>
-            <div><span class="text-sm text-gray-500">Module From</span><p class="font-semibold">${p.prod_module_from || ''}</p></div>
-            <div><span class="text-sm text-gray-500">Submodule From</span><p class="font-semibold">${p.prod_submodule_from || ''}</p></div>
+            <div><span class="text-sm text-gray-500">Expiration</span><p class="font-semibold">${p.prod_expiration ? String(p.prod_expiration).split('T')[0] : 'None'}</p></div>
+            <div><span class="text-sm text-gray-500">Updated At</span><p class="font-semibold">${p.updated_at ? new Date(p.updated_at).toLocaleString() : ''}</p></div>
         </div>
         <div class="mt-4">
             <span class="text-sm text-gray-500">Description</span>
@@ -508,19 +602,19 @@ async function deleteProduct(id) {
         }
         var result = await response.json();
         if (result.success) {
-            if (typeof showNotification === 'function') {
-                showNotification(result.message || 'Product deleted successfully', 'success');
-            }
+            Toast.fire({
+                icon: 'success',
+                title: result.message || 'Product deleted successfully'
+            });
             await loadVendorProducts();
         } else {
             throw new Error(result.message || 'Failed to delete product');
         }
     } catch (error) {
-        if (typeof showNotification === 'function') {
-            showNotification('Error deleting product: ' + error.message, 'error');
-        } else {
-            console.error('Error deleting product:', error);
-        }
+        Toast.fire({
+            icon: 'error',
+            title: 'Error deleting product: ' + error.message
+        });
     }
 }
 

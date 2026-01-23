@@ -163,7 +163,7 @@ class PSMRepository
      */
     public function getVendorProducts($venId)
     {
-        return Product::where('prod_vendor', $venId)->get();
+        return Product::where('prod_vendor', $venId)->orderBy('id', 'desc')->get();
     }
 
     public function getQuotes()
@@ -247,6 +247,14 @@ class PSMRepository
     public function createProduct($data)
     {
         return Product::create($data);
+    }
+
+    /**
+     * Get product by ID
+     */
+    public function getProduct($id)
+    {
+        return Product::find($id);
     }
 
     /**

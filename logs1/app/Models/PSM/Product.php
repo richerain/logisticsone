@@ -25,6 +25,7 @@ class Product extends Model
         'prod_warranty',
         'prod_expiration',
         'prod_desc',
+        'prod_picture',
         'prod_module_from',
         'prod_submodule_from',
     ];

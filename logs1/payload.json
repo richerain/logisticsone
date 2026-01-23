@@ -1,0 +1,8 @@
+{
+  "prod_vendor": "VEND00001",
+  "prod_name": "Test Product",
+  "prod_price": 100,
+  "prod_stock": 10,
+  "prod_type": "equipment",
+  "prod_desc": "Test description"
+}
