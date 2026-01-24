@@ -1,3 +1,28 @@
+<?php
+    $jwtToken = '';
+    if (auth()->check()) {
+        try {
+            $user = auth()->user();
+            $secret = config('app.key');
+            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+                $secret = base64_decode(substr($secret, 7));
+            }
+            
+            $payload = [
+                'iss' => config('app.url') ?? 'logs1',
+                'sub' => $user->id,
+                'email' => $user->email,
+                'roles' => $user->roles,
+                'iat' => time(),
+                'exp' => time() + (60 * 60 * 2)
+            ];
+            
+            $jwtToken = \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
+        } catch (\Exception $e) {
+            // Silently fail, fallback to localStorage
+        }
+    }
+?>
 <!-- resources/views/psm/vendor-management.blade.php -->
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
@@ -69,17 +94,21 @@
 
 </div>
 
-<div id="viewVendorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Vendor Details</h3>
-            <button id="closeViewVendorModal" class="text-gray-500 hover:text-gray-700">
+<div id="viewVendorModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center hidden z-50 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl transform transition-all flex flex-col">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center shrink-0">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class='bx bxs-user-detail'></i> <span id="viewVendorTitle">Vendor Details</span>
+            </h3>
+            <button id="closeViewVendorModal" class="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10">
                 <i class='bx bx-x text-2xl'></i>
             </button>
         </div>
-        <div id="viewVendorContent" class="space-y-2"></div>
+        <div class="p-6 overflow-y-auto bg-gray-50 flex-grow">
+            <div id="viewVendorContent" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"></div>
+        </div>
     </div>
-    </div>
+</div>
 
 <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50" style="z-index: 60">
     <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -142,19 +171,37 @@
         </form>
     </div>
 </div>
-<div id="viewProductsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Vendor Products</h3>
-            <div class="flex items-center gap-3">
-                <button id="closeViewProductsModal" class="text-gray-500 hover:text-gray-700">
-                    <i class='bx bx-x text-2xl'></i>
-                </button>
-            </div>
+<div id="viewProductsModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl transform transition-all flex flex-col">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center shrink-0">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class='bx bxs-layer'></i> Vendor Products
+            </h3>
+            <button id="closeViewProductsModal" class="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
         </div>
-        <div id="viewProductsContent" class="space-y-2"></div>
+        <div class="p-6 overflow-y-auto bg-gray-50 flex-grow">
+            <div id="viewProductsContent" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"></div>
+        </div>
     </div>
+</div>
+
+<div id="viewProductModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-[60] backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl transform transition-all flex flex-col">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center shrink-0">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class='bx bxs-package'></i> Product Details
+            </h3>
+            <button id="closeViewProductModal" class="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto bg-gray-50 flex-grow">
+            <div id="viewProductContent" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"></div>
+        </div>
     </div>
+</div>
 
 <script>
 // API Configuration
@@ -162,9 +209,10 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var APP_URL = typeof APP_URL !== 'undefined' ? APP_URL : '<?php echo url('/'); ?>';
 var PSM_VENDORS_API = typeof PSM_VENDORS_API !== 'undefined' ? PSM_VENDORS_API : `${API_BASE_URL}/psm/vendor-management`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
+var JWT_TOKEN = '<?php echo $jwtToken; ?>' || (typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt'));
 
 var currentVendors = typeof currentVendors !== 'undefined' ? currentVendors : [];
+window.currentVendorProducts = [];
 let currentVendorsPage = 1;
 const vendorsPageSize = 4;
 
@@ -224,12 +272,38 @@ function initializeEventListeners() {
             }
         });
     }
+    
+    // View Product Modal Listeners
+    const closeViewProductModalBtn = document.getElementById('closeViewProductModal');
+    const viewProductModal = document.getElementById('viewProductModal');
+    if (closeViewProductModalBtn) closeViewProductModalBtn.addEventListener('click', closeViewProductModal);
+    if (viewProductModal) {
+        viewProductModal.addEventListener('click', function(e) {
+            if (e.target === viewProductModal) {
+                closeViewProductModal();
+            }
+        });
+    }
+
     if (closeProductModalBtn) closeProductModalBtn.addEventListener('click', closeProductModal);
     if (cancelProductModalBtn) cancelProductModalBtn.addEventListener('click', closeProductModal);
     if (productForm) productForm.addEventListener('submit', handleProductSubmit);
 }
 
 async function loadVendors() {
+    // Show loading state in grid
+    const grid = document.getElementById('vendorsGrid');
+    if (grid) {
+        grid.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-20 min-h-[300px]">
+                <div class="relative mb-4">
+                    <div class="absolute inset-0 bg-gray-600 rounded-full animate-ping opacity-75"></div>
+                    <i class='bx bx-loader-alt bx-spin text-5xl text-gray-600 relative z-10'></i>
+                </div>
+                <p class="text-lg font-semibold text-gray-600 animate-pulse">Loading Vendors...</p>
+            </div>
+        `;
+    }
     showLoading();
     
     const params = new URLSearchParams();
@@ -422,24 +496,83 @@ document.getElementById('vendorsPager').addEventListener('click', function(ev){
 function viewVendor(id) {
     const vendor = currentVendors.find(v => v.id == id);
     if (!vendor) return;
+
+    // Update Modal Title
+    const titleEl = document.getElementById('viewVendorTitle');
+    if (titleEl) titleEl.textContent = `Vendor Details: ${vendor.ven_company_name}`;
+
     const content = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><span class="text-sm text-gray-500">Vendor ID</span><p class="font-semibold">${vendor.ven_id}</p></div>
-            <div><span class="text-sm text-gray-500">Company</span><p class="font-semibold">${vendor.ven_company_name}</p></div>
-            <div><span class="text-sm text-gray-500">Contact</span><p class="font-semibold">${vendor.ven_contact_person}</p></div>
-            <div><span class="text-sm text-gray-500">Email</span><p class="font-semibold">${vendor.ven_email}</p></div>
-            <div><span class="text-sm text-gray-500">Phone</span><p class="font-semibold">${vendor.ven_phone}</p></div>
-            <div><span class="text-sm text-gray-500">Type</span><p class="font-semibold capitalize">${vendor.ven_type}</p></div>
-            <div><span class="text-sm text-gray-500">Rating</span><p class="font-semibold">${vendor.ven_rating}</p></div>
-            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold capitalize">${vendor.ven_status}</p></div>
-        </div>
-        <div class="mt-4">
-            <span class="text-sm text-gray-500">Address</span>
-            <p class="font-semibold">${vendor.ven_address}</p>
-        </div>
-        <div class="mt-4">
-            <span class="text-sm text-gray-500">Description</span>
-            <p class="font-semibold">${vendor.ven_desc || ''}</p>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div class="col-span-full flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
+                 ${vendor.ven_picture 
+                    ? `<img src="${APP_URL}/${vendor.ven_picture}" class="w-20 h-20 rounded-full border-4 border-gray-100 object-cover shadow-sm">`
+                    : `<div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center border-4 border-gray-100 shadow-sm"><i class='bx bxs-business text-4xl text-blue-500'></i></div>`
+                }
+                <div>
+                    <h4 class="text-2xl font-bold text-gray-900 tracking-tight">${vendor.ven_company_name}</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold capitalize border border-blue-100">${vendor.ven_type}</span>
+                        <span class="text-sm text-gray-400">•</span>
+                        <span class="text-sm font-medium text-gray-600">${vendor.ven_email}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Contact Person</label>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
+                        <div class="p-2 bg-white rounded-full text-blue-500 shadow-sm"><i class='bx bx-user'></i></div>
+                        <span class="font-semibold text-gray-700">${vendor.ven_contact_person}</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Phone Number</label>
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
+                        <div class="p-2 bg-white rounded-full text-blue-500 shadow-sm"><i class='bx bx-phone'></i></div>
+                        <span class="font-semibold text-gray-700">${vendor.ven_phone}</span>
+                    </div>
+                </div>
+                 <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Rating</label>
+                    <div class="flex items-center gap-1 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                        <div class="flex text-amber-400">
+                            ${Array.from({length: 5}, (_, i) => `
+                                <i class='bx ${i < vendor.ven_rating ? 'bxs-star' : 'bx-star text-gray-300'} text-lg'></i>
+                            `).join('')}
+                        </div>
+                        <span class="text-sm text-gray-500 ml-2 font-medium">(${vendor.ven_rating} / 5)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Address</label>
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 h-full hover:border-blue-200 transition-colors">
+                        <div class="p-2 bg-white rounded-full text-blue-500 shadow-sm shrink-0"><i class='bx bx-map'></i></div>
+                        <span class="font-medium text-gray-700 leading-relaxed">${vendor.ven_address}</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Status</label>
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold capitalize ${
+                            vendor.ven_status === 'active' ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20' : 'bg-red-100 text-red-700 ring-1 ring-red-600/20'
+                        }">
+                            <i class='bx bxs-circle text-xs mr-2'></i>
+                            ${vendor.ven_status}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="md:col-span-2 pt-4 border-t border-gray-100">
+                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Description</label>
+                 <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                    <p class="text-gray-600 text-sm leading-relaxed">${vendor.ven_desc || 'No description provided for this vendor.'}</p>
+                 </div>
+            </div>
         </div>
     `;
     const container = document.getElementById('viewVendorContent');
@@ -473,9 +606,97 @@ async function viewVendorProducts(venId) {
         }
         const result = await response.json();
         const products = result.data || [];
+        window.currentVendorProducts = products;
         const html = products.length === 0
-            ? `<div class=\"text-center text-gray-500\">No products found for this vendor.</div>`
-            : `<div class=\"overflow-x-auto\"><table class=\"min-w-full divide-y divide-gray-200\">\n                <thead class=\"bg-gray-50\">\n                    <tr>\n                        <th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Product</th>\n                        <th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Price</th>\n                        <th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Stock</th>\n                        <th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Type</th>\n                        <th class=\"px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider\">Actions</th>\n                    </tr>\n                </thead>\n                <tbody class=\"bg-white divide-y divide-gray-200\">\n                    ${products.map(p => `\n                        <tr>\n                            <td class=\"px-6 py-4\">${p.prod_name}</td>\n                            <td class=\"px-6 py-4\">${formatCurrency(p.prod_price)}</td>\n                            <td class=\"px-6 py-4\">${p.prod_stock}</td>\n                            <td class=\"px-6 py-4 capitalize\">${p.prod_type}</td>\n                            <td class=\"px-6 py-4\">\n                                <button class=\"text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50\" onclick=\"editProduct(${p.id})\" title=\"Edit Product\">\n                                    <i class='bx bx-edit-alt text-xl'></i>\n                                </button>\n                                <button class=\"text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50\" onclick=\"deleteProduct(${p.id})\" title=\"Delete Product\">\n                                    <i class='bx bx-trash text-xl'></i>\n                                </button>\n                            </td>\n                        </tr>\n                    `).join('')}\n                </tbody>\n            </table></div>`;
+            ? `<div class="p-12 text-center">
+                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">
+                    <i class='bx bx-package text-5xl text-gray-300'></i>
+                 </div>
+                 <p class="text-gray-500 text-lg font-medium">No products found for this vendor.</p>
+               </div>`
+            : `<div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-900">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Product</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Price</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Stock</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Type</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${products.map(p => {
+                            let typeClass = 'bg-gray-100 text-gray-800';
+                            let typeIcon = 'bx-box';
+                            
+                            switch ((p.prod_type || '').toLowerCase()) {
+                                case 'equipment':
+                                    typeClass = 'bg-blue-100 text-blue-800';
+                                    typeIcon = 'bx-wrench';
+                                    break;
+                                case 'supplies':
+                                    typeClass = 'bg-emerald-100 text-emerald-800';
+                                    typeIcon = 'bx-package';
+                                    break;
+                                case 'furniture':
+                                    typeClass = 'bg-amber-100 text-amber-800';
+                                    typeIcon = 'bx-chair';
+                                    break;
+                                case 'automotive':
+                                    typeClass = 'bg-red-100 text-red-800';
+                                    typeIcon = 'bx-car';
+                                    break;
+                                default:
+                                    if (p.prod_type === 'perishable') {
+                                        typeClass = 'bg-rose-100 text-rose-800';
+                                        typeIcon = 'bx-timer';
+                                    } else if (p.prod_type === 'non-perishable') {
+                                        typeClass = 'bg-teal-100 text-teal-800';
+                                        typeIcon = 'bx-cube';
+                                    }
+                                    break;
+                            }
+                            
+                            const imgSrc = p.prod_picture ? `${APP_URL}/${p.prod_picture}` : null;
+                            const imgHtml = imgSrc 
+                                ? `<img src="${imgSrc}" class="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm" alt="${p.prod_name}">`
+                                : `<div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center text-gray-300 border border-gray-200"><i class='bx bx-image text-2xl'></i></div>`;
+
+                            return `
+                                <tr class="hover:bg-gray-50 transition-colors group">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-4">
+                                            ${imgHtml}
+                                            <div>
+                                                <div class="font-semibold text-gray-900">${p.prod_name}</div>
+                                                <div class="text-xs text-gray-500 mt-0.5">ID: #${p.id}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-bold text-green-600">${formatCurrency(p.prod_price)}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-700 font-medium">${p.prod_stock} <span class="text-gray-400 text-xs font-normal">units</span></div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${typeClass}">
+                                            <i class='bx ${typeIcon} mr-1.5'></i>
+                                            ${p.prod_type}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <button onclick="viewProduct(${p.id})" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors shadow-sm" title="View Product">
+                                            <i class='bx bx-show-alt text-xl'></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>`;
         if (container) container.innerHTML = html;
         if (modal) modal.classList.remove('hidden');
     } catch (error) {
@@ -488,18 +709,107 @@ function closeViewProductsModal() {
     if (modal) modal.classList.add('hidden');
 }
 
-function openEditProductModal(product) {
-    document.getElementById('productModalTitle').textContent = 'Edit Product';
-    document.getElementById('productId').value = product.id;
-    document.getElementById('prod_vendor').value = product.prod_vendor;
-    document.getElementById('prod_name').value = product.prod_name;
-    document.getElementById('prod_price').value = product.prod_price;
-    document.getElementById('prod_stock').value = product.prod_stock;
-    document.getElementById('prod_type').value = product.prod_type;
-    document.getElementById('prod_warranty').value = product.prod_warranty || '';
-    document.getElementById('prod_expiration').value = product.prod_expiration ? product.prod_expiration.substring(0,10) : '';
-    document.getElementById('prod_desc').value = product.prod_desc || '';
-    document.getElementById('productModal').classList.remove('hidden');
+function viewProduct(id) {
+    const product = window.currentVendorProducts.find(p => p.id == id);
+    if (!product) return;
+
+    const modal = document.getElementById('viewProductModal');
+    const container = document.getElementById('viewProductContent');
+    
+    // Determine type styling
+    let typeClass = 'bg-gray-100 text-gray-800';
+    let typeIcon = 'bx-box';
+    let typeLabel = product.prod_type || 'Unknown';
+
+    switch ((product.prod_type || '').toLowerCase()) {
+        case 'equipment':
+            typeClass = 'bg-blue-100 text-blue-800';
+            typeIcon = 'bx-wrench';
+            break;
+        case 'supplies':
+            typeClass = 'bg-emerald-100 text-emerald-800';
+            typeIcon = 'bx-package';
+            break;
+        case 'furniture':
+            typeClass = 'bg-amber-100 text-amber-800';
+            typeIcon = 'bx-chair';
+            break;
+        case 'automotive':
+            typeClass = 'bg-red-100 text-red-800';
+            typeIcon = 'bx-car';
+            break;
+        default:
+            if (product.prod_type === 'perishable') {
+                typeClass = 'bg-rose-100 text-rose-800';
+                typeIcon = 'bx-timer';
+            } else if (product.prod_type === 'non-perishable') {
+                typeClass = 'bg-teal-100 text-teal-800';
+                typeIcon = 'bx-cube';
+            }
+            break;
+    }
+
+    const imgSrc = product.prod_picture ? `${APP_URL}/${product.prod_picture}` : null;
+    const imgHtml = imgSrc 
+        ? `<img src="${imgSrc}" class="w-full h-64 object-cover rounded-xl shadow-sm mb-6" alt="${product.prod_name}">`
+        : `<div class="w-full h-64 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-6 border-2 border-dashed border-gray-200"><i class='bx bx-image text-6xl'></i></div>`;
+
+    const html = `
+        <div class="space-y-6">
+            ${imgHtml}
+            
+            <div class="flex justify-between items-start gap-4">
+                <div>
+                    <h4 class="text-2xl font-bold text-gray-900">${product.prod_name}</h4>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${typeClass}">
+                            <i class='bx ${typeIcon} mr-1.5'></i>
+                            ${typeLabel}
+                        </span>
+                        <span class="text-sm text-gray-500">ID: #${product.id}</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-green-600">${formatCurrency(product.prod_price)}</div>
+                    <div class="text-sm text-gray-500 font-medium mt-1">
+                        ${product.prod_stock} <span class="font-normal">in stock</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Warranty</label>
+                    <div class="font-medium text-gray-700 flex items-center gap-2">
+                        <i class='bx bx-shield-quarter text-blue-500'></i>
+                        ${product.prod_warranty || 'No warranty info'}
+                    </div>
+                </div>
+                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Expiration</label>
+                    <div class="font-medium text-gray-700 flex items-center gap-2">
+                        <i class='bx bx-calendar-exclamation text-orange-500'></i>
+                        ${product.prod_expiration ? new Date(product.prod_expiration).toLocaleDateString() : 'N/A'}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Description</label>
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                    <p class="text-gray-600 text-sm leading-relaxed whitespace-pre-line">${product.prod_desc || 'No description provided.'}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (container) container.innerHTML = html;
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeViewProductModal() {
+    const modal = document.getElementById('viewProductModal');
+    if (modal) modal.classList.add('hidden');
 }
 
 function closeProductModal() {
@@ -546,68 +856,7 @@ async function handleProductSubmit(e) {
     }
 }
 
-async function editProduct(id) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/psm/product-management`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include'
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        const result = await response.json();
-        const product = (result.data || []).find(p => p.id == id);
-        if (!product) return;
-        openEditProductModal(product);
-    } catch (error) {
-        showNotification('Error loading product: ' + error.message, 'error');
-    }
-}
 
-async function deleteProduct(id) {
-    const confirmResult = await Swal.fire({
-        title: 'Delete Product?',
-        text: 'Are you sure you want to delete this product?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true
-    });
-    if (!confirmResult.isConfirmed) return;
-    try {
-        const response = await fetch(`${API_BASE_URL}/psm/product-management/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include'
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        const result = await response.json();
-        if (result.success) {
-            showNotification(result.message, 'success');
-            const venIdField = document.getElementById('prod_vendor');
-            const venId = venIdField && venIdField.value ? venIdField.value : null;
-            if (venId) await viewVendorProducts(venId);
-        } else {
-            throw new Error(result.message || 'Failed to delete product');
-        }
-    } catch (error) {
-        showNotification('Error deleting product: ' + error.message, 'error');
-    }
-}
 
 function formatCurrency(value) {
     const num = Number(value || 0);
@@ -617,8 +866,7 @@ function formatCurrency(value) {
 
 window.viewVendor = viewVendor;
 window.viewVendorProducts = viewVendorProducts;
-window.editProduct = editProduct;
-window.deleteProduct = deleteProduct;
+window.viewProduct = viewProduct;
 
 // Utility Functions
 function debounce(func, wait) {

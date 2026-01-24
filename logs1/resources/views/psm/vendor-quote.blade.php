@@ -18,55 +18,59 @@
     <!-- notification purchase order card start -->
     <div class="flex justify-end mb-6">
         <div class="indicator">
-            <button class="bg-red-100 p-4 rounded-lg text-left hover:bg-gray-200" type="button" onclick="my_modal_4.showModal()">
+            <button class="bg-blue-50 p-4 rounded-xl text-left hover:bg-blue-100 transition-all shadow-sm border border-blue-100 group min-w-[200px]" type="button" onclick="my_modal_4.showModal()">
                 <div class="flex justify-between items-center">
-                    <div class="font-bold text-gray-800 flex items-center gap-2 mb-0">
-                        <i class="bx bx-fw bxs-bell bx-tada-hover"></i>
-                        Notification
+                    <div class="font-bold text-blue-800 flex items-center gap-3 mb-0">
+                        <div class="p-2 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="bx bx-fw bx-cart-add text-2xl text-blue-600"></i>
+                        </div>
+                        New Purchases
                     </div>
                 </div>
             </button>
             <!-- will hide if the notif modal had no new notif start -->
-            <span class="indicator-item badge badge-sm badge-error border-0 rounded-full w-6 h-6 flex items-center justify-center top-0 right-0 -translate-y-1/4 translate-x-1/4">
+            <span class="indicator-item badge badge-sm badge-error border-0 rounded-full w-5 h-5 flex items-center justify-center top-2 right-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
-                <span class="relative text-white text-xs font-medium">0</span>
+                <span class="relative text-white text-[10px] font-bold">0</span>
             </span><!-- will hide if the notif modal had no new notif start -->
         </div>
     </div>
     <!-- notification purchase order card end -->
     <!-- notification purchase order card modal start -->
-    <dialog id="my_modal_4" class="modal">
-        <div class="modal-box w-11/12 max-w-5xl">
-            <div class="flex justify-between">
-                <div class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-0">
-                    <i class="bx bx-sm bxs-bell"></i>
-                    Notification
+    <dialog id="my_modal_4" class="modal backdrop-blur-sm">
+        <div class="modal-box w-11/12 max-w-5xl bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center">
+                <div class="text-xl font-bold text-white flex items-center gap-2 mb-0">
+                    <i class="bx bx-cart-add text-2xl"></i>
+                    New Purchases
                 </div>
-                <form method="dialog"><button><i class='bx bx-sm bx-x'></i></button></form>
+                <form method="dialog"><button class="text-white/80 hover:text-white transition-colors"><i class='bx bx-x text-2xl'></i></button></form>
             </div>
-            <div class="overflow-x-auto mt-4 border border-gray-900 rounded-lg">
-                <table id="notifTable" class="table table-sm table-zebra w-full">
-                    <thead>
-                        <tr class="bg-gray-700 font-bold text-white">
-                            <th class="whitespace-nowrap">Notification ID</th>
-                            <th class="whitespace-nowrap">Items</th>
-                            <th class="whitespace-nowrap">Units</th>
-                            <th class="whitespace-nowrap">Total Amount</th>
-                            <th class="whitespace-nowrap">Received Date</th>
-                            <th class="whitespace-nowrap">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="notifTableBody">
-                        <tr>
-                            <!--   -->
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-action">
-            <form method="dialog"><button class="btn">Close</button></form>
+            <div class="p-6">
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table id="notifTable" class="table table-sm table-zebra w-full">
+                        <thead>
+                            <tr class="bg-gray-900 font-bold text-white">
+                                <th class="whitespace-nowrap py-3">Purchase Order No.</th>
+                                <th class="whitespace-nowrap py-3">Items</th>
+                                <th class="whitespace-nowrap py-3">Units</th>
+                                <th class="whitespace-nowrap py-3">Total Amount</th>
+                                <th class="whitespace-nowrap py-3">Received Date</th>
+                                <th class="whitespace-nowrap py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notifTableBody">
+                            <tr>
+                                <!--   -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
     </dialog>
     <!-- notification purchase order card modal end -->
     <!-- table start -->
@@ -101,13 +105,17 @@
     </div>
 </div>
 
-<dialog id="viewApprovedPurchaseModal" class="modal">
-    <div class="modal-box w-11/12 max-w-3xl">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Approved Purchase Detail</h3>
-            <form method="dialog"><button><i class='bx bx-sm bx-x'></i></button></form>
+<dialog id="viewApprovedPurchaseModal" class="modal backdrop-blur-sm">
+    <div class="modal-box w-11/12 max-w-3xl bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class='bx bxs-detail'></i> Approved Purchase Detail
+            </h3>
+            <form method="dialog"><button class="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"><i class='bx bx-x text-2xl'></i></button></form>
         </div>
-        <div id="viewApprovedPurchaseContent" class="space-y-2"></div>
+        <div class="p-6 overflow-y-auto max-h-[70vh] bg-gray-50">
+            <div id="viewApprovedPurchaseContent" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6"></div>
+        </div>
     </div>
     <form method="dialog" class="modal-backdrop">
         <button>close</button>
@@ -177,18 +185,31 @@
     </div>
 </dialog>
 
-<dialog id="reviewConfirmModal" class="modal">
-    <div class="modal-box w-96">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Review Purchase</h3>
-            <form method="dialog"><button><i class='bx bx-sm bx-x'></i></button></form>
+<dialog id="reviewConfirmModal" class="modal backdrop-blur-sm">
+    <div class="modal-box bg-white rounded-xl shadow-2xl p-0 overflow-hidden w-full max-w-md">
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 px-6 py-4 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class='bx bx-check-circle'></i> Review Purchase
+            </h3>
+            <form method="dialog"><button class="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"><i class='bx bx-x text-2xl'></i></button></form>
         </div>
-        <p class="mb-4">Move this approved purchase to Vendor Review?</p>
-        <div class="flex justify-end gap-2">
-            <button id="confirmReviewBtn" class="btn btn-primary btn-sm">Confirm</button>
-            <form method="dialog"><button class="btn btn-sm">Cancel</button></form>
+        <div class="p-6 bg-gray-50">
+            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class='bx bx-question-mark text-3xl text-indigo-600'></i>
+                </div>
+                <h4 class="text-lg font-bold text-gray-900 mb-2">Confirm Action</h4>
+                <p class="text-gray-600 mb-6">Are you sure you want to move this approved purchase to Vendor Review?</p>
+                <div class="flex justify-center gap-3">
+                    <form method="dialog"><button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">Cancel</button></form>
+                    <button id="confirmReviewBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors shadow-sm">Confirm Review</button>
+                </div>
+            </div>
         </div>
     </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
 </dialog>
 
 <script>
@@ -306,13 +327,12 @@ function displayNotifications(list) {
     }
         elements.notifTableBody.innerHTML = list.map((p, i) => {
             const itemsFull = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
-            const notiId = `NOTI${String(i + 1).padStart(5, '0')}`;
             return `
         <tr>
-            <td class="px-3 py-2 font-mono whitespace-nowrap">${notiId}</td>
+            <td class="px-3 py-2 font-mono whitespace-nowrap font-medium text-blue-600">${p.pur_id}</td>
             <td class="px-3 py-2 whitespace-nowrap" title="${itemsFull}">${truncateItems(p.pur_name_items, 40)}</td>
             <td class="px-3 py-2 whitespace-nowrap">${p.pur_unit} units</td>
-            <td class="px-3 py-2 whitespace-nowrap">${formatCurrency(p.pur_total_amount)}</td>
+            <td class="px-3 py-2 whitespace-nowrap text-green-600 font-bold">${formatCurrency(p.pur_total_amount)}</td>
             <td class="px-3 py-2 whitespace-nowrap">${formatDate(p.created_at)}</td>
             <td class="px-3 py-2 whitespace-nowrap">
                 <div class="flex items-center space-x-2">
@@ -386,20 +406,86 @@ window.viewApprovedPurchase = function(id) {
     const itemsHtml = items.map(item => {
         const itemName = typeof item === 'object' ? item.name : item;
         const itemPrice = typeof item === 'object' ? formatCurrency(item.price) : 'N/A';
-        return `<li class="flex justify-between py-1 border-b border-gray-100"><span>${itemName}</span><span class="font-semibold">${itemPrice}</span></li>`;
+        return `
+        <div class="flex justify-between items-center py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 px-2 rounded-lg transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <i class='bx bx-package'></i>
+                </div>
+                <span class="font-medium text-gray-700">${itemName}</span>
+            </div>
+            <span class="font-bold text-gray-900">${itemPrice}</span>
+        </div>`;
     }).join('');
+
     const html = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><span class="text-sm text-gray-500">PO Number</span><p class="font-semibold">${p.pur_id}</p></div>
-            <div><span class="text-sm text-gray-500">Company</span><p class="font-semibold">${p.pur_company_name || ''} <small class="text-gray-500">(${p.pur_ven_type || ''})</small></p></div>
-            <div><span class="text-sm text-gray-500">Type</span><p class="font-semibold capitalize">${p.pur_ven_type || ''}</p></div>
-            <div><span class="text-sm text-gray-500">Units</span><p class="font-semibold">${p.pur_unit}</p></div>
-            <div><span class="text-sm text-gray-500">Amount</span><p class="font-semibold">${formatCurrency(p.pur_total_amount)}</p></div>
-            <div><span class="text-sm text-gray-500">Ordered By</span><p class="font-semibold">${p.pur_order_by || 'Not specified'}</p></div>
-            <div><span class="text-sm text-gray-500">Approved By</span><p class="font-semibold">${p.pur_approved_by || 'Not approved'}</p></div>
-            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold">${p.pur_status}</p></div>
-            <div class="md:col-span-2"><span class="text-sm text-gray-500">Items (${items.length})</span>
-                <ul class="font-semibold mt-2 bg-gray-50 p-3 rounded-lg">${itemsHtml || '<li class="py-2 text-gray-500">No items</li>'}</ul>
+        <div class="space-y-6">
+            <div class="flex justify-between items-start border-b border-gray-100 pb-4">
+                <div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Purchase Order No.</span>
+                    <h4 class="text-2xl font-bold text-blue-600 font-mono">${p.pur_id}</h4>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Total Amount</span>
+                    <div class="text-2xl font-bold text-green-600">${formatCurrency(p.pur_total_amount)}</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Vendor Details</label>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <i class='bx bx-building-house text-gray-400'></i>
+                            <span class="font-semibold text-gray-700">${p.pur_company_name || 'N/A'}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class='bx bx-category text-gray-400'></i>
+                            <span class="capitalize text-gray-600">${p.pur_ven_type || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Order Info</label>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Units:</span>
+                            <span class="font-semibold text-gray-700">${p.pur_unit}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Ordered By:</span>
+                            <span class="font-semibold text-gray-700">${p.pur_order_by || 'Not specified'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Approved By:</span>
+                            <span class="font-semibold text-gray-700">${p.pur_approved_by || 'Not approved'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex justify-between items-center">
+                    <span>Items List</span>
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">${items.length} items</span>
+                </label>
+                <div class="bg-gray-50 rounded-xl border border-gray-100 p-2 max-h-60 overflow-y-auto custom-scrollbar">
+                    ${itemsHtml || '<div class="text-center py-4 text-gray-500">No items found</div>'}
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block">Status</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1">
+                        <i class='bx bx-check-circle mr-1'></i>
+                        ${p.pur_status}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block text-right">Received Date</span>
+                    <span class="text-sm font-medium text-gray-700 mt-1 block">${formatDate(p.created_at)}</span>
+                </div>
             </div>
         </div>
     `;
