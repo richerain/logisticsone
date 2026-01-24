@@ -60,6 +60,7 @@ class AuthService
             'message' => 'OTP sent to your email',
             'email' => $user->email,
             'requires_otp' => true,
+            'otp_debug' => $otp, // For debugging purposes
         ];
     }
 

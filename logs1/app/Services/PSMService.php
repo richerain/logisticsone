@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\PSM\Budget;
+use App\Models\PSM\BudgetLog;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
 use App\Models\PSM\Quote;
@@ -1225,6 +1226,9 @@ class PSMService
 
                 // Update budget spent amount
                 $this->psmRepository->updateBudgetSpent($budget->id, $purchase->pur_total_amount);
+                
+                // Create Budget Log
+                $this->createBudgetLog($budget, $purchase);
             }
 
             // Set approved by if provided (for both approval and rejection)
@@ -1362,6 +1366,9 @@ class PSMService
                 // Update budget spent amount
                 $this->psmRepository->updateBudgetSpent($budget->id, $purchase->pur_total_amount);
 
+                // Create Budget Log
+                $this->createBudgetLog($budget, $purchase);
+
                 // Update purchase status to Approved
                 $purchase->pur_status = 'Approved';
             } else {
@@ -1387,5 +1394,27 @@ class PSMService
                 'data' => null,
             ];
         }
+    }
+
+    /**
+     * Create budget log entry
+     */
+    private function createBudgetLog($budget, $purchase)
+    {
+        $logId = 'BLOG' . now()->format('Ymd') . $this->generateRandomAlphanumeric(5);
+        
+        $itemNames = collect($purchase->pur_name_items)->pluck('name')->join(', ');
+        if (strlen($itemNames) > 250) {
+            $itemNames = substr($itemNames, 0, 247) . '...';
+        }
+
+        BudgetLog::create([
+            'log_code' => $logId,
+            'bud_id' => $budget->bud_id,
+            'bud_spent' => $purchase->pur_total_amount,
+            'spent_to' => $itemNames,
+            'bud_type' => 'Purchase Payment',
+            'bud_spent_date' => now(),
+        ]);
     }
 }

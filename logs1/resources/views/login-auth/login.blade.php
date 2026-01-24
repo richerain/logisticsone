@@ -432,6 +432,12 @@ function handleLogin() {
         console.log('Login response data:', data);
         if (data.success) {
             if (data.requires_otp) {
+                // For debugging/local development: Show OTP if email fails
+                if (data.otp_debug) {
+                    console.log('OTP Code:', data.otp_debug);
+                    // alert('Your OTP Code is: ' + data.otp_debug); // Uncomment if needed for visible alert
+                }
+                
                 // Redirect to OTP verification with email parameter
                 window.location.href = `/otp-verification?email=${encodeURIComponent(data.email)}`;
             } else {

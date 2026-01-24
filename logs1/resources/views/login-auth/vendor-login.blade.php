@@ -182,7 +182,21 @@ function handleLogin() {
         body: JSON.stringify({ email: email, password: password })
     })
     .then(response => { if (!response.ok) { return response.json().then(errorData => { throw new Error(errorData.message || `Login failed with status: ${response.status}`); }).catch(() => { throw new Error(`Login failed with status: ${response.status}`); }); } return response.json(); })
-    .then(data => { if (data.success) { if (data.requires_otp) { window.location.href = `/otp-verification?portal=vendor&email=${encodeURIComponent(data.email)}`; } else { window.location.href = '/vendor/splash-login'; } } else { throw new Error(data.message || 'Login failed. Please check your credentials and try again.'); } })
+    .then(data => { 
+        if (data.success) { 
+            if (data.requires_otp) { 
+                 // For debugging/local development: Show OTP if email fails
+                 if (data.otp_debug) {
+                     console.log('OTP Code:', data.otp_debug);
+                 }
+                window.location.href = `/otp-verification?portal=vendor&email=${encodeURIComponent(data.email)}`; 
+            } else { 
+                window.location.href = '/vendor/splash-login'; 
+            } 
+        } else { 
+            throw new Error(data.message || 'Login failed. Please check your credentials and try again.'); 
+        } 
+    })
     .catch(error => { const loginError = document.getElementById('login-error'); const loginErrorMessage = document.getElementById('login-error-message'); loginErrorMessage.textContent = error.message; loginError.classList.remove('hidden'); loginError.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => { loginError.classList.add('hidden'); }, 8000); })
     .finally(() => { loginBtn.disabled = false; loginText.textContent = 'Login'; loginSpinner.classList.add('hidden'); });
 }

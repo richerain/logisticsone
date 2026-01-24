@@ -41,6 +41,7 @@ class VendorAuthService
             'message' => 'OTP sent to your email',
             'email' => $vendor->email,
             'requires_otp' => true,
+            'otp_debug' => $otp, // For debugging purposes
         ];
     }
 

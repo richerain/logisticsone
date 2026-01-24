@@ -14,6 +14,7 @@ class BudgetLog extends Model
     protected $table = 'psm_budget_logs';
 
     protected $fillable = [
+        'log_code',
         'bud_id',
         'bud_spent',
         'spent_to',
