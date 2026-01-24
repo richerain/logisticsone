@@ -104,6 +104,7 @@ class PSMService
                             'price' => $product->prod_price,
                             'stock' => $product->prod_stock,
                             'type' => $product->prod_type,
+                            'picture' => $product->prod_picture,
                         ];
                     }),
                 ];

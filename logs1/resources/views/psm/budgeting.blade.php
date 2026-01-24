@@ -11,37 +11,37 @@
 <div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Stats Section -->
     <div id="statsSection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="bg-blue-50 rounded-xl shadow-sm p-6 border border-blue-100 hover:shadow-md transition-shadow">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Budget</p>
-                    <h3 class="text-2xl font-bold text-gray-900 mt-2" id="totalBudget">₱0.00</h3>
+                    <p class="text-xs font-semibold text-blue-500 uppercase tracking-wider">Total Budget</p>
+                    <h3 class="text-2xl font-bold text-blue-700 mt-2" id="totalBudget">₱0.00</h3>
                 </div>
-                <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
                     <i class='bx bx-wallet text-xl'></i>
                 </div>
             </div>
         </div>
         
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="bg-orange-50 rounded-xl shadow-sm p-6 border border-orange-100 hover:shadow-md transition-shadow">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Spent</p>
-                    <h3 class="text-2xl font-bold text-gray-900 mt-2" id="spentBudget">₱0.00</h3>
+                    <p class="text-xs font-semibold text-orange-500 uppercase tracking-wider">Spent</p>
+                    <h3 class="text-2xl font-bold text-orange-700 mt-2" id="spentBudget">₱0.00</h3>
                 </div>
-                <div class="p-2 bg-orange-50 rounded-lg text-orange-600">
+                <div class="p-2 bg-orange-100 rounded-lg text-orange-600">
                     <i class='bx bx-cart text-xl'></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="bg-green-50 rounded-xl shadow-sm p-6 border border-green-100 hover:shadow-md transition-shadow">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Remaining</p>
-                    <h3 class="text-2xl font-bold text-gray-900 mt-2" id="remainingBudget">₱0.00</h3>
+                    <p class="text-xs font-semibold text-green-500 uppercase tracking-wider">Remaining</p>
+                    <h3 class="text-2xl font-bold text-green-700 mt-2" id="remainingBudget">₱0.00</h3>
                 </div>
-                <div class="p-2 bg-green-50 rounded-lg text-green-600">
+                <div class="p-2 bg-green-100 rounded-lg text-green-600">
                     <i class='bx bx-pie-chart-alt-2 text-xl'></i>
                 </div>
             </div>
@@ -149,14 +149,14 @@
         <h3 class="text-md font-semibold text-gray-800 mb-4">Budget Logs</h3>
         <div class="overflow-x-auto rounded-lg border border-gray-200">
             <table class="min-w-full divide-y divide-gray-200" id="budgetLogsTable">
-                <thead class="bg-gray-100">
+                <thead class="bg-gray-800">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider whitespace-nowrap">Log ID</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider whitespace-nowrap">Spent Amount</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider whitespace-nowrap">Spent To</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider whitespace-nowrap">Type</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider whitespace-nowrap">Spent Date</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 capitalize tracking-wider whitespace-nowrap">Action</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 capitalize tracking-wider whitespace-nowrap">Log ID</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 capitalize tracking-wider whitespace-nowrap">Spent Amount</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 capitalize tracking-wider whitespace-nowrap">Spent To</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 capitalize tracking-wider whitespace-nowrap">Type</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 capitalize tracking-wider whitespace-nowrap">Spent Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-100 capitalize tracking-wider whitespace-nowrap">Action</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200" id="budgetLogsTableBody">
@@ -176,53 +176,83 @@
 
 <!-- Budget Log Details Modal -->
 <div id="budgetLogModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity" aria-hidden="true" onclick="closeBudgetLogModal()"></div>
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeBudgetLogModal()"></div>
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                        <i class='bx bx-file text-blue-600 text-xl'></i>
-                    </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                            Budget Log Details
-                        </h3>
-                        <div class="mt-4 space-y-3">
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2" id="modal-title">
+                        <i class='bx bx-file text-blue-600'></i> Budget Log Details
+                    </h3>
+                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" onclick="closeBudgetLogModal()">
+                        <span class="sr-only">Close</span>
+                        <i class='bx bx-x text-2xl'></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Primary Info -->
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <p class="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-1">Spent Amount</p>
+                            <p class="text-2xl font-bold text-blue-700" id="modalSpentAmount">-</p>
+                            <div class="mt-3 pt-3 border-t border-blue-100">
+                                <p class="text-xs text-blue-400 uppercase mb-1">Transaction Type</p>
+                                <div id="modalType" class="mt-1">
+                                    -
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date & Reference -->
+                        <div class="space-y-4">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Log ID</p>
-                                <p class="text-sm text-gray-900" id="modalLogId">-</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Log Reference ID</p>
+                                <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-100">
+                                    <i class='bx bx-hash text-gray-400'></i>
+                                    <span class="text-sm font-mono font-medium text-gray-700" id="modalLogId">-</span>
+                                </div>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Budget ID</p>
-                                <p class="text-sm text-gray-900" id="modalBudgetId">-</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Budget Source ID</p>
+                                <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-100">
+                                    <i class='bx bx-id-card text-gray-400'></i>
+                                    <span class="text-sm font-mono font-medium text-gray-700" id="modalBudgetId">-</span>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Spent Amount</p>
-                                <p class="text-sm font-bold text-orange-700" id="modalSpentAmount">-</p>
+                        </div>
+
+                        <!-- Detailed Info -->
+                        <div class="md:col-span-2 space-y-4">
+                             <div>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Spent On</p>
+                                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <p class="text-sm font-medium text-gray-900 break-words" id="modalSpentTo">-</p>
+                                </div>
                             </div>
+                            
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Spent To</p>
-                                <p class="text-sm text-gray-900 break-words" id="modalSpentTo">-</p>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Type</p>
-                                <div id="modalType">-</div>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Spent Date</p>
-                                <p class="text-sm text-gray-900" id="modalSpentDate">-</p>
+                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Transaction Date</p>
+                                <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div class="p-2 bg-white rounded-full shadow-sm text-gray-600">
+                                        <i class='bx bx-calendar-event text-lg'></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900" id="modalSpentDate">-</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">Date Recorded</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="closeBudgetLogModal()">
-                    Close
+            <div class="bg-gray-50 px-6 py-4 flex justify-end">
+                <button type="button" class="inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm" onclick="closeBudgetLogModal()">
+                    Close Details
                 </button>
             </div>
         </div>

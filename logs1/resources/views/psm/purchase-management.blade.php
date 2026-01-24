@@ -1,3 +1,28 @@
+<?php
+    $jwtToken = '';
+    if (auth()->check()) {
+        try {
+            $user = auth()->user();
+            $secret = config('app.key');
+            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+                $secret = base64_decode(substr($secret, 7));
+            }
+            
+            $payload = [
+                'iss' => config('app.url') ?? 'logs1',
+                'sub' => $user->id,
+                'email' => $user->email,
+                'roles' => $user->roles,
+                'iat' => time(),
+                'exp' => time() + (60 * 60 * 2)
+            ];
+            
+            $jwtToken = \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
+        } catch (\Exception $e) {
+            // Silently fail, fallback to localStorage
+        }
+    }
+?>
 <!-- resources/views/psm/purchase-management.blade.php -->
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
@@ -110,16 +135,16 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-800 font-bold text-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Purchase Order No.</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Items</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Company / Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Units</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Delivery</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ordered By</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Approved By</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Purchase Order No.</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Items</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Company / Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Units</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Delivery</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Ordered By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Approved By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="purchasesTableBody" class="bg-white divide-y divide-gray-200">
@@ -241,7 +266,7 @@
 
 <!-- View Purchase Modal -->
 <div id="viewPurchaseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-semibold">Purchase Order Details</h3>
             <button id="closeViewPurchaseModal" class="text-gray-500 hover:text-gray-700">
@@ -254,7 +279,7 @@
 
 <!-- Budget Approval Modal -->
 <div id="budgetApprovalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+    <div class="bg-white rounded-lg p-6 w-full max-w-4xl">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-semibold">Budget Approval</h3>
             <button id="closeBudgetApprovalModal" class="text-gray-500 hover:text-gray-700">
@@ -296,7 +321,7 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
 var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
+var JWT_TOKEN = '<?php echo $jwtToken; ?>' || (typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt'));
 
 var CURRENT_USER_NAME = '<?php echo e(auth()->check() ? trim((auth()->user()->firstname ?? '').' '.(auth()->user()->lastname ?? '')) : ''); ?>';
 var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? (auth()->user()->roles ?? '') : ''); ?>';
@@ -590,11 +615,18 @@ function populateAvailableItems() {
     availableItems.forEach(item => {
         const itemElement = document.createElement('div');
         itemElement.className = 'p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors';
+        const imageUrl = item.picture 
+            ? (item.picture.startsWith('storage/') ? `/${item.picture}` : `/storage/${item.picture}`)
+            : 'https://placehold.co/100x100?text=No+Image';
+        
         itemElement.innerHTML = `
             <div class="flex justify-between items-center">
-                <div>
-                    <h4 class="font-medium text-gray-900">${item.name}</h4>
-                    <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock}</p>
+                <div class="flex items-center gap-3">
+                    <img src="${imageUrl}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${item.name}</h4>
+                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock}</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" onclick="addItemToPurchase(${item.id})" 
@@ -626,11 +658,18 @@ function filterAvailableItems() {
     filteredItems.forEach(item => {
         const itemElement = document.createElement('div');
         itemElement.className = 'p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors';
+        const imageUrl = item.picture 
+            ? (item.picture.startsWith('storage/') ? `/${item.picture}` : `/storage/${item.picture}`)
+            : 'https://placehold.co/100x100?text=No+Image';
+        
         itemElement.innerHTML = `
             <div class="flex justify-between items-center">
-                <div>
-                    <h4 class="font-medium text-gray-900">${item.name}</h4>
-                    <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock}</p>
+                <div class="flex items-center gap-3">
+                    <img src="${imageUrl}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${item.name}</h4>
+                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock}</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" onclick="addItemToPurchase(${item.id})" 
@@ -657,7 +696,8 @@ function addItemToPurchase(itemId) {
         id: itemInstanceId,
         itemId: item.id,
         name: item.name,
-        price: item.price
+        price: item.price,
+        picture: item.picture
     });
     
     showNotification(`Added ${item.name} to purchase order`, 'success');
@@ -684,6 +724,7 @@ function updateSelectedItemsDisplay() {
                 itemCounts[item.itemId] = {
                     name: item.name,
                     price: item.price,
+                    picture: item.picture,
                     count: 0,
                     instances: []
                 };
@@ -692,13 +733,20 @@ function updateSelectedItemsDisplay() {
             itemCounts[item.itemId].instances.push(item.id);
         });
         
-        elements.selectedItemsContainer.innerHTML = Object.values(itemCounts).map(group => `
+        elements.selectedItemsContainer.innerHTML = Object.values(itemCounts).map(group => {
+            const imageUrl = group.picture 
+                ? (group.picture.startsWith('storage/') ? `/${group.picture}` : `/storage/${group.picture}`)
+                : 'https://placehold.co/100x100?text=No+Image';
+            return `
             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div>
-                    <h4 class="font-medium text-gray-900">${group.name}</h4>
-                    <p class="text-sm text-gray-600">
-                        ${formatCurrency(group.price)} each × ${group.count} = ${formatCurrency(group.price * group.count)}
-                    </p>
+                <div class="flex items-center gap-3">
+                    <img src="${imageUrl}" alt="${group.name}" class="w-12 h-12 object-cover rounded-md bg-white border border-gray-200" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${group.name}</h4>
+                        <p class="text-sm text-gray-600">
+                            ${formatCurrency(group.price)} each × ${group.count} = ${formatCurrency(group.price * group.count)}
+                        </p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-sm text-gray-600 bg-white px-2 py-1 rounded border">Qty: ${group.count}</span>
@@ -712,7 +760,7 @@ function updateSelectedItemsDisplay() {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
     
     // Update calculated fields
@@ -825,6 +873,7 @@ function displayPurchases(purchases) {
         const canApprove = purchase.pur_status === 'Pending';
         const isApproved = purchase.pur_status === 'Approved';
         const isCompleted = purchase.pur_status === 'Completed';
+        const isCancelled = purchase.pur_status === 'Cancel';
         const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
         
         const orderedByHtml = formatUserLabelDisplay(purchase.pur_order_by, 'Not specified');
@@ -857,7 +906,7 @@ function displayPurchases(purchases) {
             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                 ${purchase.pur_unit}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
                 ${formatCurrency(purchase.pur_total_amount)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -888,7 +937,7 @@ function displayPurchases(purchases) {
                             title="Budget Approval">
                         <i class='bx bx-check-shield text-xl'></i>
                     </button>` : ''}
-                    ${isApproved || isCompleted ? '' : `
+                    ${isApproved || isCompleted || isCancelled ? '' : `
                     <button onclick="editPurchase(${purchase.id})" 
                             class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
                             title="Edit Purchase">
@@ -1016,28 +1065,144 @@ function formatUserLabelDisplay(label, fallback) {
 }
 
 // Budget Approval Functions
-function openBudgetApproval(purchaseId) {
+async function openBudgetApproval(purchaseId) {
     const purchase = currentPurchases.find(p => p.id == purchaseId);
     if (!purchase) return;
-    
-    if (elements.budgetApprovalContent) {
-        elements.budgetApprovalContent.innerHTML = `
-            <div class="space-y-3">
-                <div class="bg-blue-50 p-3 rounded-lg">
-                    <h4 class="font-semibold text-blue-800">Purchase Details</h4>
-                    <p><strong>PO Number:</strong> ${purchase.pur_id}</p>
-                    <p><strong>Company:</strong> ${purchase.pur_company_name}</p>
-                    <p><strong>Ordered By:</strong> ${purchase.pur_order_by || 'Not specified'}</p>
-                    <p><strong>Total Amount:</strong> ${formatCurrency(purchase.pur_total_amount)}</p>
-                </div>
-            </div>
-        `;
-    }
     
     // Store the purchase ID for the approval/rejection handlers
     if (elements.budgetApprovalModal) {
         elements.budgetApprovalModal.dataset.purchaseId = purchaseId;
         elements.budgetApprovalModal.classList.remove('hidden');
+    }
+
+    // Reset and disable approve button initially while loading
+    if (elements.approveBudgetBtn) {
+        elements.approveBudgetBtn.disabled = true;
+        elements.approveBudgetBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    if (elements.budgetApprovalContent) {
+        elements.budgetApprovalContent.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading budget details...</div>';
+    }
+
+    try {
+        const response = await fetch('/api/v1/psm/budget-management/current', {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            }
+        });
+        
+        let budgetHtml = '';
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data) {
+                const budget = result.data;
+                const remaining = parseFloat(budget.bud_remaining_amount);
+                const purchaseAmount = parseFloat(purchase.pur_total_amount);
+                const newRemaining = remaining - purchaseAmount;
+                const isInsufficient = newRemaining < 0;
+                
+                // Update approve button state based on budget sufficiency
+                if (elements.approveBudgetBtn) {
+                    elements.approveBudgetBtn.disabled = isInsufficient;
+                    if (isInsufficient) {
+                        elements.approveBudgetBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        elements.approveBudgetBtn.title = "Insufficient Budget - Cannot Approve";
+                    } else {
+                        elements.approveBudgetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        elements.approveBudgetBtn.title = "Approve Budget";
+                    }
+                }
+
+                const colorClass = isInsufficient ? 'red' : 'green';
+                
+                budgetHtml = `
+                    <div class="bg-${colorClass}-50 p-4 rounded-lg h-full border border-${colorClass}-200">
+                        <h4 class="font-semibold text-${colorClass}-800 mb-4 text-lg border-b border-${colorClass}-200 pb-2">
+                            Budget Calculation
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-${colorClass}-700 font-medium">Remaining Budget</span>
+                                <span class="font-bold text-${colorClass}-900 text-lg">${formatCurrency(remaining)}</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center text-${colorClass}-600 pl-4 relative">
+                                <span class="absolute left-0 top-1/2 -translate-y-1/2 font-bold text-xl">-</span>
+                                <span class="ml-2">Item Total Amount</span>
+                                <span class="font-medium">${formatCurrency(purchaseAmount)}</span>
+                            </div>
+                            
+                            <div class="border-t-2 border-${colorClass}-300 pt-3 flex justify-between items-center">
+                                <span class="font-bold text-${colorClass}-800 text-lg">= Current Remaining Budget</span>
+                                <span class="font-bold text-${colorClass}-900 text-xl ${isInsufficient ? 'text-red-600' : ''}">${formatCurrency(newRemaining)}</span>
+                            </div>
+                        </div>
+                        
+                        ${isInsufficient ? `
+                            <div class="mt-6 p-3 bg-red-100 text-red-800 rounded-lg text-center font-bold flex items-center justify-center gap-2 border border-red-200">
+                                <i class='bx bx-error-circle text-xl'></i> 
+                                Insufficient Budget
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                budgetHtml = `<div class="bg-red-50 p-3 rounded-lg h-full text-red-800">Failed to load budget info</div>`;
+            }
+        } else {
+             budgetHtml = `<div class="bg-red-50 p-3 rounded-lg h-full text-red-800">Failed to load budget info</div>`;
+        }
+        
+        if (elements.budgetApprovalContent) {
+            elements.budgetApprovalContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm h-full">
+                        <h4 class="font-semibold text-gray-800 mb-4 text-lg border-b border-gray-100 pb-2">Purchase Details</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">PO Number:</span>
+                                <span class="font-medium text-gray-900">${purchase.pur_id}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Company:</span>
+                                <span class="font-medium text-gray-900">${purchase.pur_company_name}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Ordered By:</span>
+                                <span class="font-medium text-gray-900">${purchase.pur_order_by || 'Not specified'}</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-gray-100 mt-2">
+                                <span class="text-gray-800 font-semibold">Total Amount:</span>
+                                <span class="font-bold text-green-600 text-lg">${formatCurrency(purchase.pur_total_amount)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${budgetHtml}
+                </div>
+            `;
+        }
+
+    } catch (e) {
+        console.error("Error fetching budget", e);
+        if (elements.budgetApprovalContent) {
+             elements.budgetApprovalContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <h4 class="font-semibold text-blue-800">Purchase Details</h4>
+                        <p><strong>PO Number:</strong> ${purchase.pur_id}</p>
+                        <p><strong>Company:</strong> ${purchase.pur_company_name}</p>
+                        <p><strong>Ordered By:</strong> ${purchase.pur_order_by || 'Not specified'}</p>
+                        <p><strong>Total Amount:</strong> ${formatCurrency(purchase.pur_total_amount)}</p>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg">
+                        <p class="text-red-800">Error loading budget details.</p>
+                    </div>
+                </div>
+            `;
+        }
     }
 }
 
@@ -1174,6 +1339,13 @@ function openAddModal() {
     if (elements.purOrderBy && CURRENT_USER_LABEL) {
         elements.purOrderBy.value = CURRENT_USER_LABEL;
     }
+    
+    // Show company selection in add mode
+    if (elements.companySelect) {
+        const container = elements.companySelect.closest('.mb-4');
+        if (container) container.classList.remove('hidden');
+    }
+
     if (elements.itemsSection) elements.itemsSection.classList.add('hidden');
     clearSelectedItems();
     selectedVendor = null;
@@ -1189,7 +1361,19 @@ function openEditModal(purchase) {
     if (elements.purOrderBy) elements.purOrderBy.value = purchase.pur_order_by || '';
     
     // Set company
-    if (elements.companySelect) elements.companySelect.value = purchase.pur_company_name;
+    if (elements.companySelect) {
+        elements.companySelect.value = purchase.pur_company_name;
+        
+        // Manually set the selected vendor so adding items works
+        const selectedOption = Array.from(elements.companySelect.options).find(opt => opt.value === purchase.pur_company_name);
+        if (selectedOption) {
+            setSelectedVendor(selectedOption);
+        }
+
+        // Hide company selection in edit mode
+        const container = elements.companySelect.closest('.mb-4');
+        if (container) container.classList.add('hidden');
+    }
     
     // Set vendor type
     if (elements.vendorType) elements.vendorType.value = purchase.pur_ven_type;
@@ -1199,11 +1383,22 @@ function openEditModal(purchase) {
     selectedItems = items.map(item => {
         const itemName = typeof item === 'object' ? item.name : item;
         const itemPrice = typeof item === 'object' ? item.price : 0;
+        let itemPicture = typeof item === 'object' ? item.picture : null;
+        
+        // Try to find picture in availableItems if missing
+        if (!itemPicture && typeof availableItems !== 'undefined' && availableItems.length > 0) {
+            const foundItem = availableItems.find(i => i.name === itemName);
+            if (foundItem) {
+                itemPicture = foundItem.picture;
+            }
+        }
+        
         return {
-            id: Date.now() + Math.random(), // Generate temporary ID for existing items
-            itemId: Date.now() + Math.random(), // Generate temporary itemId
+            id: Date.now() + Math.random(), 
+            itemId: Date.now() + Math.random(), 
             name: itemName,
-            price: itemPrice
+            price: itemPrice,
+            picture: itemPicture
         };
     });
     
@@ -1246,7 +1441,8 @@ async function handlePurchaseSubmit(e) {
         pur_desc: elements.purDesc ? elements.purDesc.value : '',
         pur_name_items: selectedItems.map(item => ({
             name: item.name,
-            price: parseFloat(item.price)
+            price: parseFloat(item.price),
+            picture: item.picture
         }))
     };
     
@@ -1450,45 +1646,146 @@ async function deletePurchase(id) {
     }
 }
 
+function findProductPicture(productName) {
+    if (!activeVendors || activeVendors.length === 0) return null;
+    
+    for (const vendor of activeVendors) {
+        if (vendor.products && Array.isArray(vendor.products)) {
+            const product = vendor.products.find(p => p.name === productName);
+            if (product && product.picture) {
+                return product.picture;
+            }
+        }
+    }
+    return null;
+}
+
 function viewPurchase(id) {
     const purchase = currentPurchases.find(p => p.id == id);
     if (!purchase) return;
     
     const items = Array.isArray(purchase.pur_name_items) ? purchase.pur_name_items : [];
+    
     const itemsHtml = items.map(item => {
         const itemName = typeof item === 'object' ? item.name : item;
         const itemPrice = typeof item === 'object' ? formatCurrency(item.price) : 'N/A';
-        return `<li class="flex justify-between py-2 border-b border-gray-100">
-            <span>${itemName}</span>
-            <span class="font-semibold">${itemPrice}</span>
+        let itemPicture = typeof item === 'object' ? item.picture : null;
+        
+        // Try to find picture from active vendors if missing in the item itself
+        if (!itemPicture) {
+            itemPicture = findProductPicture(itemName);
+        }
+        
+        const imageUrl = itemPicture 
+            ? (itemPicture.startsWith('http') ? itemPicture : (itemPicture.startsWith('storage/') ? `/${itemPicture}` : (itemPicture.startsWith('/') ? itemPicture : `/storage/${itemPicture}`)))
+            : 'https://placehold.co/100x100?text=No+Image';
+
+        return `
+        <li class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors rounded-lg px-2">
+            <div class="flex-shrink-0 h-12 w-12">
+                <img src="${imageUrl}" alt="${itemName}" class="h-12 w-12 rounded-lg object-cover border border-gray-200 bg-white" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">
+                    ${itemName}
+                </p>
+            </div>
+            <div class="inline-flex items-center text-sm font-semibold text-gray-900">
+                ${itemPrice}
+            </div>
         </li>`;
     }).join('');
     
     const content = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><span class="text-sm text-gray-500">PO Number</span><p class="font-semibold">${purchase.pur_id}</p></div>
-            <div><span class="text-sm text-gray-500">Company</span><p class="font-semibold">${purchase.pur_company_name}</p></div>
-            <div><span class="text-sm text-gray-500">Vendor Type</span><p class="font-semibold capitalize">${purchase.pur_ven_type}</p></div>
-            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(purchase.pur_status)}">${purchase.pur_status}</span></p></div>
-            <div><span class="text-sm text-gray-500">Total Units</span><p class="font-semibold">${purchase.pur_unit}</p></div>
-            <div><span class="text-sm text-gray-500">Total Amount</span><p class="font-semibold">${formatCurrency(purchase.pur_total_amount)}</p></div>
-            <div><span class="text-sm text-gray-500">Ordered By</span><p class="font-semibold">${purchase.pur_order_by || 'Not specified'}</p></div>
-            <div><span class="text-sm text-gray-500">Approved By</span><p class="font-semibold">${purchase.pur_approved_by || 'Not approved'}</p></div>
-            <div><span class="text-sm text-gray-500">Department</span><p class="font-semibold">${purchase.pur_department_from || 'Logistics 1'}</p></div>
-            <div><span class="text-sm text-gray-500">Module</span><p class="font-semibold">${purchase.pur_module_from || 'Procurement & Sourcing Management'}</p></div>
-            <div><span class="text-sm text-gray-500">Submodule</span><p class="font-semibold">${purchase.pur_submodule_from || 'Purchase Management'}</p></div>
-            <div><span class="text-sm text-gray-500">Created</span><p class="font-semibold">${new Date(purchase.created_at).toLocaleDateString()}</p></div>
-            <div><span class="text-sm text-gray-500">Last Updated</span><p class="font-semibold">${new Date(purchase.updated_at).toLocaleDateString()}</p></div>
-        </div>
-        <div class="mt-4">
-            <span class="text-sm text-gray-500">Items (${items.length})</span>
-            <ul class="font-semibold mt-2 bg-gray-50 p-3 rounded-lg">
-                ${itemsHtml || '<li class="py-2 text-gray-500">No items</li>'}
-            </ul>
-        </div>
-        <div class="mt-4">
-            <span class="text-sm text-gray-500">Description</span>
-            <p class="font-semibold mt-1 bg-gray-50 p-3 rounded-lg">${purchase.pur_desc || 'No description provided'}</p>
+        <div class="space-y-6">
+            <!-- Header Status Banner -->
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <div>
+                    <span class="text-sm text-gray-500 block">Status</span>
+                    <span class="inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-sm font-medium ${getStatusBadgeClass(purchase.pur_status)}">
+                        ${purchase.pur_status}
+                    </span>
+                </div>
+                <div class="text-right">
+                    <span class="text-sm text-gray-500 block">Total Amount</span>
+                    <span class="text-xl font-bold text-green-600">${formatCurrency(purchase.pur_total_amount)}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Order Information -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Order Information</h4>
+                    <dl class="space-y-2">
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">PO Number</dt>
+                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_id}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">Company</dt>
+                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_company_name}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">Vendor Type</dt>
+                            <dd class="text-sm font-medium text-gray-900 capitalize">${purchase.pur_ven_type}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">Total Units</dt>
+                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_unit}</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Approval & Tracking -->
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tracking & Approval</h4>
+                    <dl class="space-y-2">
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">Ordered By</dt>
+                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_order_by || 'Not specified'}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">Approved By</dt>
+                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_approved_by || 'Not approved'}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">Created Date</dt>
+                            <dd class="text-sm font-medium text-gray-900">${new Date(purchase.created_at).toLocaleDateString()}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">Last Updated</dt>
+                            <dd class="text-sm font-medium text-gray-900">${new Date(purchase.updated_at).toLocaleDateString()}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Items Section -->
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Items (${items.length})</h4>
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <ul class="divide-y divide-gray-100">
+                        ${itemsHtml || '<li class="p-4 text-center text-gray-500">No items found</li>'}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            ${purchase.pur_desc ? `
+            <div>
+                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Description</h4>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700">
+                    ${purchase.pur_desc}
+                </div>
+            </div>
+            ` : ''}
+            
+            <!-- System Info -->
+            <div class="pt-4 border-t border-gray-100">
+                 <p class="text-xs text-gray-400">
+                    Source: ${purchase.pur_department_from || 'Logistics 1'} &bull; ${purchase.pur_module_from || 'Procurement & Sourcing Management'} &bull; ${purchase.pur_submodule_from || 'Purchase Management'}
+                 </p>
+            </div>
         </div>
     `;
     const container = document.getElementById('viewPurchaseContent');
