@@ -85,6 +85,7 @@ Route::get('/login', function (Request $request) {
                 'dashboard' => 'dashboard.index',
                 'psm-purchase' => 'psm.purchase-management',
                 'psm-vendor-management' => 'psm.vendor-management',
+                'psm-budgeting' => 'psm.budgeting',
                 'sws-inventory-flow' => 'sws.inventory-flow',
                 'sws-digital-inventory' => 'sws.digital-inventory',
                 'sws-warehouse-management' => 'sws.warehouse-management',

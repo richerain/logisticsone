@@ -92,17 +92,17 @@ class PSMController extends Controller
      */
     public function createPurchase(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'pur_name_items' => 'required|array|min:1',
-                'pur_name_items.*.name' => 'required|string|max:255',
-                'pur_name_items.*.price' => 'required|numeric|min:0',
-                'pur_company_name' => 'required|string|max:255',
-                'pur_ven_type' => 'required|in:equipment,supplies,furniture,automotive',
-                'pur_order_by' => 'required|string|max:255',
-                'pur_desc' => 'nullable|string',
-            ]);
+        $validated = $request->validate([
+            'pur_name_items' => 'required|array|min:1',
+            'pur_name_items.*.name' => 'required|string|max:255',
+            'pur_name_items.*.price' => 'required|numeric|min:0',
+            'pur_company_name' => 'required|string|max:255',
+            'pur_ven_type' => 'required|in:equipment,supplies,furniture,automotive',
+            'pur_order_by' => 'nullable|string|max:255',
+            'pur_desc' => 'nullable|string',
+        ]);
 
+        try {
             $result = $this->psmService->createPurchase($validated);
 
             return response()->json($result);
@@ -636,6 +636,7 @@ class PSMController extends Controller
      * Budget Management Endpoints
      */
 
+
     /**
      * Get current budget
      */
@@ -650,6 +651,24 @@ class PSMController extends Controller
                 'success' => false,
                 'message' => 'Failed to fetch budget: '.$e->getMessage(),
                 'data' => null,
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all budgets
+     */
+    public function getAllBudgets()
+    {
+        try {
+            $result = $this->psmService->getAllBudgets();
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch budgets: '.$e->getMessage(),
+                'data' => [],
             ], 500);
         }
     }

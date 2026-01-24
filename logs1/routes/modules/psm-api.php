@@ -38,6 +38,7 @@ Route::prefix('purchase-management')->group(function () {
 
 // PSM Budget Management Routes
 Route::prefix('budget-management')->group(function () {
+    Route::get('/all', [PSMController::class, 'getAllBudgets']);
     Route::get('/current', [PSMController::class, 'getCurrentBudget']);
     Route::post('/{id}/extend', [PSMController::class, 'extendBudgetValidity']);
 });

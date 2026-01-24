@@ -471,7 +471,8 @@ async function loadActiveVendors() {
         });
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
         }
         
         const result = await response.json();
@@ -1239,7 +1240,7 @@ async function handlePurchaseSubmit(e) {
     
     const data = {
         pur_company_name: elements.companySelect ? elements.companySelect.value : '',
-        pur_ven_type: elements.vendorType ? elements.vendorType.value : '',
+        pur_ven_type: elements.vendorType ? elements.vendorType.value.toLowerCase() : '',
         pur_order_by: elements.purOrderBy ? elements.purOrderBy.value.trim() : '',
         pur_desc: elements.purDesc ? elements.purDesc.value : '',
         pur_name_items: selectedItems.map(item => ({

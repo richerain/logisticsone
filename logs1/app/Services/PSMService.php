@@ -341,7 +341,9 @@ class PSMService
             $data['pur_submodule_from'] = 'Purchase Management';
 
             // Set order_by from authenticated user
-            $data['pur_order_by'] = $data['pur_order_by'] ?? 'System User';
+            if (empty($data['pur_order_by'])) {
+                $data['pur_order_by'] = 'System User';
+            }
 
             // Calculate total units and amount from items
             $items = $data['pur_name_items'] ?? [];
@@ -844,6 +846,28 @@ class PSMService
                 'success' => false,
                 'message' => 'Failed to fetch budget: '.$e->getMessage(),
                 'data' => null,
+            ];
+        }
+    }
+
+    /**
+     * Get all budgets
+     */
+    public function getAllBudgets()
+    {
+        try {
+            $budgets = $this->psmRepository->getAllBudgets();
+
+            return [
+                'success' => true,
+                'data' => $budgets,
+                'message' => 'Budgets retrieved successfully',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch budgets: '.$e->getMessage(),
+                'data' => [],
             ];
         }
     }

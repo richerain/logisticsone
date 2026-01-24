@@ -300,6 +300,14 @@ class PSMRepository
     }
 
     /**
+     * Get all budgets
+     */
+    public function getAllBudgets()
+    {
+        return Budget::orderBy('created_at', 'desc')->get();
+    }
+
+    /**
      * Get budget by ID
      */
     public function getBudgetById($id)
