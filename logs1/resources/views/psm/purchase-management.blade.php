@@ -262,7 +262,7 @@
             </button>
         </div>
         <div id="budgetApprovalContent" class="space-y-4 mb-4">
-            <!-- Budget approval content will be populated here -->
+            
         </div>
         <div class="flex justify-end gap-3">
             <button type="button" id="rejectBudgetBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Reject</button>
@@ -882,18 +882,19 @@ function displayPurchases(purchases) {
                             title="View Purchase">
                         <i class='bx bx-show-alt text-xl'></i>
                     </button>
+                    ${canApprove ? `
+                    <button onclick="openBudgetApproval(${purchase.id})" 
+                            class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50"
+                            title="Budget Approval">
+                        <i class='bx bx-check-shield text-xl'></i>
+                    </button>` : ''}
                     ${isApproved || isCompleted ? '' : `
                     <button onclick="editPurchase(${purchase.id})" 
                             class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
                             title="Edit Purchase">
                         <i class='bx bx-edit-alt text-xl'></i>
                     </button>`}
-                    ${isCompleted ? '' : (canApprove ? `
-                    <button onclick="openBudgetApproval(${purchase.id})" 
-                            class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50 budget-approval-btn"
-                            title="Budget Approval">
-                        <i class='bx bx-check-circle text-xl'></i>
-                    </button>` : '')}
+                    
                     ${isCompleted ? '' : (canCancel ? `
                     <button onclick="cancelPurchase(${purchase.id})" 
                             class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn"

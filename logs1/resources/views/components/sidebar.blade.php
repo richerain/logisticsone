@@ -53,7 +53,9 @@
                 </div>
                 <ul class="dropdown-menu hidden bg-white/20 mt-2 rounded-lg px-2 py-2">
                     <li><a href="#" data-module="psm-purchase"  title="Purchase Management" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-purchase-tag' ></i>Purchase Management</span></a></li>
+                    @if(in_array($role, ['superadmin', 'admin', 'manager']))
                     <li><a href="#" data-module="psm-budgeting"  title="Budgeting" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-wallet'></i>Budgeting</span></a></li>
+                    @endif
                     <li><a href="#" data-module="psm-vendor-management"  title="Vendors" class="sidebar-link flex items-center px-3 py-2 text-sm hover:bg-white/30 rounded-lg whitespace-normal wrap-break-words"><span class="module-text"><i class='bx bx-fw bxs-user-detail' ></i>Vendors</span></a></li>
                 </ul>
             </li>

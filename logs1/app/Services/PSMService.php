@@ -872,6 +872,28 @@ class PSMService
         }
     }
 
+    /**
+     * Get all budget logs
+     */
+    public function getAllBudgetLogs()
+    {
+        try {
+            $logs = $this->psmRepository->getAllBudgetLogs();
+
+            return [
+                'success' => true,
+                'data' => $logs,
+                'message' => 'Budget logs retrieved successfully',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch budget logs: '.$e->getMessage(),
+                'data' => [],
+            ];
+        }
+    }
+
     public function getQuotes()
     {
         try {

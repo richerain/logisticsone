@@ -100,6 +100,14 @@ class Budget extends Model
     }
 
     /**
+     * Get the logs for the budget.
+     */
+    public function logs()
+    {
+        return $this->hasMany(BudgetLog::class, 'bud_id', 'bud_id');
+    }
+
+    /**
      * Check if budget is expired
      */
     public function getIsExpiredAttribute()

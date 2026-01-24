@@ -661,6 +661,14 @@ class PSMController extends Controller
     public function getAllBudgets()
     {
         try {
+            // Restrict access
+            $user = \Auth::guard('sws')->user();
+            $role = $user ? strtolower($user->roles ?? '') : '';
+            
+            if (!$user || !in_array($role, ['superadmin', 'admin', 'manager'])) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
             $result = $this->psmService->getAllBudgets();
 
             return response()->json($result);
@@ -668,6 +676,32 @@ class PSMController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch budgets: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all budget logs
+     */
+    public function getBudgetLogs()
+    {
+        try {
+            // Restrict access
+            $user = \Auth::guard('sws')->user();
+            $role = $user ? strtolower($user->roles ?? '') : '';
+            
+            if (!$user || !in_array($role, ['superadmin', 'admin', 'manager'])) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
+            $result = $this->psmService->getAllBudgetLogs();
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch budget logs: '.$e->getMessage(),
                 'data' => [],
             ], 500);
         }

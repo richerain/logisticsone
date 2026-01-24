@@ -100,6 +100,15 @@ Route::get('/login', function (Request $request) {
 
             $view = $moduleViews[$module] ?? 'components.module-not-found';
 
+            // Restrict access to Budgeting module
+            if ($module === 'psm-budgeting') {
+                $user = Auth::guard('sws')->user();
+                $role = strtolower($user->roles ?? '');
+                if (!in_array($role, ['superadmin', 'admin', 'manager'])) {
+                    abort(403, 'Access denied');
+                }
+            }
+
             if (! view()->exists($view)) {
                 return response()->view('components.module-under-construction', ['module' => $module], 404);
             }
@@ -142,6 +151,12 @@ Route::get('/login', function (Request $request) {
         Route::get('/user-management/accounts/{id}', [App\Http\Controllers\UserManagementController::class, 'show'])->name('user-management.accounts.show');
 
         Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
+
+        // PSM Module Routes
+        Route::prefix('psm')->group(function () {
+            Route::get('/budget-management/all', [\App\Http\Controllers\PSMController::class, 'getAllBudgets']);
+            Route::get('/budget-logs/all', [\App\Http\Controllers\PSMController::class, 'getBudgetLogs']);
+        });
     });
 
     Route::middleware(['auth:vendor', 'session.timeout'])->group(function () {

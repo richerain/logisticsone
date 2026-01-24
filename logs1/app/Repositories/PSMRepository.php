@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\PSM\Budget;
+use App\Models\PSM\BudgetLog;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
 use App\Models\PSM\Quote;
@@ -373,5 +374,13 @@ class PSMRepository
         }
 
         return null;
+    }
+
+    /**
+     * Get all budget logs
+     */
+    public function getAllBudgetLogs()
+    {
+        return BudgetLog::orderBy('created_at', 'desc')->get();
     }
 }
