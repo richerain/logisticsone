@@ -262,6 +262,114 @@ class SWSService
         }
     }
 
+    public function createCategory($data)
+    {
+        try {
+            DB::connection('sws')->beginTransaction();
+
+            // Generate ID: ICAT + YYYYMMDD + 5 random chars
+            do {
+                $datePart = now()->format('Ymd');
+                // Generate 5 random alphanumeric characters (uppercase)
+                $randomTail = strtoupper(\Illuminate\Support\Str::random(5));
+                $catId = 'ICAT' . $datePart . $randomTail;
+            } while (\App\Models\SWS\Category::where('cat_id', $catId)->exists());
+
+            $data['cat_id'] = $catId;
+
+            $category = $this->swsRepository->createCategory($data);
+
+            DB::connection('sws')->commit();
+
+            return [
+                'success' => true,
+                'data' => $category,
+                'message' => 'Category created successfully',
+            ];
+        } catch (\Exception $e) {
+            DB::connection('sws')->rollBack();
+            Log::error('Error creating category: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to create category',
+            ];
+        }
+    }
+
+    public function updateCategory($id, $data)
+    {
+        try {
+            DB::connection('sws')->beginTransaction();
+
+            $category = $this->swsRepository->updateCategory($id, $data);
+
+            if ($category) {
+                DB::connection('sws')->commit();
+
+                return [
+                    'success' => true,
+                    'data' => $category,
+                    'message' => 'Category updated successfully',
+                ];
+            }
+
+            DB::connection('sws')->rollBack();
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Category not found',
+            ];
+        } catch (\Exception $e) {
+            DB::connection('sws')->rollBack();
+            Log::error('Error updating category: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to update category',
+            ];
+        }
+    }
+
+    public function deleteCategory($id)
+    {
+        try {
+            DB::connection('sws')->beginTransaction();
+
+            $success = $this->swsRepository->deleteCategory($id);
+
+            if ($success) {
+                DB::connection('sws')->commit();
+
+                return [
+                    'success' => true,
+                    'data' => null,
+                    'message' => 'Category deleted successfully',
+                ];
+            }
+
+            DB::connection('sws')->rollBack();
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Category not found',
+            ];
+        } catch (\Exception $e) {
+            DB::connection('sws')->rollBack();
+            Log::error('Error deleting category: '.$e->getMessage());
+
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to delete category',
+            ];
+        }
+    }
+
     public function getAllLocations()
     {
         try {

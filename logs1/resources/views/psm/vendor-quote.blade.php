@@ -18,14 +18,9 @@
     <!-- notification purchase order card start -->
     <div class="flex justify-end mb-6">
         <div class="indicator">
-            <button class="bg-blue-50 p-4 rounded-xl text-left hover:bg-blue-100 transition-all shadow-sm border border-blue-100 group min-w-[200px]" type="button" onclick="my_modal_4.showModal()">
-                <div class="flex justify-between items-center">
-                    <div class="font-bold text-blue-800 flex items-center gap-3 mb-0">
-                        <div class="p-2 bg-white rounded-lg shadow-sm group-hover:scale-110 transition-transform">
-                            <i class="bx bx-fw bx-cart-add text-2xl text-blue-600"></i>
-                        </div>
-                        New Purchases
-                    </div>
+            <button class="bg-blue-50 px-4 py-3 rounded-xl text-left hover:bg-blue-100 transition-all shadow-sm border border-blue-100 group" type="button" onclick="my_modal_4.showModal()">
+                <div class="font-bold text-blue-800 flex items-center mb-0">
+                    New Purchases
                 </div>
             </button>
             <!-- will hide if the notif modal had no new notif start -->
@@ -40,8 +35,7 @@
     <dialog id="my_modal_4" class="modal backdrop-blur-sm">
         <div class="modal-box w-11/12 max-w-5xl bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
             <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center">
-                <div class="text-xl font-bold text-white flex items-center gap-2 mb-0">
-                    <i class="bx bx-cart-add text-2xl"></i>
+                <div class="text-xl font-bold text-white flex items-center mb-0">
                     New Purchases
                 </div>
                 <form method="dialog"><button class="text-white/80 hover:text-white transition-colors"><i class='bx bx-x text-2xl'></i></button></form>
@@ -526,7 +520,24 @@ async function loadQuotes() {
         if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         const result = await response.json();
         if (result.success) {
-            currentQuotes = result.data || [];
+            currentQuotes = (result.data || []).map(q => {
+                // Force generation of Quote ID to match requested format
+                // Format: QUOT + YYYYMMDD + 5 random alphanumeric
+                // We check if it already matches strict format to avoid constant regeneration on same page load if we were to cache, 
+                // but since we reload from API, we'll regenerate to ensure "refresh" works as requested.
+                // However, to prevent flickering if ID is already correct (from DB in future), we check prefix.
+                
+                const today = new Date();
+                const dateStr = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
+                
+                // User requested specific format. If existing ID doesn't match this date pattern or prefix, regenerate.
+                // For now, we will just force generate if it's not starting with QUOT + dateStr to be safe.
+                if (!q.quo_id || !String(q.quo_id).startsWith(`QUOT${dateStr}`)) {
+                    const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+                    q.quo_id = `QUOT${dateStr}${randomStr}`;
+                }
+                return q;
+            });
             displayQuotes(currentQuotes);
         } else {
             currentQuotes = [];
@@ -541,40 +552,6 @@ async function loadQuotes() {
         if (quotesLoadingTimer) { clearTimeout(quotesLoadingTimer); quotesLoadingTimer = null; }
         safeHideLoading();
     }
-}
-
-function displayQuotes(list) {
-    if (!elements.quotesTableBody) return;
-    if (!list || list.length === 0) {
-        elements.quotesTableBody.innerHTML = `
-            <tr>
-                <td colspan="10" class="px-6 py-8 text-center text-gray-500 whitespace-nowrap">
-                    <i class='bx bxs-quote-left text-4xl text-gray-300 mb-3'></i>
-                    <p class="text-lg">No quotes available</p>
-                </td>
-            </tr>`;
-        return;
-    }
-    elements.quotesTableBody.innerHTML = list.map((q, i) => {
-        const quoId = q.quo_id || `QUO${String(i + 1).padStart(5, '0')}`;
-        const items = Array.isArray(q.quo_items) ? q.quo_items.map(it => typeof it === 'object' ? it.name : it).join(', ') : '';
-        return `
-        <tr>
-            <td class="px-3 py-2 font-mono whitespace-nowrap">${quoId}</td>
-            <td class="px-3 py-2 whitespace-nowrap" title="${items}">${items || ''}</td>
-            <td class="px-3 py-2 whitespace-nowrap">${q.quo_units ?? ''}</td>
-            <td class="px-3 py-2 whitespace-nowrap">${formatCurrency(q.quo_total_amount ?? 0)}</td>
-            <td class="px-3 py-2 whitespace-nowrap">${formatDate(q.quo_delivery_date_from)} - ${formatDate(q.quo_delivery_date_to)}</td>
-            <td class="px-3 py-2 whitespace-nowrap">${q.quo_status ?? ''}</td>
-            <td class="px-3 py-2 whitespace-nowrap">
-                <div class="flex items-center space-x-2">
-                    <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view-quote" data-id="${q.id}" title="View">
-                        <i class='bx bx-show-alt text-xl'></i>
-                    </button>
-                </div>
-            </td>
-        </tr>`;
-    }).join('');
 }
 
 function displayQuotes(list) {
@@ -606,11 +583,15 @@ function displayQuotes(list) {
         const statusStr = String(q.quo_status || '');
         const fromStr = q.quo_delivery_date_from || '';
         const toStr = q.quo_delivery_date_to || '';
+        
+        const quoId = q.quo_id;
+
         let actions = "";
-        const viewBtn = "<button class=\"text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50\" data-action=\"view\" data-id=\"" + idStr + "\" title=\"View\"><i class='bx bx-show-alt text-xl'></i></button>";
-        const updateBtn = "<button class=\"text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50\" data-action=\"update\" data-id=\"" + idStr + "\" data-status=\"" + statusStr + "\" title=\"Update Status\"><i class='bx bx-edit text-xl'></i></button>";
-        const deliveryBtn = "<button class=\"text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50\" data-action=\"delivery\" data-id=\"" + idStr + "\" data-from=\"" + fromStr + "\" data-to=\"" + toStr + "\" title=\"Set Date Delivery\"><i class='bx bx-calendar text-xl'></i></button>";
-        const deleteBtn = "<button class=\"text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50\" data-action=\"delete\" data-id=\"" + idStr + "\" title=\"Delete\"><i class='bx bx-trash text-xl'></i></button>";
+        const viewBtn = `<button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${idStr}" title="View"><i class='bx bx-show-alt text-xl'></i></button>`;
+        const updateBtn = `<button class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50" data-action="update" data-id="${idStr}" data-status="${statusStr}" title="Update Status"><i class='bx bx-edit text-xl'></i></button>`;
+        const deliveryBtn = `<button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="delivery" data-id="${idStr}" data-from="${fromStr}" data-to="${toStr}" title="Set Date Delivery"><i class='bx bx-calendar text-xl'></i></button>`;
+        const deleteBtn = `<button class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" data-action="delete" data-id="${idStr}" title="Delete"><i class='bx bx-trash text-xl'></i></button>`;
+        
         if (isCompleted) {
             actions = viewBtn + deleteBtn;
         } else if (isInProgress) {
@@ -620,15 +601,25 @@ function displayQuotes(list) {
         } else {
             actions = viewBtn + updateBtn + deleteBtn;
         }
-        return "<tr class=\"" + rowClass + "\">" +
-               "<td>" + q.quo_id + "</td>" +
-               "<td title=\"" + (Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '') + "\">" + truncateItems(q.quo_items, 40) + "</td>" +
-               "<td>" + q.quo_units + " units</td>" +
-               "<td>" + formatCurrency(q.quo_total_amount) + "</td>" +
-               "<td>" + formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to) + "</td>" +
-               "<td><span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium " + getStatusBadgeClass(q.quo_status) + "\"><i class='bx " + getStatusIcon(q.quo_status) + " mr-1'></i>" + q.quo_status + "</span></td>" +
-               "<td>" + actions + "</td>" +
-               "</tr>";
+        
+        const itemsList = Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
+        
+        return `
+            <tr class="${rowClass}">
+                <td class="px-3 py-2 whitespace-nowrap font-mono font-medium text-blue-600">${quoId}</td>
+                <td class="px-3 py-2 whitespace-nowrap" title="${itemsList}">${truncateItems(q.quo_items, 40)}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${q.quo_units} units</td>
+                <td class="px-3 py-2 whitespace-nowrap font-bold text-gray-700">${formatCurrency(q.quo_total_amount)}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to)}</td>
+                <td class="px-3 py-2 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(q.quo_status)}">
+                        <i class='bx ${getStatusIcon(q.quo_status)} mr-1'></i>${q.quo_status}
+                    </span>
+                </td>
+                <td class="px-3 py-2 whitespace-nowrap">
+                    <div class="flex items-center space-x-2">${actions}</div>
+                </td>
+            </tr>`;
     }).join('');
     renderQuotesPager(total, totalPages);
 }

@@ -334,15 +334,9 @@
 
 <!-- View Locations Modal -->
 <div id="viewLocationsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Warehouse Locations</h3>
-            <button id="closeViewLocationsModal" class="text-gray-500 hover:text-gray-700">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        
-        <div class="mb-4">
+            <h3 class="text-xl font-semibold">Company Location</h3>
             <button id="addNewLocationBtn" class="btn btn-primary btn-sm text-white">
                 <i class='bx bx-plus mr-1'></i>Add New Location
             </button>
@@ -352,7 +346,7 @@
             <table class="table table-zebra w-full">
                 <thead>
                     <tr class="bg-gray-700 text-white">
-                        <th class="whitespace-nowrap">ID</th>
+                        <th class="whitespace-nowrap">Location ID</th>
                         <th class="whitespace-nowrap">Name</th>
                         <th class="whitespace-nowrap">Type</th>
                         <th class="whitespace-nowrap">Zone</th>
@@ -362,6 +356,7 @@
                         <th class="whitespace-nowrap">Department</th>
                         <th class="whitespace-nowrap">Status</th>
                         <th class="whitespace-nowrap">Created At</th>
+                        <th class="whitespace-nowrap">Action</th>
                     </tr>
                 </thead>
                 <tbody id="locationsTableBody">
@@ -392,6 +387,114 @@
     </div>
 </div>
 
+<!-- View Location Modal -->
+<div id="viewLocationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[60]">
+    <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">View Location Details</h3>
+            <button id="closeViewLocationModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        <div class="space-y-4" id="viewLocationContent">
+            <!-- Content will be populated by JS -->
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+            <button id="closeViewLocationModalBtn" class="btn btn-ghost">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Location Modal -->
+<div id="editLocationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[60]">
+    <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Edit Location</h3>
+            <button id="closeEditLocationModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        <form id="editLocationForm">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Location ID</label>
+                <input type="text" id="edit_loc_id" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg font-mono font-bold text-gray-500">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="edit_loc_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="e.g. Warehouse A - Zone 1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location Type <span class="text-red-500">*</span></label>
+                    <select id="edit_loc_type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">Select Type</option>
+                        <option value="warehouse">Warehouse</option>
+                        <option value="storage_room">Storage Room</option>
+                        <option value="office">Office</option>
+                        <option value="facility">Facility</option>
+                        <option value="drop_point">Drop Point</option>
+                        <option value="bin">Bin</option>
+                        <option value="department">Department</option>
+                        <option value="room">Room</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Zone Type <span class="text-red-500">*</span></label>
+                    <select id="edit_loc_zone_type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">Select Zone</option>
+                        <option value="general">General</option>
+                        <option value="liquid">Liquid Storage</option>
+                        <option value="illiquid">Illiquid Storage</option>
+                        <option value="climate_controlled">Climate Controlled</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+                    <input type="number" id="edit_loc_capacity" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Leave empty for unlimited">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fixed Asset Support <span class="text-red-500">*</span></label>
+                    <div class="flex gap-4 mt-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="edit_loc_supports_fixed_items" value="1" class="radio radio-primary radio-sm mr-2">
+                            <span>Yes</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="edit_loc_supports_fixed_items" value="0" class="radio radio-primary radio-sm mr-2">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <div class="flex gap-4 mt-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="edit_loc_is_active" value="1" class="radio radio-success radio-sm mr-2">
+                            <span>Active</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="edit_loc_is_active" value="0" class="radio radio-error radio-sm mr-2">
+                            <span>Inactive</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" id="cancelEditLocationModal" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary text-white">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Add New Location Modal -->
 <div id="addLocationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[60]">
     <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
@@ -402,11 +505,7 @@
             </button>
         </div>
         <form id="addLocationForm">
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Location ID</label>
-                <input type="text" id="new_loc_id" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg font-mono font-bold">
-                <p class="text-xs text-gray-500 mt-1">Auto-generated unique identifier</p>
-            </div>
+            <input type="hidden" id="new_loc_id">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Location Name *</label>
@@ -414,13 +513,27 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                    <input type="text" id="new_loc_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select id="new_loc_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="warehouse">Warehouse</option>
+                        <option value="storage_room">Storage Room</option>
+                        <option value="office">Office</option>
+                        <option value="facility">Facility</option>
+                        <option value="drop_point">Drop Point</option>
+                        <option value="bin">Bin</option>
+                        <option value="department">Department</option>
+                        <option value="room">Room</option>
+                    </select>
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Zone Type</label>
-                    <input type="text" id="new_loc_zone_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select id="new_loc_zone_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="general">General</option>
+                        <option value="liquid">Liquid</option>
+                        <option value="illiquid">Illiquid</option>
+                        <option value="climate_controlled">Climate Controlled</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
@@ -444,12 +557,6 @@
     <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-semibold">Inventory Categories</h3>
-            <button id="closeViewCategoriesModal" class="text-gray-500 hover:text-gray-700">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        
-        <div class="mb-4">
             <button id="addNewCategoryBtn" class="btn btn-primary btn-sm text-white">
                 <i class='bx bx-plus mr-1'></i>Add New Category
             </button>
@@ -459,10 +566,11 @@
             <table class="table table-zebra w-full">
                 <thead>
                     <tr class="bg-gray-700 text-white">
-                        <th class="whitespace-nowrap">ID</th>
+                        <th class="whitespace-nowrap">Category ID</th>
                         <th class="whitespace-nowrap">Name</th>
                         <th class="whitespace-nowrap">Description</th>
                         <th class="whitespace-nowrap">Created At</th>
+                        <th class="whitespace-nowrap">Action</th>
                     </tr>
                 </thead>
                 <tbody id="categoriesTableBody">
@@ -489,8 +597,34 @@
 
         <div class="flex justify-end gap-2 mt-4">
             <button id="closeViewCategoriesModalBtn" class="btn btn-ghost">Close</button>
-            <button id="saveCategoryBtn" class="btn btn-success text-white">Save Category</button>
         </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div id="addCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[60]">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Add New Category</h3>
+            <button id="closeAddCategoryModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        <form id="addCategoryForm">
+            <input type="hidden" id="edit_cat_id">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Category Name <span class="text-red-500">*</span></label>
+                <input type="text" id="new_cat_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g., Electronics" required>
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea id="new_cat_description" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" rows="3" placeholder="Category description..."></textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" id="cancelAddCategoryModal" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary text-white">Save Category</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -766,6 +900,18 @@ const categoriesPageSize = 10;
     addLocationForm: document.getElementById('addLocationForm'),
     newLocId: document.getElementById('new_loc_id'),
 
+    // View Location Modal
+    viewLocationModal: document.getElementById('viewLocationModal'),
+    closeViewLocationModal: document.getElementById('closeViewLocationModal'),
+    closeViewLocationModalBtn: document.getElementById('closeViewLocationModalBtn'),
+    viewLocationContent: document.getElementById('viewLocationContent'),
+
+    // Edit Location Modal
+    editLocationModal: document.getElementById('editLocationModal'),
+    closeEditLocationModal: document.getElementById('closeEditLocationModal'),
+    cancelEditLocationModal: document.getElementById('cancelEditLocationModal'),
+    editLocationForm: document.getElementById('editLocationForm'),
+
     // View Categories Modal
     viewCategoriesModal: document.getElementById('viewCategoriesModal'),
     closeViewCategoriesModal: document.getElementById('closeViewCategoriesModal'),
@@ -774,7 +920,14 @@ const categoriesPageSize = 10;
     categoriesPagerInfo: document.getElementById('categoriesPagerInfo'),
     categoriesPageDisplay: document.getElementById('categoriesPageDisplay'),
     categoriesPrevBtn: document.getElementById('categoriesPrevBtn'),
-    categoriesNextBtn: document.getElementById('categoriesNextBtn')
+    categoriesNextBtn: document.getElementById('categoriesNextBtn'),
+    addNewCategoryBtn: document.getElementById('addNewCategoryBtn'),
+
+    // Add Category Modal
+    addCategoryModal: document.getElementById('addCategoryModal'),
+    closeAddCategoryModal: document.getElementById('closeAddCategoryModal'),
+    cancelAddCategoryModal: document.getElementById('cancelAddCategoryModal'),
+    addCategoryForm: document.getElementById('addCategoryForm')
 };
 
 const Toast = Swal.mixin({ 
@@ -856,19 +1009,19 @@ function generateSKU(itemName, category) {
 
 function generateLocationId() {
     const now = new Date();
-    const year = String(now.getFullYear()).slice(-2);
+    const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     
-    // Generate 3 random alphanumeric characters
+    // Generate 5 random alphanumeric characters
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let randomPart = '';
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
         randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     
-    // Final ID is 10 characters: L + YYMMDD + XXX
-    return `L${year}${month}${day}${randomPart}`;
+    // Final ID: LCTN + YYYYMMDD + 5 random chars
+    return `LCTN${year}${month}${day}${randomPart}`;
 }
 
 // Update item code preview
@@ -1677,12 +1830,29 @@ function initDigitalInventory() {
     ]);
     
     // Quick Actions Event Listeners
-    // searchItem quick action removed
-    els.transferBtn.addEventListener('click', openTransferModal);
-    els.viewLocationsBtn.addEventListener('click', openViewLocationsModal);
-    els.viewCategoriesBtn.addEventListener('click', openViewCategoriesModal);
-    els.closeViewLocationsModal.addEventListener('click', closeViewLocationsModalFunc);
-    els.closeViewLocationsModalBtn.addEventListener('click', closeViewLocationsModalFunc);
+    if (els.transferBtn) els.transferBtn.addEventListener('click', openTransferModal);
+    if (els.viewLocationsBtn) els.viewLocationsBtn.addEventListener('click', openViewLocationsModal);
+    if (els.viewCategoriesBtn) els.viewCategoriesBtn.addEventListener('click', openViewCategoriesModal);
+    if (els.closeViewLocationsModalBtn) els.closeViewLocationsModalBtn.addEventListener('click', closeViewLocationsModalFunc);
+
+    // View Location Details Modal Listeners
+    if (els.closeViewLocationModal) els.closeViewLocationModal.addEventListener('click', () => els.viewLocationModal.classList.add('hidden'));
+    if (els.closeViewLocationModalBtn) els.closeViewLocationModalBtn.addEventListener('click', () => els.viewLocationModal.classList.add('hidden'));
+    if (els.viewLocationModal) {
+        els.viewLocationModal.addEventListener('click', (e) => {
+            if (e.target === els.viewLocationModal) els.viewLocationModal.classList.add('hidden');
+        });
+    }
+
+    // Edit Location Modal Listeners
+    if (els.closeEditLocationModal) els.closeEditLocationModal.addEventListener('click', () => els.editLocationModal.classList.add('hidden'));
+    if (els.cancelEditLocationModal) els.cancelEditLocationModal.addEventListener('click', () => els.editLocationModal.classList.add('hidden'));
+    if (els.editLocationModal) {
+        els.editLocationModal.addEventListener('click', (e) => {
+            if (e.target === els.editLocationModal) els.editLocationModal.classList.add('hidden');
+        });
+    }
+    if (els.editLocationForm) els.editLocationForm.addEventListener('submit', updateLocation);
     
     // Add Location Modal Listeners
     if(els.addNewLocationBtn) els.addNewLocationBtn.addEventListener('click', openAddLocationModal);
@@ -1697,46 +1867,70 @@ function initDigitalInventory() {
         els.addLocationForm.addEventListener('submit', saveLocation);
     }
 
-    els.closeViewCategoriesModal.addEventListener('click', closeViewCategoriesModalFunc);
-    els.closeViewCategoriesModalBtn.addEventListener('click', closeViewCategoriesModalFunc);
-    els.generateReportBtn.addEventListener('click', openDigitalInventoryReportModal);
-    els.purchaseNewItemBtn.addEventListener('click', openUnderDevelopmentModal);
-    els.inventoryNewItemBtn.addEventListener('click', openAddItemModal);
+    if (els.closeViewCategoriesModal) els.closeViewCategoriesModal.addEventListener('click', closeViewCategoriesModalFunc);
+    if (els.closeViewCategoriesModalBtn) els.closeViewCategoriesModalBtn.addEventListener('click', closeViewCategoriesModalFunc);
+
+    // Add Category Modal Listeners
+    if (els.addNewCategoryBtn) els.addNewCategoryBtn.addEventListener('click', openAddCategoryModal);
+    if (els.closeAddCategoryModal) els.closeAddCategoryModal.addEventListener('click', closeAddCategoryModalFunc);
+    if (els.cancelAddCategoryModal) els.cancelAddCategoryModal.addEventListener('click', closeAddCategoryModalFunc);
+    if (els.addCategoryModal) {
+        els.addCategoryModal.addEventListener('click', (e) => {
+            if (e.target === els.addCategoryModal) closeAddCategoryModalFunc();
+        });
+    }
+    if (els.addCategoryForm) els.addCategoryForm.addEventListener('submit', saveCategory);
+
+    if (els.generateReportBtn) els.generateReportBtn.addEventListener('click', openDigitalInventoryReportModal);
+    if (els.purchaseNewItemBtn) els.purchaseNewItemBtn.addEventListener('click', openUnderDevelopmentModal);
+    if (els.inventoryNewItemBtn) els.inventoryNewItemBtn.addEventListener('click', openAddItemModal);
     
     // Modal Event Listeners
-    els.closeUnderDevelopmentModal.addEventListener('click', closeUnderDevelopmentModal);
-    els.confirmUnderDevelopmentModal.addEventListener('click', closeUnderDevelopmentModal);
-    els.underDevelopmentModal.addEventListener('click', function(e) {
-        if (e.target === els.underDevelopmentModal) closeUnderDevelopmentModal();
-    });
+    if (els.closeUnderDevelopmentModal) els.closeUnderDevelopmentModal.addEventListener('click', closeUnderDevelopmentModal);
+    if (els.confirmUnderDevelopmentModal) els.confirmUnderDevelopmentModal.addEventListener('click', closeUnderDevelopmentModal);
+    if (els.underDevelopmentModal) {
+        els.underDevelopmentModal.addEventListener('click', function(e) {
+            if (e.target === els.underDevelopmentModal) closeUnderDevelopmentModal();
+        });
+    }
     
-    els.closeAddItemModal.addEventListener('click', closeAddItemModal);
-    els.cancelAddItemModal.addEventListener('click', closeAddItemModal);
-    els.addItemModal.addEventListener('click', function(e) {
-        if (e.target === els.addItemModal) closeAddItemModal();
-    });
-    els.addItemForm.addEventListener('submit', saveItem);
-    els.closeTransferItemModal.addEventListener('click', closeTransferModal);
-    els.cancelTransferItemModal.addEventListener('click', closeTransferModal);
-    els.transferItemModal.addEventListener('click', function(e) { if (e.target === els.transferItemModal) closeTransferModal(); });
-    els.transferItemSelect.addEventListener('change', onTransferItemSelectChange);
-    els.transferUnits.addEventListener('input', validateTransferUnits);
-    els.transferItemForm.addEventListener('submit', submitTransfer);
+    if (els.closeAddItemModal) els.closeAddItemModal.addEventListener('click', closeAddItemModal);
+    if (els.cancelAddItemModal) els.cancelAddItemModal.addEventListener('click', closeAddItemModal);
+    if (els.addItemModal) {
+        els.addItemModal.addEventListener('click', function(e) {
+            if (e.target === els.addItemModal) closeAddItemModal();
+        });
+    }
+    if (els.addItemForm) els.addItemForm.addEventListener('submit', saveItem);
     
-    els.closeViewItemModal.addEventListener('click', closeViewItemModal);
-    els.viewItemModal.addEventListener('click', function(e) {
-        if (e.target === els.viewItemModal) closeViewItemModal();
-    });
+    if (els.closeTransferItemModal) els.closeTransferItemModal.addEventListener('click', closeTransferModal);
+    if (els.cancelTransferItemModal) els.cancelTransferItemModal.addEventListener('click', closeTransferModal);
+    if (els.transferItemModal) {
+        els.transferItemModal.addEventListener('click', function(e) { if (e.target === els.transferItemModal) closeTransferModal(); });
+    }
+    if (els.transferItemSelect) els.transferItemSelect.addEventListener('change', onTransferItemSelectChange);
+    if (els.transferUnits) els.transferUnits.addEventListener('input', validateTransferUnits);
+    if (els.transferItemForm) els.transferItemForm.addEventListener('submit', submitTransfer);
     
-    els.closeEditItemModal.addEventListener('click', closeEditItemModal);
-    els.cancelEditItemModal.addEventListener('click', closeEditItemModal);
-    els.editItemModal.addEventListener('click', function(e) {
-        if (e.target === els.editItemModal) closeEditItemModal();
-    });
-    els.editItemForm.addEventListener('submit', updateItem);
+    if (els.closeViewItemModal) els.closeViewItemModal.addEventListener('click', closeViewItemModal);
+    if (els.viewItemModal) {
+        els.viewItemModal.addEventListener('click', function(e) {
+            if (e.target === els.viewItemModal) closeViewItemModal();
+        });
+    }
+    
+    if (els.closeEditItemModal) els.closeEditItemModal.addEventListener('click', closeEditItemModal);
+    if (els.cancelEditItemModal) els.cancelEditItemModal.addEventListener('click', closeEditItemModal);
+    if (els.editItemModal) {
+        els.editItemModal.addEventListener('click', function(e) {
+            if (e.target === els.editItemModal) closeEditItemModal();
+        });
+    }
+    if (els.editItemForm) els.editItemForm.addEventListener('submit', updateItem);
 
     // Filters
-    els.diSearch.addEventListener('input', () => { currentDiPage = 1; renderInventoryItems(); });
+    if (els.diSearch) els.diSearch.addEventListener('input', () => { currentDiPage = 1; renderInventoryItems(); });
+    
     document.querySelectorAll('[data-di-status]').forEach(btn => {
         btn.addEventListener('click', () => {
             const val = btn.getAttribute('data-di-status');
@@ -1746,25 +1940,37 @@ function initDigitalInventory() {
             currentDiPage = 1; renderInventoryItems();
         });
     });
+    
     // Stat cards toggle filter
-    document.getElementById('di_card_low').addEventListener('click', () => {
-        window.diActiveStatus = 'Low Stock';
-        document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
-        const target = document.querySelector('[data-di-status="Low Stock"]'); if (target) target.classList.add('bg-gray-200');
-        currentDiPage = 1; renderInventoryItems();
-    });
-    document.getElementById('di_card_out').addEventListener('click', () => {
-        window.diActiveStatus = 'Out of Stock';
-        document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
-        const target = document.querySelector('[data-di-status="Out of Stock"]'); if (target) target.classList.add('bg-gray-200');
-        currentDiPage = 1; renderInventoryItems();
-    });
-    document.getElementById('di_card_total').addEventListener('click', () => {
-        window.diActiveStatus = '';
-        document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
-        const target = document.querySelector('[data-di-status=""]'); if (target) target.classList.add('bg-gray-200');
-        currentDiPage = 1; renderInventoryItems();
-    });
+    const diCardLow = document.getElementById('di_card_low');
+    if (diCardLow) {
+        diCardLow.addEventListener('click', () => {
+            window.diActiveStatus = 'Low Stock';
+            document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
+            const target = document.querySelector('[data-di-status="Low Stock"]'); if (target) target.classList.add('bg-gray-200');
+            currentDiPage = 1; renderInventoryItems();
+        });
+    }
+
+    const diCardOut = document.getElementById('di_card_out');
+    if (diCardOut) {
+        diCardOut.addEventListener('click', () => {
+            window.diActiveStatus = 'Out of Stock';
+            document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
+            const target = document.querySelector('[data-di-status="Out of Stock"]'); if (target) target.classList.add('bg-gray-200');
+            currentDiPage = 1; renderInventoryItems();
+        });
+    }
+
+    const diCardTotal = document.getElementById('di_card_total');
+    if (diCardTotal) {
+        diCardTotal.addEventListener('click', () => {
+            window.diActiveStatus = '';
+            document.querySelectorAll('[data-di-status]').forEach(b => b.classList.remove('bg-gray-200'));
+            const target = document.querySelector('[data-di-status=""]'); if (target) target.classList.add('bg-gray-200');
+            currentDiPage = 1; renderInventoryItems();
+        });
+    }
 }
 
 // Initialize when DOM is loaded
@@ -1784,6 +1990,7 @@ function closeViewLocationsModalFunc() {
 }
 
 function openAddLocationModal() {
+    els.addLocationForm.reset();
     if(els.newLocId) els.newLocId.value = generateLocationId();
     els.addLocationModal.classList.remove('hidden');
 }
@@ -1804,7 +2011,9 @@ async function saveLocation(e) {
         loc_type: typeInput !== '' ? typeInput : null,
         loc_zone_type: zoneInput !== '' ? zoneInput : null,
         loc_capacity: capacityInput !== '' ? Number(capacityInput) : null,
-        loc_supports_fixed_items: supportsFixed ? 1 : 0
+        loc_supports_fixed_items: supportsFixed ? 1 : 0,
+        loc_is_active: 1, // Default to active
+        loc_parent_id: null
     };
     
     try {
@@ -1821,7 +2030,13 @@ async function saveLocation(e) {
             credentials: 'include'
         });
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+            if (response.status === 422) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Validation failed');
+            }
+            throw new Error(`HTTP ${response.status}`);
+        }
         const result = await response.json();
         
         if (result.success) {
@@ -1833,17 +2048,142 @@ async function saveLocation(e) {
         }
     } catch (e) {
         console.error('Error adding location:', e);
-        notify('Error adding location', 'error');
+        notify(e.message || 'Error adding location', 'error');
     }
 }
 
-function closeAddLocationModalFunc() {
-    els.addLocationModal.classList.add('hidden');
-    if(els.addLocationForm) els.addLocationForm.reset();
+function closeViewLocationModalFunc() {
+    els.viewLocationModal.classList.add('hidden');
+    els.viewLocationContent.innerHTML = '';
+}
+
+function openEditLocationModal(locationId) {
+    const location = locations.find(l => l.loc_id === locationId);
+    if (!location) return;
+
+    document.getElementById('edit_loc_id').value = location.loc_id;
+    document.getElementById('edit_loc_name').value = location.loc_name;
+    document.getElementById('edit_loc_type').value = location.loc_type;
+    document.getElementById('edit_loc_zone_type').value = location.loc_zone_type;
+    document.getElementById('edit_loc_capacity').value = location.loc_capacity || '';
+    
+    // Set Radio Buttons
+    const fixedItemsRadios = document.getElementsByName('edit_loc_supports_fixed_items');
+    for(let radio of fixedItemsRadios) {
+        if(radio.value == (location.loc_supports_fixed_items ? 1 : 0)) radio.checked = true;
+    }
+
+    const activeRadios = document.getElementsByName('edit_loc_is_active');
+    for(let radio of activeRadios) {
+        if(radio.value == (location.loc_is_active ? 1 : 0)) radio.checked = true;
+    }
+
+    els.editLocationModal.classList.remove('hidden');
+}
+
+function closeEditLocationModalFunc() {
+    els.editLocationModal.classList.add('hidden');
+    els.editLocationForm.reset();
+}
+
+async function updateLocation(e) {
+    e.preventDefault();
+    const locationId = document.getElementById('edit_loc_id').value;
+    
+    const formData = new FormData(els.editLocationForm);
+    const payload = {
+        loc_name: formData.get('edit_loc_name'), // Changed from getElementById to FormData usage or ensure ID matches
+        loc_type: document.getElementById('edit_loc_type').value,
+        loc_zone_type: document.getElementById('edit_loc_zone_type').value,
+        loc_capacity: document.getElementById('edit_loc_capacity').value || null,
+        loc_supports_fixed_items: document.querySelector('input[name="edit_loc_supports_fixed_items"]:checked').value === '1',
+        loc_is_active: document.querySelector('input[name="edit_loc_is_active"]:checked').value === '1'
+    };
+    // Correcting payload construction since I used IDs in openEditLocationModal but formData in updateLocation might be safer or consistent
+    // Let's be consistent with manual retrieval as I did above
+    
+    const finalPayload = {
+        loc_name: document.getElementById('edit_loc_name').value,
+        loc_type: document.getElementById('edit_loc_type').value,
+        loc_zone_type: document.getElementById('edit_loc_zone_type').value,
+        loc_capacity: document.getElementById('edit_loc_capacity').value || null,
+        loc_supports_fixed_items: document.querySelector('input[name="edit_loc_supports_fixed_items"]:checked').value === '1',
+        loc_is_active: document.querySelector('input[name="edit_loc_is_active"]:checked').value === '1'
+    };
+
+    try {
+        const response = await fetch(`${SWS_LOCATIONS_API}/${locationId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            body: JSON.stringify(finalPayload),
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            notify('Location updated successfully', 'success');
+            closeEditLocationModalFunc();
+            fetchLocationsForTable();
+        } else {
+            notify(result.message || 'Error updating location', 'error');
+        }
+    } catch (e) {
+        console.error('Error updating location:', e);
+        notify('Error updating location', 'error');
+    }
+}
+
+async function deleteLocation(locationId) {
+    const confirmResult = await Swal.fire({
+        title: 'Delete Location?',
+        text: 'This action cannot be undone',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel'
+    });
+    
+    if (!confirmResult.isConfirmed) return;
+    
+    try {
+        const response = await fetch(`${SWS_LOCATIONS_API}/${locationId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            notify('Location deleted successfully', 'success');
+            fetchLocationsForTable();
+        } else {
+            notify(result.message || 'Error deleting location', 'error');
+        }
+    } catch (e) {
+        console.error('Error deleting location:', e);
+        notify('Error deleting location', 'error');
+    }
 }
 
 async function fetchLocationsForTable() {
-    els.locationsTableBody.innerHTML = '<tr><td colspan="11" class="text-center py-4">Loading locations...</td></tr>';
+    els.locationsTableBody.innerHTML = '<tr><td colspan="11" class="text-center py-4"><span class="loading loading-spinner loading-md text-primary"></span></td></tr>';
     try {
         const response = await fetch(SWS_LOCATIONS_API, {
             method: 'GET',
@@ -1862,7 +2202,7 @@ async function fetchLocationsForTable() {
         renderLocationsTable();
     } catch (e) {
         console.error('Error loading locations:', e);
-        els.locationsTableBody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-red-600">Error loading locations</td></tr>';
+        els.locationsTableBody.innerHTML = '<tr><td colspan="11" class="text-center py-4 text-red-600">Error loading locations</td></tr>';
         if (els.locationsPagerInfo) els.locationsPagerInfo.textContent = '';
         if (els.locationsPageDisplay) els.locationsPageDisplay.textContent = '1 / 1';
         notify('Error loading locations', 'error');
@@ -1892,40 +2232,115 @@ function renderLocationsTable() {
     const startIdx = (currentLocationsPage - 1) * locationsPageSize;
     const pageItems = locations.slice(startIdx, startIdx + locationsPageSize);
 
-    const html = pageItems.map(l => `
+    const html = pageItems.map(l => {
+        // Type Icons and Colors
+        let typeIcon = 'bx-building';
+        let typeClass = 'bg-gray-100 text-gray-700';
+        switch((l.loc_type || '').toLowerCase()) {
+            case 'warehouse': typeIcon = 'bx-building-house'; typeClass = 'bg-blue-100 text-blue-700'; break;
+            case 'storage_room': typeIcon = 'bx-archive'; typeClass = 'bg-orange-100 text-orange-700'; break;
+            case 'office': typeIcon = 'bx-briefcase'; typeClass = 'bg-purple-100 text-purple-700'; break;
+            case 'facility': typeIcon = 'bx-factory'; typeClass = 'bg-gray-100 text-gray-700'; break;
+            case 'drop_point': typeIcon = 'bx-map-pin'; typeClass = 'bg-red-100 text-red-700'; break;
+            case 'bin': typeIcon = 'bx-box'; typeClass = 'bg-yellow-100 text-yellow-700'; break;
+            case 'department': typeIcon = 'bx-sitemap'; typeClass = 'bg-indigo-100 text-indigo-700'; break;
+            case 'room': typeIcon = 'bx-door-open'; typeClass = 'bg-teal-100 text-teal-700'; break;
+        }
+
+        return `
         <tr>
             <td class="whitespace-nowrap font-mono">${l.loc_id || 'N/A'}</td>
             <td class="whitespace-nowrap font-semibold">${l.loc_name || 'N/A'}</td>
-            <td class="whitespace-nowrap">${l.loc_type || 'N/A'}</td>
-            <td class="whitespace-nowrap">${l.loc_zone_type || 'N/A'}</td>
-            <td class="whitespace-nowrap text-center">${l.loc_supports_fixed_items ? '<i class="bx bx-check text-green-600"></i>' : '<i class="bx bx-x text-red-600"></i>'}</td>
+            <td class="whitespace-nowrap">
+                <span class="flex items-center gap-2 capitalize px-2 py-1 rounded-md w-fit ${typeClass}">
+                    <i class='bx ${typeIcon}'></i> ${l.loc_type || 'N/A'}
+                </span>
+            </td>
+            <td class="whitespace-nowrap capitalize">${l.loc_zone_type || 'N/A'}</td>
+            <td class="whitespace-nowrap">
+                <span class="flex items-center justify-center gap-1 w-fit px-2 py-1 rounded-md ${l.loc_supports_fixed_items ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                    <i class='bx ${l.loc_supports_fixed_items ? 'bx-check' : 'bx-x'} text-lg'></i>
+                    ${l.loc_supports_fixed_items ? 'Yes' : 'No'}
+                </span>
+            </td>
             <td class="whitespace-nowrap text-center">${l.loc_capacity ? formatNumber(l.loc_capacity) : 'Unlimited'}</td>
             <td class="whitespace-nowrap">${l.loc_parent_id || '-'}</td>
             <td class="whitespace-nowrap">${l.loc_department_code || '-'}</td>
             <td class="whitespace-nowrap">
-                <span class="badge ${l.loc_is_active ? 'badge-success' : 'badge-error'} badge-sm text-white">
+                <span class="badge ${l.loc_is_active ? 'badge-success' : 'badge-error'} badge-sm text-white gap-1">
+                    <i class='bx ${l.loc_is_active ? 'bx-check-circle' : 'bx-x-circle'}'></i>
                     ${l.loc_is_active ? 'Active' : 'Inactive'}
                 </span>
             </td>
             <td class="whitespace-nowrap">${formatDate(l.loc_created_at)}</td>
+            <td class="whitespace-nowrap">
+                <div class="flex gap-2">
+                    <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50 view-location-btn" 
+                            title="View Details" data-id="${l.loc_id}">
+                        <i class='bx bx-show-alt text-xl'></i>
+                    </button>
+                    ${!l.is_virtual_warehouse ? `
+                    <button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50 edit-location-btn" 
+                            title="Edit Location" data-id="${l.loc_id}">
+                        <i class='bx bx-edit text-xl'></i>
+                    </button>
+                    <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50 delete-location-btn" 
+                            title="Delete Location" data-id="${l.loc_id}">
+                        <i class='bx bx-trash text-xl'></i>
+                    </button>
+                    ` : `
+                    <button class="text-gray-300 p-2 rounded-lg cursor-not-allowed" title="Managed in Warehouse Module" disabled>
+                        <i class='bx bx-edit text-xl'></i>
+                    </button>
+                    <button class="text-gray-300 p-2 rounded-lg cursor-not-allowed" title="Managed in Warehouse Module" disabled>
+                        <i class='bx bx-trash text-xl'></i>
+                    </button>
+                    `}
+                </div>
+            </td>
         </tr>
-    `).join('');
+    `}).join('');
 
     els.locationsTableBody.innerHTML = html;
     renderLocationsPager(total, totalPages);
 
     // Add event listeners to action buttons
     els.locationsTableBody.querySelectorAll('.view-location-btn').forEach(btn => {
-        btn.addEventListener('click', () => notify('View Location feature coming soon: ' + btn.dataset.id));
+        btn.addEventListener('click', () => {
+            const locationId = btn.dataset.id;
+            const location = locations.find(l => l.loc_id === locationId);
+            if(location) {
+                els.viewLocationContent.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><span class="font-bold text-gray-600">Location ID:</span> <span class="font-mono">${location.loc_id}</span></div>
+                        <div><span class="font-bold text-gray-600">Name:</span> ${location.loc_name}</div>
+                        <div><span class="font-bold text-gray-600">Type:</span> ${location.loc_type}</div>
+                        <div><span class="font-bold text-gray-600">Zone Type:</span> ${location.loc_zone_type}</div>
+                        <div><span class="font-bold text-gray-600">Capacity:</span> ${location.loc_capacity || 'Unlimited'}</div>
+                        <div><span class="font-bold text-gray-600">Fixed Asset Support:</span> ${location.loc_supports_fixed_items ? 'Yes' : 'No'}</div>
+                        <div><span class="font-bold text-gray-600">Parent Location:</span> ${location.loc_parent_id || 'None'}</div>
+                        <div><span class="font-bold text-gray-600">Department:</span> ${location.loc_department_code || 'None'}</div>
+                        <div><span class="font-bold text-gray-600">Status:</span> <span class="badge ${location.loc_is_active ? 'badge-success' : 'badge-error'} badge-sm text-white">${location.loc_is_active ? 'Active' : 'Inactive'}</span></div>
+                        <div><span class="font-bold text-gray-600">Created At:</span> ${formatDate(location.loc_created_at)}</div>
+                    </div>
+                `;
+                els.viewLocationModal.classList.remove('hidden');
+            }
+        });
     });
     
     els.locationsTableBody.querySelectorAll('.edit-location-btn').forEach(btn => {
-        btn.addEventListener('click', () => notify('Edit Location feature coming soon: ' + btn.dataset.id));
+        btn.addEventListener('click', () => openEditLocationModal(btn.dataset.id));
     });
     
     els.locationsTableBody.querySelectorAll('.delete-location-btn').forEach(btn => {
-        btn.addEventListener('click', () => notify('Delete Location feature coming soon: ' + btn.dataset.id));
+        btn.addEventListener('click', () => deleteLocation(btn.dataset.id));
     });
+}
+
+function closeAddLocationModalFunc() {
+    els.addLocationModal.classList.add('hidden');
+    if(els.addLocationForm) els.addLocationForm.reset();
 }
 
 function renderLocationsPager(total, totalPages) {
@@ -1974,7 +2389,16 @@ function closeViewCategoriesModalFunc() {
 }
 
 async function fetchCategoriesForTable() {
-    els.categoriesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Loading categories...</td></tr>';
+    els.categoriesTableBody.innerHTML = `
+        <tr>
+            <td colspan="4" class="text-center py-8">
+                <div class="flex justify-center items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span class="ml-2 text-gray-600">Loading categories...</span>
+                </div>
+            </td>
+        </tr>
+    `;
     try {
         const response = await fetch(SWS_CATEGORIES_API, {
             method: 'GET',
@@ -2027,8 +2451,16 @@ function renderCategoriesTable() {
         <tr>
             <td class="whitespace-nowrap font-mono">${c.cat_id || 'N/A'}</td>
             <td class="whitespace-nowrap font-semibold">${c.cat_name || 'N/A'}</td>
-            <td class="whitespace-nowrap">${c.cat_description || '-'}</td>
+            <td class="whitespace-nowrap max-w-xs truncate" title="${c.cat_description || ''}">${c.cat_description || '-'}</td>
             <td class="whitespace-nowrap">${formatDate(c.cat_created_at)}</td>
+            <td class="whitespace-nowrap">
+                <button class="btn btn-xs btn-info text-white mr-1" onclick="openEditCategoryModal('${c.cat_id}')">
+                    <i class='bx bx-edit'></i>
+                </button>
+                <button class="btn btn-xs btn-error text-white" onclick="deleteCategory('${c.cat_id}')">
+                    <i class='bx bx-trash'></i>
+                </button>
+            </td>
         </tr>
     `).join('');
 
@@ -2045,6 +2477,125 @@ function renderCategoriesPager(total, totalPages) {
     if (els.categoriesPrevBtn) els.categoriesPrevBtn.disabled = currentCategoriesPage <= 1;
     if (els.categoriesNextBtn) els.categoriesNextBtn.disabled = currentCategoriesPage >= totalPages;
 }
+
+function openAddCategoryModal() {
+    if (els.addCategoryForm) els.addCategoryForm.reset();
+    document.getElementById('edit_cat_id').value = '';
+    document.querySelector('#addCategoryModal h3').textContent = 'Add New Category';
+    document.querySelector('#addCategoryModal button[type="submit"]').textContent = 'Save Category';
+    if (els.addCategoryModal) els.addCategoryModal.classList.remove('hidden');
+}
+
+function openEditCategoryModal(id) {
+    const cat = categories.find(c => c.cat_id === id);
+    if (!cat) return;
+
+    document.getElementById('edit_cat_id').value = cat.cat_id;
+    document.getElementById('new_cat_name').value = cat.cat_name;
+    document.getElementById('new_cat_description').value = cat.cat_description || '';
+    
+    document.querySelector('#addCategoryModal h3').textContent = 'Edit Category';
+    document.querySelector('#addCategoryModal button[type="submit"]').textContent = 'Update Category';
+    
+    if (els.addCategoryModal) els.addCategoryModal.classList.remove('hidden');
+}
+
+function closeAddCategoryModalFunc() {
+    if (els.addCategoryModal) els.addCategoryModal.classList.add('hidden');
+}
+
+async function saveCategory(e) {
+    e.preventDefault();
+    const nameInput = document.getElementById('new_cat_name');
+    const descInput = document.getElementById('new_cat_description');
+    const idInput = document.getElementById('edit_cat_id');
+    
+    if (!nameInput) return;
+    
+    const name = nameInput.value.trim();
+    const description = descInput ? descInput.value.trim() : '';
+    const id = idInput ? idInput.value : '';
+    
+    if (!name) return;
+
+    const url = id ? `${SWS_CATEGORIES_API}/${id}` : SWS_CATEGORIES_API;
+    const method = id ? 'PUT' : 'POST';
+    const successMsg = id ? 'Category updated successfully' : 'Category added successfully';
+    const errorMsg = id ? 'Error updating category' : 'Error adding category';
+
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            body: JSON.stringify({ cat_name: name, cat_description: description }),
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+
+        if (result.success) {
+            notify(successMsg, 'success');
+            closeAddCategoryModalFunc();
+            fetchCategoriesForTable();
+        } else {
+            notify(result.message || errorMsg, 'error');
+        }
+    } catch (e) {
+        console.error(errorMsg + ':', e);
+        notify(errorMsg, 'error');
+    }
+}
+
+async function deleteCategory(id) {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!result.isConfirmed) return;
+    
+    try {
+        const response = await fetch(`${SWS_CATEGORIES_API}/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+
+        if (result.success) {
+            notify('Category deleted successfully', 'success');
+            fetchCategoriesForTable();
+        } else {
+            notify(result.message || 'Error deleting category', 'error');
+        }
+    } catch (e) {
+        console.error('Error deleting category:', e);
+        notify('Error deleting category', 'error');
+    }
+}
+
+// Expose functions to global scope for onclick handlers
+window.openEditCategoryModal = openEditCategoryModal;
+window.deleteCategory = deleteCategory;
 
 function openTransferModal() {
     els.transferItemModal.classList.remove('hidden');

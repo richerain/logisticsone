@@ -15,6 +15,10 @@ class Category extends Model
 
     protected $primaryKey = 'cat_id';
 
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     public $timestamps = false;
 
     protected $fillable = [

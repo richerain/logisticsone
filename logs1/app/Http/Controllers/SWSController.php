@@ -386,9 +386,33 @@ class SWSController extends Controller
         return response()->json($result, $result['success'] ? 200 : 500);
     }
 
-    public function getLocations()
+    public function createCategory(Request $request)
     {
-        $result = $this->swsService->getAllLocations();
+        $validated = $request->validate([
+            'cat_name' => ['required', 'string', 'max:100', 'unique:sws.sws_categories,cat_name'],
+            'cat_description' => ['nullable', 'string'],
+        ]);
+
+        $result = $this->swsService->createCategory($validated);
+
+        return response()->json($result, $result['success'] ? 201 : 500);
+    }
+
+    public function updateCategory(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'cat_name' => ['sometimes', 'string', 'max:100'],
+            'cat_description' => ['nullable', 'string'],
+        ]);
+
+        $result = $this->swsService->updateCategory($id, $validated);
+
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    public function deleteCategory($id)
+    {
+        $result = $this->swsService->deleteCategory($id);
 
         return response()->json($result, $result['success'] ? 200 : 500);
     }
@@ -396,17 +420,26 @@ class SWSController extends Controller
     public function createLocation(Request $request)
     {
         $validated = $request->validate([
-            'loc_id' => ['required', 'string', 'max:10', 'unique:sws.sws_locations,loc_id'],
+            'loc_id' => ['required', 'string', 'max:25', 'unique:sws.sws_locations,loc_id'],
             'loc_name' => ['required', 'string', 'max:100'],
-            'loc_type' => ['nullable', 'string', 'max:50'],
-            'loc_zone_type' => ['nullable', 'string', 'max:50'],
+            'loc_type' => ['required', Rule::in(['warehouse', 'storage_room', 'office', 'facility', 'drop_point', 'bin', 'department', 'room'])],
+            'loc_zone_type' => ['required', Rule::in(['liquid', 'illiquid', 'climate_controlled', 'general'])],
             'loc_capacity' => ['nullable', 'integer', 'min:0'],
             'loc_supports_fixed_items' => ['required', 'boolean'],
+            'loc_parent_id' => ['nullable', 'string', 'exists:sws.sws_locations,loc_id'],
+            'loc_is_active' => ['nullable', 'boolean'],
         ]);
 
         $result = $this->swsService->createLocation($validated);
 
         return response()->json($result, $result['success'] ? 201 : 500);
+    }
+
+    public function getLocations()
+    {
+        $result = $this->swsService->getAllLocations();
+
+        return response()->json($result, $result['success'] ? 200 : 500);
     }
 
     public function updateLocation(Request $request, $id)

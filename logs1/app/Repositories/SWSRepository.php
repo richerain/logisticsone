@@ -70,12 +70,33 @@ class SWSRepository
 
     public function getAllCategories()
     {
-        return Category::orderBy('cat_name')->get();
+        return Category::orderBy('cat_created_at', 'desc')->get();
     }
 
     public function getAllLocations()
     {
-        return Location::orderBy('loc_name')->get();
+        $locations = Location::orderBy('loc_name')->get();
+        
+        $warehouses = Warehouse::orderBy('ware_name')->get()->map(function ($w) {
+            $loc = new Location();
+            $loc->loc_id = $w->ware_id;
+            $loc->loc_name = $w->ware_name;
+            $loc->loc_type = 'warehouse';
+            $loc->loc_zone_type = $w->ware_zone_type;
+            $loc->loc_supports_fixed_items = $w->ware_supports_fixed_items;
+            $loc->loc_capacity = $w->ware_capacity;
+            $loc->loc_parent_id = null;
+            $loc->loc_department_code = null;
+            $loc->loc_is_active = $w->ware_status === 'active';
+            $loc->loc_created_at = $w->ware_created_at;
+            
+            // Add a transient property to distinguish if needed
+            $loc->is_virtual_warehouse = true;
+            
+            return $loc;
+        });
+
+        return $locations->concat($warehouses)->sortBy('loc_name')->values();
     }
 
     public function createLocation(array $data)
@@ -227,14 +248,17 @@ class SWSRepository
         return $query->get();
     }
 
+    public function createCategory(array $data)
+    {
+        if (!isset($data['cat_created_at'])) {
+            $data['cat_created_at'] = now();
+        }
+        return Category::create($data);
+    }
+
     public function getCategoryById($id)
     {
         return Category::find($id);
-    }
-
-    public function createCategory(array $data)
-    {
-        return Category::create($data);
     }
 
     public function updateCategory($id, array $data)

@@ -15,6 +15,10 @@ class Location extends Model
 
     protected $primaryKey = 'loc_id';
 
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     public $timestamps = false;
 
     protected $fillable = [
