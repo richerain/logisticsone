@@ -146,18 +146,8 @@
                             <span id="password-error" class="text-red-600 text-sm hidden"></span>
                         </div>
 
-                        <!-- Sign In -->
-                        <button id="sign-in-btn" type="submit" disabled
-                            class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg
-                                    transition-all duration-300 shadow-lg
-                                    transform active:translate-y-0 active:scale-[0.99]
-                                    opacity-60 cursor-not-allowed">
-                            <span id="loginText">Sign In</span>
-                            <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
-                        </button>
-
                         <!-- Terms checkbox below button -->
-                        <div class="mt-4 flex items-start gap-3">
+                        <div class="mt-4 mb-4 flex items-start gap-3">
                             <input id="terms-check" name="agree" type="checkbox"
                             class="mt-1 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary transition">
                             <label for="terms-check" class="text-sm text-gray-700 leading-relaxed select-none">
@@ -169,10 +159,27 @@
                             </label>
                         </div>
                         <span id="agree-error" class="text-red-600 text-sm hidden"></span>
+
+                        <!-- Sign In -->
+                        <button id="sign-in-btn" type="submit"
+                            class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg
+                                    transition-all duration-300 shadow-lg
+                                    transform active:translate-y-0 active:scale-[0.99] hover:bg-brand-primary-hover">
+                            <span id="loginText">Sign In</span>
+                            <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
+                        </button>
+
+                        <!-- Vendor Login Button -->
+                        <div class="mt-4 text-center">
+                            <a href="/login/vendor-portal" 
+                                class="inline-block text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold text-sm">
+                                Vendor Here!
+                            </a>
+                        </div>
                     </form>
 
                     <div class="text-center mt-8 text-sm">
-                        <p class="text-gray-500">&copy; 2025 Microfinance Logistics. All Rights Reserved.</p>
+                        <p class="text-gray-500">&copy; 2026 Microfinance Logistics. All Rights Reserved.</p>
                     </div>
                 </div>
             </section>

@@ -8,78 +8,172 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "brand-primary": "#059669",
+                        "brand-primary-hover": "#047857",
+                        "brand-background-main": "#F0FDF4",
+                        "brand-border": "#D1FAE5",
+                        "brand-text-primary": "#1F2937",
+                        "brand-text-secondary": "#4B5563",
+                    },
+                    keyframes: {
+                        float: {
+                            "0%, 100%": { transform: "translateY(0) translateX(0)" },
+                            "25%": { transform: "translateY(-20px) translateX(10px)" },
+                            "50%": { transform: "translateY(-40px) translateX(0)" },
+                            "75%": { transform: "translateY(-20px) translateX(-10px)" },
+                        },
+                        "float-reverse": {
+                            "0%, 100%": { transform: "translateY(0) translateX(0)" },
+                            "33%": { transform: "translateY(25px) translateX(-15px)" },
+                            "66%": { transform: "translateY(10px) translateX(15px)" },
+                        }
+                    },
+                    animation: {
+                        float: "float 6s ease-in-out infinite",
+                        "float-delayed": "float 6s ease-in-out 3s infinite",
+                        "float-reverse": "float-reverse 7s ease-in-out infinite",
+                        "float-reverse-fast": "float-reverse 5s ease-in-out infinite",
+                        "float-fast": "float 5s ease-in-out infinite",
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
-    <main class="flex items-center justify-center min-h-screen bg-green-700 p-6">
-        <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
-            <div class="md:w-1/2 bg-gray-900 p-8 flex items-center justify-center">
-                <div class="text-center">
-                    <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Vendors Logo" class="w-20 h-20 sm:w-24 sm:h-24 md:w-40 md:h-40 lg:w-56 lg:h-56 mx-auto mb-4 object-contain" />
-                    <h3 class="text-xl md:text-2xl lg:text-3xl font-bold text-white">Microfinancial Vendors</h3>
-                    <p class="text-xs sm:text-sm text-green-100 mt-2">Secure access to Vendors Portal.</p>
+    <main class="flex items-center justify-center min-h-screen bg-brand-primary p-6 relative overflow-hidden">
+        <!-- Floating Shapes Background -->
+        <div class="absolute inset-0 z-0 pointer-events-none">
+            <div class="shape absolute w-72 h-72 top-[5%] left-[-5%] bg-white/5 rounded-full animate-float"></div>
+            <div class="shape shape-2 absolute w-96 h-96 bottom-[-20%] left-[15%] bg-white/5 rounded-full animate-float-delayed"></div>
+            <div class="shape shape-3 absolute w-80 h-80 top-[-15%] right-[-10%] bg-white/5 rounded-full animate-float-reverse"></div>
+            <div class="shape shape-4 absolute w-56 h-56 bottom-[5%] right-[10%] bg-white/5 rounded-full animate-float-fast"></div>
+            <div class="shape shape-5 absolute w-48 h-48 top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 bg-white/5 rounded-full animate-float-reverse-fast"></div>
+        </div>
+
+        <div class="w-full max-w-6xl rounded-lg overflow-hidden flex flex-col lg:flex-row relative z-10">
+            <!-- Left Panel -->
+            <section class="hidden lg:flex w-1/2 items-center justify-center p-6 text-white bg-brand-primary/10">
+                <div class="flex flex-col items-center w-full py-4">
+                    <div class="text-center">
+                        <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Vendors Logo" class="w-20 h-20 mx-auto">
+                        <h1 class="text-3xl font-bold mt-4">Microfinance Vendors</h1>
+                        <p class="text-white/80">Vendor Portal</p>
+                    </div>
+
+                    <!-- Illustration Carousel -->
+                    <div class="relative w-full max-w-2xl h-64 my-4">
+                        <img src="{{ asset('storage/login-carousel/illustration-1.svg') }}" alt="Illustration 1" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-100">
+                        <img src="{{ asset('storage/login-carousel/illustration-2.svg') }}" alt="Illustration 2" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                        <img src="{{ asset('storage/login-carousel/illustration-3.svg') }}" alt="Illustration 3" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                        <img src="{{ asset('storage/login-carousel/illustration-4.svg') }}" alt="Illustration 4" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                        <img src="{{ asset('storage/login-carousel/illustration-5.svg') }}" alt="Illustration 5" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                    </div>
+
+                    <div class="text-center mt-4 max-w-xl">
+                        <p class="italic text-white/90 text-base leading-relaxed">
+                            “The strength of the team is each individual member. The strength of each member is the team.”
+                        </p>
+                        <cite class="block text-right mt-2 text-white/60">- Phil Jackson</cite>
+                    </div>
                 </div>
-            </div>
-            <div class="md:w-1/2 p-8">
-                <h2 class="text-3xl font-bold text-gray-700 text-center">Vendor Login</h2>
-                <p class="text-center text-gray-600 mb-6">Enter your vendor credentials to access the portal.</p>
+            </section>
 
-                <form id="loginForm" class="space-y-4" novalidate>
-                    @csrf
-                    <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden" role="alert">
-                        <div class="flex items-center">
-                            <i class='bx bxs-error-circle text-red-600 mr-2'></i>
-                            <span id="login-error-message" class="text-red-600 text-sm">Login failed. Please check your credentials and try again.</span>
-                        </div>
+            <!-- Right Panel: Login Card -->
+            <section class="w-full lg:w-1/2 flex items-center justify-center p-8">
+                <div class="bg-white/90 w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8">
+                    <div class="text-center mb-6">
+                        <h2 class="text-3xl font-bold text-brand-text-primary">Vendor Portal</h2>
+                        <p class="text-brand-text-secondary mt-1">Please enter your details to sign in.</p>
                     </div>
 
-                    <label class="block">
-                        <span class="text-gray-700">Email</span>
-                        <div class="relative mt-1">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="bx bxs-envelope text-gray-400 text-lg" aria-hidden="true"></i>
-                            </span>
-                            <input type="email" name="email" id="email" placeholder="mail@site.com" class="input input-bordered w-full pl-10 mt-0" aria-label="Email address" required/>
+                    <form id="loginForm" class="space-y-4" novalidate>
+                        @csrf
+                        <!-- login failed alert start -->
+                        <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden mb-4" role="alert">
+                            <div class="flex items-center">
+                                <i class='bx bxs-error-circle text-red-600 mr-2'></i>
+                                <span id="login-error-message" class="text-red-600 text-sm">Login failed. Please check your credentials and try again.</span>
+                            </div>
                         </div>
-                        <span id="email-error" class="text-red-600 text-sm hidden"></span>
-                    </label>
+                        <!-- login failed alert end -->
 
-                    <label class="block relative">
-                        <span class="text-gray-700">Password</span>
-                        <div class="relative mt-1">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="bx bxs-lock text-gray-400 text-lg" aria-hidden="true"></i>
-                            </span>
-                            <input id="password" name="password" type="password" placeholder="Password" class="input input-bordered w-full pl-10 pr-12 mt-0" aria-label="Password" required/>
-                            <button type="button" onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500" aria-pressed="false" aria-label="Show password">
-                                <i class="bx bx-show-alt text-lg"></i>
+                        <!-- Email -->
+                        <div class="relative mb-4">
+                            <label class="block text-sm font-medium text-gray-700" for="email">Email Address</label>
+                            <div class="mt-1 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class='bx bx-at text-gray-400 text-lg'></i>
+                                </div>
+                                <input type="email" name="email" id="email" placeholder="mail@site.com" 
+                                    class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm
+                                            focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
+                                            transition-all duration-200"
+                                    aria-label="Email address" required/>
+                            </div>
+                            <span id="email-error" class="text-red-600 text-sm hidden"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="relative mb-4">
+                            <label class="block text-sm font-medium text-gray-700" for="password">Password</label>
+                            <div class="mt-1 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class='bx bx-lock-alt text-gray-400 text-lg'></i>
+                                </div>
+                                <input id="password" name="password" type="password" placeholder="Password" 
+                                    class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm
+                                            focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
+                                            transition-all duration-200"
+                                    aria-label="Password" required/>
+                                <div id="password-toggle" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer select-none transition-transform duration-150" onclick="togglePassword(this)">
+                                    <i id="password-icon" class='bx bx-show-alt text-xl text-gray-400 hover:text-brand-primary transition-colors'></i>
+                                </div>
+                            </div>
+                            <span id="password-error" class="text-red-600 text-sm hidden"></span>
+                        </div>
+
+                        <!-- Terms checkbox -->
+                        <div class="mt-4 mb-4 flex items-start gap-3">
+                            <input id="agree" name="agree" type="checkbox"
+                            class="mt-1 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary transition" required />
+                            <label for="agree" class="text-sm text-gray-700 leading-relaxed select-none">
+                            I agree to the
+                            <button id="terms-link" type="button"
+                                class="text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold">
+                                Terms &amp; Conditions
                             </button>
+                            </label>
                         </div>
-                        <span id="password-error" class="text-red-600 text-sm hidden"></span>
-                    </label>
+                        <span id="agree-error" class="text-red-600 text-sm hidden"></span>
 
-                    <div class="flex items-center justify-between">
-                        <label for="agree" class="flex items-center space-x-2 cursor-pointer">
-                            <input id="agree" name="agree" type="checkbox" class="checkbox h-4 w-4 md:h-5 md:w-5 shrink-0 align-middle" aria-checked="false" required />
-                            <span class="text-sm text-gray-600 leading-tight">
-                                I have read and agree to the
-                                <a href="#" id="terms-link" class="text-purple-600 hover:underline">Terms &amp; Conditions</a>
-                            </span>
-                        </label>
-                    </div>
-                    <span id="agree-error" class="text-red-600 text-sm hidden"></span>
+                        <!-- Sign In Button -->
+                        <button type="submit" id="loginBtn" 
+                            class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg
+                                    transition-all duration-300 shadow-lg
+                                    transform active:translate-y-0 active:scale-[0.99]">
+                            <span id="loginText">Sign In</span>
+                            <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
+                        </button>
+                        
+                        <div class="mt-4 text-center">
+                            <a href="/login" class="inline-block text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold text-sm">Employee Here!</a>
+                        </div>
+                    </form>
 
-                    <button type="submit" id="loginBtn" class="btn btn-primary w-full">
-                        <span id="loginText">Login</span>
-                        <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
-                    </button>
-                    <div class="mt-2 ml-4 text-left">
-                        <a href="/login" class="text-purple-600 hover:underline text-sm">Login Employee Account?</a>
+                    <div class="text-center mt-8 text-sm">
+                        <p class="text-gray-500">&copy; 2026 Microfinance Logistics. All Rights Reserved.</p>
                     </div>
-                </form>
-            </div>
+                </div>
+            </section>
         </div>
     </main>
 
