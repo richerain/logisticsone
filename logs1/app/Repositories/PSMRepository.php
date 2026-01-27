@@ -42,7 +42,13 @@ class PSMRepository
      */
     public function getPurchases($filters = [])
     {
-        return Purchase::orderBy('created_at', 'desc')->get();
+        $query = Purchase::orderBy('created_at', 'desc');
+
+        if (! empty($filters['status'])) {
+            $query->where('pur_status', $filters['status']);
+        }
+
+        return $query->get();
     }
 
     public function getApprovedPurchasesWithoutQuote()

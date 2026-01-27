@@ -185,10 +185,14 @@
             </button>
         </div>
         <form id="addItemForm">
+            <input type="hidden" id="psm_purchase_id" name="psm_purchase_id">
+            <input type="hidden" id="psm_item_index" name="psm_item_index">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
-                    <input type="text" id="item_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select id="item_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Select Item from Completed Purchase</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
@@ -196,12 +200,12 @@
                     <p class="text-xs text-gray-500 mt-1">Product variant identifier (e.g., MF-LAPTOP-BLACK-16GB)</p>
                 </div>
             </div>
-            <div class="mb-4">
+            <div class="mb-4" style="display:none">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea id="item_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
+                <div style="display:none">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
                     <select id="item_category_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Select Category</option>
@@ -233,7 +237,7 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
+                <div style="display:none">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Current Stock *</label>
                     <input type="number" id="item_current_stock" required min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
@@ -243,7 +247,7 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
+                <div style="display:none">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (₱) *</label>
                     <input type="number" id="item_unit_price" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0.00">
                 </div>
@@ -253,7 +257,7 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
+                <div style="display:none">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Warranty End</label>
                     <input type="date" id="item_warranty_end" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
@@ -268,7 +272,7 @@
                     <label class="text-sm font-medium text-gray-700">Is Collateral</label>
                 </div>
             </div>
-            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <div class="bg-gray-50 p-4 rounded-lg mb-4" style="display:none">
                 <h4 class="font-semibold text-gray-700 mb-2">Item Code Information</h4>
                 <p class="text-sm text-gray-600">Item Code will be auto-generated as: <span id="itemCodePreview" class="font-mono font-bold">ITMYYYYMMDDRRRRR</span></p>
                 <p class="text-xs text-gray-500 mt-1">Format: ITM + Year + Month + Day + 5 random alphanumeric characters</p>
@@ -810,7 +814,9 @@
 <script>
 var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php echo url('/api/v1'); ?>';
 var SWS_DIGITAL_INVENTORY_API = `${API_BASE_URL}/sws/digital-inventory`;
+var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
 var SWS_ITEMS_API = `${API_BASE_URL}/sws/items`;
+var completedPurchases = [];
 var SWS_CATEGORIES_API = `${API_BASE_URL}/sws/categories`;
 var SWS_WAREHOUSES_API = `${API_BASE_URL}/sws/warehouse`;
 var SWS_INVENTORY_STATS_API = `${API_BASE_URL}/sws/inventory-stats`;
@@ -818,7 +824,14 @@ var SWS_STOCK_LEVELS_API = `${API_BASE_URL}/sws/stock-levels`;
 var SWS_LOCATIONS_API = `${API_BASE_URL}/sws/locations`;
 var SWS_DIGITAL_INVENTORY_REPORT_API = `${API_BASE_URL}/sws/digital-inventory/report`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
+// Prioritize server-injected token, then global window token, then localStorage
+var JWT_TOKEN = '{{ $jwtToken ?? "" }}';
+if (!JWT_TOKEN && typeof window.SERVER_JWT_TOKEN !== 'undefined') {
+    JWT_TOKEN = window.SERVER_JWT_TOKEN;
+}
+if (!JWT_TOKEN) {
+    JWT_TOKEN = localStorage.getItem('jwt');
+}
 
 var inventoryItems = [];
 let currentDiPage = 1;
@@ -1453,36 +1466,165 @@ function closeUnderDevelopmentModal() {
     els.underDevelopmentModal.classList.add('hidden');
 }
 
+async function fetchCompletedPurchases() {
+    try {
+        const response = await fetch(`${PSM_PURCHASES_API}?status=Completed`, {
+             headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            }
+        });
+        const result = await response.json();
+        if (result.success) {
+            completedPurchases = result.data;
+            populateItemNameDropdown();
+        }
+    } catch (e) {
+        console.error('Error fetching purchases:', e);
+    }
+}
+
+function populateItemNameDropdown() {
+    const select = document.getElementById('item_name');
+    if (!select) return;
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">Select Item from Completed Purchase</option>';
+    
+    completedPurchases.forEach(purchase => {
+        let items = [];
+        try {
+            items = typeof purchase.pur_name_items === 'string' ? JSON.parse(purchase.pur_name_items) : purchase.pur_name_items;
+        } catch(e) { items = []; }
+        if (!Array.isArray(items)) items = [];
+        
+        items.forEach((item, index) => {
+             // Skip if already added to inventory
+             if (item.in_inventory) return;
+
+             const option = document.createElement('option');
+             option.value = `${purchase.pur_id}|${index}`;
+             option.textContent = `${item.name} (PO: ${purchase.pur_id})`;
+             option.dataset.purchaseId = purchase.pur_id;
+             option.dataset.itemIndex = index;
+             option.dataset.itemName = item.name;
+             select.appendChild(option);
+        });
+    });
+    if (currentVal) select.value = currentVal;
+}
+
+function onPurchaseItemSelected(e) {
+    const val = e.target.value;
+    const skuInput = document.getElementById('item_stock_keeping_unit');
+    const categorySelect = document.getElementById('item_category_id');
+    
+    // Clear hidden fields initially
+    document.getElementById('psm_purchase_id').value = '';
+    document.getElementById('psm_item_index').value = '';
+    
+    if (!val) return;
+    
+    const [purId, itemIndex] = val.split('|');
+    
+    // Set hidden fields
+    document.getElementById('psm_purchase_id').value = purId;
+    document.getElementById('psm_item_index').value = itemIndex;
+
+    const purchase = completedPurchases.find(p => p.pur_id === purId);
+    if (!purchase) return;
+    
+    let items = typeof purchase.pur_name_items === 'string' ? JSON.parse(purchase.pur_name_items) : purchase.pur_name_items;
+    const item = items[parseInt(itemIndex)];
+    
+    if (item) {
+         document.getElementById('item_description').value = purchase.pur_desc || '';
+         document.getElementById('item_current_stock').value = purchase.pur_unit || 0;
+         document.getElementById('item_unit_price').value = purchase.pur_total_amount || 0;
+
+         // Populate Expiration Date
+         const expInput = document.getElementById('item_expiration_date');
+         if (item.expiration) {
+             expInput.value = item.expiration.split('T')[0];
+         } else {
+             expInput.value = '';
+         }
+
+         // Populate Warranty End
+         const warrantyInput = document.getElementById('item_warranty_end');
+         if (item.warranty) {
+             if (item.warranty.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                 warrantyInput.value = item.warranty;
+             } else {
+                 const startDate = new Date(purchase.created_at || Date.now());
+                 const warrantyStr = item.warranty.toLowerCase();
+                 let monthsToAdd = 0;
+                 if (warrantyStr.includes('year')) {
+                     const years = parseInt(warrantyStr) || 0;
+                     monthsToAdd = years * 12;
+                 } else if (warrantyStr.includes('month')) {
+                     monthsToAdd = parseInt(warrantyStr) || 0;
+                 } else if (warrantyStr.includes('day')) {
+                     const days = parseInt(warrantyStr) || 0;
+                     startDate.setDate(startDate.getDate() + days);
+                 }
+                 if (monthsToAdd > 0) {
+                     startDate.setMonth(startDate.getMonth() + monthsToAdd);
+                 }
+                 if (monthsToAdd > 0 || warrantyStr.includes('day')) {
+                     warrantyInput.value = startDate.toISOString().split('T')[0];
+                 } else {
+                     warrantyInput.value = '';
+                 }
+             }
+         } else {
+             warrantyInput.value = '';
+         }
+         
+         if (purchase.pur_ven_type) {
+             for (let i = 0; i < categorySelect.options.length; i++) {
+                 const opt = categorySelect.options[i];
+                 if (opt.text.toLowerCase().includes(purchase.pur_ven_type.toLowerCase())) {
+                     categorySelect.value = opt.value;
+                     break;
+                 }
+             }
+         }
+         
+         if (!skuInput.value) {
+             const categoryName = categorySelect.options[categorySelect.selectedIndex]?.text || '';
+             skuInput.value = generateSKU(item.name, categoryName);
+         }
+    }
+}
+
 function openAddItemModal() {
     els.addItemModal.classList.remove('hidden');
-    // Reset form
     els.addItemForm.reset();
     document.getElementById('item_is_fixed').checked = false;
     document.getElementById('item_is_collateral').checked = false;
     
-    // Update item code preview
     updateItemCodePreview();
     
-    // Auto-generate SKU based on item name if empty
-    const itemNameInput = document.getElementById('item_name');
+    fetchCompletedPurchases();
+    
+    const itemNameSelect = document.getElementById('item_name');
     const skuInput = document.getElementById('item_stock_keeping_unit');
     
-    itemNameInput.addEventListener('input', function() {
-        if (!skuInput.value) {
-            const categorySelect = document.getElementById('item_category_id');
-            const categoryName = categorySelect.options[categorySelect.selectedIndex]?.text || '';
-            skuInput.value = generateSKU(this.value, categoryName);
-        }
-    });
+    itemNameSelect.onchange = onPurchaseItemSelected;
     
-    // Also generate SKU when category changes
     const categorySelect = document.getElementById('item_category_id');
-    categorySelect.addEventListener('change', function() {
-        if (!skuInput.value && itemNameInput.value) {
-            const categoryName = this.options[this.selectedIndex]?.text || '';
-            skuInput.value = generateSKU(itemNameInput.value, categoryName);
+    categorySelect.onchange = function() {
+        if (!skuInput.value && itemNameSelect.value) {
+             const selectedOption = itemNameSelect.options[itemNameSelect.selectedIndex];
+             const itemName = selectedOption ? (selectedOption.dataset.itemName || selectedOption.text) : '';
+             const categoryName = this.options[this.selectedIndex]?.text || '';
+             if (itemName) {
+                skuInput.value = generateSKU(itemName, categoryName);
+             }
         }
-    });
+    };
 }
 
 function closeAddItemModal() {
@@ -1509,9 +1651,18 @@ function closeEditItemModal() {
 async function saveItem(e) {
     e.preventDefault();
     
-    const itemName = document.getElementById('item_name').value.trim();
+    const itemNameSelect = document.getElementById('item_name');
+    if (!itemNameSelect.value) {
+        notify('Please select an item', 'error');
+        return;
+    }
+    const selectedOption = itemNameSelect.options[itemNameSelect.selectedIndex];
+    const itemName = selectedOption ? (selectedOption.dataset.itemName || selectedOption.text) : '';
+
     const formData = {
         item_name: itemName,
+        psm_purchase_id: document.getElementById('psm_purchase_id').value || null,
+        psm_item_index: document.getElementById('psm_item_index').value || null,
         item_description: document.getElementById('item_description').value.trim() || null,
         item_stock_keeping_unit: document.getElementById('item_stock_keeping_unit').value.trim() || null,
         item_category_id: document.getElementById('item_category_id').value || null,

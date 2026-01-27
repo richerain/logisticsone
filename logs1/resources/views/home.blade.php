@@ -13,6 +13,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.js"></script>
     <!-- Add CSRF Token Meta Tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        // Inject JWT Token from server session if available
+        window.SERVER_JWT_TOKEN = '{{ $jwtToken ?? "" }}';
+        if (window.SERVER_JWT_TOKEN) {
+            localStorage.setItem('jwt', window.SERVER_JWT_TOKEN);
+        }
+    </script>
     <style>
         /* Custom scrollbar for sidebar */
         .sidebar-scrollbar {

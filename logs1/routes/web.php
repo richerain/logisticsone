@@ -113,13 +113,21 @@ Route::get('/login', function (Request $request) {
                 return response()->view('components.module-under-construction', ['module' => $module], 404);
             }
 
+            // Generate JWT Token for API access
+            $jwtToken = '';
+            if (Auth::guard('sws')->check()) {
+                $user = Auth::guard('sws')->user();
+                $authService = app(\App\Services\AuthService::class);
+                $jwtToken = $authService->generateTokenForUser($user);
+            }
+
             // If it's an AJAX request, return just the module content
             if (request()->ajax()) {
-                return view($view);
+                return view($view, ['jwtToken' => $jwtToken]);
             }
 
             // If it's a direct browser request, return the full home page with the module loaded
-            return view('home');
+            return view('home', ['jwtToken' => $jwtToken]);
         })->name('module.load');
 
         Route::get('/alms/assets', [ALMSController::class, 'getAssets'])->name('alms.assets.index');

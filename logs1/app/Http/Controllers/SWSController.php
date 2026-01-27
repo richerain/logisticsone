@@ -342,6 +342,8 @@ class SWSController extends Controller
             'item_liquidity_risk_level' => ['required', Rule::in(['high', 'medium', 'low'])],
             'item_is_collateral' => ['nullable', 'boolean'],
             'item_code' => ['nullable', 'string', 'max:20', 'unique:sws.sws_items,item_code'],
+            'psm_purchase_id' => ['nullable', 'string'],
+            'psm_item_index' => ['nullable', 'integer'],
         ]);
 
         $result = $this->swsService->createItem($validated);

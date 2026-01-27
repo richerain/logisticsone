@@ -5,14 +5,17 @@ namespace App\Services;
 use App\Repositories\SWSRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\PSMService;
 
 class SWSService
 {
     protected $swsRepository;
+    protected $psmService;
 
-    public function __construct(SWSRepository $swsRepository)
+    public function __construct(SWSRepository $swsRepository, PSMService $psmService)
     {
         $this->swsRepository = $swsRepository;
+        $this->psmService = $psmService;
     }
 
     public function getAllItems()
@@ -74,7 +77,20 @@ class SWSService
                 $data['item_stock_keeping_unit'] = 'SKU-'.date('YmdHis').rand(100, 999);
             }
 
+            // Extract PSM fields if present
+            $psmPurchaseId = $data['psm_purchase_id'] ?? null;
+            $psmItemIndex = $data['psm_item_index'] ?? null;
+            
+            // Remove them from data before sending to repo
+            unset($data['psm_purchase_id']);
+            unset($data['psm_item_index']);
+
             $item = $this->swsRepository->createItem($data);
+
+            // Update PSM if needed
+            if ($psmPurchaseId && $psmItemIndex !== null) {
+                $this->psmService->markItemAsInventory($psmPurchaseId, $psmItemIndex);
+            }
 
             DB::connection('sws')->commit();
 

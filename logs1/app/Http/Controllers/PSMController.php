@@ -39,7 +39,8 @@ class PSMController extends Controller
     public function getPurchases(Request $request)
     {
         try {
-            $result = $this->psmService->getPurchases();
+            $filters = $request->only(['status']);
+            $result = $this->psmService->getPurchases($filters);
 
             return response()->json($result);
         } catch (\Exception $e) {
@@ -96,6 +97,8 @@ class PSMController extends Controller
             'pur_name_items' => 'required|array|min:1',
             'pur_name_items.*.name' => 'required|string|max:255',
             'pur_name_items.*.price' => 'required|numeric|min:0',
+            'pur_name_items.*.warranty' => 'nullable|string|max:255',
+            'pur_name_items.*.expiration' => 'nullable|date',
             'pur_company_name' => 'required|string|max:255',
             'pur_ven_type' => 'required|in:equipment,supplies,furniture,automotive',
             'pur_order_by' => 'nullable|string|max:255',

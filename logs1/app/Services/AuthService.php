@@ -95,6 +95,26 @@ class AuthService
         ];
     }
 
+    public function generateTokenForUser($user)
+    {
+        $secret = config('app.key');
+        if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+            $secret = base64_decode(substr($secret, 7));
+        }
+
+        $expiresAt = Carbon::now()->addHours(2)->timestamp;
+        $payload = [
+            'iss' => config('app.url') ?? 'logs1',
+            'sub' => $user->id,
+            'email' => $user->email,
+            'roles' => $user->roles,
+            'iat' => Carbon::now()->timestamp,
+            'exp' => $expiresAt,
+        ];
+
+        return JWT::encode($payload, $secret, 'HS256');
+    }
+
     public function verifyOtp($email, $otp)
     {
         $user = EmployeeAccount::where('email', $email)->first();

@@ -104,8 +104,10 @@ class PSMService
                             'price' => $product->prod_price,
                             'stock' => $product->prod_stock,
                             'type' => $product->prod_type,
-                            'picture' => $product->prod_picture,
-                        ];
+                'picture' => $product->prod_picture,
+                'warranty' => $product->prod_warranty,
+                'expiration' => $product->prod_expiration,
+            ];
                     }),
                 ];
             });
@@ -130,7 +132,51 @@ class PSMService
     public function getPurchases($filters = [])
     {
         try {
-            $purchases = $this->psmRepository->getPurchases();
+            $purchases = $this->psmRepository->getPurchases($filters);
+
+            // Enrich items with warranty and expiration if missing
+            $allItemNames = [];
+            foreach ($purchases as $purchase) {
+                if (is_array($purchase->pur_name_items)) {
+                    foreach ($purchase->pur_name_items as $item) {
+                        if (isset($item['name'])) {
+                            $allItemNames[] = $item['name'];
+                        }
+                    }
+                }
+            }
+            
+            $products = [];
+            if (!empty($allItemNames)) {
+                $products = Product::whereIn('prod_name', array_unique($allItemNames))
+                    ->get()
+                    ->keyBy('prod_name');
+            }
+
+            $purchases->transform(function ($purchase) use ($products) {
+                $items = $purchase->pur_name_items;
+                if (is_array($items)) {
+                    $updated = false;
+                    foreach ($items as &$item) {
+                        if (isset($item['name']) && $products->has($item['name'])) {
+                            $product = $products->get($item['name']);
+                            if (!isset($item['warranty']) || $item['warranty'] === null) {
+                                $item['warranty'] = $product->prod_warranty;
+                                $updated = true;
+                            }
+                            if (!isset($item['expiration']) || $item['expiration'] === null) {
+                                $item['expiration'] = $product->prod_expiration;
+                                $updated = true;
+                            }
+                        }
+                    }
+                    // Explicitly set the attribute to ensure it's included in toArray()/JSON
+                    if ($updated) {
+                        $purchase->pur_name_items = $items;
+                    }
+                }
+                return $purchase;
+            });
 
             return [
                 'success' => true,
@@ -143,6 +189,35 @@ class PSMService
                 'message' => 'Failed to fetch purchases: '.$e->getMessage(),
                 'data' => [],
             ];
+        }
+    }
+
+    /**
+     * Mark a purchase item as added to inventory
+     */
+    public function markItemAsInventory($purchaseId, $itemIndex)
+    {
+        try {
+            $purchase = Purchase::where('pur_id', $purchaseId)->first();
+            if (!$purchase) {
+                return ['success' => false, 'message' => 'Purchase not found'];
+            }
+
+            $items = $purchase->pur_name_items;
+            // The items might be an array of arrays or array of objects depending on how it was decoded/encoded
+            // Since cast is 'array', it should be array of arrays.
+            
+            // Note: The index provided by frontend matches the array index in pur_name_items
+            if (isset($items[$itemIndex])) {
+                $items[$itemIndex]['in_inventory'] = true;
+                $purchase->pur_name_items = $items;
+                $purchase->save();
+                return ['success' => true];
+            }
+
+            return ['success' => false, 'message' => 'Item index not found'];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 

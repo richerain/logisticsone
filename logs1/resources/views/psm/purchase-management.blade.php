@@ -625,7 +625,7 @@ function populateAvailableItems() {
                     <img src="${imageUrl}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
                     <div>
                         <h4 class="font-medium text-gray-900">${item.name}</h4>
-                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock}</p>
+                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock} | Warranty: ${item.warranty || 'N/A'} | Expiration: ${item.expiration ? formatDate(item.expiration) : 'N/A'}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -668,7 +668,7 @@ function filterAvailableItems() {
                     <img src="${imageUrl}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
                     <div>
                         <h4 class="font-medium text-gray-900">${item.name}</h4>
-                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock}</p>
+                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock} | Warranty: ${item.warranty || 'N/A'} | Expiration: ${item.expiration ? formatDate(item.expiration) : 'N/A'}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -697,7 +697,9 @@ function addItemToPurchase(itemId) {
         itemId: item.id,
         name: item.name,
         price: item.price,
-        picture: item.picture
+        picture: item.picture,
+        warranty: item.warranty,
+        expiration: item.expiration
     });
     
     showNotification(`Added ${item.name} to purchase order`, 'success');
@@ -1384,12 +1386,34 @@ function openEditModal(purchase) {
         const itemName = typeof item === 'object' ? item.name : item;
         const itemPrice = typeof item === 'object' ? item.price : 0;
         let itemPicture = typeof item === 'object' ? item.picture : null;
+        let itemWarranty = typeof item === 'object' ? item.warranty : null;
+        let itemExpiration = typeof item === 'object' ? item.expiration : null;
         
-        // Try to find picture in availableItems if missing
-        if (!itemPicture && typeof availableItems !== 'undefined' && availableItems.length > 0) {
-            const foundItem = availableItems.find(i => i.name === itemName);
-            if (foundItem) {
-                itemPicture = foundItem.picture;
+        // Try to find picture and details
+        if (!itemPicture || !itemWarranty || !itemExpiration) {
+            // Check availableItems first
+            if (typeof availableItems !== 'undefined' && availableItems.length > 0) {
+                 const foundItem = availableItems.find(i => i.name === itemName);
+                 if (foundItem) {
+                    if (!itemPicture) itemPicture = foundItem.picture;
+                    if (!itemWarranty) itemWarranty = foundItem.warranty;
+                    if (!itemExpiration) itemExpiration = foundItem.expiration;
+                 }
+            }
+            
+            // If still missing, check activeVendors
+            if ((!itemPicture || !itemWarranty || !itemExpiration) && typeof activeVendors !== 'undefined') {
+                for (const vendor of activeVendors) {
+                    if (vendor.products) {
+                        const product = vendor.products.find(p => p.name === itemName);
+                        if (product) {
+                            if (!itemPicture) itemPicture = product.picture;
+                            if (!itemWarranty) itemWarranty = product.warranty;
+                            if (!itemExpiration) itemExpiration = product.expiration;
+                            break;
+                        }
+                    }
+                }
             }
         }
         
@@ -1398,7 +1422,9 @@ function openEditModal(purchase) {
             itemId: Date.now() + Math.random(), 
             name: itemName,
             price: itemPrice,
-            picture: itemPicture
+            picture: itemPicture,
+            warranty: itemWarranty,
+            expiration: itemExpiration
         };
     });
     
@@ -1442,7 +1468,9 @@ async function handlePurchaseSubmit(e) {
         pur_name_items: selectedItems.map(item => ({
             name: item.name,
             price: parseFloat(item.price),
-            picture: item.picture
+            picture: item.picture,
+            warranty: item.warranty,
+            expiration: item.expiration
         }))
     };
     
@@ -1670,10 +1698,24 @@ function viewPurchase(id) {
         const itemName = typeof item === 'object' ? item.name : item;
         const itemPrice = typeof item === 'object' ? formatCurrency(item.price) : 'N/A';
         let itemPicture = typeof item === 'object' ? item.picture : null;
+        let itemWarranty = typeof item === 'object' ? (item.warranty || 'N/A') : 'N/A';
+        let itemExpiration = typeof item === 'object' ? (item.expiration ? formatDate(item.expiration) : 'N/A') : 'N/A';
         
-        // Try to find picture from active vendors if missing in the item itself
-        if (!itemPicture) {
-            itemPicture = findProductPicture(itemName);
+        // Try to find details from active vendors if missing
+        if ((!itemPicture || itemWarranty === 'N/A' || itemExpiration === 'N/A') && typeof activeVendors !== 'undefined') {
+            for (const vendor of activeVendors) {
+                if (vendor.products) {
+                    const product = vendor.products.find(p => p.name === itemName);
+                    if (product) {
+                        if (!itemPicture) itemPicture = product.picture;
+                        if (itemWarranty === 'N/A') itemWarranty = product.warranty || 'N/A';
+                        if (itemExpiration === 'N/A') itemExpiration = product.expiration ? formatDate(product.expiration) : 'N/A';
+                        // Break if we found everything we need, otherwise keep looking? 
+                        // Assuming unique names, we can break.
+                        break; 
+                    }
+                }
+            }
         }
         
         const imageUrl = itemPicture 
@@ -1688,6 +1730,9 @@ function viewPurchase(id) {
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 truncate">
                     ${itemName}
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    Warranty: ${itemWarranty} | Expiration: ${itemExpiration}
                 </p>
             </div>
             <div class="inline-flex items-center text-sm font-semibold text-gray-900">
