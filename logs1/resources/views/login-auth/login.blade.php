@@ -8,99 +8,174 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "brand-primary": "#059669",
+                        "brand-primary-hover": "#047857",
+                        "brand-background-main": "#F0FDF4",
+                        "brand-border": "#D1FAE5",
+                        "brand-text-primary": "#1F2937",
+                        "brand-text-secondary": "#4B5563",
+                    },
+                    keyframes: {
+                        float: {
+                            "0%, 100%": { transform: "translateY(0) translateX(0)" },
+                            "25%": { transform: "translateY(-20px) translateX(10px)" },
+                            "50%": { transform: "translateY(-40px) translateX(0)" },
+                            "75%": { transform: "translateY(-20px) translateX(-10px)" },
+                        },
+                        "float-reverse": {
+                            "0%, 100%": { transform: "translateY(0) translateX(0)" },
+                            "33%": { transform: "translateY(25px) translateX(-15px)" },
+                            "66%": { transform: "translateY(10px) translateX(15px)" },
+                        }
+                    },
+                    animation: {
+                        float: "float 6s ease-in-out infinite",
+                        "float-delayed": "float 6s ease-in-out 3s infinite",
+                        "float-reverse": "float-reverse 7s ease-in-out infinite",
+                        "float-reverse-fast": "float-reverse 5s ease-in-out infinite",
+                        "float-fast": "float 5s ease-in-out infinite",
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     <!-- Add CSRF Token Meta Tag -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
-    <main class="flex items-center justify-center min-h-screen bg-green-700 p-6">
-        <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
-            <!-- Logo / branding panel start -->
-            <div class="md:w-1/2 bg-gray-900 p-8 flex items-center justify-center">
-                <div class="text-center">
-                    <img src="{{ asset('images/micrologo.png') }}"
-                         alt="Microfinancial Logistics Logo"
-                         class="w-20 h-20 sm:w-24 sm:h-24 md:w-40 md:h-40 lg:w-56 lg:h-56 mx-auto mb-4 object-contain" />
-                    <h3 class="text-xl md:text-2xl lg:text-3xl font-bold text-white">Microfinancial Logistics I</h3>
-                    <p class="text-xs sm:text-sm text-green-100 mt-2">Secure access to Logistics I System.</p>
-                </div>
-            </div>
-            <!-- Logo / branding panel end -->
-            <!-- login form panel start -->
-            <div class="md:w-1/2 p-8">
-                <h2 class="text-3xl font-bold text-gray-700 text-center">Login</h2>
-                <p class="text-center text-gray-600 mb-6">Please enter your credentials to access the system.</p>
+    <main class="flex items-center justify-center min-h-screen bg-brand-primary p-6 relative overflow-hidden">
+        <!-- Floating Shapes Background -->
+        <div class="absolute inset-0 z-0 pointer-events-none">
+            <div class="shape absolute w-72 h-72 top-[5%] left-[-5%] bg-white/5 rounded-full animate-float"></div>
+            <div class="shape shape-2 absolute w-96 h-96 bottom-[-20%] left-[15%] bg-white/5 rounded-full animate-float-delayed"></div>
+            <div class="shape shape-3 absolute w-80 h-80 top-[-15%] right-[-10%] bg-white/5 rounded-full animate-float-reverse"></div>
+            <div class="shape shape-4 absolute w-56 h-56 bottom-[5%] right-[10%] bg-white/5 rounded-full animate-float-fast"></div>
+            <div class="shape shape-5 absolute w-48 h-48 top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 bg-white/5 rounded-full animate-float-reverse-fast"></div>
+        </div>
 
-                <!-- login form start -->
-                <form id="loginForm" class="space-y-4" novalidate>
-                    @csrf <!-- Add CSRF token -->
-                    
+        <div class="w-full max-w-6xl rounded-lg overflow-hidden flex flex-col lg:flex-row relative z-10">
+            <!-- Left Panel -->
+            <section class="hidden lg:flex w-1/2 items-center justify-center p-6 text-white bg-brand-primary/10">
+                <div class="flex flex-col items-center w-full py-4">
+                    <div class="text-center">
+                        <img src="{{ asset('images/micrologo.png') }}" alt="Microfinance Logo" class="w-20 h-20 mx-auto">
+                        <h1 class="text-3xl font-bold mt-4">Microfinance Logistics</h1>
+                        <p class="text-white/80">Logistics I</p>
+                    </div>
+
+                    <!-- Illustration Carousel -->
+                    <div class="relative w-full max-w-2xl h-64 my-4">
+                        <img src="{{ asset('storage/login-carousel/illustration-1.svg') }}" alt="Illustration 1" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-100">
+                        <img src="{{ asset('storage/login-carousel/illustration-2.svg') }}" alt="Illustration 2" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                        <img src="{{ asset('storage/login-carousel/illustration-3.svg') }}" alt="Illustration 3" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                        <img src="{{ asset('storage/login-carousel/illustration-4.svg') }}" alt="Illustration 4" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                        <img src="{{ asset('storage/login-carousel/illustration-5.svg') }}" alt="Illustration 5" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
+                    </div>
+
+                    <div class="text-center mt-4 max-w-xl">
+                        <p class="italic text-white/90 text-base leading-relaxed">
+                            “The strength of the team is each individual member. The strength of each member is the team.”
+                        </p>
+                        <cite class="block text-right mt-2 text-white/60">- Phil Jackson</cite>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Right Panel: Login Card -->
+            <section class="w-full lg:w-1/2 flex items-center justify-center p-8">
+                <div class="bg-white/90 w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8">
+
+                    <div class="text-center mb-6">
+                        <h2 class="text-3xl font-bold text-brand-text-primary">Welcome Back!</h2>
+                        <p class="text-brand-text-secondary mt-1">Please enter your details to sign in.</p>
+                    </div>
+
                     <!-- login failed alert start -->
-                    <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden" role="alert">
+                    <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden mb-4" role="alert">
                         <div class="flex items-center">
                             <i class='bx bxs-error-circle text-red-600 mr-2'></i>
                             <span id="login-error-message" class="text-red-600 text-sm">Login failed. Please check your credentials and try again.</span>
                         </div>
                     </div>
                     <!-- login failed alert end -->
-                    
-                    <!-- email field start -->
-                    <label class="block">
-                        <span class="text-gray-700">Email</span>
-                        <div class="relative mt-1">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="bx bxs-envelope text-gray-400 text-lg" aria-hidden="true"></i>
-                            </span>
-                            <input type="email" name="email" id="email" placeholder="mail@site.com" class="input input-bordered w-full pl-10 mt-0" aria-label="Email address" required/>
-                        </div>
-                        <span id="email-error" class="text-red-600 text-sm hidden"></span>
-                    </label>
-                    <!-- email field end -->
-                    
-                    <!-- password field start -->
-                    <label class="block relative">
-                        <span class="text-gray-700">Password</span>
-                        <div class="relative mt-1">
-                            <!-- left lock icon -->
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="bx bxs-lock text-gray-400 text-lg" aria-hidden="true"></i>
-                            </span>
-                            <input id="password" name="password" type="password" placeholder="Password" class="input input-bordered w-full pl-10 pr-12 mt-0" aria-label="Password" required/>
-                            <!-- toggle show/hide button -->
-                            <button type="button" onclick="togglePassword(this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500" aria-pressed="false" aria-label="Show password">
-                                <i class="bx bx-show-alt text-lg"></i>
-                            </button>
-                        </div>
-                        <span id="password-error" class="text-red-600 text-sm hidden"></span>
-                    </label>
-                    <!-- password field end -->
-                    
-                    <!-- Terms and Conditions checkbox section start-->
-                    <div class="flex items-center justify-between">
-                        <label for="agree" class="flex items-center space-x-2 cursor-pointer">
-                            <input id="agree" name="agree" type="checkbox"
-                                class="checkbox h-4 w-4 md:h-5 md:w-5 shrink-0 align-middle"
-                                aria-checked="false" required />
-                            <span class="text-sm text-gray-600 leading-tight">
-                                I have read and agree to the
-                                <a href="#" id="terms-link" class="text-blue-600 hover:underline">Terms &amp; Conditions</a>
-                            </span>
-                        </label>
-                    </div>
-                    <span id="agree-error" class="text-red-600 text-sm hidden"></span>
-                    <!-- Terms and Conditions checkbox section end -->
 
-                    <button type="submit" id="loginBtn" class="btn btn-primary w-full">
-                        <span id="loginText">Login</span>
-                        <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
-                    </button>
-                    <div class="mt-2 ml-4 text-left">
-                        <a href="/login/vendor-portal" class="text-blue-600 hover:underline text-sm">Login Vendor Account?</a>
+                    <form id="login-form">
+                        @csrf
+                        <!-- Email -->
+                        <div class="relative mb-4">
+                            <label class="block text-sm font-medium text-gray-700" for="email">Email Address</label>
+                            <div class="mt-1 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class='bx bx-at text-gray-400 text-lg'></i>
+                                </div>
+                                <input id="email" name="email" type="email" placeholder="Enter your email"
+                                    class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm
+                                            focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
+                                            transition-all duration-200"
+                                    required />
+                            </div>
+                            <span id="email-error" class="text-red-600 text-sm hidden"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="relative mb-4">
+                            <label class="block text-sm font-medium text-gray-700" for="password">Password</label>
+                            <div class="mt-1 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class='bx bx-lock-alt text-gray-400 text-lg'></i>
+                                </div>
+
+                                <input id="password" name="password" type="password" placeholder="Enter your password"
+                                    class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm
+                                            focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
+                                            transition-all duration-200"
+                                    required />
+
+                                <div id="password-toggle"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer select-none transition-transform duration-150">
+                                    <i id="password-icon" class='bx bx-show-alt text-xl text-gray-400 hover:text-brand-primary transition-colors'></i>
+                                </div>
+                            </div>
+                            <span id="password-error" class="text-red-600 text-sm hidden"></span>
+                        </div>
+
+                        <!-- Sign In -->
+                        <button id="sign-in-btn" type="submit" disabled
+                            class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg
+                                    transition-all duration-300 shadow-lg
+                                    transform active:translate-y-0 active:scale-[0.99]
+                                    opacity-60 cursor-not-allowed">
+                            <span id="loginText">Sign In</span>
+                            <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
+                        </button>
+
+                        <!-- Terms checkbox below button -->
+                        <div class="mt-4 flex items-start gap-3">
+                            <input id="terms-check" name="agree" type="checkbox"
+                            class="mt-1 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary transition">
+                            <label for="terms-check" class="text-sm text-gray-700 leading-relaxed select-none">
+                            I agree to the
+                            <button id="terms-link" type="button"
+                                class="text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold">
+                                Terms and Conditions
+                            </button>
+                            </label>
+                        </div>
+                        <span id="agree-error" class="text-red-600 text-sm hidden"></span>
+                    </form>
+
+                    <div class="text-center mt-8 text-sm">
+                        <p class="text-gray-500">&copy; 2025 Microfinance Logistics. All Rights Reserved.</p>
                     </div>
-                </form>
-                <!-- login form end -->
-            </div>
+                </div>
+            </section>
             <!-- login form panel end -->
         </div>
     </main>
@@ -109,10 +184,10 @@
     <div id="terms-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4">
         <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-green-50 flex-shrink-0">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-brand-background-main flex-shrink-0">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class='bx bxs-file-doc text-green-600 text-xl'></i>
+                    <div class="w-10 h-10 bg-brand-border rounded-full flex items-center justify-center">
+                        <i class='bx bxs-file-doc text-brand-primary text-xl'></i>
                     </div>
                     <div>
                         <h3 class="text-xl font-semibold text-gray-800">Terms & Conditions</h3>
@@ -134,10 +209,10 @@
                     </div>
 
                     <!-- Last Updated -->
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="bg-brand-background-main border border-brand-border rounded-lg p-4">
                         <div class="flex items-center">
-                            <i class='bx bxs-calendar text-blue-600 mr-2'></i>
-                            <span class="text-sm text-blue-800">Last Updated: November 2025</span>
+                            <i class='bx bxs-calendar text-brand-primary mr-2'></i>
+                            <span class="text-sm text-brand-text-secondary">Last Updated: November 2025</span>
                         </div>
                     </div>
 
@@ -156,15 +231,15 @@
                             <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">2. User Responsibilities</h4>
                             <div class="space-y-2 text-sm text-gray-700">
                                 <p class="flex items-start">
-                                    <i class='bx bxs-check-circle text-green-600 mr-2 mt-0.5 flex-shrink-0'></i>
+                                    <i class='bx bxs-check-circle text-brand-primary mr-2 mt-0.5 flex-shrink-0'></i>
                                     <span>You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.</span>
                                 </p>
                                 <p class="flex items-start">
-                                    <i class='bx bxs-check-circle text-green-600 mr-2 mt-0.5 flex-shrink-0'></i>
+                                    <i class='bx bxs-check-circle text-brand-primary mr-2 mt-0.5 flex-shrink-0'></i>
                                     <span>You must provide accurate and complete information during registration and keep it updated.</span>
                                 </p>
                                 <p class="flex items-start">
-                                    <i class='bx bxs-check-circle text-green-600 mr-2 mt-0.5 flex-shrink-0'></i>
+                                    <i class='bx bxs-check-circle text-brand-primary mr-2 mt-0.5 flex-shrink-0'></i>
                                     <span>You agree to use the system only for legitimate business purposes related to logistics management.</span>
                                 </p>
                             </div>
@@ -254,7 +329,7 @@
                             <h5 class="font-semibold text-gray-800 mb-2">Contact Information</h5>
                             <p class="text-sm text-gray-600">
                                 For questions about these Terms and Conditions, please contact the system administrator at 
-                                <a href="mailto:logistic1.microfinancial@gmail.com" class="text-blue-600 hover:underline">logistic1.microfinancial@gmail.com</a> 
+                                <a href="mailto:logistic1.microfinancial@gmail.com" class="text-brand-primary hover:underline">logistic1.microfinancial@gmail.com</a> 
                                 or your department supervisor.
                             </p>
                         </div>
@@ -265,14 +340,14 @@
             <!-- Modal Footer -->
             <div class="flex justify-between items-center p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
                 <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <i class='bx bxs-info-circle text-blue-600'></i>
+                    <i class='bx bxs-info-circle text-brand-primary'></i>
                     <span>By clicking "Yes, I Agree" you accept all terms and conditions</span>
                 </div>
                 <div class="flex space-x-3">
                     <button id="decline-terms" class="btn btn-ghost text-gray-600 hover:bg-gray-200">
                         Cancel
                     </button>
-                    <button id="accept-terms" class="btn btn-primary border-none bg-green-600 hover:bg-green-700 text-white">
+                    <button id="accept-terms" class="btn bg-brand-primary hover:bg-brand-primary-hover text-white border-none">
                         <i class='bx bxs-check-circle mr-2'></i>Yes, I Agree
                     </button>
                 </div>
@@ -281,66 +356,141 @@
     </div>
 
 <script>
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    handleLogin();
-});
-
-// Terms & Conditions Modal Functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Debug helper
+    console.log('Login form loaded successfully');
+
+    // Carousel Functionality
+    const svgs = document.querySelectorAll('.login-svg');
+    let currentIndex = 0;
+    
+    if(svgs.length > 0) {
+        setInterval(() => {
+            // Fade out current
+            svgs[currentIndex].classList.remove('opacity-100');
+            svgs[currentIndex].classList.add('opacity-0');
+            
+            // Move to next
+            currentIndex = (currentIndex + 1) % svgs.length;
+            
+            // Fade in next
+            svgs[currentIndex].classList.remove('opacity-0');
+            svgs[currentIndex].classList.add('opacity-100');
+        }, 4000); // Change every 4 seconds
+    }
+
+    // Password Toggle Functionality
+    const passwordToggle = document.getElementById('password-toggle');
+    const passwordInput = document.getElementById('password');
+    const passwordIcon = document.getElementById('password-icon');
+
+    if (passwordToggle && passwordInput && passwordIcon) {
+        passwordToggle.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.classList.remove('bx-show-alt');
+                passwordIcon.classList.add('bx-hide');
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.classList.remove('bx-hide');
+                passwordIcon.classList.add('bx-show-alt');
+            }
+        });
+    }
+
+    // Terms Checkbox & Sign In Button State
+    const termsCheck = document.getElementById('terms-check');
+    const signInBtn = document.getElementById('sign-in-btn');
+
+    if (termsCheck && signInBtn) {
+        termsCheck.addEventListener('change', function() {
+            if (this.checked) {
+                signInBtn.disabled = false;
+                signInBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                signInBtn.classList.add('hover:bg-brand-primary-hover', 'active:translate-y-0', 'active:scale-[0.99]');
+            } else {
+                signInBtn.disabled = true;
+                signInBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                signInBtn.classList.remove('hover:bg-brand-primary-hover', 'active:translate-y-0', 'active:scale-[0.99]');
+            }
+        });
+    }
+
+    // Login Form Submission
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleLogin();
+        });
+    }
+
+    // Terms & Conditions Modal Functionality
     const termsLink = document.getElementById('terms-link');
     const termsModal = document.getElementById('terms-modal');
     const closeTermsModal = document.getElementById('close-terms-modal');
     const declineTerms = document.getElementById('decline-terms');
     const acceptTerms = document.getElementById('accept-terms');
-    const agreeCheckbox = document.getElementById('agree');
+    // Re-select checkbox here or use the one defined above
+    const agreeCheckbox = document.getElementById('terms-check');
 
     // Open terms modal
-    termsLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        termsModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    });
+    if (termsLink && termsModal) {
+        termsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            termsModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+    }
 
     // Close terms modal
     function closeTermsModalFunc() {
-        termsModal.classList.add('hidden');
-        document.body.style.overflow = '';
+        if (termsModal) {
+            termsModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
     }
 
-    closeTermsModal.addEventListener('click', closeTermsModalFunc);
-    declineTerms.addEventListener('click', closeTermsModalFunc);
+    if (closeTermsModal) closeTermsModal.addEventListener('click', closeTermsModalFunc);
+    if (declineTerms) declineTerms.addEventListener('click', closeTermsModalFunc);
 
     // Accept terms and conditions
-    acceptTerms.addEventListener('click', function() {
-        // Check the checkbox
-        agreeCheckbox.checked = true;
-        agreeCheckbox.setAttribute('aria-checked', 'true');
-        
-        // Close the modal
-        closeTermsModalFunc();
-        
-        // Optional: Show a brief confirmation
-        const originalText = acceptTerms.innerHTML;
-        acceptTerms.innerHTML = '<i class="bx bxs-check-circle mr-2"></i>Accepted!';
-        acceptTerms.disabled = true;
-        
-        setTimeout(() => {
-            acceptTerms.innerHTML = originalText;
-            acceptTerms.disabled = false;
-        }, 1500);
-    });
+    if (acceptTerms) {
+        acceptTerms.addEventListener('click', function() {
+            // Check the checkbox
+            if (agreeCheckbox) {
+                agreeCheckbox.checked = true;
+                // Trigger change event to update button state
+                agreeCheckbox.dispatchEvent(new Event('change'));
+            }
+            
+            // Close the modal
+            closeTermsModalFunc();
+            
+            // Optional: Show a brief confirmation
+            const originalText = acceptTerms.innerHTML;
+            acceptTerms.innerHTML = '<i class="bx bxs-check-circle mr-2"></i>Accepted!';
+            acceptTerms.disabled = true;
+            
+            setTimeout(() => {
+                acceptTerms.innerHTML = originalText;
+                acceptTerms.disabled = false;
+            }, 1500);
+        });
+    }
 
     // Close modal when clicking outside
-    termsModal.addEventListener('click', function(e) {
-        if (e.target === termsModal) {
-            closeTermsModalFunc();
-        }
-    });
+    if (termsModal) {
+        termsModal.addEventListener('click', function(e) {
+            if (e.target === termsModal) {
+                closeTermsModalFunc();
+            }
+        });
+    }
 
     // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !termsModal.classList.contains('hidden')) {
+        if (e.key === 'Escape' && termsModal && !termsModal.classList.contains('hidden')) {
             closeTermsModalFunc();
         }
     });
@@ -354,14 +504,15 @@ function handleLogin() {
 
     // Hide login error alert
     const loginError = document.getElementById('login-error');
-    loginError.classList.add('hidden');
+    if (loginError) loginError.classList.add('hidden');
 
-    const formData = new FormData(document.getElementById('loginForm'));
+    const form = document.getElementById('login-form');
+    const formData = new FormData(form);
     
     // Basic validation
     const email = formData.get('email');
     const password = formData.get('password');
-    const agree = document.getElementById('agree').checked;
+    const agree = document.getElementById('terms-check').checked;
 
     let hasError = false;
 
@@ -385,20 +536,21 @@ function handleLogin() {
     }
 
     // Show loading state
-    const loginBtn = document.getElementById('loginBtn');
+    const loginBtn = document.getElementById('sign-in-btn');
     const loginText = document.getElementById('loginText');
     const loginSpinner = document.getElementById('loginSpinner');
 
-    loginBtn.disabled = true;
-    loginText.textContent = 'Logging in...';
-    loginSpinner.classList.remove('hidden');
+    if (loginBtn) loginBtn.disabled = true;
+    if (loginText) loginText.textContent = 'Logging in...';
+    if (loginSpinner) loginSpinner.classList.remove('hidden');
 
     // Get CSRF token from meta tag
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
 
     console.log('Making login request with CSRF token:', csrfToken ? 'Present' : 'Missing');
 
-    // Make API request with CSRF token - FIXED: Use direct /api/login route
+    // Make API request with CSRF token
     fetch('/api/login', {
         method: 'POST',
         headers: {
@@ -407,7 +559,7 @@ function handleLogin() {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': csrfToken
         },
-        credentials: 'include', // Important: Include cookies for session
+        credentials: 'include',
         body: JSON.stringify({
             email: email,
             password: password
@@ -415,14 +567,10 @@ function handleLogin() {
     })
     .then(response => {
         console.log('Login response status:', response.status);
-        
-        // First check if response is ok, then parse JSON
         if (!response.ok) {
-            // If response is not ok, try to parse error message
             return response.json().then(errorData => {
                 throw new Error(errorData.message || `Login failed with status: ${response.status}`);
             }).catch(() => {
-                // If JSON parsing fails, use the exact wording provided
                 throw new Error(`Login failed with status: ${response.status}`);
             });
         }
@@ -432,77 +580,47 @@ function handleLogin() {
         console.log('Login response data:', data);
         if (data.success) {
             if (data.requires_otp) {
-                // For debugging/local development: Show OTP if email fails
                 if (data.otp_debug) {
                     console.log('OTP Code:', data.otp_debug);
-                    // alert('Your OTP Code is: ' + data.otp_debug); // Uncomment if needed for visible alert
                 }
-                
-                // Redirect to OTP verification with email parameter
                 window.location.href = `/otp-verification?email=${encodeURIComponent(data.email)}`;
             } else {
-                // Direct login success
                 window.location.href = '/splash-login';
             }
         } else {
-            // Handle API success: false case - use the exact wording provided
             throw new Error(data.message || 'Login failed. Please check your credentials and try again.');
         }
     })
     .catch(error => {
         console.error('Login error:', error);
         
-        // Show login error alert with the exact wording provided
         const loginError = document.getElementById('login-error');
         const loginErrorMessage = document.getElementById('login-error-message');
         
-        loginErrorMessage.textContent = error.message;
-        loginError.classList.remove('hidden');
-        
-        // Scroll to error message
-        loginError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Auto-hide error after 8 seconds
-        setTimeout(() => {
-            loginError.classList.add('hidden');
-        }, 8000);
+        if (loginError && loginErrorMessage) {
+            loginErrorMessage.textContent = error.message;
+            loginError.classList.remove('hidden');
+            loginError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+                loginError.classList.add('hidden');
+            }, 8000);
+        }
     })
     .finally(() => {
-        // Reset loading state
-        loginBtn.disabled = false;
-        loginText.textContent = 'Login';
-        loginSpinner.classList.add('hidden');
+        if (loginBtn) loginBtn.disabled = false;
+        if (loginText) loginText.textContent = 'Sign In';
+        if (loginSpinner) loginSpinner.classList.add('hidden');
     });
 }
 
 function showError(elementId, message) {
     const errorElement = document.getElementById(elementId);
-    errorElement.textContent = message;
-    errorElement.classList.remove('hidden');
-}
-
-// Toggle password visibility
-function togglePassword(btn){
-    var input = document.getElementById('password');
-    var icon = btn.querySelector('i');
-    if (!input) return;
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('bx-show-alt');
-        icon.classList.add('bx-hide');
-        btn.setAttribute('aria-pressed', 'true');
-        btn.setAttribute('aria-label', 'Hide password');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('bx-hide');
-        icon.classList.add('bx-show-alt');
-        btn.setAttribute('aria-pressed', 'false');
-        btn.setAttribute('aria-label', 'Show password');
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
     }
 }
-
-// Debug helper - you can remove this after testing
-console.log('Login form loaded successfully');
 </script>
 </body>
 </html>
