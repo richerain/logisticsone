@@ -113,7 +113,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class='bx bx-at text-gray-400 text-lg'></i>
                                 </div>
-                                <input type="email" name="email" id="email" placeholder="mail@site.com" 
+                                <input type="email" name="email" id="email" placeholder="Enter your email" 
                                     class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm
                                             focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
                                             transition-all duration-200"
@@ -129,7 +129,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class='bx bx-lock-alt text-gray-400 text-lg'></i>
                                 </div>
-                                <input id="password" name="password" type="password" placeholder="Password" 
+                                <input id="password" name="password" type="password" placeholder="Enter your password" 
                                     class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm
                                             focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
                                             transition-all duration-200"
