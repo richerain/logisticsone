@@ -122,11 +122,19 @@ class VendorAuthController extends Controller
         if (! empty($data['remove_picture'])) {
             if ($user->picture) {
                 $path = $user->picture;
+                // Handle old storage path
                 if (str_starts_with($path, 'storage/')) {
-                    $path = substr($path, 8);
-                }
-                if ($path && Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
+                    $storagePath = substr($path, 8);
+                    if (Storage::disk('public')->exists($storagePath)) {
+                        Storage::disk('public')->delete($storagePath);
+                    }
+                } 
+                // Handle new public path
+                else {
+                    $publicPath = public_path($path);
+                    if (file_exists($publicPath)) {
+                        unlink($publicPath);
+                    }
                 }
             }
             $user->picture = null;
@@ -134,17 +142,27 @@ class VendorAuthController extends Controller
 
         if ($request->hasFile('picture')) {
             $file = $request->file('picture');
-            $storedPath = $file->store('profile-pictures', 'public');
+            $filename = $file->hashName();
+            $file->move(public_path('images/profile-picture'), $filename);
+
             if ($user->picture) {
                 $oldPath = $user->picture;
+                // Handle old storage path
                 if (str_starts_with($oldPath, 'storage/')) {
-                    $oldPath = substr($oldPath, 8);
+                    $storagePath = substr($oldPath, 8);
+                    if (Storage::disk('public')->exists($storagePath)) {
+                        Storage::disk('public')->delete($storagePath);
+                    }
                 }
-                if ($oldPath && Storage::disk('public')->exists($oldPath)) {
-                    Storage::disk('public')->delete($oldPath);
+                // Handle new public path
+                else {
+                    $publicPath = public_path($oldPath);
+                    if (file_exists($publicPath)) {
+                        unlink($publicPath);
+                    }
                 }
             }
-            $user->picture = 'storage/'.$storedPath;
+            $user->picture = 'images/profile-picture/' . $filename;
         }
 
         $user->firstname = $data['firstname'];

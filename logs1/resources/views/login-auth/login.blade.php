@@ -118,8 +118,7 @@
                                 <input id="email" name="email" type="email" placeholder="Enter your email"
                                     class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm
                                             focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
-                                            transition-all duration-200"
-                                    required />
+                                            transition-all duration-200" />
                             </div>
                             <span id="email-error" class="text-red-600 text-sm hidden"></span>
                         </div>
@@ -135,8 +134,7 @@
                                 <input id="password" name="password" type="password" placeholder="Enter your password"
                                     class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm
                                             focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary
-                                            transition-all duration-200"
-                                    required />
+                                            transition-all duration-200" />
 
                                 <div id="password-toggle"
                                     class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer select-none transition-transform duration-150">
@@ -147,18 +145,20 @@
                         </div>
 
                         <!-- Terms checkbox below button -->
-                        <div class="mt-4 mb-4 flex items-start gap-3">
-                            <input id="terms-check" name="agree" type="checkbox"
-                            class="mt-1 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary transition">
-                            <label for="terms-check" class="text-sm text-gray-700 leading-relaxed select-none">
-                            I agree to the
-                            <button id="terms-link" type="button"
-                                class="text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold">
-                                Terms and Conditions
-                            </button>
-                            </label>
+                        <div class="mt-4 mb-4">
+                            <div class="flex items-start gap-3">
+                                <input id="terms-check" name="agree" type="checkbox"
+                                class="mt-1 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary transition">
+                                <label for="terms-check" class="text-sm text-gray-700 leading-relaxed select-none">
+                                I agree to the
+                                <button id="terms-link" type="button"
+                                    class="text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold">
+                                    Terms and Conditions
+                                </button>
+                                </label>
+                            </div>
+                            <span id="agree-error" class="text-red-600 text-sm hidden block mt-1"></span>
                         </div>
-                        <span id="agree-error" class="text-red-600 text-sm hidden"></span>
 
                         <!-- Sign In -->
                         <button id="sign-in-btn" type="submit"
@@ -576,9 +576,9 @@ function handleLogin() {
         console.log('Login response status:', response.status);
         if (!response.ok) {
             return response.json().then(errorData => {
-                throw new Error(errorData.message || `Login failed with status: ${response.status}`);
+                throw new Error("Incorrect credential please try again!");
             }).catch(() => {
-                throw new Error(`Login failed with status: ${response.status}`);
+                throw new Error("Incorrect credential please try again!");
             });
         }
         return response.json();

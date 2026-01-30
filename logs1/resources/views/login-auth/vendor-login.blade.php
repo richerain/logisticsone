@@ -275,7 +275,7 @@ function handleLogin() {
         credentials: 'include',
         body: JSON.stringify({ email: email, password: password })
     })
-    .then(response => { if (!response.ok) { return response.json().then(errorData => { throw new Error(errorData.message || `Login failed with status: ${response.status}`); }).catch(() => { throw new Error(`Login failed with status: ${response.status}`); }); } return response.json(); })
+    .then(response => { if (!response.ok) { return response.json().then(errorData => { throw new Error("Incorrect credential please try again!"); }).catch(() => { throw new Error("Incorrect credential please try again!"); }); } return response.json(); })
     .then(data => { 
         if (data.success) { 
             if (data.requires_otp) { 

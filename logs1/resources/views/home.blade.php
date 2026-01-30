@@ -8,6 +8,24 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#059669',
+                            'primary-hover': '#047857',
+                            'background-main': '#F0FDF4',
+                            border: '#D1FAE5',
+                            'text-primary': '#1F2937',
+                            'text-secondary': '#4B5563',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@latest/dist/chart.umd.js"></script>
@@ -21,64 +39,49 @@
         }
     </script>
     <style>
-        /* Custom scrollbar for sidebar */
-        .sidebar-scrollbar {
+        /* Custom scrollbar */
+        .custom-scrollbar {
             scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
         }
         
-        .sidebar-scrollbar::-webkit-scrollbar {
+        .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
         
-        .sidebar-scrollbar::-webkit-scrollbar-track {
+        .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
         }
         
-        .sidebar-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.3);
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
             border-radius: 20px;
         }
         
-        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(255, 255, 255, 0.5);
-        }
-        
-        /* Active sidebar link styles */
-        .sidebar-link.active {
-            background-color: rgba(255, 255, 255, 0.3);
-            font-weight: 600;
-        }
-        
-        .sidebar-link.active-submodule {
-            background-color: rgba(255, 255, 255, 0.25);
-            font-weight: 500;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.7);
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <!-- Header Component -->
-    @include('components.header')
+<body class="bg-gray-100 overflow-hidden">
+    <!-- Sidebar Component (Fixed) -->
+    @include('components.sidebar')
 
-    <div class="flex w-full h-[calc(100vh-4rem)]">
-        <div id="overlay" class="hidden fixed inset-0 bg-black opacity-50 z-40"></div> 
+    <!-- Main Content Wrapper -->
+    <div class="lg:ml-72 h-screen flex flex-col transition-all duration-300">
+        <!-- Header Component -->
+        @include('components.header')
 
-        <!-- Sidebar Component -->
-        @include('components.sidebar')
-
-        <main id="main-content" class="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <!-- Main Content -->
+        <main id="main-content" class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
             <!-- Content will be loaded dynamically here -->
-            <div id="module-content" class="flex-1 overflow-y-auto p-6">
+            <div id="module-content" class="flex-1 overflow-y-auto p-6 custom-scrollbar">
                 <!-- Default dashboard content will be loaded here initially -->
                 @if(request()->is('home') || request()->is('/'))
                     @include('dashboard.index')
                 @endif
             </div>
 
-            <!-- Footer -->
-            <footer class="shrink-0 py-3 text-xs text-gray-500 text-center bg-white border-t border-gray-200">
-            Copyright © 2025 BSIT 4117 Microfinancial I Logistic I . All Rights Reserved.
-            </footer>
         </main>
     </div>
 
@@ -161,29 +164,7 @@
         // Initialize charts when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeCharts();
-            
-            // Set dashboard as active by default
-            setActiveSidebarLink('dashboard');
         });
-
-        // Function to set active sidebar link
-        function setActiveSidebarLink(module) {
-            // Remove active classes from all sidebar links
-            const allLinks = document.querySelectorAll('.sidebar-link');
-            allLinks.forEach(link => {
-                link.classList.remove('active', 'active-submodule');
-            });
-            
-            // Add active class to the clicked module
-            const activeLink = document.querySelector(`[data-module="${module}"]`);
-            if (activeLink) {
-                if (module === 'dashboard') {
-                    activeLink.classList.add('active');
-                } else {
-                    activeLink.classList.add('active-submodule');
-                }
-            }
-        }
     </script>
 </body>
 </html>
