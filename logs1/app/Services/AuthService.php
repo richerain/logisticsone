@@ -124,6 +124,10 @@ class AuthService
         ];
 
         try {
+            if (!class_exists(\Firebase\JWT\JWT::class)) {
+                throw new \Exception('Firebase\JWT\JWT class not found. Please check composer dependencies.');
+            }
+
             return JWT::encode($payload, $secret, 'HS256');
         } catch (\Throwable $e) {
             Log::error('JWT Generation Error: ' . $e->getMessage());
