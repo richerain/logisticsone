@@ -68,6 +68,8 @@ Route::get('/login', function (Request $request) {
         return view('login-auth.vendor-splash-logout');
     })->name('vendor.splash.logout');
 
+    Route::get('/auth/token', [App\Http\Controllers\AuthController::class, 'getApiToken']);
+
     // Protected Routes - Using normal Laravel auth with session timeout
     Route::middleware(['auth:sws', 'session.timeout'])->group(function () {
         Route::get('/home', function () {
@@ -309,7 +311,6 @@ Route::get('/api/test-db', function () {
     Route::get('/check-auth', [App\Http\Controllers\AuthController::class, 'checkAuth']);
     Route::post('/refresh-session', [App\Http\Controllers\AuthController::class, 'refreshSession']);
     Route::get('/check-session', [App\Http\Controllers\AuthController::class, 'checkSession']);
-    Route::get('/auth/token', [App\Http\Controllers\AuthController::class, 'getApiToken']);
     Route::get('/csrf-token', [App\Http\Controllers\AuthController::class, 'getCsrfToken']);
 
     Route::prefix('vendor')->group(function () {
