@@ -399,7 +399,8 @@ async function ensureJwtToken() {
     
     console.log('JWT Token missing, attempting to fetch from server...');
     try {
-        const response = await fetch('/auth/token', {
+        const tokenUrl = API_BASE_URL.includes('://') ? `${API_BASE_URL.replace('/api/v1', '')}/auth/token` : '/auth/token';
+        const response = await fetch(tokenUrl, {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',

@@ -18,7 +18,9 @@ class AuthController extends Controller
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
-        /**
+    }
+
+    /**
      * Get a fresh API Token (JWT) for the authenticated user
      */
     public function getApiToken(Request $request)
@@ -48,7 +50,6 @@ class AuthController extends Controller
             'message' => 'Unable to generate token. User may not be authenticated.',
         ], 401);
     }
-}
 
     public function login(Request $request)
     {
