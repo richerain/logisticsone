@@ -194,7 +194,21 @@ Route::get('/login', function (Request $request) {
 
     Route::middleware(['auth:vendor', 'session.timeout'])->group(function () {
         Route::get('/vendor/home', function () {
-            return view('home');
+            // Generate JWT Token for API access
+            $jwtToken = '';
+            try {
+                if (Auth::guard('vendor')->check()) {
+                    $user = Auth::guard('vendor')->user();
+                    if ($user) {
+                        $authService = app(\App\Services\VendorAuthService::class);
+                        $jwtToken = $authService->generateTokenForUser($user);
+                        \Illuminate\Support\Facades\Log::info('Vendor home token generated for: ' . $user->email);
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for vendor home: ' . $e->getMessage());
+            }
+            return view('home', ['jwtToken' => $jwtToken]);
         })->name('vendor.home');
         Route::get('/vendor/dashboard', function () {
             return view('dashboard.index');
@@ -220,7 +234,12 @@ Route::get('/login', function (Request $request) {
                     if ($user) {
                         $authService = app(\App\Services\VendorAuthService::class);
                         $jwtToken = $authService->generateTokenForUser($user);
+                        \Illuminate\Support\Facades\Log::info('Vendor module token generated for: ' . $user->email);
+                    } else {
+                        \Illuminate\Support\Facades\Log::warning('Vendor module token: No user found in guard');
                     }
+                } else {
+                    \Illuminate\Support\Facades\Log::warning('Vendor module token: Guard check failed');
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for vendor: ' . $e->getMessage());
