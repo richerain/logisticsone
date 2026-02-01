@@ -87,16 +87,28 @@ class VendorAuthService
         if (is_string($secret) && str_starts_with($secret, 'base64:')) {
             $secret = base64_decode(substr($secret, 7));
         }
-        $expiresAt = Carbon::now()->addHours(2)->timestamp;
-        $payload = [
-            'iss' => config('app.url') ?? 'logs1',
-            'sub' => $vendor->id,
-            'email' => $vendor->email,
-            'roles' => $vendor->roles,
-            'iat' => Carbon::now()->timestamp,
-            'exp' => $expiresAt,
-        ];
-        $token = JWT::encode($payload, $secret, 'HS256');
+
+        try {
+            // Generate JWT Token
+            $expiresAt = Carbon::now()->addHours(2)->timestamp;
+            $payload = [
+                'iss' => config('app.url') ?? 'logs1',
+                'sub' => $vendor->id,
+                'email' => $vendor->email,
+                'roles' => $vendor->roles, // Assuming vendor has roles field or relationship
+                'iat' => Carbon::now()->timestamp,
+                'exp' => $expiresAt,
+            ];
+
+            $token = JWT::encode($payload, $secret, 'HS256');
+        } catch (\Throwable $e) {
+            Log::error('JWT Token Generation Error for Vendor: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Login successful but failed to generate access token.',
+                'vendor' => $vendor
+            ];
+        }
 
         return [
             'success' => true,

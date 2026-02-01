@@ -1,28 +1,3 @@
-<?php
-    $jwtToken = '';
-    if (auth()->check()) {
-        try {
-            $user = auth()->user();
-            $secret = config('app.key');
-            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
-                $secret = base64_decode(substr($secret, 7));
-            }
-            
-            $payload = [
-                'iss' => config('app.url') ?? 'logs1',
-                'sub' => $user->id,
-                'email' => $user->email,
-                'roles' => $user->roles,
-                'iat' => time(),
-                'exp' => time() + (60 * 60 * 2)
-            ];
-            
-            $jwtToken = \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
-        } catch (\Exception $e) {
-            // Silently fail, fallback to localStorage
-        }
-    }
-?>
 <!-- resources/views/psm/vendor-management.blade.php -->
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
