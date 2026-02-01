@@ -28,7 +28,14 @@
         <div class="h-8 w-px bg-gray-200 hidden sm:block"></div>
 
         <!-- User Profile Dropdown -->
-        @php($user = Auth::guard('sws')->user() ?: Auth::guard('vendor')->user())
+        @php
+            $user = null;
+            try {
+                $user = Auth::guard('sws')->user() ?: Auth::guard('vendor')->user();
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Header auth check failed: ' . $e->getMessage());
+            }
+        @endphp
         <div class="relative">
             <button id="user-menu-button" 
                 class="flex items-center gap-3 focus:outline-none group rounded-xl px-2 py-2 hover:bg-gray-100 active:bg-gray-200 transition">

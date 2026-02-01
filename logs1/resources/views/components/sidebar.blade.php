@@ -25,9 +25,18 @@
 
   <!-- Sidebar content -->
   <div class="px-4 py-4 overflow-y-auto flex-1 custom-scrollbar">
-    @php($isVendor = Auth::guard('vendor')->check())
-    @php($user = $isVendor ? Auth::guard('vendor')->user() : Auth::guard('sws')->user())
-    @php($role = strtolower(optional($user)->roles ?? ''))
+    @php
+        $isVendor = false;
+        $user = null;
+        $role = '';
+        try {
+            $isVendor = Auth::guard('vendor')->check();
+            $user = $isVendor ? Auth::guard('vendor')->user() : Auth::guard('sws')->user();
+            $role = strtolower(optional($user)->roles ?? '');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Sidebar auth check failed: ' . $e->getMessage());
+        }
+    @endphp
 
     <!-- MAIN MENU -->
     <div class="text-xs font-bold text-gray-400 tracking-wider px-2 mb-2">MAIN MENU</div>

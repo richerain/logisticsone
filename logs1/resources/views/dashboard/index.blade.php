@@ -5,7 +5,7 @@
             <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Vendor Dashboard</h2>
         </div>
         <div class="text-right">
-            <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('vendor')->user()->ven_contact_person ?? Auth::guard('vendor')->user()->ven_company_name ?? 'Vendor' }} - Vendor</span>
+            <span class="text-md text-gray-600">Welcome back, {{ optional(Auth::guard('vendor')->user())->ven_contact_person ?? optional(Auth::guard('vendor')->user())->ven_company_name ?? 'Vendor' }} - Vendor</span>
         </div>
     </div>
 

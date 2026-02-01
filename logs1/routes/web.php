@@ -73,14 +73,16 @@ Route::get('/login', function (Request $request) {
         Route::get('/home', function () {
             // Generate JWT Token for API access
             $jwtToken = '';
-            if (Auth::guard('sws')->check()) {
-                try {
+            try {
+                if (Auth::guard('sws')->check()) {
                     $user = Auth::guard('sws')->user();
-                    $authService = app(\App\Services\AuthService::class);
-                    $jwtToken = $authService->generateTokenForUser($user);
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for home: ' . $e->getMessage());
+                    if ($user) {
+                        $authService = app(\App\Services\AuthService::class);
+                        $jwtToken = $authService->generateTokenForUser($user);
+                    }
                 }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for home: ' . $e->getMessage());
             }
             return view('home', ['jwtToken' => $jwtToken]);
         })->name('home');
@@ -126,14 +128,16 @@ Route::get('/login', function (Request $request) {
 
             // Generate JWT Token for API access
             $jwtToken = '';
-            if (Auth::guard('sws')->check()) {
-                try {
+            try {
+                if (Auth::guard('sws')->check()) {
                     $user = Auth::guard('sws')->user();
-                    $authService = app(\App\Services\AuthService::class);
-                    $jwtToken = $authService->generateTokenForUser($user);
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Failed to generate JWT token: ' . $e->getMessage());
+                    if ($user) {
+                        $authService = app(\App\Services\AuthService::class);
+                        $jwtToken = $authService->generateTokenForUser($user);
+                    }
                 }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to generate JWT token: ' . $e->getMessage());
             }
 
             // If it's an AJAX request, return just the module content
