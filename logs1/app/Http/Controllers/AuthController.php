@@ -18,7 +18,37 @@ class AuthController extends Controller
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
+        /**
+     * Get a fresh API Token (JWT) for the authenticated user
+     */
+    public function getApiToken(Request $request)
+    {
+        $token = null;
+
+        if (Auth::guard('sws')->check()) {
+            $user = Auth::guard('sws')->user();
+            $token = $this->authService->generateTokenForUser($user);
+        } elseif (Auth::guard('vendor')->check()) {
+            $user = Auth::guard('vendor')->user();
+            // We need VendorAuthService for vendor tokens to ensure correct claims
+            $vendorAuthService = app(\App\Services\VendorAuthService::class);
+            $token = $vendorAuthService->generateTokenForUser($user);
+        }
+
+        if ($token) {
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'token_type' => 'Bearer',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to generate token. User may not be authenticated.',
+        ], 401);
     }
+}
 
     public function login(Request $request)
     {

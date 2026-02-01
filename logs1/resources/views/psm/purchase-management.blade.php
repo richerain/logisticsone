@@ -299,10 +299,22 @@ var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.query
 
 // JWT Token Handling with LocalStorage Sync
 var SERVER_JWT = '{{ $jwtToken ?? "" }}';
+
+// Debug logging
+console.log('PSM: Server JWT:', SERVER_JWT ? 'Present' : 'Empty');
+console.log('PSM: Window JWT:', typeof window.SERVER_JWT_TOKEN !== 'undefined' ? (window.SERVER_JWT_TOKEN ? 'Present' : 'Empty') : 'Undefined');
+console.log('PSM: LocalStorage JWT:', localStorage.getItem('jwt') ? 'Present' : 'Empty');
+
 if (SERVER_JWT) {
     localStorage.setItem('jwt', SERVER_JWT);
     console.log('JWT updated from server');
+} else if (typeof window.SERVER_JWT_TOKEN !== 'undefined' && window.SERVER_JWT_TOKEN) {
+    // Fallback to window global from home.blade.php
+    SERVER_JWT = window.SERVER_JWT_TOKEN;
+    localStorage.setItem('jwt', SERVER_JWT);
+    console.log('JWT recovered from window global');
 }
+
 var JWT_TOKEN = SERVER_JWT || localStorage.getItem('jwt');
 
 if (!JWT_TOKEN) {
@@ -382,10 +394,44 @@ function getProductImageUrl(path) {
     return '/images/product-picture/' + filename;
 }
 
-function initPurchaseManagement() {
+async function ensureJwtToken() {
+    if (JWT_TOKEN) return true;
+    
+    console.log('JWT Token missing, attempting to fetch from server...');
+    try {
+        const response = await fetch('/auth/token', {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN
+            },
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.token) {
+                JWT_TOKEN = data.token;
+                localStorage.setItem('jwt', JWT_TOKEN);
+                console.log('JWT Token recovered from server');
+                return true;
+            }
+        }
+        console.error('Failed to recover JWT token');
+        return false;
+    } catch (e) {
+        console.error('Error fetching JWT token:', e);
+        return false;
+    }
+}
+
+async function initPurchaseManagement() {
     console.log('🚀 Purchase Management Initialized');
     console.log('API Base URL:', API_BASE_URL);
     console.log('Purchases API:', PSM_PURCHASES_API);
+    
+    await ensureJwtToken();
+    
     initializeEventListeners();
     loadPurchases();
     loadActiveVendors();

@@ -143,6 +143,11 @@ Route::get('/login', function (Request $request) {
                     if ($user) {
                         $authService = app(\App\Services\AuthService::class);
                         $jwtToken = $authService->generateTokenForUser($user);
+                        if (!$jwtToken) {
+                            \Illuminate\Support\Facades\Log::error('Module load: JWT Generation returned null for SWS user: ' . $user->id);
+                        } else {
+                            \Illuminate\Support\Facades\Log::info('Module load: JWT Generated for SWS user: ' . $user->id);
+                        }
                     }
                 } elseif (Auth::guard('vendor')->check()) {
                     $user = Auth::guard('vendor')->user();
@@ -304,6 +309,7 @@ Route::get('/api/test-db', function () {
     Route::get('/check-auth', [App\Http\Controllers\AuthController::class, 'checkAuth']);
     Route::post('/refresh-session', [App\Http\Controllers\AuthController::class, 'refreshSession']);
     Route::get('/check-session', [App\Http\Controllers\AuthController::class, 'checkSession']);
+    Route::get('/auth/token', [App\Http\Controllers\AuthController::class, 'getApiToken']);
     Route::get('/csrf-token', [App\Http\Controllers\AuthController::class, 'getCsrfToken']);
 
     Route::prefix('vendor')->group(function () {

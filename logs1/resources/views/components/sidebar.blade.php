@@ -325,7 +325,8 @@
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
+                },
+                credentials: 'include'
             })
             .then(response => {
                 if (!response.ok) {
