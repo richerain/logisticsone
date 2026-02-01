@@ -296,7 +296,7 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
 var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-var JWT_TOKEN = '<?php echo $jwtToken; ?>' || (typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt'));
+var JWT_TOKEN = '{{ $jwtToken ?? "" }}' || localStorage.getItem('jwt');
 
 var CURRENT_USER_NAME = '<?php echo e(auth()->check() ? trim((auth()->user()->firstname ?? '').' '.(auth()->user()->lastname ?? '')) : ''); ?>';
 var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? (auth()->user()->roles ?? '') : ''); ?>';

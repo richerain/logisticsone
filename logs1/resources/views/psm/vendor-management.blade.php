@@ -184,7 +184,7 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var APP_URL = typeof APP_URL !== 'undefined' ? APP_URL : '<?php echo url('/'); ?>';
 var PSM_VENDORS_API = typeof PSM_VENDORS_API !== 'undefined' ? PSM_VENDORS_API : `${API_BASE_URL}/psm/vendor-management`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-var JWT_TOKEN = '<?php echo $jwtToken; ?>' || (typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt'));
+var JWT_TOKEN = '{{ $jwtToken ?? "" }}' || localStorage.getItem('jwt');
 
 var currentVendors = typeof currentVendors !== 'undefined' ? currentVendors : [];
 window.currentVendorProducts = [];
