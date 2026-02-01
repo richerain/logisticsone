@@ -113,7 +113,11 @@ class VendorAuthService
                 'exp' => $expiresAt,
             ];
 
-            $token = JWT::encode($payload, $secret, 'HS256');
+            if (!class_exists(\Firebase\JWT\JWT::class)) {
+                throw new \Exception('Firebase\JWT\JWT class not found. Please check composer dependencies.');
+            }
+
+            $token = \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
         } catch (\Throwable $e) {
             // CRITICAL: Logout the user if token generation fails to prevent inconsistent state
             Auth::guard('vendor')->logout();
