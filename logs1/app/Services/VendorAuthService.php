@@ -88,7 +88,16 @@ class VendorAuthService
             $secret = base64_decode(substr($secret, 7));
         }
 
+        if (empty($secret)) {
+            Log::error('JWT Secret (app.key) is missing or empty.');
+            $secret = env('JWT_SECRET'); // Fallback to env
+        }
+
         try {
+            if (empty($secret)) {
+                throw new \Exception('Application key is not set.');
+            }
+
             // Generate JWT Token
             $expiresAt = Carbon::now()->addHours(2)->timestamp;
             
@@ -115,8 +124,8 @@ class VendorAuthService
             
             return [
                 'success' => false,
-                'message' => 'Login successful but failed to generate access token. Please contact support.',
-                'error_debug' => $e->getMessage(), // Temporarily expose error for debugging
+                'message' => 'Token Generation Failed: ' . $e->getMessage(), // Exposed for debugging
+                'error_debug' => $e->getMessage(),
                 'vendor' => $vendor
             ];
         }
