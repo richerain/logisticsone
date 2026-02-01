@@ -296,7 +296,19 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
 var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-var JWT_TOKEN = '{{ $jwtToken ?? "" }}' || localStorage.getItem('jwt');
+
+// JWT Token Handling with LocalStorage Sync
+var SERVER_JWT = '{{ $jwtToken ?? "" }}';
+if (SERVER_JWT) {
+    localStorage.setItem('jwt', SERVER_JWT);
+    console.log('JWT updated from server');
+}
+var JWT_TOKEN = SERVER_JWT || localStorage.getItem('jwt');
+
+if (!JWT_TOKEN) {
+    console.error('JWT Token is missing! API requests will fail.');
+    // Optional: Redirect to login or show error
+}
 
 var CURRENT_USER_NAME = '<?php echo e(auth()->check() ? trim((auth()->user()->firstname ?? '').' '.(auth()->user()->lastname ?? '')) : ''); ?>';
 var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? (auth()->user()->roles ?? '') : ''); ?>';
