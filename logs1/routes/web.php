@@ -79,7 +79,16 @@ Route::get('/login', function (Request $request) {
                     if ($user) {
                         $authService = app(\App\Services\AuthService::class);
                         $jwtToken = $authService->generateTokenForUser($user);
+                        if (!$jwtToken) {
+                            \Illuminate\Support\Facades\Log::error('JWT Generation returned null for user: ' . $user->id);
+                        } else {
+                            \Illuminate\Support\Facades\Log::info('JWT Generated successfully for user: ' . $user->id);
+                        }
+                    } else {
+                        \Illuminate\Support\Facades\Log::error('Auth check passed but user is null');
                     }
+                } else {
+                    \Illuminate\Support\Facades\Log::error('Auth check failed in /home route');
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for home: ' . $e->getMessage());
