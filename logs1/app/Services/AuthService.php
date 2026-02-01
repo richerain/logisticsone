@@ -176,22 +176,28 @@ class AuthService
 
         Log::info("OTP verification successful for user: {$email}");
 
-        $secret = config('app.key');
-        if (is_string($secret) && str_starts_with($secret, 'base64:')) {
-            $secret = base64_decode(substr($secret, 7));
+        $token = null;
+        try {
+            $secret = config('app.key');
+            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+                $secret = base64_decode(substr($secret, 7));
+            }
+
+            $expiresAt = Carbon::now()->addHours(2)->timestamp;
+            $payload = [
+                'iss' => config('app.url') ?? 'logs1',
+                'sub' => $user->id,
+                'email' => $user->email,
+                'roles' => $user->roles,
+                'iat' => Carbon::now()->timestamp,
+                'exp' => $expiresAt,
+            ];
+
+            $token = JWT::encode($payload, $secret, 'HS256');
+        } catch (\Exception $e) {
+            Log::error('JWT Token generation failed during OTP verification: ' . $e->getMessage());
+            // We continue without token, but this might affect API calls
         }
-
-        $expiresAt = Carbon::now()->addHours(2)->timestamp;
-        $payload = [
-            'iss' => config('app.url') ?? 'logs1',
-            'sub' => $user->id,
-            'email' => $user->email,
-            'roles' => $user->roles,
-            'iat' => Carbon::now()->timestamp,
-            'exp' => $expiresAt,
-        ];
-
-        $token = JWT::encode($payload, $secret, 'HS256');
 
         return [
             'success' => true,

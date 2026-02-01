@@ -27,10 +27,10 @@ Route::get('/login', function (Request $request) {
 
     Route::get('/otp-verification', function (Request $request) {
         if (Auth::guard('sws')->check()) {
-            return redirect('/home');
+            return redirect('/splash-login');
         }
         if (Auth::guard('vendor')->check()) {
-            return redirect('/vendor/home');
+            return redirect('/vendor/splash-login');
         }
         if (! $request->has('email')) {
             $portal = $request->get('portal');
@@ -71,7 +71,18 @@ Route::get('/login', function (Request $request) {
     // Protected Routes - Using normal Laravel auth with session timeout
     Route::middleware(['auth:sws', 'session.timeout'])->group(function () {
         Route::get('/home', function () {
-            return view('home');
+            // Generate JWT Token for API access
+            $jwtToken = '';
+            if (Auth::guard('sws')->check()) {
+                try {
+                    $user = Auth::guard('sws')->user();
+                    $authService = app(\App\Services\AuthService::class);
+                    $jwtToken = $authService->generateTokenForUser($user);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for home: ' . $e->getMessage());
+                }
+            }
+            return view('home', ['jwtToken' => $jwtToken]);
         })->name('home');
 
         Route::get('/dashboard', function () {
@@ -116,9 +127,13 @@ Route::get('/login', function (Request $request) {
             // Generate JWT Token for API access
             $jwtToken = '';
             if (Auth::guard('sws')->check()) {
-                $user = Auth::guard('sws')->user();
-                $authService = app(\App\Services\AuthService::class);
-                $jwtToken = $authService->generateTokenForUser($user);
+                try {
+                    $user = Auth::guard('sws')->user();
+                    $authService = app(\App\Services\AuthService::class);
+                    $jwtToken = $authService->generateTokenForUser($user);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to generate JWT token: ' . $e->getMessage());
+                }
             }
 
             // If it's an AJAX request, return just the module content

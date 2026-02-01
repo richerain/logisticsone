@@ -113,7 +113,7 @@
             <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Dashboard</h2>
         </div>
         <div class="text-right">
-            <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('sws')->user()->firstname }} - {{ ucfirst(Auth::guard('sws')->user()->roles) }}</span>
+            <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('sws')->user()?->firstname }} - {{ ucfirst(Auth::guard('sws')->user()?->roles ?? 'User') }}</span>
         </div>
     </div>
 
