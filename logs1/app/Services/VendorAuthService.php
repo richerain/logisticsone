@@ -60,6 +60,46 @@ class VendorAuthService
         return ['success' => true, 'message' => 'OTP sent successfully', 'email' => $vendor->email];
     }
 
+    public function generateTokenForUser($vendor)
+    {
+        // Prioritize JWT_SECRET from env
+        $secret = env('JWT_SECRET');
+        
+        // Fallback to app.key if JWT_SECRET is missing
+        if (empty($secret)) {
+            $secret = config('app.key');
+            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+                $secret = base64_decode(substr($secret, 7));
+            }
+        }
+
+        if (empty($secret)) {
+            Log::error('JWT Error: No secret key found in configuration');
+            throw new \Exception('No secret key found in configuration');
+        }
+
+        $expiresAt = Carbon::now()->addHours(2)->timestamp;
+        
+        // Ensure roles is a string or array, handle potential null
+        $roles = $vendor->roles ?? 'vendor';
+        
+        $payload = [
+            'iss' => config('app.url') ?? 'logs1',
+            'sub' => $vendor->id,
+            'type' => 'vendor',
+            'email' => $vendor->email,
+            'roles' => $roles,
+            'iat' => Carbon::now()->timestamp,
+            'exp' => $expiresAt,
+        ];
+
+        if (!class_exists(\Firebase\JWT\JWT::class)) {
+            throw new \Exception('Firebase\JWT\JWT class not found. Please check composer dependencies.');
+        }
+
+        return \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
+    }
+
     public function verifyOtp($email, $otp)
     {
         $vendor = VendorAccount::where('email', $email)->first();
@@ -83,50 +123,17 @@ class VendorAuthService
 
         Log::info("Vendor OTP verification successful for user: {$email}");
 
-        // Prioritize JWT_SECRET from env
-        $secret = env('JWT_SECRET');
-        
-        // Fallback to app.key if JWT_SECRET is missing
-        if (empty($secret)) {
-            $secret = config('app.key');
-            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
-                $secret = base64_decode(substr($secret, 7));
-            }
-        }
-
-        if (empty($secret)) {
-            Log::error('JWT Error: No secret key found in configuration');
-            throw new \Exception('No secret key found in configuration');
-        }
-
         try {
             // Generate JWT Token
+            $token = $this->generateTokenForUser($vendor);
+            // Re-calculate expiresAt for response (approximate)
             $expiresAt = Carbon::now()->addHours(2)->timestamp;
-            
-            // Ensure roles is a string or array, handle potential null
-            $roles = $vendor->roles ?? 'vendor';
-            
-            $payload = [
-                'iss' => config('app.url') ?? 'logs1',
-                'sub' => $vendor->id,
-                'email' => $vendor->email,
-                'roles' => $roles,
-                'iat' => Carbon::now()->timestamp,
-                'exp' => $expiresAt,
-            ];
-
-            if (!class_exists(\Firebase\JWT\JWT::class)) {
-                throw new \Exception('Firebase\JWT\JWT class not found. Please check composer dependencies.');
-            }
-
-            $token = \Firebase\JWT\JWT::encode($payload, $secret, 'HS256');
         } catch (\Throwable $e) {
             // CRITICAL: Logout the user if token generation fails to prevent inconsistent state
             Auth::guard('vendor')->logout();
             request()->session()->invalidate();
             
             Log::error('JWT Token Generation Error for Vendor: ' . $e->getMessage());
-            Log::error('JWT Payload Trace: ' . json_encode($payload ?? []));
             
             return [
                 'success' => false,

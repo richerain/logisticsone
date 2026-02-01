@@ -117,6 +117,7 @@ class AuthService
         $payload = [
             'iss' => config('app.url') ?? 'logs1',
             'sub' => $user->id,
+            'type' => 'employee',
             'email' => $user->email,
             'roles' => $user->roles ?? '',
             'iat' => Carbon::now()->timestamp,

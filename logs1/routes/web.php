@@ -135,6 +135,12 @@ Route::get('/login', function (Request $request) {
                         $authService = app(\App\Services\AuthService::class);
                         $jwtToken = $authService->generateTokenForUser($user);
                     }
+                } elseif (Auth::guard('vendor')->check()) {
+                    $user = Auth::guard('vendor')->user();
+                    if ($user) {
+                        $authService = app(\App\Services\VendorAuthService::class);
+                        $jwtToken = $authService->generateTokenForUser($user);
+                    }
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Failed to generate JWT token: ' . $e->getMessage());
@@ -206,11 +212,25 @@ Route::get('/login', function (Request $request) {
                 return response()->view('components.module-under-construction', ['module' => $module], 404);
             }
 
-            if (request()->ajax()) {
-                return view($view);
+            // Generate JWT Token for API access
+            $jwtToken = '';
+            try {
+                if (Auth::guard('vendor')->check()) {
+                    $user = Auth::guard('vendor')->user();
+                    if ($user) {
+                        $authService = app(\App\Services\VendorAuthService::class);
+                        $jwtToken = $authService->generateTokenForUser($user);
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for vendor: ' . $e->getMessage());
             }
 
-            return view('home');
+            if (request()->ajax()) {
+                return view($view, ['jwtToken' => $jwtToken]);
+            }
+
+            return view('home', ['jwtToken' => $jwtToken]);
         })->name('vendor.module.load');
     });
 
