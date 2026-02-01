@@ -439,7 +439,7 @@
                         </div>
                         <div class="form-control space-y-1.5">
                             <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Date of Birth</label>
-                            <input type="date" name="birthdate" value="{{ optional($user)->birthdate }}" 
+                            <input type="date" name="birthdate" value="{{ optional($user)->birthdate ? \Carbon\Carbon::parse($user->birthdate)->format('Y-m-d') : '' }}" 
                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-background-main outline-none transition font-medium text-gray-800" />
                         </div>
                         <div class="form-control space-y-1.5">
@@ -542,6 +542,28 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // --- Check for Profile Update Success Flag ---
+        if (localStorage.getItem('profileUpdated')) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Successfully updated Profile!'
+            });
+
+            localStorage.removeItem('profileUpdated');
+        }
+
         // --- Sidebar Overlay Logic ---
         const toggleBtn = document.getElementById('toggle-btn');
         const overlay = document.getElementById('overlay');
@@ -657,7 +679,7 @@
                 e.preventDefault();
                 const formData = new FormData(this);
                 
-                fetch('{{ route("profile.update") }}', {
+                fetch('{{ Auth::guard("vendor")->check() ? route("vendor.profile.update") : route("profile.update") }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -667,15 +689,13 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: 'Profile updated successfully',
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            location.reload(); 
-                        });
+                        // Close modals immediately
+                        if(editProfileModal) editProfileModal.classList.add('hidden');
+                        if(profileModal) profileModal.classList.add('hidden');
+
+                        // Set flag and reload
+                        localStorage.setItem('profileUpdated', 'true');
+                        location.reload();
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -716,7 +736,7 @@
 
         if (confirmLogoutBtn) {
             confirmLogoutBtn.addEventListener('click', () => {
-                fetch('/api/v1/auth/logout', {
+                fetch('/api/logout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

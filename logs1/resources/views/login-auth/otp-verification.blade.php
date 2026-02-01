@@ -31,6 +31,22 @@
                             "0%, 100%": { transform: "translateY(0) translateX(0)" },
                             "33%": { transform: "translateY(25px) translateX(-15px)" },
                             "66%": { transform: "translateY(10px) translateX(15px)" },
+                        },
+                        slideInDown: {
+                            "0%": { transform: "translateY(-50px)", opacity: "0" },
+                            "100%": { transform: "translateY(0)", opacity: "1" },
+                        },
+                        slideInUp: {
+                            "0%": { transform: "translateY(50px)", opacity: "0" },
+                            "100%": { transform: "translateY(0)", opacity: "1" },
+                        },
+                        slideInLeft: {
+                            "0%": { transform: "translateX(-30px)", opacity: "0" },
+                            "100%": { transform: "translateX(0)", opacity: "1" },
+                        },
+                        popUp: {
+                            "0%": { transform: "scale(0.9)", opacity: "0" },
+                            "100%": { transform: "scale(1)", opacity: "1" },
                         }
                     },
                     animation: {
@@ -39,6 +55,10 @@
                         "float-reverse": "float-reverse 7s ease-in-out infinite",
                         "float-reverse-fast": "float-reverse 5s ease-in-out infinite",
                         "float-fast": "float 5s ease-in-out infinite",
+                        "entrance-down": "slideInDown 0.8s ease-out forwards",
+                        "entrance-up": "slideInUp 0.8s ease-out forwards",
+                        "entrance-left": "slideInLeft 0.8s ease-out forwards",
+                        "entrance-pop": "popUp 0.6s ease-out forwards",
                     }
                 }
             }
@@ -63,14 +83,14 @@
             <!-- Left Panel -->
             <section class="hidden lg:flex w-1/2 items-center justify-center p-6 text-white bg-brand-primary/10">
                 <div class="flex flex-col items-center w-full py-4">
-                    <div class="text-center">
-                        <img src="{{ asset('images/micrologo.png') }}" alt="Microfinance Logo" class="w-20 h-20 mx-auto">
+                    <div class="text-center opacity-0 animate-entrance-down">
+                        <img src="{{ asset('images/micrologo.png') }}" alt="Microfinance Logo" class="w-32 h-32 mx-auto">
                         <h1 class="text-3xl font-bold mt-4">{{ (request()->get('portal') === 'vendor') ? 'Microfinancial Vendors' : 'Microfinancial Logistics' }}</h1>
                         <p class="text-white/80">{{ (request()->get('portal') === 'vendor') ? 'Vendor Portal' : 'Logistics I' }}</p>
                     </div>
 
                     <!-- Illustration Carousel -->
-                    <div class="relative w-full max-w-2xl h-64 my-4">
+                    <div class="relative w-full max-w-2xl h-64 my-4 opacity-0 animate-entrance-pop delay-[500ms]">
                         <img src="{{ asset('images/login-img/illustration-1.svg') }}" alt="Illustration 1" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-100">
                         <img src="{{ asset('images/login-img/illustration-2.svg') }}" alt="Illustration 2" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
                         <img src="{{ asset('images/login-img/illustration-3.svg') }}" alt="Illustration 3" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
@@ -78,7 +98,7 @@
                         <img src="{{ asset('images/login-img/illustration-5.svg') }}" alt="Illustration 5" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
                     </div>
 
-                    <div class="text-center mt-4 max-w-xl">
+                    <div class="text-center mt-4 max-w-xl opacity-0 animate-entrance-pop delay-[500ms]">
                         <p class="italic text-white/90 text-base leading-relaxed">
                             “The strength of the team is each individual member. The strength of each member is the team.”
                         </p>
@@ -89,9 +109,9 @@
             
             <!-- Right Panel: OTP Form Card -->
             <section class="w-full lg:w-1/2 flex items-center justify-center p-8">
-                <div class="bg-white/90 w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8">
+                <div class="bg-white/90 w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8 opacity-0 animate-entrance-up">
 
-                    <div class="text-center mb-6">
+                    <div class="text-center mb-6 opacity-0 animate-entrance-left delay-[500ms]">
                         <h2 class="text-3xl font-bold text-brand-text-primary">OTP Verification</h2>
                         <p class="text-brand-text-secondary mt-1">
                             Enter the 6-digit code sent to <strong class="text-brand-primary" id="user-email">{{ request()->get('email', 'mail@site.com') }}</strong>
@@ -106,7 +126,7 @@
                         <input type="hidden" name="email" id="email" value="{{ request()->get('email', 'mail@site.com') }}" />
 
                         <!-- OTP inputs (single row on all screen sizes) -->
-                        <div class="grid grid-cols-6 gap-2 justify-items-center">
+                        <div class="grid grid-cols-6 gap-2 justify-items-center opacity-0 animate-entrance-left delay-[500ms]">
                             <input name="otp1" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" spellcheck="false" 
                                 class="otp w-10 h-10 sm:w-12 sm:h-12 text-center text-lg sm:text-xl border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all duration-200" aria-label="Digit 1" />
                             <input name="otp2" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" spellcheck="false" 
@@ -125,14 +145,14 @@
                         <p id="otp-error" class="text-center text-red-600 text-sm hidden">Please enter the full 6-digit code.</p>
 
                         <!-- resend / timer row -->
-                        <div class="flex items-center justify-center">
+                        <div class="flex items-center justify-center opacity-0 animate-entrance-pop delay-[1000ms]">
                             <div class="text-sm text-gray-600">
                                 <button id="resend-btn" type="button" class="text-brand-primary hover:text-brand-primary-hover hover:underline disabled:opacity-50 disabled:no-underline font-semibold" disabled>Resend OTP</button>
                                 <span id="timer" class="ml-2 text-gray-500 font-mono">(01:00)</span>
                             </div>
                         </div>
 
-                        <div class="space-y-3">
+                        <div class="space-y-3 opacity-0 animate-entrance-pop delay-[1000ms]">
                             <button id="verify-btn" type="button" disabled
                                 class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg
                                         transition-all duration-300 shadow-lg
@@ -148,7 +168,7 @@
                     </form>
                     <!-- otp form end -->
 
-                    <div class="text-center mt-8 text-sm">
+                    <div class="text-center mt-8 text-sm opacity-0 animate-entrance-pop delay-[1000ms]">
                         <p class="text-gray-500">&copy; 2025 Microfinance Logistics. All Rights Reserved.</p>
                     </div>
                 </div>

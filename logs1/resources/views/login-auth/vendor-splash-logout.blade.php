@@ -31,6 +31,10 @@
                             "0%, 100%": { transform: "translateY(0) translateX(0)" },
                             "33%": { transform: "translateY(25px) translateX(-15px)" },
                             "66%": { transform: "translateY(10px) translateX(15px)" },
+                        },
+                        popUp: {
+                            "0%": { transform: "scale(0.9)", opacity: "0" },
+                            "100%": { transform: "scale(1)", opacity: "1" },
                         }
                     },
                     animation: {
@@ -39,6 +43,7 @@
                         "float-reverse": "float-reverse 7s ease-in-out infinite",
                         "float-reverse-fast": "float-reverse 5s ease-in-out infinite",
                         "float-fast": "float 5s ease-in-out infinite",
+                        "entrance-pop": "popUp 0.6s ease-out forwards",
                     }
                 }
             }
@@ -59,7 +64,7 @@
         </div>
 
         <div class="w-full max-w-md relative z-10">
-            <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl p-8 flex flex-col items-center space-y-4">
+            <div class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl p-8 flex flex-col items-center space-y-4 opacity-0 animate-entrance-pop">
                 <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Vendors Logo" class="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain" />
                 <div role="status" aria-live="polite" class="flex items-center space-x-3">
                     <i class="bx bx-loader-alt bx-spin text-brand-primary text-4xl" aria-hidden="true"></i>

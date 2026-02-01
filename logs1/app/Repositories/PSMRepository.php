@@ -8,9 +8,31 @@ use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
 use App\Models\PSM\Quote;
 use App\Models\PSM\Vendor;
+use App\Models\PSM\PurchaseProduct;
 
 class PSMRepository
 {
+    /**
+     * Get all purchase products with optional filters
+     */
+    public function getPurchaseProducts($filters = [])
+    {
+        $query = PurchaseProduct::orderBy('created_at', 'desc');
+        return $query->get();
+    }
+
+    /**
+     * Delete purchase product by ID (purcprod_id)
+     */
+    public function deletePurchaseProduct($id)
+    {
+        $product = PurchaseProduct::where('purcprod_id', $id)->first();
+        if ($product) {
+            return $product->delete();
+        }
+        return false;
+    }
+
     /**
      * Get all vendors with optional filters and search
      */

@@ -184,6 +184,14 @@ var vendorProductsElements = {
     cancelProductBtn: document.getElementById('cancelProductBtn')
 };
 
+function getProductImageUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('data:')) return path;
+    if (path.startsWith('http')) return path;
+    var filename = path.split(/[/\\]/).pop();
+    return '/images/product-picture/' + filename;
+}
+
 function initVendorProducts() {
     if (!CURRENT_VENDOR_ID) {
         if (vendorProductsElements.tableBody) {
@@ -521,7 +529,7 @@ function viewProduct(id) {
     
     var imageHtml = '';
     if (p.prod_picture) {
-        var imgSrc = p.prod_picture.startsWith('http') || p.prod_picture.startsWith('/') ? p.prod_picture : '/' + p.prod_picture;
+        var imgSrc = getProductImageUrl(p.prod_picture);
         imageHtml = `<div class="mb-4 text-center">
             <img src="${imgSrc}" alt="${p.prod_name}" class="max-w-full h-auto max-h-64 mx-auto rounded-lg shadow-md object-contain">
         </div>`;

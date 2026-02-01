@@ -6,12 +6,14 @@ use App\Models\PSM\Budget;
 use App\Models\PSM\BudgetLog;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
+use App\Models\PSM\PurchaseProduct;
 use App\Models\PSM\Quote;
 use App\Models\PSM\Vendor;
 use App\Models\VendorAccount;
 use App\Repositories\PSMRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PSMService
 {
@@ -20,6 +22,44 @@ class PSMService
     public function __construct(PSMRepository $psmRepository)
     {
         $this->psmRepository = $psmRepository;
+    }
+
+    /**
+     * Get purchase products
+     */
+    public function getPurchaseProducts()
+    {
+        try {
+            return $this->psmRepository->getPurchaseProducts();
+        } catch (Exception $e) {
+            throw new Exception('Error fetching purchase products: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete purchase product
+     */
+    public function deletePurchaseProduct($id)
+    {
+        try {
+            $result = $this->psmRepository->deletePurchaseProduct($id);
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Purchase product deleted successfully'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Purchase product not found'
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error deleting purchase product: ' . $e->getMessage()
+            ];
+        }
     }
 
     /**
@@ -789,8 +829,8 @@ class PSMService
 
                 $file = $data['prod_picture'];
                 $filename = 'prod_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('storage/products'), $filename);
-                $data['prod_picture'] = 'storage/products/' . $filename;
+                $file->move(public_path('images/product-picture'), $filename);
+                $data['prod_picture'] = 'images/product-picture/' . $filename;
             }
 
             $product = $this->psmRepository->updateProduct($id, $data);
@@ -1037,6 +1077,11 @@ class PSMService
     {
         DB::beginTransaction();
         try {
+            // Map status to quo_status if present (fixes frontend mismatch)
+            if (isset($data['status']) && !isset($data['quo_status'])) {
+                $data['quo_status'] = $data['status'];
+            }
+
             if (isset($data['quo_items']) && is_string($data['quo_items'])) {
                 $data['quo_items'] = json_decode($data['quo_items'], true);
             }
@@ -1044,11 +1089,8 @@ class PSMService
             if ($quote) {
                 if ($quote->quo_purchase_id) {
                     $purchaseUpdates = [];
-                    if (array_key_exists('quo_delivery_date_from', $data)) {
-                        $purchaseUpdates['pur_delivery_date_from'] = $data['quo_delivery_date_from'];
-                    }
-                    if (array_key_exists('quo_delivery_date_to', $data)) {
-                        $purchaseUpdates['pur_delivery_date_to'] = $data['quo_delivery_date_to'];
+                    if (array_key_exists('quo_delivery_date', $data)) {
+                        $purchaseUpdates['pur_delivery_date'] = $data['quo_delivery_date'];
                     }
                     if (! empty($purchaseUpdates)) {
                         $this->psmRepository->updatePurchase($quote->quo_purchase_id, $purchaseUpdates);
@@ -1064,7 +1106,10 @@ class PSMService
                     ];
                     $targetStatus = $map[$data['quo_status']] ?? null;
                     if ($targetStatus) {
-                        $this->updatePurchaseStatus($quote->quo_purchase_id, $targetStatus, false, null);
+                        $statusResult = $this->updatePurchaseStatus($quote->quo_purchase_id, $targetStatus, false, null);
+                        if (is_array($statusResult) && isset($statusResult['success']) && !$statusResult['success']) {
+                            throw new Exception($statusResult['message'] ?? 'Failed to update linked purchase status');
+                        }
                     }
                 }
                 DB::commit();
@@ -1310,6 +1355,105 @@ class PSMService
             // Set approved by if provided (for both approval and rejection)
             if ($approvedBy) {
                 $purchase->pur_approved_by = $approvedBy;
+            }
+
+            // Calculate warranty and expiration if status is Completed
+            if ($status === 'Completed') {
+                $items = $purchase->pur_name_items;
+                $warranties = [];
+                $expirations = [];
+                $today = now();
+
+                if (is_array($items)) {
+                    // Enrich items with product defaults if missing
+                    $productNames = array_column($items, 'name');
+                    $products = Product::whereIn('prod_name', $productNames)->get()->keyBy('prod_name');
+
+                    foreach ($items as $item) {
+                        $itemName = $item['name'] ?? 'Unknown Item';
+                        
+                        // Get warranty/expiration from item or fallback to product
+                        $itemWarranty = $item['warranty'] ?? null;
+                        $itemExpiration = $item['expiration'] ?? null;
+
+                        if (empty($itemWarranty) && isset($products[$itemName])) {
+                            $itemWarranty = $products[$itemName]->prod_warranty;
+                        }
+                        if (empty($itemExpiration) && isset($products[$itemName])) {
+                            $itemExpiration = $products[$itemName]->prod_expiration;
+                        }
+
+                        // Warranty Calculation
+                        $calculatedWarrantyDate = null;
+                        if ($itemWarranty) {
+                            $warrantyStr = $itemWarranty;
+                            $daysToAdd = 0;
+                            
+                            if (preg_match('/(\d+)\s*Day/i', $warrantyStr, $matches)) {
+                                $daysToAdd = (int)$matches[1];
+                            } elseif (preg_match('/(\d+)\s*Month/i', $warrantyStr, $matches)) {
+                                $daysToAdd = (int)$matches[1] * 31;
+                            } elseif (preg_match('/(\d+)\s*Year/i', $warrantyStr, $matches)) {
+                                $daysToAdd = (int)$matches[1] * 365;
+                            }
+                            
+                            if ($daysToAdd > 0) {
+                                $calculatedWarrantyDate = $today->copy()->addDays($daysToAdd)->format('Y-m-d');
+                                $warranties[] = [
+                                    'item' => $itemName,
+                                    'warranty_end' => $calculatedWarrantyDate,
+                                    'original_warranty' => $warrantyStr
+                                ];
+                            } else {
+                                $warranties[] = [
+                                    'item' => $itemName,
+                                    'warranty_end' => null,
+                                    'original_warranty' => $warrantyStr
+                                ];
+                            }
+                        }
+
+                        // Expiration Handling
+                        $expirationDate = null;
+                        if ($itemExpiration) {
+                            $expirationDate = date('Y-m-d', strtotime($itemExpiration));
+                            $expirations[] = [
+                                'item' => $itemName,
+                                'expiration_date' => $expirationDate
+                            ];
+                        }
+
+                        // Create PurchaseProduct Record
+                        // Generate ID: PCPD + YYYYMMDD + 5 random alphanumeric chars
+                        $prefix = 'PCPD';
+                        $dateCode = now()->format('Ymd');
+                        $randomCode = strtoupper(Str::random(5));
+                        $purchaseProductId = $prefix . $dateCode . $randomCode;
+
+                        // Get real product ID if available
+                        $prodId = isset($products[$itemName]) ? $products[$itemName]->prod_id : ($item['itemId'] ?? Str::random(10));
+                        
+                        // Calculate quantity (always 1 for dissected items)
+                        $prodUnit = 1;
+
+                        PurchaseProduct::create([
+                            'purcprod_id' => $purchaseProductId,
+                            'purcprod_prod_id' => $prodId,
+                            'purcprod_prod_name' => $itemName,
+                            'purcprod_prod_price' => $item['price'] ?? 0,
+                            'purcprod_prod_unit' => $prodUnit,
+                            'purcprod_prod_type' => $purchase->pur_ven_type,
+                            'purcprod_status' => 'Completed', // Default status for completed purchase items
+                            'purcprod_date' => now(),
+                            'purcprod_warranty' => $calculatedWarrantyDate,
+                            'purcprod_expiration' => $expirationDate,
+                            'purcprod_desc' => $purchase->pur_desc,
+                        ]);
+                    }
+                }
+                
+                $purchase->pur_warranty = !empty($warranties) ? json_encode($warranties) : null;
+                $purchase->pur_expiration = !empty($expirations) ? json_encode($expirations) : null;
             }
 
             // Update purchase status

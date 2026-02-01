@@ -31,6 +31,22 @@
                             "0%, 100%": { transform: "translateY(0) translateX(0)" },
                             "33%": { transform: "translateY(25px) translateX(-15px)" },
                             "66%": { transform: "translateY(10px) translateX(15px)" },
+                        },
+                        slideInDown: {
+                            "0%": { transform: "translateY(-50px)", opacity: "0" },
+                            "100%": { transform: "translateY(0)", opacity: "1" },
+                        },
+                        slideInUp: {
+                            "0%": { transform: "translateY(50px)", opacity: "0" },
+                            "100%": { transform: "translateY(0)", opacity: "1" },
+                        },
+                        slideInLeft: {
+                            "0%": { transform: "translateX(-30px)", opacity: "0" },
+                            "100%": { transform: "translateX(0)", opacity: "1" },
+                        },
+                        popUp: {
+                            "0%": { transform: "scale(0.9)", opacity: "0" },
+                            "100%": { transform: "scale(1)", opacity: "1" },
                         }
                     },
                     animation: {
@@ -39,6 +55,10 @@
                         "float-reverse": "float-reverse 7s ease-in-out infinite",
                         "float-reverse-fast": "float-reverse 5s ease-in-out infinite",
                         "float-fast": "float 5s ease-in-out infinite",
+                        "entrance-down": "slideInDown 0.8s ease-out forwards",
+                        "entrance-up": "slideInUp 0.8s ease-out forwards",
+                        "entrance-left": "slideInLeft 0.8s ease-out forwards",
+                        "entrance-pop": "popUp 0.6s ease-out forwards",
                     }
                 }
             }
@@ -63,14 +83,14 @@
             <!-- Left Panel -->
             <section class="hidden lg:flex w-1/2 items-center justify-center p-6 text-white bg-brand-primary/10">
                 <div class="flex flex-col items-center w-full py-4">
-                    <div class="text-center">
-                        <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Vendors Logo" class="w-20 h-20 mx-auto">
+                    <div class="text-center opacity-0 animate-entrance-down">
+                        <img src="{{ asset('images/micrologo.png') }}" alt="Microfinancial Vendors Logo" class="w-32 h-32 mx-auto">
                         <h1 class="text-3xl font-bold mt-4">Microfinance Vendors</h1>
                         <p class="text-white/80">Vendor Portal</p>
                     </div>
 
                     <!-- Illustration Carousel -->
-                    <div class="relative w-full max-w-2xl h-64 my-4">
+                    <div class="relative w-full max-w-2xl h-64 my-4 opacity-0 animate-entrance-pop delay-[500ms]">
                         <img src="{{ asset('images/login-img/illustration-1.svg') }}" alt="Illustration 1" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-100">
                         <img src="{{ asset('images/login-img/illustration-2.svg') }}" alt="Illustration 2" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
                         <img src="{{ asset('images/login-img/illustration-3.svg') }}" alt="Illustration 3" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
@@ -78,7 +98,7 @@
                         <img src="{{ asset('images/login-img/illustration-5.svg') }}" alt="Illustration 5" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
                     </div>
 
-                    <div class="text-center mt-4 max-w-xl">
+                    <div class="text-center mt-4 max-w-xl opacity-0 animate-entrance-pop delay-[500ms]">
                         <p class="italic text-white/90 text-base leading-relaxed">
                             “The strength of the team is each individual member. The strength of each member is the team.”
                         </p>
@@ -89,8 +109,8 @@
 
             <!-- Right Panel: Login Card -->
             <section class="w-full lg:w-1/2 flex items-center justify-center p-8">
-                <div class="bg-white/90 w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8">
-                    <div class="text-center mb-6">
+                <div class="bg-white/90 w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8 opacity-0 animate-entrance-up">
+                    <div class="text-center mb-6 opacity-0 animate-entrance-left delay-[500ms]">
                         <h2 class="text-3xl font-bold text-brand-text-primary">Vendor Portal</h2>
                         <p class="text-brand-text-secondary mt-1">Please enter your details to sign in.</p>
                     </div>
@@ -107,7 +127,7 @@
                         <!-- login failed alert end -->
 
                         <!-- Email -->
-                        <div class="relative mb-4">
+                        <div class="relative mb-4 opacity-0 animate-entrance-left delay-[500ms]">
                             <label class="block text-sm font-medium text-gray-700" for="email">Email Address</label>
                             <div class="mt-1 relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -123,7 +143,7 @@
                         </div>
 
                         <!-- Password -->
-                        <div class="relative mb-4">
+                        <div class="relative mb-4 opacity-0 animate-entrance-left delay-[500ms]">
                             <label class="block text-sm font-medium text-gray-700" for="password">Password</label>
                             <div class="mt-1 relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -142,7 +162,7 @@
                         </div>
 
                         <!-- Terms checkbox -->
-                        <div class="mt-4 mb-4 flex items-start gap-3">
+                        <div class="mt-4 mb-4 flex items-start gap-3 opacity-0 animate-entrance-pop delay-[1000ms]">
                             <input id="agree" name="agree" type="checkbox"
                             class="mt-1 h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary transition" required />
                             <label for="agree" class="text-sm text-gray-700 leading-relaxed select-none">
@@ -159,17 +179,17 @@
                         <button type="submit" id="loginBtn" 
                             class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg
                                     transition-all duration-300 shadow-lg
-                                    transform active:translate-y-0 active:scale-[0.99]">
+                                    transform active:translate-y-0 active:scale-[0.99] opacity-0 animate-entrance-pop delay-[1000ms]">
                             <span id="loginText">Sign In</span>
                             <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
                         </button>
                         
-                        <div class="mt-4 text-center">
+                        <div class="mt-4 text-center opacity-0 animate-entrance-pop delay-[1000ms]">
                             <a href="/login" class="inline-block text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold text-sm">Employee Here!</a>
                         </div>
                     </form>
 
-                    <div class="text-center mt-8 text-sm">
+                    <div class="text-center mt-8 text-sm opacity-0 animate-entrance-pop delay-[1000ms]">
                         <p class="text-gray-500">&copy; 2026 Microfinance Logistics. All Rights Reserved.</p>
                     </div>
                 </div>

@@ -70,6 +70,9 @@
                 <button id="inventoryNewItemBtn" class="btn btn-primary px-9 text-white">
                     <i class='bx bxs-down-arrow-square mr-2'></i>Inventory New Item
                 </button>
+                <button id="incomingAssetsBtn" class="btn btn-primary px-9 text-white">
+                    <i class='bx bx-import mr-2'></i>Incoming Assets
+                </button>
             </div> 
         </div>
         <!-- Quick Actions section end -->
@@ -205,7 +208,7 @@
                 <textarea id="item_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div style="display:none">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
                     <select id="item_category_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Select Category</option>
@@ -236,32 +239,16 @@
                     </select>
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div style="display:none">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Stock *</label>
-                    <input type="number" id="item_current_stock" required min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Stock *</label>
-                    <input type="number" id="item_max_stock" required min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="100">
-                </div>
+            
+            <!-- Hidden Fields (Auto-populated/Defaulted) -->
+            <div style="display:none">
+                <input type="number" id="item_current_stock" required min="0">
+                <input type="number" id="item_max_stock" required min="1" value="100">
+                <input type="number" id="item_unit_price" required min="0" step="0.01">
+                <input type="text" id="item_expiration_date">
+                <input type="text" id="item_warranty_end">
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div style="display:none">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (₱) *</label>
-                    <input type="number" id="item_unit_price" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0.00">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
-                    <input type="date" id="item_expiration_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div style="display:none">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Warranty End</label>
-                    <input type="date" id="item_warranty_end" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div class="flex items-center">
                     <input type="checkbox" id="item_is_fixed" class="mr-2">
@@ -553,6 +540,72 @@
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Location</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Incoming Assets Modal -->
+<div id="incomingAssetsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Incoming Assets (Purchase Products)</h3>
+            <button id="closeIncomingAssetsModal" class="text-gray-500 hover:text-gray-700">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        
+        <div class="overflow-x-auto mb-4 border rounded-lg">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="bg-gray-700 text-white">
+                        <th class="whitespace-nowrap">ID</th>
+                        <th class="whitespace-nowrap">Prod ID</th>
+                        <th class="whitespace-nowrap">Name</th>
+                        <th class="whitespace-nowrap">Price</th>
+                        <th class="whitespace-nowrap">Unit</th>
+                        <th class="whitespace-nowrap">Type</th>
+                        <th class="whitespace-nowrap">Status</th>
+                        <th class="whitespace-nowrap">Date</th>
+                        <th class="whitespace-nowrap">Warranty</th>
+                        <th class="whitespace-nowrap">Expiration</th>
+                        <th class="whitespace-nowrap">Desc</th>
+                        <th class="whitespace-nowrap">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="incomingAssetsTableBody">
+                    <tr>
+                        <td colspan="12" class="text-center py-8 text-gray-500">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex flex-1 justify-between sm:hidden">
+                <button id="incomingAssetsPrevBtnMobile" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</button>
+                <button id="incomingAssetsNextBtnMobile" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</button>
+            </div>
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700" id="incomingAssetsPagerInfo">
+                        Showing <span class="font-medium">0</span> to <span class="font-medium">0</span> of <span class="font-medium">0</span> results
+                    </p>
+                </div>
+                <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                        <button id="incomingAssetsPrevBtn" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Previous</span>
+                            <i class='bx bx-chevron-left h-5 w-5'></i>
+                        </button>
+                        <span id="incomingAssetsPageDisplay" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">1</span>
+                        <button id="incomingAssetsNextBtn" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Next</span>
+                            <i class='bx bx-chevron-right h-5 w-5'></i>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -940,7 +993,19 @@ const categoriesPageSize = 10;
     addCategoryModal: document.getElementById('addCategoryModal'),
     closeAddCategoryModal: document.getElementById('closeAddCategoryModal'),
     cancelAddCategoryModal: document.getElementById('cancelAddCategoryModal'),
-    addCategoryForm: document.getElementById('addCategoryForm')
+    addCategoryForm: document.getElementById('addCategoryForm'),
+
+    // Incoming Assets Modal
+    incomingAssetsModal: document.getElementById('incomingAssetsModal'),
+    closeIncomingAssetsModal: document.getElementById('closeIncomingAssetsModal'),
+    incomingAssetsTableBody: document.getElementById('incomingAssetsTableBody'),
+    incomingAssetsPagerInfo: document.getElementById('incomingAssetsPagerInfo'),
+    incomingAssetsPageDisplay: document.getElementById('incomingAssetsPageDisplay'),
+    incomingAssetsPrevBtn: document.getElementById('incomingAssetsPrevBtn'),
+    incomingAssetsNextBtn: document.getElementById('incomingAssetsNextBtn'),
+    incomingAssetsPrevBtnMobile: document.getElementById('incomingAssetsPrevBtnMobile'),
+    incomingAssetsNextBtnMobile: document.getElementById('incomingAssetsNextBtnMobile'),
+    incomingAssetsBtn: document.getElementById('incomingAssetsBtn')
 };
 
 const Toast = Swal.mixin({ 
@@ -1217,8 +1282,8 @@ function renderInventoryItems() {
             <tr>
                 <td colspan="12" class="text-center py-8 text-gray-500">
                     <div class="flex flex-col items-center justify-center">
-                        <i class='bx bx-fw bxs-store text-4xl text-gray-400 mb-2'></i>
-                        <p>No inventory items found</p>
+                        <i class='bx bx-fw bxs-store text-6xl text-gray-400 mb-2'></i>
+                        <p class="text-lg font-medium">No inventory items found!</p>
                     </div>
                 </td>
             </tr>
@@ -1489,125 +1554,297 @@ async function fetchCompletedPurchases() {
 function populateItemNameDropdown() {
     const select = document.getElementById('item_name');
     if (!select) return;
+    
+    // Save current value if any
     const currentVal = select.value;
-    select.innerHTML = '<option value="">Select Item from Completed Purchase</option>';
     
-    completedPurchases.forEach(purchase => {
-        let items = [];
-        try {
-            items = typeof purchase.pur_name_items === 'string' ? JSON.parse(purchase.pur_name_items) : purchase.pur_name_items;
-        } catch(e) { items = []; }
-        if (!Array.isArray(items)) items = [];
+    select.innerHTML = '<option value="">Select Item from Incoming Assets</option>';
+    
+    if (!incomingAssetsData || incomingAssetsData.length === 0) return;
+
+    incomingAssetsData.forEach((item, index) => {
+        const option = document.createElement('option');
+        // Use the index as the value to easily retrieve the item data later
+        option.value = index; 
+        // Display Name and Prod ID (or ID if Prod ID is missing)
+        const displayId = item.purcprod_prod_id || item.purcprod_id;
+        option.textContent = `${item.purcprod_prod_name || 'Unknown Item'} (ID: ${displayId})`;
         
-        items.forEach((item, index) => {
-             // Skip if already added to inventory
-             if (item.in_inventory) return;
-
-             const option = document.createElement('option');
-             option.value = `${purchase.pur_id}|${index}`;
-             option.textContent = `${item.name} (PO: ${purchase.pur_id})`;
-             option.dataset.purchaseId = purchase.pur_id;
-             option.dataset.itemIndex = index;
-             option.dataset.itemName = item.name;
-             select.appendChild(option);
-        });
+        // Store name in dataset for SKU generation
+        option.dataset.itemName = item.purcprod_prod_name;
+        
+        select.appendChild(option);
     });
-    if (currentVal) select.value = currentVal;
-}
-
-function onPurchaseItemSelected(e) {
-    const val = e.target.value;
-    const skuInput = document.getElementById('item_stock_keeping_unit');
-    const categorySelect = document.getElementById('item_category_id');
     
-    // Clear hidden fields initially
-    document.getElementById('psm_purchase_id').value = '';
-    document.getElementById('psm_item_index').value = '';
-    
-    if (!val) return;
-    
-    const [purId, itemIndex] = val.split('|');
-    
-    // Set hidden fields
-    document.getElementById('psm_purchase_id').value = purId;
-    document.getElementById('psm_item_index').value = itemIndex;
-
-    const purchase = completedPurchases.find(p => p.pur_id === purId);
-    if (!purchase) return;
-    
-    let items = typeof purchase.pur_name_items === 'string' ? JSON.parse(purchase.pur_name_items) : purchase.pur_name_items;
-    const item = items[parseInt(itemIndex)];
-    
-    if (item) {
-         document.getElementById('item_description').value = purchase.pur_desc || '';
-         document.getElementById('item_current_stock').value = purchase.pur_unit || 0;
-         document.getElementById('item_unit_price').value = purchase.pur_total_amount || 0;
-
-         // Populate Expiration Date
-         const expInput = document.getElementById('item_expiration_date');
-         if (item.expiration) {
-             expInput.value = item.expiration.split('T')[0];
-         } else {
-             expInput.value = '';
-         }
-
-         // Populate Warranty End
-         const warrantyInput = document.getElementById('item_warranty_end');
-         if (item.warranty) {
-             if (item.warranty.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                 warrantyInput.value = item.warranty;
-             } else {
-                 const startDate = new Date(purchase.created_at || Date.now());
-                 const warrantyStr = item.warranty.toLowerCase();
-                 let monthsToAdd = 0;
-                 if (warrantyStr.includes('year')) {
-                     const years = parseInt(warrantyStr) || 0;
-                     monthsToAdd = years * 12;
-                 } else if (warrantyStr.includes('month')) {
-                     monthsToAdd = parseInt(warrantyStr) || 0;
-                 } else if (warrantyStr.includes('day')) {
-                     const days = parseInt(warrantyStr) || 0;
-                     startDate.setDate(startDate.getDate() + days);
-                 }
-                 if (monthsToAdd > 0) {
-                     startDate.setMonth(startDate.getMonth() + monthsToAdd);
-                 }
-                 if (monthsToAdd > 0 || warrantyStr.includes('day')) {
-                     warrantyInput.value = startDate.toISOString().split('T')[0];
-                 } else {
-                     warrantyInput.value = '';
-                 }
-             }
-         } else {
-             warrantyInput.value = '';
-         }
-         
-         if (purchase.pur_ven_type) {
-             for (let i = 0; i < categorySelect.options.length; i++) {
-                 const opt = categorySelect.options[i];
-                 if (opt.text.toLowerCase().includes(purchase.pur_ven_type.toLowerCase())) {
-                     categorySelect.value = opt.value;
-                     break;
-                 }
-             }
-         }
-         
-         if (!skuInput.value) {
-             const categoryName = categorySelect.options[categorySelect.selectedIndex]?.text || '';
-             skuInput.value = generateSKU(item.name, categoryName);
-         }
+    // Restore value if it still exists (though indices might change, this is best effort)
+    if (currentVal && incomingAssetsData[currentVal]) {
+        select.value = currentVal;
     }
 }
 
-function openAddItemModal() {
+function onPurchaseItemSelected(e) {
+    const index = e.target.value;
+    const skuInput = document.getElementById('item_stock_keeping_unit');
+    
+    // Clear fields initially
+    document.getElementById('psm_purchase_id').value = '';
+    document.getElementById('psm_item_index').value = '';
+    
+    if (index === '') return;
+    
+    const item = incomingAssetsData[index];
+    if (!item) return;
+    
+    // Populate Form Fields
+    
+    // SKU - Use Prod ID
+    skuInput.value = item.purcprod_prod_id || '';
+    
+    // Description
+    document.getElementById('item_description').value = item.purcprod_desc || '';
+    
+    // Stock (Aggregated Units)
+    document.getElementById('item_current_stock').value = item.purcprod_prod_unit || 0;
+    
+    // Price (Aggregated Price - assumed Total Amount based on user request)
+    document.getElementById('item_unit_price').value = item.purcprod_prod_price || 0;
+
+    // Expiration Date
+    document.getElementById('item_expiration_date').value = item.purcprod_expiration || '';
+
+    // Warranty End
+    document.getElementById('item_warranty_end').value = item.purcprod_warranty || '';
+    
+    // Item Type (Map to lowercase if exists)
+    if (item.purcprod_prod_type) {
+        const type = item.purcprod_prod_type.toLowerCase();
+        const typeSelect = document.getElementById('item_item_type');
+        // Check if option exists
+        if ([...typeSelect.options].some(o => o.value === type)) {
+            typeSelect.value = type;
+        }
+    }
+}
+
+
+// Incoming Assets Logic
+let incomingAssetsData = [];
+let currentIncomingAssetsPage = 1;
+const incomingAssetsPerPage = 10;
+
+function groupIncomingAssets(data) {
+    const groupedMap = new Map();
+
+    data.forEach(item => {
+        const prodId = item.purcprod_prod_id;
+        // Group by prodId if available, otherwise use unique record ID
+        const key = prodId ? prodId : `unique_${item.purcprod_id}`;
+
+        if (!groupedMap.has(key)) {
+            // Create new entry
+            const newItem = { ...item };
+            newItem.purcprod_prod_unit = parseFloat(item.purcprod_prod_unit) || 0;
+            newItem.purcprod_prod_price = parseFloat(item.purcprod_prod_price) || 0;
+            groupedMap.set(key, newItem);
+        } else {
+            // Aggregate existing entry
+            const existingItem = groupedMap.get(key);
+            existingItem.purcprod_prod_unit += parseFloat(item.purcprod_prod_unit) || 0;
+            existingItem.purcprod_prod_price += parseFloat(item.purcprod_prod_price) || 0;
+        }
+    });
+
+    return Array.from(groupedMap.values());
+}
+
+async function loadIncomingAssets() {
+    try {
+        const response = await fetch('/api/v1/sws/purchase-product-management', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            // Group data by Prod ID before assigning
+            incomingAssetsData = groupIncomingAssets(result.data);
+            renderIncomingAssets();
+        } else {
+            incomingAssetsData = [];
+            renderIncomingAssets();
+        }
+    } catch (e) {
+        console.error('Error loading incoming assets:', e);
+        incomingAssetsData = [];
+        renderIncomingAssets();
+        notify('Error loading incoming assets', 'error');
+    }
+}
+
+function renderIncomingAssets() {
+    const start = (currentIncomingAssetsPage - 1) * incomingAssetsPerPage;
+    const end = start + incomingAssetsPerPage;
+    const paginatedData = incomingAssetsData.slice(start, end);
+    const tbody = els.incomingAssetsTableBody;
+    
+    tbody.innerHTML = '';
+    
+    if (paginatedData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="12" class="text-center py-8 text-gray-500">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class='bx bx-fw bxs-store text-6xl text-gray-400 mb-2'></i>
+                        <p class="text-lg font-medium">No incoming assets found!</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        updateIncomingAssetsPagination(0);
+        return;
+    }
+
+    paginatedData.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+        tr.innerHTML = `
+            <td class="font-mono text-sm whitespace-nowrap">${item.purcprod_id}</td>
+            <td class="font-mono text-sm whitespace-nowrap">${item.purcprod_prod_id || '-'}</td>
+            <td class="font-semibold whitespace-nowrap">${item.purcprod_prod_name || '-'}</td>
+            <td class="whitespace-nowrap">${formatCurrency(item.purcprod_prod_price)}</td>
+            <td class="whitespace-nowrap">${item.purcprod_prod_unit || '-'}</td>
+            <td class="whitespace-nowrap">${item.purcprod_prod_type || '-'}</td>
+            <td class="whitespace-nowrap">
+                <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    ${item.purcprod_status || 'Pending'}
+                </span>
+            </td>
+            <td class="whitespace-nowrap">${formatDate(item.purcprod_date)}</td>
+            <td class="whitespace-nowrap">${item.purcprod_warranty || '-'}</td>
+            <td class="whitespace-nowrap">${item.purcprod_expiration || '-'}</td>
+            <td class="max-w-xs truncate whitespace-nowrap" title="${item.purcprod_desc || ''}">${item.purcprod_desc || '-'}</td>
+            <td class="whitespace-nowrap">
+                <button onclick="deleteIncomingAsset('${item.purcprod_id}')" class="text-red-600 hover:text-red-900 flex items-center gap-1">
+                    <i class='bx bx-trash'></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    updateIncomingAssetsPagination(incomingAssetsData.length);
+}
+
+window.deleteIncomingAsset = function(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/api/v1/sws/purchase-product-management/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeIncomingAssetsModal(); // Close the modal first
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Successfully deleted!'
+                    });
+                    // Refresh data in background or just wait until next open
+                    loadIncomingAssets(); 
+                } else {
+                    notify(data.message || 'Error deleting item', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                notify('An error occurred while deleting', 'error');
+            });
+        }
+    });
+}
+
+function updateIncomingAssetsPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / incomingAssetsPerPage);
+    const start = totalItems === 0 ? 0 : (currentIncomingAssetsPage - 1) * incomingAssetsPerPage + 1;
+    const end = Math.min(currentIncomingAssetsPage * incomingAssetsPerPage, totalItems);
+
+    if (els.incomingAssetsPagerInfo) {
+        els.incomingAssetsPagerInfo.innerHTML = `Showing <span class="font-medium">${start}</span> to <span class="font-medium">${end}</span> of <span class="font-medium">${totalItems}</span> results`;
+    }
+
+    if (els.incomingAssetsPageDisplay) {
+        els.incomingAssetsPageDisplay.textContent = currentIncomingAssetsPage;
+    }
+
+    const prevDisabled = currentIncomingAssetsPage === 1;
+    const nextDisabled = currentIncomingAssetsPage === totalPages || totalPages === 0;
+
+    if (els.incomingAssetsPrevBtn) els.incomingAssetsPrevBtn.disabled = prevDisabled;
+    if (els.incomingAssetsNextBtn) els.incomingAssetsNextBtn.disabled = nextDisabled;
+    if (els.incomingAssetsPrevBtnMobile) els.incomingAssetsPrevBtnMobile.disabled = prevDisabled;
+    if (els.incomingAssetsNextBtnMobile) els.incomingAssetsNextBtnMobile.disabled = nextDisabled;
+
+    // Style updates for disabled state
+    const updateBtnStyle = (btn, disabled) => {
+        if (!btn) return;
+        if (disabled) {
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.classList.remove('hover:bg-gray-50');
+        } else {
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('hover:bg-gray-50');
+        }
+    };
+
+    updateBtnStyle(els.incomingAssetsPrevBtn, prevDisabled);
+    updateBtnStyle(els.incomingAssetsNextBtn, nextDisabled);
+    updateBtnStyle(els.incomingAssetsPrevBtnMobile, prevDisabled);
+    updateBtnStyle(els.incomingAssetsNextBtnMobile, nextDisabled);
+}
+
+function openIncomingAssetsModal() {
+    els.incomingAssetsModal.classList.remove('hidden');
+    currentIncomingAssetsPage = 1;
+    loadIncomingAssets();
+}
+
+function closeIncomingAssetsModal() {
+    els.incomingAssetsModal.classList.add('hidden');
+}
+
+async function openAddItemModal() {
     els.addItemModal.classList.remove('hidden');
     els.addItemForm.reset();
+    document.getElementById('item_max_stock').value = 100;
     document.getElementById('item_is_fixed').checked = false;
     document.getElementById('item_is_collateral').checked = false;
     
     updateItemCodePreview();
     
-    fetchCompletedPurchases();
+    // fetchCompletedPurchases();
+    await loadIncomingAssets();
+    populateItemNameDropdown();
     
     const itemNameSelect = document.getElementById('item_name');
     const skuInput = document.getElementById('item_stock_keeping_unit');
@@ -1659,13 +1896,16 @@ async function saveItem(e) {
     const selectedOption = itemNameSelect.options[itemNameSelect.selectedIndex];
     const itemName = selectedOption ? (selectedOption.dataset.itemName || selectedOption.text) : '';
 
+    const categoryVal = document.getElementById('item_category_id').value;
+    // console.log('Category Value in saveItem:', categoryVal);
+    
     const formData = {
         item_name: itemName,
         psm_purchase_id: document.getElementById('psm_purchase_id').value || null,
-        psm_item_index: document.getElementById('psm_item_index').value || null,
+        psm_item_index: document.getElementById('psm_item_index').value ? parseInt(document.getElementById('psm_item_index').value) : null,
         item_description: document.getElementById('item_description').value.trim() || null,
         item_stock_keeping_unit: document.getElementById('item_stock_keeping_unit').value.trim() || null,
-        item_category_id: document.getElementById('item_category_id').value || null,
+        item_category_id: categoryVal || null,
         item_stored_from: document.getElementById('item_stored_from').value.trim() || null,
         item_item_type: document.getElementById('item_item_type').value,
         item_is_fixed: document.getElementById('item_is_fixed').checked,
@@ -1726,7 +1966,20 @@ async function saveItem(e) {
             credentials: 'include'
         });
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Validation errors:', errorData);
+            
+            // Notify specific validation errors if available
+            if (errorData.errors) {
+                const errorMessages = Object.values(errorData.errors).flat().join('\n');
+                notify(errorMessages, 'error');
+            } else {
+                notify(errorData.message || `HTTP ${response.status}`, 'error');
+            }
+            
+            throw new Error(errorData.message || `HTTP ${response.status}`);
+        }
         
         const result = await response.json();
         
@@ -1744,7 +1997,7 @@ async function saveItem(e) {
         }
     } catch (e) {
         console.error('Error creating item:', e);
-        notify('Error creating item', 'error');
+        notify(e.message || 'Error creating item', 'error');
     }
 }
 
@@ -1985,6 +2238,30 @@ function initDigitalInventory() {
     if (els.viewLocationsBtn) els.viewLocationsBtn.addEventListener('click', openViewLocationsModal);
     if (els.viewCategoriesBtn) els.viewCategoriesBtn.addEventListener('click', openViewCategoriesModal);
     if (els.closeViewLocationsModalBtn) els.closeViewLocationsModalBtn.addEventListener('click', closeViewLocationsModalFunc);
+
+    // Incoming Assets Event Listeners
+    if (els.incomingAssetsBtn) els.incomingAssetsBtn.addEventListener('click', openIncomingAssetsModal);
+    if (els.closeIncomingAssetsModal) els.closeIncomingAssetsModal.addEventListener('click', closeIncomingAssetsModal);
+    if (els.incomingAssetsModal) {
+        els.incomingAssetsModal.addEventListener('click', (e) => {
+            if (e.target === els.incomingAssetsModal) closeIncomingAssetsModal();
+        });
+    }
+
+    // Incoming Assets Pagination Listeners
+    const changeIncomingAssetsPage = (delta) => {
+        const totalPages = Math.ceil(incomingAssetsData.length / incomingAssetsPerPage);
+        const newPage = currentIncomingAssetsPage + delta;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentIncomingAssetsPage = newPage;
+            renderIncomingAssets();
+        }
+    };
+
+    if (els.incomingAssetsPrevBtn) els.incomingAssetsPrevBtn.addEventListener('click', () => changeIncomingAssetsPage(-1));
+    if (els.incomingAssetsNextBtn) els.incomingAssetsNextBtn.addEventListener('click', () => changeIncomingAssetsPage(1));
+    if (els.incomingAssetsPrevBtnMobile) els.incomingAssetsPrevBtnMobile.addEventListener('click', () => changeIncomingAssetsPage(-1));
+    if (els.incomingAssetsNextBtnMobile) els.incomingAssetsNextBtnMobile.addEventListener('click', () => changeIncomingAssetsPage(1));
 
     // View Location Details Modal Listeners
     if (els.closeViewLocationModal) els.closeViewLocationModal.addEventListener('click', () => els.viewLocationModal.classList.add('hidden'));

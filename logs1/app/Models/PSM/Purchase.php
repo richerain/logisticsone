@@ -27,19 +27,19 @@ class Purchase extends Model
         'pur_order_by',
         'pur_cancel_by',
         'pur_desc',
-        'pur_delivery_date_from',
-        'pur_delivery_date_to',
+        'pur_delivery_date',
         'pur_department_from',
         'pur_module_from',
         'pur_submodule_from',
+        'pur_warranty',
+        'pur_expiration',
     ];
 
     protected $casts = [
         'pur_name_items' => 'array',
         'pur_unit' => 'integer',
         'pur_total_amount' => 'decimal:2',
-        'pur_delivery_date_from' => 'date',
-        'pur_delivery_date_to' => 'date',
+        'pur_delivery_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

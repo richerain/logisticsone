@@ -100,6 +100,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        // Handle vendor logout if applicable
+        if (Auth::guard('vendor')->check()) {
+            Auth::guard('vendor')->logout();
+        }
+
         $result = $this->authService->logout();
 
         return response()->json($result);
@@ -239,6 +244,27 @@ class AuthController extends Controller
             ]);
         }
 
+        if (Auth::guard('vendor')->check()) {
+            // Force session regeneration and save
+            $request->session()->regenerate(true);
+
+            // Update last activity timestamp in session
+            $request->session()->put('last_activity', time());
+
+            // Force immediate session save
+            $request->session()->save();
+
+            // Get fresh CSRF token
+            $newToken = csrf_token();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Session refreshed successfully',
+                'csrf_token' => $newToken,
+                'session_refreshed_at' => now()->toDateTimeString(),
+            ]);
+        }
+
         return response()->json([
             'success' => false,
             'message' => 'Not authenticated',
@@ -271,6 +297,24 @@ class AuthController extends Controller
                 'user' => [
                     'id' => Auth::guard('sws')->id(),
                     'email' => Auth::guard('sws')->user()->email,
+                    'role' => 'employee'
+                ],
+                'csrf_token' => csrf_token(),
+                'session_lifetime' => config('session.lifetime', 40),
+            ]);
+        }
+
+        if (Auth::guard('vendor')->check()) {
+            // Update last activity
+            $request->session()->put('last_activity', time());
+
+            return response()->json([
+                'success' => true,
+                'authenticated' => true,
+                'user' => [
+                    'id' => Auth::guard('vendor')->id(),
+                    'email' => Auth::guard('vendor')->user()->email,
+                    'role' => 'vendor'
                 ],
                 'csrf_token' => csrf_token(),
                 'session_lifetime' => config('session.lifetime', 40),
@@ -296,6 +340,19 @@ class AuthController extends Controller
                 'user' => [
                     'id' => Auth::guard('sws')->id(),
                     'email' => Auth::guard('sws')->user()->email,
+                    'role' => 'employee'
+                ],
+            ]);
+        }
+
+        if (Auth::guard('vendor')->check()) {
+            return response()->json([
+                'success' => true,
+                'authenticated' => true,
+                'user' => [
+                    'id' => Auth::guard('vendor')->id(),
+                    'email' => Auth::guard('vendor')->user()->email,
+                    'role' => 'vendor'
                 ],
             ]);
         }

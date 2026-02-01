@@ -40,8 +40,8 @@ class Item extends Model
     ];
 
     protected $casts = [
-        'item_expiration_date' => 'date',
-        'item_warranty_end' => 'date',
+        // 'item_expiration_date' => 'date', // Changed to string
+        // 'item_warranty_end' => 'date', // Changed to string
         'item_unit_price' => 'decimal:2',
         'item_total_quantity' => 'integer',
         'item_current_stock' => 'integer',

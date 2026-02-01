@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SWSController;
+use App\Http\Controllers\PSMController;
 use Illuminate\Support\Facades\Route;
 
 // SWS Module API Routes
@@ -47,3 +48,9 @@ Route::post('/locations', [SWSController::class, 'createLocation']);
 Route::get('/locations', [SWSController::class, 'getLocations']);
 Route::put('/locations/{id}', [SWSController::class, 'updateLocation']);
 Route::delete('/locations/{id}', [SWSController::class, 'deleteLocation']);
+
+// Purchase Product Management Routes (consumed from PSM)
+Route::prefix('purchase-product-management')->group(function () {
+    Route::get('/', [PSMController::class, 'getPurchaseProducts']);
+    Route::delete('/{id}', [PSMController::class, 'deletePurchaseProduct']);
+});

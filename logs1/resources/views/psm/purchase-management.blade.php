@@ -140,7 +140,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Company / Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Units</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Amount</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Delivery</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Delivery Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Ordered By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Approved By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Status</th>
@@ -387,6 +387,14 @@ const elements = {
     confirmCancelPurchaseBtn: document.getElementById('confirmCancelPurchaseBtn')
 };
 
+function getProductImageUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('data:')) return path;
+    if (path.startsWith('http')) return path;
+    var filename = path.split(/[/\\]/).pop();
+    return '/images/product-picture/' + filename;
+}
+
 function initPurchaseManagement() {
     console.log('🚀 Purchase Management Initialized');
     console.log('API Base URL:', API_BASE_URL);
@@ -616,7 +624,7 @@ function populateAvailableItems() {
         const itemElement = document.createElement('div');
         itemElement.className = 'p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors';
         const imageUrl = item.picture 
-            ? (item.picture.startsWith('storage/') ? `/${item.picture}` : `/storage/${item.picture}`)
+            ? getProductImageUrl(item.picture)
             : 'https://placehold.co/100x100?text=No+Image';
         
         itemElement.innerHTML = `
@@ -659,7 +667,7 @@ function filterAvailableItems() {
         const itemElement = document.createElement('div');
         itemElement.className = 'p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors';
         const imageUrl = item.picture 
-            ? (item.picture.startsWith('storage/') ? `/${item.picture}` : `/storage/${item.picture}`)
+            ? getProductImageUrl(item.picture)
             : 'https://placehold.co/100x100?text=No+Image';
         
         itemElement.innerHTML = `
@@ -737,7 +745,7 @@ function updateSelectedItemsDisplay() {
         
         elements.selectedItemsContainer.innerHTML = Object.values(itemCounts).map(group => {
             const imageUrl = group.picture 
-                ? (group.picture.startsWith('storage/') ? `/${group.picture}` : `/storage/${group.picture}`)
+                ? getProductImageUrl(group.picture)
                 : 'https://placehold.co/100x100?text=No+Image';
             return `
             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -803,9 +811,10 @@ async function loadPurchases() {
     
     try {
         const purchasesUrl = `${PSM_PURCHASES_API}`;
+        params.append('t', new Date().getTime());
         console.log('📡 Fetching purchases from:', `${purchasesUrl}?${params}`);
         
-        const response = await fetch(`${purchasesUrl}`, {
+        const response = await fetch(`${purchasesUrl}?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -875,6 +884,7 @@ function displayPurchases(purchases) {
         const canApprove = purchase.pur_status === 'Pending';
         const isApproved = purchase.pur_status === 'Approved';
         const isCompleted = purchase.pur_status === 'Completed';
+        const isInProgress = purchase.pur_status === 'In-Progress';
         const isCancelled = purchase.pur_status === 'Cancel';
         const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
         
@@ -912,7 +922,7 @@ function displayPurchases(purchases) {
                 ${formatCurrency(purchase.pur_total_amount)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${formatDateRange(purchase.pur_delivery_date_from, purchase.pur_delivery_date_to) || ''}
+                ${formatDate(purchase.pur_delivery_date)}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 ${orderedByHtml}
@@ -939,7 +949,7 @@ function displayPurchases(purchases) {
                             title="Budget Approval">
                         <i class='bx bx-check-shield text-xl'></i>
                     </button>` : ''}
-                    ${isApproved || isCompleted || isCancelled ? '' : `
+                    ${isApproved || isCompleted || isCancelled || isInProgress ? '' : `
                     <button onclick="editPurchase(${purchase.id})" 
                             class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
                             title="Edit Purchase">
@@ -1719,7 +1729,7 @@ function viewPurchase(id) {
         }
         
         const imageUrl = itemPicture 
-            ? (itemPicture.startsWith('http') ? itemPicture : (itemPicture.startsWith('storage/') ? `/${itemPicture}` : (itemPicture.startsWith('/') ? itemPicture : `/storage/${itemPicture}`)))
+            ? getProductImageUrl(itemPicture)
             : 'https://placehold.co/100x100?text=No+Image';
 
         return `
@@ -1815,6 +1825,53 @@ function viewPurchase(id) {
                 </div>
             </div>
 
+            <!-- Warranty Section -->
+            ${(() => {
+                try {
+                    const warranties = purchase.pur_warranty ? JSON.parse(purchase.pur_warranty) : [];
+                    if (!warranties || !Array.isArray(warranties) || warranties.length === 0) return '';
+                    return `
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Warranty Details</h4>
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            <ul class="divide-y divide-gray-100">
+                                ${warranties.map(w => `
+                                    <li class="p-3 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="font-medium text-gray-900">${w.item || 'Unknown Item'}</span>
+                                            <span class="text-gray-600">Ends: ${w.warranty_end ? formatDate(w.warranty_end) : 'N/A'}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">Duration: ${w.original_warranty || 'N/A'}</div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>`;
+                } catch (e) { console.error('Error parsing warranty:', e); return ''; }
+            })()}
+
+            <!-- Expiration Section -->
+            ${(() => {
+                try {
+                    const expirations = purchase.pur_expiration ? JSON.parse(purchase.pur_expiration) : [];
+                    if (!expirations || !Array.isArray(expirations) || expirations.length === 0) return '';
+                    return `
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Expiration Details</h4>
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            <ul class="divide-y divide-gray-100">
+                                ${expirations.map(e => `
+                                    <li class="p-3 text-sm flex justify-between">
+                                        <span class="font-medium text-gray-900">${e.item || 'Unknown Item'}</span>
+                                        <span class="text-gray-600">Expires: ${e.expiration_date ? formatDate(e.expiration_date) : 'N/A'}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>`;
+                } catch (e) { console.error('Error parsing expiration:', e); return ''; }
+            })()}
+
             <!-- Description Section -->
             ${purchase.pur_desc ? `
             <div>
@@ -1824,13 +1881,6 @@ function viewPurchase(id) {
                 </div>
             </div>
             ` : ''}
-            
-            <!-- System Info -->
-            <div class="pt-4 border-t border-gray-100">
-                 <p class="text-xs text-gray-400">
-                    Source: ${purchase.pur_department_from || 'Logistics 1'} &bull; ${purchase.pur_module_from || 'Procurement & Sourcing Management'} &bull; ${purchase.pur_submodule_from || 'Purchase Management'}
-                 </p>
-            </div>
         </div>
     `;
     const container = document.getElementById('viewPurchaseContent');
@@ -1884,8 +1934,8 @@ function formatCurrency(value) {
 function formatDate(d) {
     if (!d) return '';
     const dt = new Date(d);
-    const mm = dt.getMonth() + 1;
-    const dd = dt.getDate();
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
     const yyyy = dt.getFullYear();
     return `${mm}-${dd}-${yyyy}`;
 }

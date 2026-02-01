@@ -76,7 +76,7 @@
                     <th class="whitespace-nowrap">Items</th>
                     <th class="whitespace-nowrap">Units</th>
                     <th class="whitespace-nowrap">Total Amount</th>
-                    <th class="whitespace-nowrap">Estimated Date of Delivery</th>
+                    <th class="whitespace-nowrap">Delivery Date</th>
                     <th class="whitespace-nowrap">Status</th>
                     <th class="whitespace-nowrap">Actions</th>
                 </tr>
@@ -149,14 +149,12 @@
 <dialog id="setDeliveryModal" class="modal">
     <div class="modal-box w-96">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Set Delivery Dates</h3>
+            <h3 class="text-xl font-semibold">Set Delivery Date</h3>
             <form method="dialog"><button><i class='bx bx-sm bx-x'></i></button></form>
         </div>
         <div class="space-y-3">
-            <label class="block text-sm">Delivery From</label>
-            <input id="deliveryFromInput" type="date" class="input input-bordered w-full" />
-            <label class="block text-sm">Delivery To</label>
-            <input id="deliveryToInput" type="date" class="input input-bordered w-full" />
+            <label class="block text-sm">Delivery Date</label>
+            <input id="deliveryDateInput" type="date" class="input input-bordered w-full" />
             <div class="flex justify-end gap-2">
                 <button id="confirmSetDeliveryBtn" class="btn btn-primary btn-sm">Save</button>
                 <form method="dialog"><button class="btn btn-sm">Close</button></form>
@@ -231,8 +229,7 @@ var elements = {
     statusSelect: document.getElementById('statusSelect'),
     confirmUpdateStatusBtn: document.getElementById('confirmUpdateStatusBtn'),
     setDeliveryModal: document.getElementById('setDeliveryModal'),
-    deliveryFromInput: document.getElementById('deliveryFromInput'),
-    deliveryToInput: document.getElementById('deliveryToInput'),
+    deliveryDateInput: document.getElementById('deliveryDateInput'),
     confirmSetDeliveryBtn: document.getElementById('confirmSetDeliveryBtn'),
     deleteQuoteModal: document.getElementById('deleteQuoteModal'),
     confirmDeleteQuoteBtn: document.getElementById('confirmDeleteQuoteBtn'),
@@ -279,7 +276,7 @@ function setNotificationIndicator(count) {
 
 async function loadNotifications() {
     try {
-        const response = await fetch(`${PSM_QUOTES_API}/notifications`, {
+        const response = await fetch(`${PSM_QUOTES_API}/notifications?t=${new Date().getTime()}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -380,8 +377,14 @@ if (elements.confirmReviewBtn) {
                 await loadQuotes();
                 selectedPurchaseId = null;
                 elements.reviewConfirmModal?.close();
+                elements.notifModal?.close();
                 if (elements.notifModal) elements.notifModal.removeAttribute('inert');
                 updateNotifIndicatorFromDOM();
+                
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Successfully Confirm Review'
+                });
             }
         } catch(e) {}
     });
@@ -507,7 +510,7 @@ async function loadQuotes() {
             }, 200);
         }
         safeShowLoading();
-        const response = await fetch(`${PSM_QUOTES_API}`, {
+        const response = await fetch(`${PSM_QUOTES_API}?t=${new Date().getTime()}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -581,15 +584,14 @@ function displayQuotes(list) {
         const rowClass = isCompleted ? 'bg-gray-200' : '';
         const idStr = String(q.id);
         const statusStr = String(q.quo_status || '');
-        const fromStr = q.quo_delivery_date_from || '';
-        const toStr = q.quo_delivery_date_to || '';
+        const dateStr = q.quo_delivery_date || '';
         
         const quoId = q.quo_id;
 
         let actions = "";
         const viewBtn = `<button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${idStr}" title="View"><i class='bx bx-show-alt text-xl'></i></button>`;
         const updateBtn = `<button class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50" data-action="update" data-id="${idStr}" data-status="${statusStr}" title="Update Status"><i class='bx bx-edit text-xl'></i></button>`;
-        const deliveryBtn = `<button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="delivery" data-id="${idStr}" data-from="${fromStr}" data-to="${toStr}" title="Set Date Delivery"><i class='bx bx-calendar text-xl'></i></button>`;
+        const deliveryBtn = `<button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="delivery" data-id="${idStr}" data-date="${dateStr}" title="Set Date Delivery"><i class='bx bx-calendar text-xl'></i></button>`;
         const deleteBtn = `<button class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" data-action="delete" data-id="${idStr}" title="Delete"><i class='bx bx-trash text-xl'></i></button>`;
         
         if (isCompleted) {
@@ -610,7 +612,7 @@ function displayQuotes(list) {
                 <td class="px-3 py-2 whitespace-nowrap" title="${itemsList}">${truncateItems(q.quo_items, 40)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${q.quo_units} units</td>
                 <td class="px-3 py-2 whitespace-nowrap font-bold text-gray-700">${formatCurrency(q.quo_total_amount)}</td>
-                <td class="px-3 py-2 whitespace-nowrap">${formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to)}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${formatDate(q.quo_delivery_date)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(q.quo_status)}">
                         <i class='bx ${getStatusIcon(q.quo_status)} mr-1'></i>${q.quo_status}
@@ -656,7 +658,7 @@ function viewQuote(id) {
             <div class="md:col-span-2"><span class="text-sm text-gray-500">Items</span><p class="font-semibold">${Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}</p></div>
             <div><span class="text-sm text-gray-500">Units</span><p class="font-semibold">${q.quo_units}</p></div>
             <div><span class="text-sm text-gray-500">Total Amount</span><p class="font-semibold">${formatCurrency(q.quo_total_amount)}</p></div>
-            <div class="md:col-span-2"><span class="text-sm text-gray-500">Delivery</span><p class="font-semibold">${formatDateRange(q.quo_delivery_date_from, q.quo_delivery_date_to)}</p></div>
+            <div class="md:col-span-2"><span class="text-sm text-gray-500">Delivery Date</span><p class="font-semibold">${formatDate(q.quo_delivery_date)}</p></div>
         </div>
     `;
     elements.viewQuoteModal.showModal();
@@ -688,9 +690,20 @@ if (elements.confirmUpdateStatusBtn) {
             const result = await response.json();
             if (result.success) {
                 await loadQuotes();
+                // Also reload purchases notifications if they are linked
+                await loadNotifications(); 
+                
                 selectedQuoteId = null;
                 elements.updateStatusModal?.close();
-                if (typeof showNotification === 'function') showNotification('Quote status updated', 'success');
+                
+                if (elements.statusSelect.value === 'Completed') {
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'purchase order complete'
+                    });
+                } else {
+                    if (typeof showNotification === 'function') showNotification('Quote status updated', 'success');
+                }
             }
         } catch(e) { if (typeof showNotification === 'function') showNotification('Error updating status: ' + (e && e.message ? e.message : 'Unknown error'), 'error'); }
     });
@@ -724,7 +737,10 @@ function formatCurrency(n) {
 function formatDate(d) {
     if (!d) return '';
     const dt = new Date(d);
-    return `${dt.getMonth()+1}-${dt.getDate()}-${dt.getFullYear()}`;
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const yyyy = dt.getFullYear();
+    return `${mm}-${dd}-${yyyy}`;
 }
 
 function formatDateRange(a, b) {
@@ -816,16 +832,15 @@ if (elements.quotesTableBody) {
         } else if (action === 'update') {
             window.openUpdateStatus(Number(id), btn.dataset.status);
         } else if (action === 'delivery') {
-            window.openSetDelivery(Number(id), btn.dataset.from, btn.dataset.to);
+            window.openSetDelivery(Number(id), btn.dataset.date);
         } else if (action === 'delete') {
             window.openDeleteQuote(Number(id));
         }
     });
 }
-function openSetDelivery(id, from, to) {
+function openSetDelivery(id, date) {
     selectedQuoteId = id;
-    if (elements.deliveryFromInput) elements.deliveryFromInput.value = from ? from.substring(0,10) : '';
-    if (elements.deliveryToInput) elements.deliveryToInput.value = to ? to.substring(0,10) : '';
+    if (elements.deliveryDateInput) elements.deliveryDateInput.value = date ? date.substring(0,10) : '';
     elements.setDeliveryModal?.showModal();
 }
 
@@ -872,8 +887,7 @@ if (elements.confirmSetDeliveryBtn) {
         if (!selectedQuoteId) return;
         try {
             const body = {
-                quo_delivery_date_from: elements.deliveryFromInput.value || null,
-                quo_delivery_date_to: elements.deliveryToInput.value || null
+                quo_delivery_date: elements.deliveryDateInput.value || null
             };
             const response = await fetch(`${PSM_QUOTES_API}/${selectedQuoteId}`, {
                 method: 'PUT',

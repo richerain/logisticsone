@@ -16,6 +16,41 @@ class PSMController extends Controller
     }
 
     /**
+     * Get purchase products
+     */
+    public function getPurchaseProducts()
+    {
+        try {
+            $products = $this->psmService->getPurchaseProducts();
+            return response()->json([
+                'success' => true,
+                'data' => $products
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete purchase product
+     */
+    public function deletePurchaseProduct($id)
+    {
+        try {
+            $result = $this->psmService->deletePurchaseProduct($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete purchase product: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get active vendors for purchase orders
      */
     public function getActiveVendorsForPurchase()
@@ -235,8 +270,7 @@ class PSMController extends Controller
                 'quo_items' => 'required',
                 'quo_units' => 'nullable|integer',
                 'quo_total_amount' => 'nullable|numeric',
-                'quo_delivery_date_from' => 'nullable|date',
-                'quo_delivery_date_to' => 'nullable|date',
+                'quo_delivery_date' => 'nullable|date',
                 'quo_status' => 'nullable|string',
                 'quo_item_drop_to' => 'nullable|string',
                 'quo_payment' => 'nullable|string',
