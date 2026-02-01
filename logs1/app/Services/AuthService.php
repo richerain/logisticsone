@@ -97,9 +97,20 @@ class AuthService
 
     public function generateTokenForUser($user)
     {
-        $secret = config('app.key');
-        if (is_string($secret) && str_starts_with($secret, 'base64:')) {
-            $secret = base64_decode(substr($secret, 7));
+        // Prioritize JWT_SECRET from env
+        $secret = env('JWT_SECRET');
+        
+        // Fallback to app.key if JWT_SECRET is missing
+        if (empty($secret)) {
+            $secret = config('app.key');
+            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+                $secret = base64_decode(substr($secret, 7));
+            }
+        }
+        
+        if (empty($secret)) {
+            Log::error('JWT Error: No secret key found in configuration');
+            return null;
         }
 
         $expiresAt = Carbon::now()->addHours(2)->timestamp;
@@ -107,12 +118,17 @@ class AuthService
             'iss' => config('app.url') ?? 'logs1',
             'sub' => $user->id,
             'email' => $user->email,
-            'roles' => $user->roles,
+            'roles' => $user->roles ?? '',
             'iat' => Carbon::now()->timestamp,
             'exp' => $expiresAt,
         ];
 
-        return JWT::encode($payload, $secret, 'HS256');
+        try {
+            return JWT::encode($payload, $secret, 'HS256');
+        } catch (\Throwable $e) {
+            Log::error('JWT Generation Error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function verifyOtp($email, $otp)

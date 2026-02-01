@@ -21,9 +21,19 @@ class JwtAuth
 
         $token = substr($authHeader, 7);
         try {
-            $secret = config('app.key');
-            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
-                $secret = base64_decode(substr($secret, 7));
+            // Prioritize JWT_SECRET from env
+            $secret = env('JWT_SECRET');
+
+            // Fallback to app.key if JWT_SECRET is missing
+            if (empty($secret)) {
+                $secret = config('app.key');
+                if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+                    $secret = base64_decode(substr($secret, 7));
+                }
+            }
+
+            if (empty($secret)) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized: No secret key'], 401);
             }
 
             $payload = JWT::decode($token, new Key($secret, 'HS256'));

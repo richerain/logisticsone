@@ -83,21 +83,23 @@ class VendorAuthService
 
         Log::info("Vendor OTP verification successful for user: {$email}");
 
-        $secret = config('app.key');
-        if (is_string($secret) && str_starts_with($secret, 'base64:')) {
-            $secret = base64_decode(substr($secret, 7));
+        // Prioritize JWT_SECRET from env
+        $secret = env('JWT_SECRET');
+        
+        // Fallback to app.key if JWT_SECRET is missing
+        if (empty($secret)) {
+            $secret = config('app.key');
+            if (is_string($secret) && str_starts_with($secret, 'base64:')) {
+                $secret = base64_decode(substr($secret, 7));
+            }
         }
 
         if (empty($secret)) {
-            Log::error('JWT Secret (app.key) is missing or empty.');
-            $secret = env('JWT_SECRET'); // Fallback to env
+            Log::error('JWT Error: No secret key found in configuration');
+            throw new \Exception('No secret key found in configuration');
         }
 
         try {
-            if (empty($secret)) {
-                throw new \Exception('Application key is not set.');
-            }
-
             // Generate JWT Token
             $expiresAt = Carbon::now()->addHours(2)->timestamp;
             
