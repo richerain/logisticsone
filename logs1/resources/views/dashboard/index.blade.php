@@ -10,7 +10,7 @@
     </div>
 
     <!-- Vendor Statistics Section start -->
-    <div class="mb-3 bg-blue-100 p-5 rounded-lg shadow-xl overflow-visible">
+    <div class="mb-3 bg-white p-5 rounded-lg shadow-xl overflow-visible">
         <div class="flex items-center mb-2 space-x-2 text-gray-700">
             <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>Overview Metrics</h2>
         </div>
@@ -118,7 +118,7 @@
     </div>
 
     <!-- announcement board section start -->
-    <div class="bg-green-100 shadow-lg rounded-lg p-5 mb-3 overflow-visible min-h-[200px] flex flex-col">
+    <div class="bg-white shadow-lg rounded-lg p-5 mb-3 overflow-visible min-h-[200px] flex flex-col">
         <div class="flex items-center mb-4 space-x-2 text-gray-700">
             <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
         </div>
@@ -171,7 +171,7 @@
     <!-- announcement board section end -->
     
     <!-- Statistics Section start -->
-    <div class="mb-3 bg-green-100 p-5 rounded-lg shadow-xl overflow-visible">
+    <div class="mb-3 bg-white p-5 rounded-lg shadow-xl overflow-visible">
         <div class="flex items-center mb-2 space-x-2 text-gray-700">
             <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>System Overview Metrics</h2>
         </div>
@@ -330,7 +330,7 @@
     <!-- Statistics Section end -->
 
     <!-- statistics charts section start -->
-    <div class="bg-green-100 rounded-lg p-5 shadow-xl overflow-visible mb-3">
+    <div class="bg-white rounded-lg p-5 shadow-xl overflow-visible mb-3">
         <h2 class="text-gray-700 text-lg font-semibold mb-4"><i class='bx bx-fw bxs-pie-chart-alt-2'></i>Module Performance Charts</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Chart 1: Purchase Order Status (PSM) -->
