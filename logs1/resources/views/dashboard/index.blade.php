@@ -119,56 +119,190 @@
 
     <!-- announcement board section start -->
     <div class="bg-white shadow-lg rounded-lg p-5 mb-3 overflow-visible min-h-[200px] flex flex-col">
-        <div class="flex items-center mb-4 space-x-2 text-gray-700">
-            <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
+        <div class="flex items-center justify-between mb-4 text-gray-700">
+            <div class="flex items-center space-x-2">
+                <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
+            </div>
+            @if(in_array(strtolower(Auth::guard('sws')->user()?->roles ?? ''), ['superadmin', 'admin']))
+            <button onclick="openAnnouncementModal()" class="btn btn-sm btn-primary text-white flex items-center gap-1">
+                <i class='bx bx-plus'></i> Create Announcement
+            </button>
+            @endif
         </div>
 
-        <div class="flex-1 flex items-start">
-            <div class="w-full stat card bg-transparent p-4">
-                <!-- Announcements grid: show max 3 per page, responsive columns (no overlap when sidebar toggles) -->
-                <div id="announcements-grid" class="announcements-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Latest (left-most) -->
-                    <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
-                        <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 3" class="h-36 w-full object-cover" loading="lazy" />
-                        <div class="p-4">
-                            <h3 class="font-semibold text-gray-800 truncate">New Warehouse Integration Launched</h3>
-                            <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">We are excited to announce the rollout of the new warehouse integration that will streamline inventory updates in real-time across all hubs.</p>
-                            <div class="mt-3 text-xs text-gray-500">Posted: Oct 28, 2025</div>
-                        </div>
-                        <span class="absolute top-3 left-3 bg-green-600 text-white text-xs px-2 py-1 rounded">Latest</span>
-                    </article>
-
-                    <!-- Announcement 2 -->
-                    <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
-                        <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 2" class="h-36 w-full object-cover" loading="lazy" />
-                        <div class="p-4">
-                            <h3 class="font-semibold text-gray-800 truncate">Maintenance Window Scheduled</h3>
-                            <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">Planned maintenance will occur this weekend. Some services may be intermittently unavailable during this period.</p>
-                            <div class="mt-3 text-xs text-gray-500">Posted: Oct 20, 2025</div>
-                        </div>
-                    </article>
-
-                    <!-- Announcement 1 -->
-                    <article class="announcement-card bg-white rounded-lg shadow-md overflow-hidden">
-                        <img src="{{ asset('images/announcement.png') }}" alt="Announcement image 1" class="h-36 w-full object-cover" loading="lazy" />
-                        <div class="p-4">
-                            <h3 class="font-semibold text-gray-800 truncate">Quarterly Logistics Review</h3>
-                            <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden">Join the Q3 logistics review to discuss performance metrics, bottlenecks, and improvement plans for the next quarter.</p>
-                            <div class="mt-3 text-xs text-gray-500">Posted: Oct 10, 2025</div>
-                        </div>
-                    </article>
+        <div class="flex-1">
+            <div id="announcementGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Cards will be populated here -->
+                <div class="col-span-full text-center py-10">
+                    <span class="loading loading-spinner loading-lg text-primary"></span>
                 </div>
-
-                <!-- Pagination controls: show 3 per page, can view previous announcements on next pages -->
-                <div class="join justify-center gap-0.5 mt-4">
-                    <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-left'></i></button>
-                    <button class="join-item btn btn-sm">Page 1</button>
-                    <button class="join-item btn btn-sm"><i class='bx bxs-chevrons-right'></i></button>
+            </div>
+            <div id="announcementPager" class="flex items-center justify-between mt-3 hidden">
+                <div id="announcementPagerInfo" class="text-sm text-gray-600"></div>
+                <div class="join">
+                    <button class="btn btn-sm join-item" id="announcementPrevBtn" disabled>Prev</button>
+                    <span class="btn btn-sm join-item bg-base-200" id="announcementPageDisplay">1 / 1</span>
+                    <button class="btn btn-sm join-item" id="announcementNextBtn" disabled>Next</button>
                 </div>
             </div>
         </div>
     </div>
     <!-- announcement board section end -->
+
+    <!-- Create Announcement Modal -->
+    <dialog id="announcement_modal" class="modal">
+      <div class="modal-box w-11/12 max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">Create Announcement</h3>
+        <form id="createAnnouncementForm" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="form-control w-full mb-3">
+                <label class="label"><span class="label-text">Title</span></label>
+                <input type="text" name="title" class="input input-bordered w-full" required />
+            </div>
+            <div class="form-control w-full mb-3">
+                <label class="label"><span class="label-text">Description</span></label>
+                <textarea name="desc" class="textarea textarea-bordered h-24" required></textarea>
+            </div>
+            <div class="form-control w-full mb-3">
+                <label class="label"><span class="label-text">Announcement Image</span></label>
+                <input type="file" name="announcement_image" class="file-input file-input-bordered w-full" accept="image/*" />
+                <label class="label"><span class="label-text-alt text-gray-500">Stored in public/images/announcement</span></label>
+            </div>
+            <div class="modal-action">
+                <button type="button" class="btn" onclick="closeAnnouncementModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button type="button" onclick="closeAnnouncementModal()">close</button>
+      </form>
+    </dialog>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let currentPage = 1;
+        let lastPage = 1;
+        const fetchUrl = "{{ route('dashboard.announcements.fetch') }}";
+        const storeUrl = "{{ route('dashboard.announcements.store') }}";
+
+        function fetchAnnouncements(page = 1) {
+            const grid = document.getElementById('announcementGrid');
+            grid.innerHTML = '<div class="col-span-full text-center py-10"><span class="loading loading-spinner loading-lg text-primary"></span></div>';
+            
+            fetch(`${fetchUrl}?page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        renderAnnouncements(data.data);
+                        updatePagination(data.pagination);
+                        currentPage = data.pagination.current_page;
+                        lastPage = data.pagination.last_page;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    grid.innerHTML = '<div class="col-span-full text-center text-red-500">Error loading announcements.</div>';
+                });
+        }
+
+        function renderAnnouncements(announcements) {
+            const grid = document.getElementById('announcementGrid');
+            grid.innerHTML = '';
+            
+            if (announcements.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center text-gray-500">No announcements found.</div>';
+                return;
+            }
+
+            announcements.forEach(item => {
+                const date = new Date(item.created_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const imgUrl = item.announcement_image ? "{{ asset('') }}" + item.announcement_image : "{{ asset('images/announcement.png') }}";
+                
+                const card = `
+                    <article class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full border border-gray-100">
+                        <img src="${imgUrl}" alt="${item.title}" class="h-36 w-full object-cover" loading="lazy" onError="this.src='{{ asset('images/announcement.png') }}'" />
+                        <div class="p-4 flex flex-col flex-1">
+                            <h3 class="font-semibold text-gray-800 truncate" title="${item.title}">${item.title}</h3>
+                            <p class="text-sm text-gray-600 mt-2 h-14 overflow-hidden line-clamp-3" title="${item.desc}">${item.desc}</p>
+                            <div class="mt-auto pt-3 text-xs text-gray-500">Posted: ${date}</div>
+                        </div>
+                    </article>
+                `;
+                grid.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        function updatePagination(pagination) {
+            const pager = document.getElementById('announcementPager');
+            if (pagination.total === 0) {
+                pager.classList.add('hidden');
+                return;
+            }
+            pager.classList.remove('hidden');
+            
+            document.getElementById('announcementPagerInfo').textContent = `Showing ${pagination.current_page} of ${pagination.last_page} pages`;
+            document.getElementById('announcementPageDisplay').textContent = `${pagination.current_page} / ${pagination.last_page}`;
+            
+            document.getElementById('announcementPrevBtn').disabled = pagination.current_page <= 1;
+            document.getElementById('announcementNextBtn').disabled = pagination.current_page >= pagination.last_page;
+        }
+
+        window.openAnnouncementModal = function() {
+            document.getElementById('announcement_modal').showModal();
+        }
+
+        window.closeAnnouncementModal = function() {
+            document.getElementById('announcement_modal').close();
+        }
+        
+        document.getElementById('announcementPrevBtn').addEventListener('click', () => {
+            if(currentPage > 1) fetchAnnouncements(currentPage - 1);
+        });
+        
+        document.getElementById('announcementNextBtn').addEventListener('click', () => {
+            if(currentPage < lastPage) fetchAnnouncements(currentPage + 1);
+        });
+        
+        document.getElementById('createAnnouncementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+            
+            fetch(storeUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    closeAnnouncementModal();
+                    this.reset();
+                    fetchAnnouncements(1);
+                } else {
+                    alert(data.message || 'Error creating announcement');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+
+        // Initial fetch
+        fetchAnnouncements();
+    });
+    </script>
     
     <!-- Statistics Section start -->
     <div class="mb-3 bg-white p-5 rounded-lg shadow-xl overflow-visible">

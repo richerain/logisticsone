@@ -98,9 +98,9 @@ Route::get('/login', function (Request $request) {
             return view('home', ['jwtToken' => $jwtToken]);
         })->name('home');
 
-        Route::get('/dashboard', function () {
-            return view('dashboard.index');
-        })->name('dashboard');
+        Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/announcements', [App\Http\Controllers\DashboardController::class, 'fetchAnnouncements'])->name('dashboard.announcements.fetch');
+        Route::post('/dashboard/announcements', [App\Http\Controllers\DashboardController::class, 'storeAnnouncement'])->name('dashboard.announcements.store');
 
         // Module content loading routes
         Route::get('/module/{module}', function ($module) {
