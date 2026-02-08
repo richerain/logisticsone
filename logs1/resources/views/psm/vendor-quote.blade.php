@@ -205,14 +205,9 @@
 </dialog>
 
 <script>
-var API_BASE_URL = (function(){
-    try {
-        var isVendor = <?php echo \Auth::guard('vendor')->check() ? 'true' : 'false'; ?>;
-        return isVendor ? '<?php echo url('/api/vendor/v1'); ?>' : '<?php echo url('/api/v1'); ?>';
-    } catch(e) { return '<?php echo url('/api/v1'); ?>'; }
-})();
-var PSM_QUOTES_API = typeof PSM_QUOTES_API !== 'undefined' ? PSM_QUOTES_API : `${API_BASE_URL}/psm/vendor-quote`;
-var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
+var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
+var PSM_QUOTES_API = `${API_BASE_URL}/psm/vendor-quote`;
+var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
 
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
@@ -337,6 +332,66 @@ function displayNotifications(list) {
             </td>
         </tr>`;
         }).join('');
+}
+
+window.viewApprovedPurchase = function(id) {
+    const purchase = currentNotifications.find(p => p.id === id);
+    if (!purchase) return;
+    
+    const content = document.getElementById('viewApprovedPurchaseContent');
+    const modal = document.getElementById('viewApprovedPurchaseModal');
+    if (!content || !modal) return;
+
+    // Build HTML for purchase details
+    let itemsHtml = '';
+    if (Array.isArray(purchase.pur_name_items)) {
+        itemsHtml = purchase.pur_name_items.map(item => {
+             const name = typeof item === 'object' ? item.name : item;
+             const price = typeof item === 'object' ? (item.price || 0) : 0;
+             return `
+            <div class="flex justify-between py-2 border-b border-gray-100 last:border-0">
+                <span class="font-medium text-gray-800">${name || 'Unknown Item'}</span>
+                <span class="text-gray-600 font-mono">${formatCurrency(price)}</span>
+            </div>
+        `}).join('');
+    }
+
+    content.innerHTML = `
+        <div class="grid grid-cols-2 gap-y-4 gap-x-6 mb-6">
+            <div>
+                <p class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Purchase ID</p>
+                <p class="font-mono font-bold text-gray-900 text-lg">${purchase.pur_id}</p>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Date</p>
+                <p class="font-bold text-gray-900">${formatDate(purchase.created_at)}</p>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Total Amount</p>
+                <p class="font-bold text-green-600 text-lg">${formatCurrency(purchase.pur_total_amount)}</p>
+            </div>
+            <div>
+                <p class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Status</p>
+                <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">${purchase.pur_status}</span>
+            </div>
+        </div>
+        <div>
+            <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2"><i class='bx bx-list-ul'></i> Items</h4>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                ${itemsHtml || '<p class="text-gray-500 italic">No items listed</p>'}
+            </div>
+        </div>
+    `;
+
+    modal.showModal();
+    if (elements.notifModal) elements.notifModal.setAttribute('inert', '');
+}
+
+const viewApprovedPurchaseModal = document.getElementById('viewApprovedPurchaseModal');
+if (viewApprovedPurchaseModal) {
+    viewApprovedPurchaseModal.addEventListener('close', () => {
+        if (elements.notifModal) elements.notifModal.removeAttribute('inert');
+    });
 }
 
 window.openReviewConfirm = function(id) {

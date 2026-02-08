@@ -83,6 +83,17 @@ class PSMRepository
             ->get();
     }
 
+    public function getApprovedPurchasesForVendor($companyName)
+    {
+        $quotedPurchaseIds = Quote::whereNotNull('quo_purchase_id')->pluck('quo_purchase_id')->toArray();
+
+        return Purchase::where('pur_status', 'Approved')
+            ->where('pur_company_name', $companyName)
+            ->whereNotIn('id', $quotedPurchaseIds)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
     /**
      * Get vendor by ID
      */

@@ -728,6 +728,33 @@ class PSMService
         }
     }
 
+    public function getVendorQuoteNotifications($vendorUser)
+    {
+        try {
+            if (! $vendorUser || ! $vendorUser->company_name) {
+                return [
+                    'success' => false,
+                    'message' => 'Vendor information not found',
+                    'data' => [],
+                ];
+            }
+
+            $purchases = $this->psmRepository->getApprovedPurchasesForVendor($vendorUser->company_name);
+
+            return [
+                'success' => true,
+                'data' => $purchases,
+                'message' => 'Notifications retrieved successfully',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch notifications: '.$e->getMessage(),
+                'data' => [],
+            ];
+        }
+    }
+
     /**
      * Generate unique vendor ID
      */

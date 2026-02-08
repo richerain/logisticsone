@@ -141,13 +141,8 @@
 </dialog>
 
 <script>
-var API_BASE_URL = (function(){
-    try {
-        var isVendor = <?php echo \Auth::guard('vendor')->check() ? 'true' : 'false'; ?>;
-        return isVendor ? '<?php echo url('/api/vendor/v1'); ?>' : '<?php echo url('/api/v1'); ?>';
-    } catch(e) { return '<?php echo url('/api/v1'); ?>'; }
-})();
-var PSM_PRODUCTS_API = typeof PSM_PRODUCTS_API !== 'undefined' ? PSM_PRODUCTS_API : `${API_BASE_URL}/psm/product-management`;
+var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
+var PSM_PRODUCTS_API = `${API_BASE_URL}/psm/product-management`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 var CURRENT_VENDOR_ID = <?php echo json_encode(optional(Auth::guard('vendor')->user())->vendorid ?? ''); ?>;

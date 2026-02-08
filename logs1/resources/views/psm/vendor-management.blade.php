@@ -180,9 +180,9 @@
 
 <script>
 // API Configuration
-var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php echo url('/api/v1'); ?>';
+var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
 var APP_URL = typeof APP_URL !== 'undefined' ? APP_URL : '<?php echo url('/'); ?>';
-var PSM_VENDORS_API = typeof PSM_VENDORS_API !== 'undefined' ? PSM_VENDORS_API : `${API_BASE_URL}/psm/vendor-management`;
+var PSM_VENDORS_API = `${API_BASE_URL}/psm/vendor-management`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 // JWT Token Handling with LocalStorage Sync

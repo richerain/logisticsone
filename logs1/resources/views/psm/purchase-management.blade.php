@@ -292,8 +292,8 @@
 
 <script>
 // API Configuration
-var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php echo url('/api/v1'); ?>';
-var PSM_PURCHASES_API = typeof PSM_PURCHASES_API !== 'undefined' ? PSM_PURCHASES_API : `${API_BASE_URL}/psm/purchase-management`;
+var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
+var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
 var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 

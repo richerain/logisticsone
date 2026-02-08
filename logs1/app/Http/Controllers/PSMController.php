@@ -352,6 +352,35 @@ class PSMController extends Controller
         ]);
     }
 
+    public function getVendorQuoteNotifications()
+    {
+        try {
+            $user = \Auth::guard('vendor')->user();
+            
+            if (! $user) {
+                $user = \Auth::user();
+            }
+
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                    'data' => [],
+                ], 401);
+            }
+
+            $result = $this->psmService->getVendorQuoteNotifications($user);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch notifications: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
     public function getVendors()
     {
         return response()->json([
