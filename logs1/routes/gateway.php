@@ -58,6 +58,11 @@ Route::prefix('psm')->group(function () {
     Route::get('/products', [App\Http\Controllers\PSMController::class, 'getProducts']);
 });
 
+// External Integration Routes (API Key Protected)
+Route::middleware(['api.key'])->prefix('alms/external')->group(function () {
+    Route::get('/maintenance', [App\Http\Controllers\ALMSController::class, 'getMaintenance']);
+});
+
 Route::middleware([
     'jwt.auth',
 ])->group(function () {
