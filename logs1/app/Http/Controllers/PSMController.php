@@ -850,4 +850,42 @@ class PSMController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Cancel a budget request
+     */
+    public function cancelRequestBudget($id)
+    {
+        try {
+            $request = \App\Models\PSM\RequestBudget::find($id);
+
+            if (!$request) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Budget request not found.'
+                ], 404);
+            }
+
+            if ($request->req_status !== 'Pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending requests can be cancelled.'
+                ], 400);
+            }
+
+            $request->req_status = 'Cancelled';
+            $request->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Budget request cancelled successfully.',
+                'data' => $request
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel budget request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

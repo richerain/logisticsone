@@ -396,17 +396,18 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Req ID</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Requested By</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Contact</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Date</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Dept</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Purpose</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Purpose</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Contact</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200" id="requestStatusTableBody">
                                 <tr>
-                                    <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">
+                                    <td colspan="9" class="px-6 py-12 text-center text-sm text-gray-500">
                                         <div class="flex flex-col items-center justify-center">
                                             <i class='bx bx-loader-alt bx-spin text-3xl mb-2 text-blue-500'></i>
                                             <span>Loading requests...</span>
@@ -427,6 +428,66 @@
     </div>
 </div>
 
+
+<!-- View Request Details Modal -->
+<div id="viewRequestModal" class="fixed inset-0 z-[120] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeViewRequestModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-gradient-to-r from-gray-100 to-gray-200 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class='bx bx-file'></i> Request Details
+                </h3>
+                <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none" onclick="closeViewRequestModal()">
+                    <span class="sr-only">Close</span>
+                    <i class='bx bx-x text-2xl'></i>
+                </button>
+            </div>
+            <div class="p-6 bg-white space-y-4">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Request ID</span>
+                        <span id="view_req_id" class="font-semibold text-gray-900"></span>
+                    </div>
+                    <div>
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Date</span>
+                        <span id="view_req_date" class="font-medium text-gray-900"></span>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Requested By</span>
+                        <span id="view_req_by" class="font-medium text-gray-900"></span>
+                    </div>
+                    <div>
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Department</span>
+                        <span id="view_req_dept" class="font-medium text-gray-900"></span>
+                    </div>
+                    <div>
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Amount</span>
+                        <span id="view_req_amount" class="font-bold text-blue-600 text-lg"></span>
+                    </div>
+                     <div class="col-span-2">
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Contact</span>
+                        <span id="view_req_contact" class="font-medium text-gray-900"></span>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Status</span>
+                        <span id="view_req_status" class="inline-flex px-2 py-1 rounded-full text-xs font-semibold"></span>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide mb-1">Purpose</span>
+                        <div id="view_req_purpose" class="bg-gray-50 p-3 rounded border border-gray-200 text-gray-700 whitespace-pre-wrap"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
+                <button type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="closeViewRequestModal()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     // Global functions for Modal
@@ -571,6 +632,105 @@
         document.getElementById('requestStatusModal').classList.add('hidden');
     };
 
+    // View Request Details Modal Logic
+    window.openViewRequestDetails = function(req) {
+        document.getElementById('view_req_id').textContent = '#' + req.req_id;
+        document.getElementById('view_req_date').textContent = window.formatDateGlobal(req.req_date);
+        document.getElementById('view_req_by').textContent = req.req_by;
+        document.getElementById('view_req_dept').textContent = req.req_dept;
+        document.getElementById('view_req_amount').textContent = window.formatCurrencyGlobal(req.req_amount);
+        document.getElementById('view_req_contact').textContent = req.req_contact;
+        document.getElementById('view_req_purpose').textContent = req.req_purpose;
+
+        const statusEl = document.getElementById('view_req_status');
+        statusEl.textContent = req.req_status;
+        
+        // Reset classes
+        statusEl.className = 'inline-flex px-2 py-1 rounded-full text-xs font-semibold items-center gap-1';
+        
+        if (req.req_status === 'Approved') {
+            statusEl.classList.add('bg-green-100', 'text-green-800');
+            statusEl.innerHTML = "<i class='bx bx-check-circle'></i> Approved";
+        } else if (req.req_status === 'Rejected') {
+            statusEl.classList.add('bg-red-100', 'text-red-800');
+            statusEl.innerHTML = "<i class='bx bx-x-circle'></i> Rejected";
+        } else if (req.req_status === 'Cancelled') {
+            statusEl.classList.add('bg-gray-100', 'text-gray-800');
+            statusEl.innerHTML = "<i class='bx bx-block'></i> Cancelled";
+        } else {
+            statusEl.classList.add('bg-yellow-100', 'text-yellow-800');
+            statusEl.innerHTML = "<i class='bx bx-time-five'></i> Pending";
+        }
+
+        document.getElementById('viewRequestModal').classList.remove('hidden');
+    }
+
+    window.closeViewRequestModal = function() {
+        document.getElementById('viewRequestModal').classList.add('hidden');
+    }
+
+    // Cancel Request Logic
+    window.confirmCancelRequest = function(reqId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to cancel this budget request?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, keep it'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                cancelRequest(reqId);
+            }
+        });
+    }
+
+    window.cancelRequest = function(reqId) {
+        fetch(`/api/v1/psm/budget-requests/${reqId}/cancel`, {
+            method: 'PATCH',
+            headers: {
+                'X-API-KEY': '{{ \App\Models\ApiKey::orderBy("created_at", "desc")->first()->key ?? "" }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Refresh the table
+                fetchRequestStatus();
+                
+                // Show Toast
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Request successfully cancelled'
+                });
+            } else {
+                Swal.fire('Error', data.message || 'Failed to cancel request', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An unexpected error occurred.', 'error');
+        });
+    }
+
     function fetchRequestStatus() {
         const tbody = document.getElementById('requestStatusTableBody');
         // Only show loading if empty or explicitly requested, otherwise it might flicker too much on refresh
@@ -608,45 +768,62 @@
         tbody.innerHTML = '';
 
         if (requests.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
             return;
         }
 
         requests.forEach(req => {
             let statusColor = 'bg-gray-100 text-gray-800';
             let statusIcon = 'bx-time';
+            let actionButtons = '';
             
             if (req.req_status === 'Approved') {
                 statusColor = 'bg-green-100 text-green-800';
                 statusIcon = 'bx-check-circle';
+                actionButtons = `
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
+                `;
             } else if (req.req_status === 'Rejected') {
                 statusColor = 'bg-red-100 text-red-800';
                 statusIcon = 'bx-x-circle';
+                actionButtons = `
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
+                `;
+            } else if (req.req_status === 'Cancelled') {
+                statusColor = 'bg-gray-100 text-gray-800';
+                statusIcon = 'bx-block';
+                actionButtons = `
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
+                `;
             } else if (req.req_status === 'Pending') {
                 statusColor = 'bg-yellow-100 text-yellow-800';
                 statusIcon = 'bx-time-five';
+                actionButtons = `
+                    <div class="flex gap-2">
+                        <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
+                        <button onclick="confirmCancelRequest('${req.req_id}')" class="text-red-600 hover:text-red-900 font-medium text-xs bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors">Cancel</button>
+                    </div>
+                `;
             }
 
             const row = `
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${req.req_id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                                ${req.req_by.charAt(0).toUpperCase()}
-                            </div>
-                            ${req.req_by}
-                        </div>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                        ${req.req_by}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_contact}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${window.formatDateGlobal(req.req_date)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_dept}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title="${req.req_purpose}">${req.req_purpose}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title="${req.req_purpose}">${req.req_purpose}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_contact}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} items-center gap-1">
                             <i class='bx ${statusIcon}'></i> ${req.req_status}
                         </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        ${actionButtons}
                     </td>
                 </tr>
             `;

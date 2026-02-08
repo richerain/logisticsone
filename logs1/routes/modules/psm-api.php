@@ -47,6 +47,7 @@ Route::prefix('budget-management')->group(function () {
 Route::prefix('budget-requests')->group(function () {
     Route::get('/', [PSMController::class, 'getRequestBudgets']);
     Route::post('/', [PSMController::class, 'storeRequestBudget']);
+    Route::patch('/{id}/cancel', [PSMController::class, 'cancelRequestBudget']);
 });
 
 // PSM Budget Logs Routes
