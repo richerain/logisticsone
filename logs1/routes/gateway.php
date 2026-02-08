@@ -63,6 +63,10 @@ Route::middleware(['api.key'])->prefix('alms/external')->group(function () {
     Route::get('/maintenance', [App\Http\Controllers\ALMSController::class, 'getMaintenance']);
 });
 
+Route::middleware(['api.key'])->prefix('psm/external')->group(function () {
+    Route::get('/budget-requests', [App\Http\Controllers\PSMController::class, 'getRequestBudgets']);
+});
+
 Route::middleware([
     'jwt.auth',
 ])->group(function () {
