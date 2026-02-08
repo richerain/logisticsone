@@ -1,11 +1,31 @@
 <!-- resources/views/dashboard/index.blade.php -->
-@if(Auth::guard('vendor')->check())
+@php
+    $currentUser = null;
+    $currentRole = 'user';
+    $isSws = false;
+    $isVendor = false;
+
+    try {
+        if (Auth::guard('vendor')->check()) {
+            $isVendor = true;
+            $currentUser = Auth::guard('vendor')->user();
+        } elseif (Auth::guard('sws')->check()) {
+            $isSws = true;
+            $currentUser = Auth::guard('sws')->user();
+            $currentRole = strtolower($currentUser->roles ?? 'user');
+        }
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::error('Dashboard auth check failed: ' . $e->getMessage());
+    }
+@endphp
+
+@if($isVendor)
     <div class="mb-6 flex items-center justify-between gap-4">
         <div class="flex items-center">
             <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Vendor Dashboard</h2>
         </div>
         <div class="text-right">
-            <span class="text-md text-gray-600">Welcome back, {{ optional(Auth::guard('vendor')->user())->ven_contact_person ?? optional(Auth::guard('vendor')->user())->ven_company_name ?? 'Vendor' }} - Vendor</span>
+            <span class="text-md text-gray-600">Welcome back, {{ optional($currentUser)->ven_contact_person ?? optional($currentUser)->ven_company_name ?? 'Vendor' }} - Vendor</span>
         </div>
     </div>
 
@@ -110,7 +130,7 @@
             <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-dashboard'></i>Dashboard</h2>
         </div>
         <div class="text-right">
-            <span class="text-md text-gray-600">Welcome back, {{ Auth::guard('sws')->user()?->firstname }} - {{ ucfirst(Auth::guard('sws')->user()?->roles ?? 'User') }}</span>
+            <span class="text-md text-gray-600">Welcome back, {{ optional($currentUser)->firstname }} - {{ ucfirst(optional($currentUser)->roles ?? 'User') }}</span>
         </div>
     </div>
 
@@ -120,7 +140,7 @@
             <div class="flex items-center space-x-2">
                 <h2 class="text-lg font-semibold"><i class='bx bx-fw bxs-megaphone'></i>Announcement Board</h2>
             </div>
-            @if(in_array(strtolower(Auth::guard('sws')->user()?->roles ?? ''), ['superadmin', 'admin']))
+            @if(in_array($currentRole, ['superadmin', 'admin']))
             <button onclick="openAnnouncementModal()" class="btn btn-sm btn-primary text-white flex items-center gap-1">
                 <i class='bx bx-plus'></i> Create Announcement
             </button>

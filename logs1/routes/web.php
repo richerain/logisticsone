@@ -75,6 +75,36 @@ Route::get('/login', function (Request $request) {
 
     Route::get('/auth/token', [App\Http\Controllers\AuthController::class, 'getApiToken']);
 
+    Route::get('/health-check', function () {
+        $status = [
+            'db_connected' => false,
+            'storage_writable' => false,
+            'error' => null,
+            'timestamp' => now()->toDateTimeString(),
+            'env' => app()->environment(),
+        ];
+
+        try {
+            DB::connection()->getPdo();
+            $status['db_connected'] = true;
+        } catch (\Exception $e) {
+            $status['error'] = 'DB Connection failed: ' . $e->getMessage();
+        }
+
+        try {
+            $testFile = storage_path('framework/views/test.txt');
+            file_put_contents($testFile, 'test');
+            if (file_exists($testFile)) {
+                $status['storage_writable'] = true;
+                unlink($testFile);
+            }
+        } catch (\Exception $e) {
+            $status['error'] .= ' | Storage write failed: ' . $e->getMessage();
+        }
+
+        return response()->json($status);
+    });
+
     Route::get('/debug-config', function () {
         try {
             return response()->json([
@@ -115,7 +145,13 @@ Route::get('/login', function (Request $request) {
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for home: ' . $e->getMessage());
             }
-            return view('home', ['jwtToken' => $jwtToken]);
+
+            try {
+                return view('home', ['jwtToken' => $jwtToken]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Home View Rendering Error: ' . $e->getMessage());
+                return response("Error rendering home view: " . $e->getMessage(), 500);
+            }
         })->name('home');
 
         // Dashboard Route
