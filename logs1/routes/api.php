@@ -35,7 +35,7 @@ Route::get('/test-db', function () {
 
 
 // Gateway routes - load module-specific API routes
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('api.key')->group(function () {
     require __DIR__.'/gateway.php';
 });
 

@@ -44,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'session.timeout' => \App\Http\Middleware\CheckSessionTimeout::class,
             'jwt.auth' => \App\Http\Middleware\JwtAuth::class,
+            'api.key' => \App\Http\Middleware\CheckApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

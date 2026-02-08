@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class ALMSController extends Controller
@@ -68,11 +69,45 @@ class ALMSController extends Controller
 
     public function getRequestMaintenance()
     {
-        $rows = DB::connection('alms')->table('alms_request_maintenance')
+        // Local data
+        $localRows = DB::connection('alms')->table('alms_request_maintenance')
             ->orderByDesc('id')
             ->get();
 
-        return response()->json(['data' => $rows]);
+        // External data
+        $externalRows = [];
+        try {
+            $response = Http::timeout(5)->get('https://log2.microfinancial-1.com/api/maintenance_api.php', [
+                'key' => 'd4f8a9b3c6e2f1a4b7d9e0c3f2a1b4d6'
+            ]);
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                // Assume data is in 'data' key or root array
+                $items = $data['data'] ?? ($data['requests'] ?? ($data ?? []));
+                if (is_array($items)) {
+                    foreach ($items as $item) {
+                        $externalRows[] = (object) [
+                            'req_id' => $item['req_id'] ?? ($item['id'] ?? 'EXT-' . uniqid()),
+                            'req_asset_name' => $item['req_asset_name'] ?? ($item['asset_name'] ?? 'Unknown Asset'),
+                            'req_date' => $item['req_date'] ?? ($item['date'] ?? now()->toDateString()),
+                            'req_priority' => $item['req_priority'] ?? ($item['priority'] ?? 'low'),
+                            'req_processed' => $item['req_processed'] ?? 0,
+                            'req_type' => $item['req_type'] ?? ($item['type'] ?? 'External'),
+                            'is_external' => true
+                        ];
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Log error but continue with local data
+        }
+
+        // Merge and sort (latest date first)
+        $merged = collect($externalRows)->merge($localRows);
+        $sorted = $merged->sortByDesc('req_date')->values();
+
+        return response()->json(['data' => $sorted]);
     }
 
     public function showAsset($id)
