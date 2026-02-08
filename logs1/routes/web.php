@@ -187,6 +187,32 @@ Route::get('/login', function (Request $request) {
 
             return view('components.module-not-found');
         })->name('module.load');
+
+        // ALMS Routes
+        Route::prefix('alms')->group(function () {
+            // Assets
+            Route::get('/assets', [ALMSController::class, 'getAssets']);
+            Route::get('/assets/{id}', [ALMSController::class, 'showAsset']);
+            Route::put('/assets/{id}/status', [ALMSController::class, 'updateAssetStatus']);
+            Route::delete('/assets/{id}', [ALMSController::class, 'deleteAsset']);
+
+            // Maintenance
+            Route::get('/maintenance', [ALMSController::class, 'getMaintenance']);
+            Route::post('/maintenance', [ALMSController::class, 'storeMaintenance']);
+            Route::put('/maintenance/{id}/status', [ALMSController::class, 'updateMaintenanceStatus']);
+            Route::delete('/maintenance/{id}', [ALMSController::class, 'deleteMaintenance']);
+            
+            // Request Maintenance
+            Route::get('/request-maintenance', [ALMSController::class, 'getRequestMaintenance']);
+            Route::post('/request-maintenance', [ALMSController::class, 'storeRequestMaintenance']);
+            Route::delete('/request-maintenance/{id}', [ALMSController::class, 'deleteRequestMaintenance']);
+            Route::put('/request-maintenance/{id}/process', [ALMSController::class, 'markRequestProcessed']);
+            
+            // Repair Personnel
+            Route::get('/repair-personnel', [ALMSController::class, 'getRepairPersonnel']);
+            Route::post('/repair-personnel', [ALMSController::class, 'storeRepairPersonnel']);
+            Route::delete('/repair-personnel/{id}', [ALMSController::class, 'deleteRepairPersonnel']);
+        });
     });
 
     // Vendor Protected Routes
