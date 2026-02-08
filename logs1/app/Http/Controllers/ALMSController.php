@@ -151,6 +151,8 @@ class ALMSController extends Controller
                     $row->req_id = "REQM{$dateStr}{$hash}"; // Display ID
                     
                     $row->is_external = false;
+                    // Ensure processed status is boolean/integer
+                    $row->req_processed = (int)$row->req_processed;
                     return $row;
                 });
 
@@ -342,6 +344,8 @@ class ALMSController extends Controller
             'mnt_repair_personnel_id' => 'nullable|integer',
             'mnt_status' => 'required|in:scheduled,in_progress,completed,cancelled',
             'mnt_priority' => 'required|in:low,medium,high',
+            'request_id' => 'nullable|string',
+            'is_external' => 'nullable|boolean'
         ]);
 
         do {
@@ -354,6 +358,7 @@ class ALMSController extends Controller
             $exists = DB::connection('alms')->table('alms_maintenance')->where('mnt_code', $code)->exists();
         } while ($exists);
 
+        // Insert Maintenance Record
         DB::connection('alms')->table('alms_maintenance')->insert([
             'mnt_code' => $code,
             'mnt_asset_name' => $validated['mnt_asset_name'],
@@ -365,6 +370,38 @@ class ALMSController extends Controller
             'mnt_created_at' => now(),
             'mnt_updated_at' => now(),
         ]);
+
+        // Handle Request Status Update
+        if (!empty($validated['request_id'])) {
+            $reqId = $validated['request_id'];
+            $isExternal = $validated['is_external'] ?? false;
+
+            if ($isExternal) {
+                // External Request: Mark as processed locally
+                // Format of external req_id might be "EXT-123", we need raw ID "123"
+                $rawId = str_replace('EXT-', '', $reqId);
+                
+                $exists = DB::connection('alms')->table('alms_processed_external_requests')
+                    ->where('external_id', $rawId)
+                    ->exists();
+                
+                if (!$exists) {
+                    DB::connection('alms')->table('alms_processed_external_requests')->insert([
+                        'external_id' => $rawId,
+                        'processed_at' => now()
+                    ]);
+                }
+            } else {
+                // Local Request: Update status and processed flag
+                // Check if it exists by real_id (which is stored in req_id column of db)
+                DB::connection('alms')->table('alms_request_maintenance')
+                    ->where('req_id', $reqId)
+                    ->update([
+                        'req_status' => 'scheduled',
+                        'req_processed' => 1
+                    ]);
+            }
+        }
 
         return response()->json(['message' => 'Maintenance scheduled', 'code' => $code], 201);
     }

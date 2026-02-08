@@ -667,7 +667,9 @@
                     mnt_scheduled_date: document.getElementById('sch_req_scheduled_date').value,
                     mnt_repair_personnel_id: document.getElementById('sch_req_repair_personnel_id').value || null,
                     mnt_status: 'scheduled',
-                    mnt_priority: currentReqToSchedule.req_priority
+                    mnt_priority: currentReqToSchedule.req_priority,
+                    request_id: currentReqToSchedule.real_id,
+                    is_external: !!currentReqToSchedule.is_external
                 };
                 fetch('/alms/maintenance', {
                     method: 'POST',
@@ -679,14 +681,11 @@
                       if(res.ok){
                           if(Toast) Toast.fire({ icon: 'success', title: 'Maintenance scheduled' });
                           close('scheduleFromRequestModal');
-                          var reqId = currentReqToSchedule ? currentReqToSchedule.real_id : null;
                           currentReqToSchedule = null;
                           loadMaintenanceSchedules();
-                          if(reqId){
-                              fetch('/alms/request-maintenance/'+encodeURIComponent(reqId)+'/processed', { method: 'POST', headers: { 'Accept':'application/json','X-CSRF-TOKEN': getCsrfToken() }})
-                                  .then(function(){ loadRequestMaintenance(); updateRequestMaintenanceCount(); })
-                                  .catch(function(){});
-                          }
+                          // Reload requests to update status/processed flag
+                          loadRequestMaintenance(); 
+                          updateRequestMaintenanceCount();
                       }
                       else { if(Toast) { Swal.fire({ icon: 'error', title: 'Failed to schedule', text: (res.body && res.body.message) ? res.body.message : 'Please try again.' }); } }
                   })
