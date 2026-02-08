@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::connection('alms')->hasTable('alms_processed_external_requests')) {
-            Schema::connection('alms')->create('alms_processed_external_requests', function (Blueprint $table) {
-                $table->id();
-                $table->string('external_id')->unique(); // ID from external API
-                $table->timestamp('processed_at')->useCurrent();
-            });
-        }
+        Schema::connection('alms')->create('alms_processed_external_requests', function (Blueprint $table) {
+            $table->id();
+            $table->string('external_id')->unique();
+            $table->timestamp('processed_at')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**

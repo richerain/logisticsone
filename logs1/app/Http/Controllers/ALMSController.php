@@ -388,7 +388,9 @@ class ALMSController extends Controller
                 if (!$exists) {
                     DB::connection('alms')->table('alms_processed_external_requests')->insert([
                         'external_id' => $rawId,
-                        'processed_at' => now()
+                        'processed_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
                 }
             } else {
@@ -455,6 +457,8 @@ class ALMSController extends Controller
                     DB::connection('alms')->table('alms_processed_external_requests')->insert([
                         'external_id' => $rawId,
                         'processed_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
                 }
                 return response()->json(['message' => 'External request marked as processed']);
