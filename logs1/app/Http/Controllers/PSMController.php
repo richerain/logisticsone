@@ -346,10 +346,31 @@ class PSMController extends Controller
 
     public function getVendorQuotes()
     {
-        return response()->json([
-            'message' => 'PSM Vendor Quotes data',
-            'data' => [],
-        ]);
+        try {
+            $user = \Auth::guard('vendor')->user();
+            
+            if (! $user) {
+                $user = \Auth::user();
+            }
+
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                    'data' => [],
+                ], 401);
+            }
+
+            $result = $this->psmService->getVendorQuotes($user);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch vendor quotes: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
     }
 
     public function getVendorQuoteNotifications()

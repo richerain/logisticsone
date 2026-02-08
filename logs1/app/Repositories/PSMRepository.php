@@ -211,6 +211,15 @@ class PSMRepository
         return Quote::orderBy('created_at', 'desc')->get();
     }
 
+    public function getQuotesForVendor($companyName)
+    {
+        return Quote::select('psm_quote.*')
+            ->join('psm_purchase', 'psm_quote.quo_purchase_id', '=', 'psm_purchase.id')
+            ->where('psm_purchase.pur_company_name', $companyName)
+            ->orderBy('psm_quote.created_at', 'desc')
+            ->get();
+    }
+
     public function getQuoteById($id)
     {
         return Quote::find($id);

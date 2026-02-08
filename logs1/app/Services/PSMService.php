@@ -1057,6 +1057,33 @@ class PSMService
         }
     }
 
+    public function getVendorQuotes($vendorUser)
+    {
+        try {
+            if (! $vendorUser || ! $vendorUser->company_name) {
+                return [
+                    'success' => false,
+                    'message' => 'Vendor information not found',
+                    'data' => [],
+                ];
+            }
+
+            $quotes = $this->psmRepository->getQuotesForVendor($vendorUser->company_name);
+
+            return [
+                'success' => true,
+                'data' => $quotes,
+                'message' => 'Vendor quotes retrieved successfully',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch vendor quotes: '.$e->getMessage(),
+                'data' => [],
+            ];
+        }
+    }
+
     public function createQuote($data)
     {
         DB::beginTransaction();
