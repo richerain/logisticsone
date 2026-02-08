@@ -18,6 +18,9 @@ class DashboardController extends Controller
     public function fetchAnnouncements(Request $request)
     {
         try {
+            // Debug logging
+            Log::info('Fetching announcements...');
+
             $query = Announcement::orderBy('created_date', 'desc');
             $announcements = $query->paginate(3);
 
@@ -32,11 +35,14 @@ class DashboardController extends Controller
                     'has_more_pages' => $announcements->hasMorePages(),
                 ]
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error fetching announcements: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
             return response()->json([
                 'success' => false, 
-                'message' => 'Failed to fetch announcements: ' . $e->getMessage()
+                'message' => 'Failed to fetch announcements: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ], 500);
         }
     }

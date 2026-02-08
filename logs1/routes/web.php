@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Route;
 // Simple session setup for auth routes
 // Middleware is already applied by bootstrap/app.php
 // Public Authentication Routes - FIXED: Proper route definitions
+
+// Temporary fix: Move announcements fetch outside auth middleware to debug 500 error
+Route::get('/dashboard/announcements', [DashboardController::class, 'fetchAnnouncements'])->name('dashboard.announcements.fetch');
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -157,7 +161,7 @@ Route::get('/login', function (Request $request) {
         // Dashboard Route
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         Route::post('/dashboard/announcements', [DashboardController::class, 'storeAnnouncement'])->name('dashboard.announcements.store');
-        Route::get('/dashboard/announcements', [DashboardController::class, 'fetchAnnouncements'])->name('dashboard.announcements.fetch');
+        // Route::get('/dashboard/announcements', [DashboardController::class, 'fetchAnnouncements'])->name('dashboard.announcements.fetch');
         
         // Profile Update
         Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
