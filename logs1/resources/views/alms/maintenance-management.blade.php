@@ -487,7 +487,6 @@
                         rows += '<tr class="'+(processed ? 'bg-gray-100 opacity-70' : '')+'">'+
                             '<td class="whitespace-nowrap font-mono text-xs">'+ 
                                 (r.req_code||r.req_id||'') + 
-                                (isExternal ? ' <span class="badge badge-xs badge-info ml-1">EXT</span>' : '') +
                             '</td>'+
                             '<td class="whitespace-nowrap">'+ (r.req_asset_name||'') +'</td>'+
                             '<td class="whitespace-nowrap">'+ (r.req_date||'') +'</td>'+
@@ -595,7 +594,14 @@
                     .then(function(j){
                         var data=j.data||[]; var opts='';
                         if(data.length===0){ opts = '<option value="">No personnel available</option>'; }
-                        else { for(var i=0;i<data.length;i++){ var p=data[i]; opts += '<option value="'+p.id+'">'+[p.firstname,p.middlename,p.lastname].filter(Boolean).join(' ')+'</option>'; } }
+                        else { 
+                            for(var i=0;i<data.length;i++){ 
+                                var p=data[i]; 
+                                var fullName = [p.firstname,p.middlename,p.lastname].filter(Boolean).join(' ');
+                                var displayText = fullName + (p.position ? ' - ' + p.position : '');
+                                opts += '<option value="'+p.id+'">'+displayText+'</option>'; 
+                            } 
+                        }
                         if(sel) sel.innerHTML = opts;
                     })
                     .catch(function(){ if(sel) sel.innerHTML = '<option value="">Failed to load</option>'; });
