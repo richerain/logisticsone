@@ -185,6 +185,7 @@
                         <option value="all">All</option>
                         <option value="Technician">Technician</option>
                         <option value="Mechanic">Mechanic</option>
+                        <option value="Cleaning Staff">Cleaning Staff</option>
                     </select>
                 </div>
             </div>
@@ -261,6 +262,7 @@
                         <select id="rp_position" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                             <option value="Technician" selected>Technician</option>
                             <option value="Mechanic">Mechanic</option>
+                            <option value="Cleaning Staff">Cleaning Staff</option>
                         </select>
                     </div>
                     <div>

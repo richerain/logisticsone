@@ -470,7 +470,7 @@ class ALMSController extends Controller
             'firstname' => 'required|string|max:100',
             'middlename' => 'nullable|string|max:100',
             'lastname' => 'required|string|max:100',
-            'position' => 'required|in:Technician,Mechanic',
+            'position' => 'required|in:Technician,Mechanic,Cleaning Staff',
             'status' => 'required|in:active,inactive',
         ]);
 
