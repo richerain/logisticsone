@@ -13,10 +13,7 @@
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold text-gray-800">Budget Overview</h3>
         <div class="flex gap-2">
-            <button onclick="openRequestBudgetModal()" class="btn btn-primary btn-sm gap-2">
-                <i class='bx bx-plus-circle'></i> Request Budget
-            </button>
-            <button onclick="openRequestStatusModal()" class="btn btn-outline btn-sm gap-2">
+            <button onclick="openRequestStatusModal()" class="btn btn-primary btn-sm gap-2">
                 <i class='bx bx-list-ul'></i> Request Budget Status
             </button>
         </div>
@@ -287,96 +284,147 @@
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeRequestBudgetModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-            <div class="bg-white">
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <i class='bx bx-plus-circle text-blue-600'></i> Request Budget
-                    </h3>
-                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" onclick="closeRequestBudgetModal()">
-                        <span class="sr-only">Close</span>
-                        <i class='bx bx-x text-2xl'></i>
-                    </button>
-                </div>
-                
-                <div class="p-6">
-                    <form id="requestBudgetForm" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class='bx bx-plus-circle'></i> New Budget Request
+                </h3>
+                <button type="button" class="text-white hover:text-gray-200 focus:outline-none" onclick="closeRequestBudgetModal()">
+                    <span class="sr-only">Close</span>
+                    <i class='bx bx-x text-2xl'></i>
+                </button>
+            </div>
+            
+            <div class="p-8 bg-gray-50">
+                <form id="requestBudgetForm" class="space-y-6">
+                    <!-- Section 1: Requester Information -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Requester Information</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label for="req_by" class="block text-sm font-medium text-gray-700">Requested By</label>
-                                <input type="text" name="req_by" id="req_by" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                <label for="req_by" class="block text-sm font-medium text-gray-700 mb-1">Requested By</label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class='bx bx-user text-gray-400'></i>
+                                    </div>
+                                    <input type="text" name="req_by" id="req_by" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" placeholder="Full Name" required>
+                                </div>
                             </div>
                             <div>
-                                <label for="req_date" class="block text-sm font-medium text-gray-700">Request Date</label>
-                                <input type="date" name="req_date" id="req_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                <label for="req_dept" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class='bx bx-building text-gray-400'></i>
+                                    </div>
+                                    <input type="text" name="req_dept" id="req_dept" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" placeholder="Department Name" required>
+                                </div>
                             </div>
                             <div>
-                                <label for="req_dept" class="block text-sm font-medium text-gray-700">Department</label>
-                                <input type="text" name="req_dept" id="req_dept" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                <label for="req_contact" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class='bx bx-phone text-gray-400'></i>
+                                    </div>
+                                    <input type="text" name="req_contact" id="req_contact" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" placeholder="e.g. +63 912 345 6789" required>
+                                </div>
                             </div>
                             <div>
-                                <label for="req_contact" class="block text-sm font-medium text-gray-700">Contact</label>
-                                <input type="text" name="req_contact" id="req_contact" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="req_amount" class="block text-sm font-medium text-gray-700">Amount</label>
-                                <input type="number" step="0.01" name="req_amount" id="req_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="req_purpose" class="block text-sm font-medium text-gray-700">Purpose</label>
-                                <textarea name="req_purpose" id="req_purpose" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required></textarea>
+                                <label for="req_date" class="block text-sm font-medium text-gray-700 mb-1">Request Date</label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class='bx bx-calendar text-gray-400'></i>
+                                    </div>
+                                    <input type="date" name="req_date" id="req_date" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" required>
+                                </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <!-- Section 2: Financial Details -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Financial Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2">
+                                <label for="req_amount" class="block text-sm font-medium text-gray-700 mb-1">Requested Amount</label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">₱</span>
+                                    </div>
+                                    <input type="number" step="0.01" name="req_amount" id="req_amount" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md py-2" placeholder="0.00" required>
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">PHP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="req_purpose" class="block text-sm font-medium text-gray-700 mb-1">Purpose / Description</label>
+                                <div class="relative rounded-md shadow-sm">
+                                    <textarea name="req_purpose" id="req_purpose" rows="4" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-3" placeholder="Describe the purpose of this budget request..." required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
-                <button type="button" class="btn btn-outline btn-sm" onclick="closeRequestBudgetModal()">Close</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="submitRequestBudget()">Send Request</button>
+            <div class="bg-gray-100 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+                <button type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="closeRequestBudgetModal()">
+                    Cancel
+                </button>
+                <button type="button" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center gap-2" onclick="submitRequestBudget()">
+                    <i class='bx bx-send'></i> Send Request
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Request Budget Status Modal -->
-<div id="requestStatusModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<div id="requestStatusModal" class="fixed inset-0 z-40 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeRequestStatusModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
             <div class="bg-white">
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <i class='bx bx-list-ul text-blue-600'></i> Request Budget Status
                     </h3>
-                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" onclick="closeRequestStatusModal()">
-                        <span class="sr-only">Close</span>
-                        <i class='bx bx-x text-2xl'></i>
+                    <button onclick="openRequestBudgetModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 gap-2">
+                        <i class='bx bx-plus-circle'></i> Request Budget
                     </button>
                 </div>
                 
-                <div class="p-6 overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200" id="requestStatusTable">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Req ID</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested By</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dept</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="requestStatusTableBody">
-                            <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading requests...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="p-6 overflow-x-auto bg-gray-50 min-h-[300px]">
+                    <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200" id="requestStatusTable">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Req ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requested By</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Dept</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="requestStatusTableBody">
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <i class='bx bx-loader-alt bx-spin text-3xl mb-2 text-blue-500'></i>
+                                            <span>Loading requests...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-end">
-                <button type="button" class="btn btn-outline btn-sm" onclick="closeRequestStatusModal()">Close</button>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
+                <button type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onclick="closeRequestStatusModal()">
+                    Close
+                </button>
             </div>
         </div>
     </div>
@@ -458,15 +506,21 @@
         .then(response => response.json())
         .then(result => {
             if (result.success) {
+                // Success Workflow:
+                // 1. Refresh the Status Table (in background or foreground)
+                fetchRequestStatus();
+                
+                // 2. Close Both Modals
                 closeRequestBudgetModal();
+                closeRequestStatusModal();
+
+                // 3. Show Success Alert
                 Swal.fire({
                     icon: 'success',
-                    title: 'Success',
-                    text: 'Budget request sent successfully!',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000
+                    title: 'Request Sent!',
+                    text: 'Your budget request has been successfully submitted.',
+                    confirmButtonText: 'Great!',
+                    confirmButtonColor: '#3085d6'
                 });
             } else {
                 Swal.fire({
@@ -498,7 +552,9 @@
 
     function fetchRequestStatus() {
         const tbody = document.getElementById('requestStatusTableBody');
-        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading requests...</td></tr>';
+        // Only show loading if empty or explicitly requested, otherwise it might flicker too much on refresh
+        // But for now, simple is fine.
+        // tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500"><div class="flex flex-col items-center justify-center"><i class="bx bx-loader-alt bx-spin text-3xl mb-2 text-blue-500"></i><span>Loading requests...</span></div></td></tr>';
 
         const token = localStorage.getItem('jwt');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
@@ -531,26 +587,42 @@
         tbody.innerHTML = '';
 
         if (requests.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
             return;
         }
 
         requests.forEach(req => {
             let statusColor = 'bg-gray-100 text-gray-800';
-            if (req.req_status === 'Approved') statusColor = 'bg-green-100 text-green-800';
-            else if (req.req_status === 'Rejected') statusColor = 'bg-red-100 text-red-800';
-            else if (req.req_status === 'Pending') statusColor = 'bg-yellow-100 text-yellow-800';
+            let statusIcon = 'bx-time';
+            
+            if (req.req_status === 'Approved') {
+                statusColor = 'bg-green-100 text-green-800';
+                statusIcon = 'bx-check-circle';
+            } else if (req.req_status === 'Rejected') {
+                statusColor = 'bg-red-100 text-red-800';
+                statusIcon = 'bx-x-circle';
+            } else if (req.req_status === 'Pending') {
+                statusColor = 'bg-yellow-100 text-yellow-800';
+                statusIcon = 'bx-time-five';
+            }
 
             const row = `
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_by}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${window.formatDateGlobal(req.req_date)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_dept}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${req.req_id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                                ${req.req_by.charAt(0).toUpperCase()}
+                            </div>
+                            ${req.req_by}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${window.formatDateGlobal(req.req_date)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_dept}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
-                            ${req.req_status}
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} items-center gap-1">
+                            <i class='bx ${statusIcon}'></i> ${req.req_status}
                         </span>
                     </td>
                 </tr>
