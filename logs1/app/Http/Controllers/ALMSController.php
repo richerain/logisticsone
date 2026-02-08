@@ -501,41 +501,5 @@ class ALMSController extends Controller
         return response()->json(['message' => 'Maintenance deleted']);
     }
 
-    public function storeRepairPersonnel(Request $request)
-    {
-        $validated = $request->validate([
-            'firstname' => 'required|string|max:100',
-            'middlename' => 'nullable|string|max:100',
-            'lastname' => 'required|string|max:100',
-            'position' => 'required|in:Technician,Mechanic,Cleaning Staff',
-            'status' => 'required|in:active,inactive',
-        ]);
 
-        $repId = null;
-        do {
-            $repId = 'RPL'.random_int(1, 9).chr(random_int(65, 90)).random_int(1, 9).chr(random_int(65, 90)).random_int(1, 9);
-            $exists = DB::connection('alms')->table('almns_repair_personnel')->where('rep_id', $repId)->exists();
-        } while ($exists);
-
-        DB::connection('alms')->table('almns_repair_personnel')->insert([
-            'rep_id' => $repId,
-            'firstname' => $validated['firstname'],
-            'middlename' => $validated['middlename'] ?? null,
-            'lastname' => $validated['lastname'],
-            'position' => $validated['position'],
-            'status' => $validated['status'],
-        ]);
-
-        return response()->json(['message' => 'Repair personnel added', 'rep_id' => $repId], 201);
-    }
-
-    public function deleteRepairPersonnel($id)
-    {
-        $deleted = DB::connection('alms')->table('almns_repair_personnel')->where('id', $id)->delete();
-        if (! $deleted) {
-            return response()->json(['message' => 'Delete failed'], 400);
-        }
-
-        return response()->json(['message' => 'Repair personnel deleted']);
-    }
 }

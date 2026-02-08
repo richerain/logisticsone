@@ -166,7 +166,6 @@
             <div class="flex justify-between items-center mb-4">
                 <h4 class="text-lg font-semibold">Repair Personnel</h4>
                 <div class="flex items-center gap-2">
-                    <button id="addRepairPersonnelBtn" class="btn btn-primary"><i class='bx bx-plus mr-2'></i>Add new Repair Personnel</button>
                     <button id="closeRepairPersonnelModal" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
                 </div>
             </div>
@@ -197,7 +196,6 @@
                             <th>Repair Personnel Name</th>
                             <th>Position</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="repairPersonnelBody">
@@ -236,50 +234,7 @@
         </div>
     </div>
 
-    <div id="addRepairPersonnelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[60]">
-        <div class="bg-white rounded-lg p-6 w-full max-w-xl">
-            <div class="flex justify-between items-center mb-4">
-                <h4 class="text-lg font-semibold">Add new Repair Personnel</h4>
-                <button id="closeAddRepairPersonnelModal" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
-            </div>
-            <form id="addRepairPersonnelForm" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    <div>
-                        <label class="block text-sm text-gray-700">Firstname</label>
-                        <input type="text" id="rp_firstname" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-700">Middlename</label>
-                        <input type="text" id="rp_middlename" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-700">Lastname</label>
-                        <input type="text" id="rp_lastname" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-700">Position</label>
-                        <select id="rp_position" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            <option value="Technician" selected>Technician</option>
-                            <option value="Mechanic">Mechanic</option>
-                            <option value="Cleaning Staff">Cleaning Staff</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-700">Status</label>
-                        <select id="rp_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            <option value="active" selected>Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2">
-                    <button type="button" id="cancelAddRepairPersonnelModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
-                    <button type="submit" id="saveRepairPersonnelBtn" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     
 
@@ -328,18 +283,12 @@
             var closeReq=document.getElementById('closeRequestMaintenanceModal');
             var closeRep=document.getElementById('closeRepairPersonnelModal');
             
-            var addBtn=document.getElementById('addRepairPersonnelBtn');
-            var closeAdd=document.getElementById('closeAddRepairPersonnelModal');
-            var cancelAdd=document.getElementById('cancelAddRepairPersonnelModal');
             if(reqBtn) reqBtn.addEventListener('click', function(){ open('requestMaintenanceModal'); loadRequestMaintenance(); });
             if(repBtn) repBtn.addEventListener('click', function(){ open('repairPersonnelModal'); loadRepairPersonnel(); });
             
             if(closeReq) closeReq.addEventListener('click', function(){ close('requestMaintenanceModal'); });
             if(closeRep) closeRep.addEventListener('click', function(){ close('repairPersonnelModal'); });
-            
-            if(addBtn) addBtn.addEventListener('click', function(){ open('addRepairPersonnelModal'); });
-            if(closeAdd) closeAdd.addEventListener('click', function(){ close('addRepairPersonnelModal'); });
-            if(cancelAdd) cancelAdd.addEventListener('click', function(){ close('addRepairPersonnelModal'); });
+
 
             function getCsrfToken(){ var m=document.querySelector('meta[name="csrf-token"]'); return m?m.getAttribute('content'):''; }
             var repairPersonnelState = [];
@@ -779,35 +728,7 @@
                   .catch(function(){ if(typeof Swal !== 'undefined'){ Swal.fire({ icon: 'error', title: 'Failed to save', text: 'Please try again.' }); } });
             });
 
-            var addForm=document.getElementById('addRepairPersonnelForm');
-            var Toast = (typeof Swal !== 'undefined') ? Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true }) : null;
-            if(addForm) addForm.addEventListener('submit', function(e){
-                e.preventDefault();
-                var fn = document.getElementById('rp_firstname').value.trim();
-                var ln = document.getElementById('rp_lastname').value.trim();
-                if(!fn || !ln){ if(typeof Swal !== 'undefined') { Swal.fire({ icon: 'error', title: 'Validation error', text: 'Firstname and Lastname are required' }); } return; }
-                var payload = {
-                    firstname: document.getElementById('rp_firstname').value,
-                    middlename: document.getElementById('rp_middlename').value || null,
-                    lastname: document.getElementById('rp_lastname').value,
-                    position: document.getElementById('rp_position').value,
-                    status: document.getElementById('rp_status').value
-                };
-                fetch('/alms/repair-personnel', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken()
-                    },
-                    body: JSON.stringify(payload)
-                }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, status:r.status, body:j}; }); })
-                  .then(function(res){
-                      if(res.ok){ if(Toast) Toast.fire({ icon: 'success', title: 'Repair personnel added' }); close('addRepairPersonnelModal'); loadRepairPersonnel(); preloadPersonnelSelect(); }
-                      else { if(Toast) { Swal.fire({ icon: 'error', title: 'Failed to save', text: (res.body && res.body.message) ? res.body.message : 'Please try again.' }); } }
-                  })
-                  .catch(function(){ if(Toast) { Swal.fire({ icon: 'error', title: 'Failed to save', text: 'Please try again.' }); } });
-            });
+
 
             var viewModal = document.getElementById('viewRepairPersonnelModal');
             var closeView = document.getElementById('closeViewRepairPersonnelModal');
@@ -833,16 +754,6 @@
                             '</div>';
                         if(viewContent) viewContent.innerHTML = html;
                         open('viewRepairPersonnelModal');
-                    }
-                } else if(action === 'delete'){
-                    if(typeof Swal !== 'undefined'){
-                        var confirm = await Swal.fire({ title: 'Delete Personnel?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Delete', cancelButtonText: 'Cancel' });
-                        if(confirm.isConfirmed){
-                            fetch('/alms/repair-personnel/'+id, { method: 'DELETE', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() }})
-                                .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, status:r.status, body:j}; }); })
-                                .then(function(res){ if(res.ok){ if(Toast) Toast.fire({ icon: 'success', title: 'Personnel deleted' }); loadRepairPersonnel(); preloadPersonnelSelect(); } else { Swal.fire({ icon: 'error', title: 'Delete failed', text: (res.body && res.body.message) ? res.body.message : 'Please try again.' }); } })
-                                .catch(function(){ Swal.fire({ icon: 'error', title: 'Delete failed', text: 'Please try again.' }); });
-                        }
                     }
                 }
             });
