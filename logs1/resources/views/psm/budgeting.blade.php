@@ -688,9 +688,12 @@
     }
 
     window.cancelRequest = function(reqId) {
+        const token = localStorage.getItem('jwt');
+        
         fetch(`/api/v1/psm/budget-requests/${reqId}/cancel`, {
             method: 'PATCH',
             headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
                 'X-API-KEY': '{{ \Illuminate\Support\Facades\DB::connection("main")->table("api_keys")->orderBy("created_at", "desc")->value("key") ?? "" }}',
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
