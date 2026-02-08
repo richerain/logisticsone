@@ -744,21 +744,24 @@ if (elements.confirmUpdateStatusBtn) {
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const result = await response.json();
             if (result.success) {
-                await loadQuotes();
-                // Also reload purchases notifications if they are linked
-                await loadNotifications(); 
-                
+                // Update UI immediately for better UX
                 selectedQuoteId = null;
                 elements.updateStatusModal?.close();
-                
+
                 if (elements.statusSelect.value === 'Completed') {
-                    Toast.fire({
-                        icon: 'success',
-                        title: 'purchase order complete'
-                    });
+                    if (typeof Toast !== 'undefined') {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'purchase order complete'
+                        });
+                    }
                 } else {
                     if (typeof showNotification === 'function') showNotification('Quote status updated', 'success');
                 }
+
+                // Reload data in background
+                await loadQuotes();
+                await loadNotifications(); 
             }
         } catch(e) { if (typeof showNotification === 'function') showNotification('Error updating status: ' + (e && e.message ? e.message : 'Unknown error'), 'error'); }
     });
@@ -959,10 +962,11 @@ if (elements.confirmSetDeliveryBtn) {
             if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             const result = await response.json();
             if (result.success) {
-                await loadQuotes();
                 selectedQuoteId = null;
                 elements.setDeliveryModal?.close();
                 if (typeof showNotification === 'function') showNotification('Delivery dates updated', 'success');
+                
+                await loadQuotes();
             }
         } catch(e) { if (typeof showNotification === 'function') showNotification('Error updating delivery: ' + (e && e.message ? e.message : 'Unknown error'), 'error'); }
     });
