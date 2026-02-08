@@ -797,4 +797,57 @@ class PSMController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Store a new budget request
+     */
+    public function storeRequestBudget(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'req_by' => 'required|string|max:255',
+                'req_date' => 'required|date',
+                'req_dept' => 'required|string|max:255',
+                'req_amount' => 'required|numeric|min:0',
+                'req_purpose' => 'required|string',
+                'req_contact' => 'required|string|max:255',
+            ]);
+
+            $validated['req_status'] = 'Pending';
+
+            $budgetRequest = \App\Models\PSM\RequestBudget::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Budget request created successfully.',
+                'data' => $budgetRequest
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create budget request: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all budget requests
+     */
+    public function getRequestBudgets()
+    {
+        try {
+            $requests = \App\Models\PSM\RequestBudget::orderBy('created_at', 'desc')->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $requests
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch budget requests: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
 }

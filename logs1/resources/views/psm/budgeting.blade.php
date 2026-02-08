@@ -12,9 +12,14 @@
     <!-- Budget Overview Header -->
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold text-gray-800">Budget Overview</h3>
-        <button class="btn btn-primary btn-sm gap-2">
-            <i class='bx bx-plus-circle'></i> Request Budget
-        </button>
+        <div class="flex gap-2">
+            <button onclick="openRequestBudgetModal()" class="btn btn-primary btn-sm gap-2">
+                <i class='bx bx-plus-circle'></i> Request Budget
+            </button>
+            <button onclick="openRequestStatusModal()" class="btn btn-outline btn-sm gap-2">
+                <i class='bx bx-list-ul'></i> Request Budget Status
+            </button>
+        </div>
     </div>
 
     <!-- Stats Section -->
@@ -198,9 +203,7 @@
 <div id="budgetLogModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeBudgetLogModal()"></div>
-
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
         <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
             <div class="bg-white">
                 <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -279,6 +282,107 @@
     </div>
 </div>
 
+<!-- Request Budget Modal -->
+<div id="requestBudgetModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeRequestBudgetModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="bg-white">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class='bx bx-plus-circle text-blue-600'></i> Request Budget
+                    </h3>
+                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" onclick="closeRequestBudgetModal()">
+                        <span class="sr-only">Close</span>
+                        <i class='bx bx-x text-2xl'></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <form id="requestBudgetForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="req_by" class="block text-sm font-medium text-gray-700">Requested By</label>
+                                <input type="text" name="req_by" id="req_by" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label for="req_date" class="block text-sm font-medium text-gray-700">Request Date</label>
+                                <input type="date" name="req_date" id="req_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label for="req_dept" class="block text-sm font-medium text-gray-700">Department</label>
+                                <input type="text" name="req_dept" id="req_dept" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                            </div>
+                            <div>
+                                <label for="req_contact" class="block text-sm font-medium text-gray-700">Contact</label>
+                                <input type="text" name="req_contact" id="req_contact" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="req_amount" class="block text-sm font-medium text-gray-700">Amount</label>
+                                <input type="number" step="0.01" name="req_amount" id="req_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="req_purpose" class="block text-sm font-medium text-gray-700">Purpose</label>
+                                <textarea name="req_purpose" id="req_purpose" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeRequestBudgetModal()">Close</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="submitRequestBudget()">Send Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Request Budget Status Modal -->
+<div id="requestStatusModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeRequestStatusModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <div class="bg-white">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class='bx bx-list-ul text-blue-600'></i> Request Budget Status
+                    </h3>
+                    <button type="button" class="text-gray-400 hover:text-gray-500 focus:outline-none" onclick="closeRequestStatusModal()">
+                        <span class="sr-only">Close</span>
+                        <i class='bx bx-x text-2xl'></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200" id="requestStatusTable">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Req ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested By</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dept</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="requestStatusTableBody">
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading requests...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeRequestStatusModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     // Global functions for Modal
     window.allBudgetLogs = []; // Store logs for modal access
@@ -317,6 +421,143 @@
     window.closeBudgetLogModal = function() {
         document.getElementById('budgetLogModal').classList.add('hidden');
     };
+
+    // --- Request Budget Modal Logic ---
+    window.openRequestBudgetModal = function() {
+        document.getElementById('requestBudgetForm').reset();
+        document.getElementById('requestBudgetModal').classList.remove('hidden');
+    };
+
+    window.closeRequestBudgetModal = function() {
+        document.getElementById('requestBudgetModal').classList.add('hidden');
+    };
+
+    window.submitRequestBudget = function() {
+        const form = document.getElementById('requestBudgetForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        const token = localStorage.getItem('jwt');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        fetch('/api/v1/psm/budget-requests', {
+            method: 'POST',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || '',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                closeRequestBudgetModal();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Budget request sent successfully!',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'Failed to send request.',
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting request:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while sending the request.',
+            });
+        });
+    };
+
+    // --- Request Status Modal Logic ---
+    window.openRequestStatusModal = function() {
+        document.getElementById('requestStatusModal').classList.remove('hidden');
+        fetchRequestStatus();
+    };
+
+    window.closeRequestStatusModal = function() {
+        document.getElementById('requestStatusModal').classList.add('hidden');
+    };
+
+    function fetchRequestStatus() {
+        const tbody = document.getElementById('requestStatusTableBody');
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading requests...</td></tr>';
+
+        const token = localStorage.getItem('jwt');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        fetch('/api/v1/psm/budget-requests', {
+            method: 'GET',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || '',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success && Array.isArray(result.data)) {
+                renderRequestStatusTable(result.data);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No requests found or error loading data.</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching request status:', error);
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">Error loading requests.</td></tr>';
+        });
+    }
+
+    function renderRequestStatusTable(requests) {
+        const tbody = document.getElementById('requestStatusTableBody');
+        tbody.innerHTML = '';
+
+        if (requests.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
+            return;
+        }
+
+        requests.forEach(req => {
+            let statusColor = 'bg-gray-100 text-gray-800';
+            if (req.req_status === 'Approved') statusColor = 'bg-green-100 text-green-800';
+            else if (req.req_status === 'Rejected') statusColor = 'bg-red-100 text-red-800';
+            else if (req.req_status === 'Pending') statusColor = 'bg-yellow-100 text-yellow-800';
+
+            const row = `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_by}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${window.formatDateGlobal(req.req_date)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_dept}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
+                            ${req.req_status}
+                        </span>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    }
     
     // Helper functions for global scope (needed for modal)
     window.formatCurrencyGlobal = function(amount) {
