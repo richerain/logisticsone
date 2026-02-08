@@ -9,6 +9,14 @@
 </div>
 
 <div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- Budget Overview Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-gray-800">Budget Overview</h3>
+        <button class="btn btn-primary btn-sm gap-2">
+            <i class='bx bx-plus-circle'></i> Request Budget
+        </button>
+    </div>
+
     <!-- Stats Section -->
     <div id="statsSection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-blue-50 rounded-xl shadow-sm p-6 border border-blue-100 hover:shadow-md transition-shadow">
@@ -143,6 +151,8 @@
             </div>
         </div>
     </div>
+
+    <hr class="my-6 border-gray-200">
 
     <!-- Budget Logs Table Container -->
     <div class="mt-8">
