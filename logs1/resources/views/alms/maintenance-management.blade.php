@@ -534,8 +534,8 @@
                         var processed = !!r.req_processed;
                         var isExternal = !!r.is_external;
                         rows += '<tr class="'+(processed ? 'bg-gray-100 opacity-70' : '')+'">'+
-                            '<td class="whitespace-nowrap">'+ 
-                                (r.req_id||'') + 
+                            '<td class="whitespace-nowrap font-mono text-xs">'+ 
+                                (r.req_code||r.req_id||'') + 
                                 (isExternal ? ' <span class="badge badge-xs badge-info ml-1">EXT</span>' : '') +
                             '</td>'+
                             '<td class="whitespace-nowrap">'+ (r.req_asset_name||'') +'</td>'+

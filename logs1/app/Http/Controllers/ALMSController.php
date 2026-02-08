@@ -126,10 +126,21 @@ class ALMSController extends Controller
 
     public function getRequestMaintenance()
     {
+        // Get processed external IDs
+        $processedExternalIds = DB::connection('alms')->table('alms_processed_external_requests')
+            ->pluck('external_id')->toArray();
+
         // Local data
         $localRows = DB::connection('alms')->table('alms_request_maintenance')
             ->orderByDesc('id')
-            ->get();
+            ->get()
+            ->map(function ($row) {
+                // Generate display ID: REQM + YYYYMMDD + 5 chars from hash of ID
+                $dateStr = date('Ymd', strtotime($row->req_date));
+                $hash = strtoupper(substr(md5($row->req_id . 'local'), 0, 5));
+                $row->req_code = "REQM{$dateStr}{$hash}";
+                return $row;
+            });
 
         // External data
         $externalRows = [];
@@ -144,17 +155,33 @@ class ALMSController extends Controller
                 $items = $data['data'] ?? ($data['requests'] ?? ($data ?? []));
                 if (is_array($items)) {
                     foreach ($items as $item) {
+                        $rawId = $item['req_id'] ?? ($item['id'] ?? null);
+                        if (!$rawId) continue;
+                        
+                        // Check if processed locally
+                        $isProcessed = in_array($rawId, $processedExternalIds);
+
                         // Construct unique asset name from vehicle + plate if available
                         $vehicleName = $item['vehicle'] ?? ($item['req_asset_name'] ?? ($item['asset_name'] ?? 'Unknown Asset'));
                         $plate = $item['plate'] ?? '';
                         $assetName = $vehicleName . ($plate ? ' - ' . $plate : '');
+                        
+                        // Consistent external ID for logic
+                        $extId = 'EXT-' . $rawId;
+
+                        // Generate display ID
+                        $dateVal = $item['req_date'] ?? ($item['date'] ?? now()->toDateString());
+                        $dateStr = date('Ymd', strtotime($dateVal));
+                        $hash = strtoupper(substr(md5($extId . 'external'), 0, 5));
+                        $reqCode = "REQM{$dateStr}{$hash}";
 
                         $externalRows[] = (object) [
-                            'req_id' => $item['req_id'] ?? ($item['id'] ?? 'EXT-' . uniqid()),
+                            'req_id' => $extId,
+                            'req_code' => $reqCode,
                             'req_asset_name' => $assetName,
-                            'req_date' => $item['req_date'] ?? ($item['date'] ?? now()->toDateString()),
+                            'req_date' => $dateVal,
                             'req_priority' => strtolower($item['req_priority'] ?? ($item['priority'] ?? 'low')),
-                            'req_processed' => $item['req_processed'] ?? 0,
+                            'req_processed' => $isProcessed ? 1 : ($item['req_processed'] ?? 0),
                             'req_type' => $item['req_type'] ?? ($item['type'] ?? 'External'),
                             'is_external' => true
                         ];
@@ -166,7 +193,7 @@ class ALMSController extends Controller
         }
 
         // Merge and sort (latest date first)
-        $merged = collect($externalRows)->merge($localRows);
+        $merged = $localRows->merge($externalRows);
         $sorted = $merged->sortByDesc('req_date')->values();
 
         return response()->json(['data' => $sorted]);
@@ -353,14 +380,36 @@ class ALMSController extends Controller
 
     public function markRequestProcessed($id)
     {
-        $updated = DB::connection('alms')->table('alms_request_maintenance')->where('req_id', $id)->update([
-            'req_processed' => 1,
-        ]);
-        if (! $updated) {
-            return response()->json(['message' => 'Mark processed failed'], 400);
+        if (str_starts_with($id, 'EXT-')) {
+            // External request: record in local processed table
+            $rawId = substr($id, 4); // Remove 'EXT-' prefix
+            try {
+                // Check if already processed
+                $exists = DB::connection('alms')->table('alms_processed_external_requests')
+                    ->where('external_id', $rawId)
+                    ->exists();
+                
+                if (!$exists) {
+                    DB::connection('alms')->table('alms_processed_external_requests')->insert([
+                        'external_id' => $rawId,
+                        'processed_at' => now(),
+                    ]);
+                }
+                return response()->json(['message' => 'External request marked as processed']);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Failed to mark external request'], 500);
+            }
+        } else {
+            // Local request
+            $updated = DB::connection('alms')->table('alms_request_maintenance')->where('req_id', $id)->update([
+                'req_processed' => 1,
+            ]);
+            if (! $updated) {
+                // It might already be processed or not found
+                return response()->json(['message' => 'Mark processed failed or already processed'], 200);
+            }
+            return response()->json(['message' => 'Request marked as processed']);
         }
-
-        return response()->json(['message' => 'Request marked as processed']);
     }
 
     public function updateMaintenanceStatus(Request $request, $id)
