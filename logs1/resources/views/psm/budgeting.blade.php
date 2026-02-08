@@ -389,8 +389,8 @@
                     </button>
                 </div>
                 
-                <div class="p-6 overflow-x-auto bg-gray-50 min-h-[300px]">
-                    <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+                <div class="p-6 bg-gray-50 min-h-[300px]">
+                    <div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
                         <table class="min-w-full divide-y divide-gray-200" id="requestStatusTable">
                             <thead class="bg-gray-100">
                                 <tr>
