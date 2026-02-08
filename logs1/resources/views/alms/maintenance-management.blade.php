@@ -196,6 +196,7 @@
                             <th>Repair Personnel Name</th>
                             <th>Position</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="repairPersonnelBody">
@@ -418,7 +419,6 @@
                         '<td>'+
                             '<div class="flex items-center gap-2">'+
                                 '<button class="text-indigo-600 transition-colors p-2 rounded-lg hover:bg-gray-50" title="View Personnel" data-action="view" data-id="'+p.id+'"><i class="bx bx-show-alt text-xl"></i></button>'+
-                                '<button class="text-red-600 transition-colors p-2 rounded-lg hover:bg-gray-50" title="Delete Personnel" data-action="delete" data-id="'+p.id+'"><i class="bx bx-trash text-xl"></i></button>'+
                             '</div>'+
                         '</td>'+
                     '</tr>';
