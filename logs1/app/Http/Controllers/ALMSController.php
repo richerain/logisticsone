@@ -206,6 +206,57 @@ class ALMSController extends Controller
 
     public function getRepairPersonnel()
     {
+        // Sync from External Employees API
+        try {
+            $response = Http::withoutVerifying()->timeout(15)->withHeaders([
+                'X-API-Key' => 'b24e8778f104db434adedd4342e94d39cee6d0668ec595dc6f02c739c522b57a',
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            ])->get('https://hr4.microfinancial-1.com/allemployees');
+
+            if ($response->successful()) {
+                $employees = $response->json();
+                
+                foreach ($employees as $emp) {
+                    $empId = $emp['employee_id'] ?? null;
+                    if (!$empId) continue;
+
+                    // Check if exists by rep_id
+                    $exists = DB::connection('alms')->table('almns_repair_personnel')
+                        ->where('rep_id', $empId)
+                        ->exists();
+                    
+                    if ($exists) continue;
+
+                    // Parse Name
+                    $fullName = trim($emp['full_name'] ?? '');
+                    $parts = explode(' ', $fullName);
+                    $lastname = array_pop($parts);
+                    $firstname = implode(' ', $parts);
+                    if (empty($firstname)) {
+                        $firstname = $lastname; // Fallback
+                        $lastname = '';
+                    }
+
+                    // Parse Position
+                    $position = $emp['job']['job_title'] ?? ($emp['position']['department'] ?? 'External Staff');
+                    
+                    // Parse Status
+                    $status = (strtolower($emp['status'] ?? '') === 'active') ? 'active' : 'inactive';
+
+                    DB::connection('alms')->table('almns_repair_personnel')->insert([
+                        'rep_id' => $empId,
+                        'firstname' => $firstname,
+                        'middlename' => null, // API doesn't provide distinct middle name easily
+                        'lastname' => $lastname,
+                        'position' => substr($position, 0, 100), // Limit length
+                        'status' => $status,
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            // Log error or ignore
+        }
+
         $status = request()->query('status');
         $query = DB::connection('alms')->table('almns_repair_personnel');
         if ($status) {
