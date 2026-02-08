@@ -97,7 +97,7 @@ class PSMService
                     'ven_rating' => $vendor->rating ?? 0,
                     'ven_status' => $vendor->status,
                     'ven_picture' => $vendor->picture,
-                    'ven_desc' => '',
+                    'ven_desc' => $vendor->company_desc,
                     'created_at' => $vendor->created_at,
                     'updated_at' => $vendor->updated_at,
                 ];
@@ -282,7 +282,7 @@ class PSMService
                     'ven_rating' => $vendor->rating ?? 0,
                     'ven_status' => $vendor->status,
                     'ven_picture' => $vendor->picture,
-                    'ven_desc' => '',
+                    'ven_desc' => $vendor->company_desc,
                     'created_at' => $vendor->created_at,
                     'updated_at' => $vendor->updated_at,
                 ];
@@ -354,7 +354,7 @@ class PSMService
                     'ven_type' => $vendor->company_type ?? 'Unknown',
                     'ven_rating' => $vendor->rating ?? 0,
                     'ven_status' => $vendor->status,
-                    'ven_desc' => '',
+                    'ven_desc' => $vendor->company_desc,
                     'created_at' => $vendor->created_at,
                     'updated_at' => $vendor->updated_at,
                 ];

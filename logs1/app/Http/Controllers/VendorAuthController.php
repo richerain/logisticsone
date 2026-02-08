@@ -104,6 +104,7 @@ class VendorAuthController extends Controller
             'address' => ['nullable', 'string'],
             'company_type' => ['nullable', 'string', 'max:255'],
             'company_name' => ['nullable', 'string', 'max:255'],
+            'company_desc' => ['nullable', 'string'],
             'picture' => ['nullable', 'image', 'max:2048'],
             'remove_picture' => ['nullable', 'boolean'],
         ];
@@ -176,6 +177,7 @@ class VendorAuthController extends Controller
         $user->address = $data['address'] ?? null;
         $user->company_type = $data['company_type'] ?? null;
         $user->company_name = $data['company_name'] ?? null;
+        $user->company_desc = $data['company_desc'] ?? null;
         $user->save();
 
         return response()->json([

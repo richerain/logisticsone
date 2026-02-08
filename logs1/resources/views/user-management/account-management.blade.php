@@ -335,6 +335,16 @@
         let currentActionId = null;
         const csrfToken = "{{ csrf_token() }}";
 
+        function getAuthHeaders() {
+            const token = localStorage.getItem('jwt');
+            return {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+        }
+
         // SweetAlert Mixin
         const Toast = Swal.mixin({
             toast: true,
@@ -460,16 +470,18 @@
 
         async function loadStats() {
             try {
-                const response = await fetch('/user-management/stats');
-                if (!response.ok) return;
-                const stats = await response.json();
+                const response = await fetch('/api/v1/user-management/stats', {
+                    headers: getAuthHeaders()
+                });
+                if (!response.ok) throw new Error('Failed to load stats');
+                const data = await response.json();
                 
-                document.getElementById('statTotalEmployee').textContent = stats.total_employee;
-                document.getElementById('statTotalVendor').textContent = stats.total_vendor;
-                document.getElementById('statActive').textContent = stats.active;
-                document.getElementById('statInactive').textContent = stats.inactive;
+                document.getElementById('statTotalEmployee').textContent = data.total_employee;
+                document.getElementById('statTotalVendor').textContent = data.total_vendor;
+                document.getElementById('statActive').textContent = data.active;
+                document.getElementById('statInactive').textContent = data.inactive;
             } catch (e) {
-                console.error('Error loading stats:', e);
+                console.error(e);
             }
         }
 
@@ -477,24 +489,32 @@
             const tbody = document.getElementById('accountsTableBody');
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="100%" class="px-6 py-4">
-                        <div id="loadingState" class="text-center py-8">
-                            <div class="loading loading-spinner loading-lg"></div>
-                            <p class="mt-2 text-gray-600">Loading Accounts...</p>
+                    <td colspan="100%" class="px-6 py-4 text-center text-gray-500">
+                        <div class="flex justify-center items-center py-4">
+                            <span class="loading loading-spinner loading-md mr-2"></span> Loading accounts...
                         </div>
                     </td>
                 </tr>
             `;
 
             try {
-                const response = await fetch(`/user-management/accounts?page=${currentPage}&type=${currentType}&search=${currentSearch}`);
-                const data = await response.json();
+                const query = new URLSearchParams({
+                    page: currentPage,
+                    type: currentType,
+                    search: currentSearch
+                });
 
+                const response = await fetch(`/api/v1/user-management/accounts?${query}`, {
+                    headers: getAuthHeaders()
+                });
+                if (!response.ok) throw new Error('Error loading accounts');
+                
+                const data = await response.json();
                 renderTable(data.data);
                 updatePagination(data);
-            } catch (error) {
-                console.error('Error loading accounts:', error);
-                tbody.innerHTML = `<tr><td colspan="100%" class="text-center py-4 text-red-500">Error loading data</td></tr>`;
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="100%" class="text-center py-4 text-red-500">Error loading accounts</td></tr>`;
             }
         }
 
@@ -653,7 +673,9 @@
 
         async function openViewModal(id) {
             try {
-                const response = await fetch(`/user-management/accounts/${id}?type=${currentType}`);
+                const response = await fetch(`/api/v1/user-management/accounts/${id}?type=${currentType}`, {
+                    headers: getAuthHeaders()
+                });
                 if (!response.ok) throw new Error('Failed to fetch details');
                 const data = await response.json();
 
@@ -685,11 +707,9 @@
 
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`/user-management/accounts/${id}?type=${currentType}`, {
+                    const response = await fetch(`/api/v1/user-management/accounts/${id}?type=${currentType}`, {
                         method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        }
+                        headers: getAuthHeaders()
                     });
                     
                     if (response.ok) {
@@ -730,12 +750,9 @@
             btn.textContent = 'Registering...';
 
             try {
-                const response = await fetch('/user-management/accounts/employee', {
+                const response = await fetch('/api/v1/user-management/accounts/employee', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ firstname, middlename, lastname, email, password, role, status })
                 });
 
@@ -780,12 +797,9 @@
             btn.textContent = 'Registering...';
 
             try {
-                const response = await fetch('/user-management/accounts/vendor', {
+                const response = await fetch('/api/v1/user-management/accounts/vendor', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ firstname, middlename, lastname, email, password, status })
                 });
 
@@ -819,12 +833,9 @@
             btn.textContent = 'Saving...';
             
             try {
-                const response = await fetch(`/user-management/accounts/${currentActionId}/role`, {
+                const response = await fetch(`/api/v1/user-management/accounts/${currentActionId}/role`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ role })
                 });
                 
@@ -856,12 +867,9 @@
             btn.textContent = 'Saving...';
             
             try {
-                const response = await fetch(`/user-management/accounts/${currentActionId}/status`, {
+                const response = await fetch(`/api/v1/user-management/accounts/${currentActionId}/status`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ status, type: currentType })
                 });
                 

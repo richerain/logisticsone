@@ -3,12 +3,17 @@
 use App\Http\Controllers\ALMSController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VendorAuthController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Simple session setup for auth routes
 // Middleware is already applied by bootstrap/app.php
 // Public Authentication Routes - FIXED: Proper route definitions
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
 Route::get('/login', function (Request $request) {
     if (Auth::guard('sws')->check()) {
         return redirect('/home');
@@ -70,6 +75,21 @@ Route::get('/login', function (Request $request) {
 
     Route::get('/auth/token', [App\Http\Controllers\AuthController::class, 'getApiToken']);
 
+    Route::get('/debug-config', function () {
+        try {
+            return response()->json([
+                'db_default' => config('database.default'),
+                'db_connections' => config('database.connections'),
+                'session_driver' => config('session.driver'),
+                'session_connection' => config('session.connection'),
+                'env_db_connection' => env('DB_CONNECTION'),
+                'env_session_driver' => env('SESSION_DRIVER'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    });
+
     // Protected Routes - Using normal Laravel auth with session timeout
     Route::middleware(['auth:sws', 'session.timeout'])->group(function () {
         Route::get('/home', function () {
@@ -98,18 +118,18 @@ Route::get('/login', function (Request $request) {
             return view('home', ['jwtToken' => $jwtToken]);
         })->name('home');
 
-        Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/dashboard/announcements', [App\Http\Controllers\DashboardController::class, 'fetchAnnouncements'])->name('dashboard.announcements.fetch');
-        Route::post('/dashboard/announcements', [App\Http\Controllers\DashboardController::class, 'storeAnnouncement'])->name('dashboard.announcements.store');
+        // Dashboard Route
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::post('/dashboard/announcements', [DashboardController::class, 'storeAnnouncement'])->name('dashboard.announcements.store');
+        Route::get('/dashboard/announcements', [DashboardController::class, 'fetchAnnouncements'])->name('dashboard.announcements.fetch');
+        
+        // Profile Update
+        Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
 
-        // Module content loading routes
+        // Module Loader Route
         Route::get('/module/{module}', function ($module) {
-            // Map module names to their respective views
-            $moduleViews = [
+            $map = [
                 'dashboard' => 'dashboard.index',
-                'psm-purchase' => 'psm.purchase-management',
-                'psm-vendor-management' => 'psm.vendor-management',
-                'psm-budgeting' => 'psm.budgeting',
                 'sws-inventory-flow' => 'sws.inventory-flow',
                 'sws-digital-inventory' => 'sws.digital-inventory',
                 'sws-warehouse-management' => 'sws.warehouse-management',
@@ -118,98 +138,24 @@ Route::get('/login', function (Request $request) {
                 'alms-maintenance-management' => 'alms.maintenance-management',
                 'dtlr-document-tracker' => 'dtlr.document-tracker',
                 'dtlr-logistics-record' => 'dtlr.logistics-record',
+                'psm-purchase' => 'psm.purchase-management',
+                'psm-budgeting' => 'psm.budgeting',
+                'psm-vendor-management' => 'psm.vendor-management',
                 'um-account-management' => 'user-management.account-management',
                 'um-audit-trail' => 'user-management.audit-trail',
             ];
 
-            $view = $moduleViews[$module] ?? 'components.module-not-found';
-
-            // Restrict access to Budgeting module
-            if ($module === 'psm-budgeting') {
-                $user = Auth::guard('sws')->user();
-                $role = strtolower($user->roles ?? '');
-                if (!in_array($role, ['superadmin', 'admin', 'manager'])) {
-                    abort(403, 'Access denied');
-                }
+            if (array_key_exists($module, $map)) {
+                return view($map[$module]);
             }
 
-            if (! view()->exists($view)) {
-                return response()->view('components.module-under-construction', ['module' => $module], 404);
-            }
-
-            // Generate JWT Token for API access
-            $jwtToken = '';
-            try {
-                if (Auth::guard('sws')->check()) {
-                    $user = Auth::guard('sws')->user();
-                    if ($user) {
-                        $authService = app(\App\Services\AuthService::class);
-                        $jwtToken = $authService->generateTokenForUser($user);
-                        if (!$jwtToken) {
-                            \Illuminate\Support\Facades\Log::error('Module load: JWT Generation returned null for SWS user: ' . $user->id);
-                        } else {
-                            \Illuminate\Support\Facades\Log::info('Module load: JWT Generated for SWS user: ' . $user->id);
-                        }
-                    }
-                } elseif (Auth::guard('vendor')->check()) {
-                    $user = Auth::guard('vendor')->user();
-                    if ($user) {
-                        $authService = app(\App\Services\VendorAuthService::class);
-                        $jwtToken = $authService->generateTokenForUser($user);
-                    }
-                }
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to generate JWT token: ' . $e->getMessage());
-            }
-
-            // If it's an AJAX request, return just the module content
-            if (request()->ajax()) {
-                return view($view, ['jwtToken' => $jwtToken]);
-            }
-
-            // If it's a direct browser request, return the full home page with the module loaded
-            return view('home', ['jwtToken' => $jwtToken]);
+            return view('components.module-not-found');
         })->name('module.load');
-
-        Route::get('/alms/assets', [ALMSController::class, 'getAssets'])->name('alms.assets.index');
-        Route::get('/alms/assets/{id}', [ALMSController::class, 'showAsset'])->name('alms.assets.show');
-        Route::put('/alms/assets/{id}/status', [ALMSController::class, 'updateAssetStatus'])->name('alms.assets.status');
-        Route::delete('/alms/assets/{id}', [ALMSController::class, 'deleteAsset'])->name('alms.assets.delete');
-
-        Route::get('/alms/repair-personnel', [ALMSController::class, 'getRepairPersonnel'])->name('alms.repair_personnel.index');
-        Route::post('/alms/repair-personnel', [ALMSController::class, 'storeRepairPersonnel'])->name('alms.repair_personnel.store');
-        Route::delete('/alms/repair-personnel/{id}', [ALMSController::class, 'deleteRepairPersonnel'])->name('alms.repair_personnel.delete');
-        Route::get('/alms/maintenance', [ALMSController::class, 'getMaintenance'])->name('alms.maintenance.index');
-        Route::post('/alms/maintenance', [ALMSController::class, 'storeMaintenance'])->name('alms.maintenance.store');
-        Route::put('/alms/maintenance/{id}/status', [ALMSController::class, 'updateMaintenanceStatus'])->name('alms.maintenance.status');
-        Route::delete('/alms/maintenance/{id}', [ALMSController::class, 'deleteMaintenance'])->name('alms.maintenance.delete');
-
-        Route::get('/alms/request-maintenance', [ALMSController::class, 'getRequestMaintenance'])->name('alms.request_maintenance.index');
-        Route::post('/alms/request-maintenance', [ALMSController::class, 'storeRequestMaintenance'])->name('alms.request_maintenance.store');
-        Route::delete('/alms/request-maintenance/{id}', [ALMSController::class, 'deleteRequestMaintenance'])->name('alms.request_maintenance.delete');
-        Route::post('/alms/request-maintenance/{id}/processed', [ALMSController::class, 'markRequestProcessed'])->name('alms.request_maintenance.processed');
-
-        // User Management Routes
-        Route::get('/user-management/accounts', [App\Http\Controllers\UserManagementController::class, 'getAccounts'])->name('user-management.accounts');
-        Route::get('/user-management/stats', [App\Http\Controllers\UserManagementController::class, 'getStats'])->name('user-management.stats');
-        Route::post('/user-management/accounts/employee', [App\Http\Controllers\UserManagementController::class, 'createEmployee'])->name('user-management.accounts.createEmployee');
-        Route::post('/user-management/accounts/vendor', [App\Http\Controllers\UserManagementController::class, 'createVendor'])->name('user-management.accounts.createVendor');
-        Route::put('/user-management/accounts/{id}/role', [App\Http\Controllers\UserManagementController::class, 'updateRole'])->name('user-management.accounts.updateRole');
-        Route::put('/user-management/accounts/{id}/status', [App\Http\Controllers\UserManagementController::class, 'updateStatus'])->name('user-management.accounts.updateStatus');
-        Route::delete('/user-management/accounts/{id}', [App\Http\Controllers\UserManagementController::class, 'destroy'])->name('user-management.accounts.destroy');
-        Route::get('/user-management/accounts/{id}', [App\Http\Controllers\UserManagementController::class, 'show'])->name('user-management.accounts.show');
-
-        Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
-
-        // PSM Module Routes
-        Route::prefix('psm')->group(function () {
-            Route::get('/budget-management/all', [\App\Http\Controllers\PSMController::class, 'getAllBudgets']);
-            Route::get('/budget-logs/all', [\App\Http\Controllers\PSMController::class, 'getBudgetLogs']);
-        });
     });
 
-    Route::middleware(['auth:vendor', 'session.timeout'])->group(function () {
-        Route::get('/vendor/home', function () {
+    // Vendor Protected Routes
+    Route::prefix('vendor')->middleware(['auth:vendor', 'session.timeout'])->group(function () {
+        Route::get('/home', function () {
             // Generate JWT Token for API access
             $jwtToken = '';
             try {
@@ -218,128 +164,32 @@ Route::get('/login', function (Request $request) {
                     if ($user) {
                         $authService = app(\App\Services\VendorAuthService::class);
                         $jwtToken = $authService->generateTokenForUser($user);
-                        \Illuminate\Support\Facades\Log::info('Vendor home token generated for: ' . $user->email);
+                        if (!$jwtToken) {
+                            \Illuminate\Support\Facades\Log::error('JWT Generation returned null for vendor: ' . $user->id);
+                        }
                     }
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for vendor home: ' . $e->getMessage());
             }
-            return view('home', ['jwtToken' => $jwtToken]);
+            return view('vendor-portal.home', ['jwtToken' => $jwtToken]);
         })->name('vendor.home');
-        Route::get('/vendor/dashboard', function () {
-            return view('dashboard.index');
-        })->name('vendor.dashboard');
-        Route::get('/vendor/module/{module}', function ($module) {
-            $moduleViews = [
-                'dashboard' => 'dashboard.index',
+
+        // Vendor Profile Update
+        Route::post('/profile/update', [VendorAuthController::class, 'updateProfile'])->name('vendor.profile.update');
+
+        // Vendor Module Loader Route
+        Route::get('/module/{module}', function ($module) {
+            $map = [
+                'dashboard' => 'dashboard.index', // Vendor dashboard is part of dashboard.index
                 'vendor-quote' => 'psm.vendor-quote',
                 'vendor-products' => 'psm.vendor-products',
             ];
 
-            $view = $moduleViews[$module] ?? 'components.module-not-found';
-
-            if (! view()->exists($view)) {
-                return response()->view('components.module-under-construction', ['module' => $module], 404);
+            if (array_key_exists($module, $map)) {
+                return view($map[$module]);
             }
 
-            // Generate JWT Token for API access
-            $jwtToken = '';
-            try {
-                if (Auth::guard('vendor')->check()) {
-                    $user = Auth::guard('vendor')->user();
-                    if ($user) {
-                        $authService = app(\App\Services\VendorAuthService::class);
-                        $jwtToken = $authService->generateTokenForUser($user);
-                        \Illuminate\Support\Facades\Log::info('Vendor module token generated for: ' . $user->email);
-                    } else {
-                        \Illuminate\Support\Facades\Log::warning('Vendor module token: No user found in guard');
-                    }
-                } else {
-                    \Illuminate\Support\Facades\Log::warning('Vendor module token: Guard check failed');
-                }
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to generate JWT token for vendor: ' . $e->getMessage());
-            }
-
-            if (request()->ajax()) {
-                return view($view, ['jwtToken' => $jwtToken]);
-            }
-
-            return view('home', ['jwtToken' => $jwtToken]);
+            return view('components.module-not-found');
         })->name('vendor.module.load');
     });
-
-    // Redirect root to appropriate page
-    Route::get('/', function () {
-        if (Auth::guard('sws')->check()) {
-            return redirect('/home');
-        }
-        if (Auth::guard('vendor')->check()) {
-            return redirect('/vendor/home');
-        }
-
-        return redirect('/login');
-    });
-
-// Health check endpoints (outside session middleware)
-Route::get('/up', function () {
-    return 'Application is healthy';
-});
-
-Route::get('/api/health', function () {
-    return response()->json(['status' => 'healthy', 'timestamp' => now()]);
-});
-
-Route::get('/api/test-db', function () {
-    try {
-        DB::connection('sws')->getPdo();
-
-        return response()->json(['database' => 'Connected successfully']);
-    } catch (\Exception $e) {
-        return response()->json(['database' => 'Connection failed: '.$e->getMessage()], 500);
-    }
-});
-
-// FIXED: Add explicit API routes for authentication to ensure they're accessible
-// These routes use the session middleware (inherited from web group) but exclude CSRF verification (handled in bootstrap/app.php)
-    Route::prefix('api')->group(function () {
-    Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
-    Route::post('/send-otp', [App\Http\Controllers\AuthController::class, 'sendOtp']);
-    Route::post('/verify-otp', [App\Http\Controllers\AuthController::class, 'verifyOtp']);
-    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
-    Route::get('/me', [App\Http\Controllers\AuthController::class, 'me']);
-    Route::get('/check-auth', [App\Http\Controllers\AuthController::class, 'checkAuth']);
-    Route::post('/refresh-session', [App\Http\Controllers\AuthController::class, 'refreshSession']);
-    Route::get('/check-session', [App\Http\Controllers\AuthController::class, 'checkSession']);
-    Route::get('/csrf-token', [App\Http\Controllers\AuthController::class, 'getCsrfToken']);
-
-    Route::prefix('vendor')->group(function () {
-        Route::post('/login', [VendorAuthController::class, 'login']);
-        Route::post('/send-otp', [VendorAuthController::class, 'sendOtp']);
-        Route::post('/verify-otp', [VendorAuthController::class, 'verifyOtp']);
-        Route::post('/logout', [VendorAuthController::class, 'logout']);
-        Route::get('/me', [VendorAuthController::class, 'me']);
-        Route::get('/check-auth', [VendorAuthController::class, 'checkAuth']);
-        Route::post('/refresh-session', [VendorAuthController::class, 'refreshSession']);
-        Route::get('/check-session', [VendorAuthController::class, 'checkSession']);
-        Route::get('/csrf-token', [VendorAuthController::class, 'getCsrfToken']);
-
-        Route::post('/profile/update', [VendorAuthController::class, 'updateProfile'])->name('vendor.profile.update');
-
-        Route::middleware(['auth:vendor'])->prefix('v1/psm/vendor-quote')->group(function () {
-            Route::get('/', [\App\Http\Controllers\PSMController::class, 'listQuotes']);
-            Route::get('/notifications', [\App\Http\Controllers\PSMController::class, 'listApprovedPurchasesForQuote']);
-            Route::post('/review-from-purchase/{purchaseId}', [\App\Http\Controllers\PSMController::class, 'reviewPurchaseToQuote']);
-            Route::put('/{id}', [\App\Http\Controllers\PSMController::class, 'updateQuote']);
-            Route::delete('/{id}', [\App\Http\Controllers\PSMController::class, 'deleteQuote']);
-        });
-
-        Route::middleware(['auth:vendor'])->prefix('v1/psm/product-management')->group(function () {
-            Route::get('/', [\App\Http\Controllers\PSMController::class, 'getProducts']);
-            Route::get('/by-vendor/{venId}', [\App\Http\Controllers\PSMController::class, 'getProductsByVendor']);
-            Route::post('/', [\App\Http\Controllers\PSMController::class, 'createProduct']);
-            Route::put('/{id}', [\App\Http\Controllers\PSMController::class, 'updateProduct']);
-            Route::delete('/{id}', [\App\Http\Controllers\PSMController::class, 'deleteProduct']);
-        });
-    });
-});

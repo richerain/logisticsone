@@ -33,6 +33,19 @@ Route::prefix('auth')->group(function () {
     Route::get('/csrf-token', [App\Http\Controllers\AuthController::class, 'getCsrfToken']);
 });
 
+// Vendor Authentication Routes
+Route::prefix('vendor/auth')->group(function () {
+    Route::post('/login', [App\Http\Controllers\VendorAuthController::class, 'login']);
+    Route::post('/send-otp', [App\Http\Controllers\VendorAuthController::class, 'sendOtp']);
+    Route::post('/verify-otp', [App\Http\Controllers\VendorAuthController::class, 'verifyOtp']);
+    Route::post('/logout', [App\Http\Controllers\VendorAuthController::class, 'logout']);
+    Route::get('/me', [App\Http\Controllers\VendorAuthController::class, 'me']);
+    Route::get('/check-auth', [App\Http\Controllers\VendorAuthController::class, 'checkAuth']);
+    Route::post('/refresh-session', [App\Http\Controllers\VendorAuthController::class, 'refreshSession']);
+    Route::get('/check-session', [App\Http\Controllers\VendorAuthController::class, 'checkSession']);
+    Route::get('/csrf-token', [App\Http\Controllers\VendorAuthController::class, 'getCsrfToken']);
+});
+
 // Public vendor info routes (for other modules)
 Route::prefix('vendor-info')->group(function () {
     Route::get('/data', [App\Http\Controllers\PSMController::class, 'getVendorInfo']);
@@ -72,5 +85,10 @@ Route::middleware([
     // DTLR Module Routes
     Route::prefix('dtlr')->group(function () {
         require __DIR__.'/modules/dtlr-api.php';
+    });
+
+    // User Management Module Routes
+    Route::prefix('user-management')->group(function () {
+        require __DIR__.'/modules/um-api.php';
     });
 });

@@ -82,7 +82,7 @@
     <script>
         // Redirect to home after a short delay
         setTimeout(() => {
-            window.location.href = '/home';
+            window.location.href = "{{ route('home') }}";
         }, 2000);
     </script>
 </body>

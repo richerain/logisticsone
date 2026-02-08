@@ -171,6 +171,16 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination Controls -->
+        <div id="logsPager" class="flex items-center justify-between mt-4">
+            <div id="logsPagerInfo" class="text-sm text-gray-600"></div>
+            <div class="join">
+                <button class="btn btn-sm join-item" id="logsPrevBtn" data-action="prev">Prev</button>
+                <span class="btn btn-sm join-item" id="logsPageDisplay">1 / 1</span>
+                <button class="btn btn-sm join-item" id="logsNextBtn" data-action="next">Next</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -315,8 +325,32 @@
     (function() {
         console.log('Budgeting Module Initialized');
         
+        let currentLogsPage = 1;
+        const logsPageSize = 10;
+
         fetchBudgets();
         fetchBudgetLogs();
+
+        // Add event listener for pager
+        const logsPager = document.getElementById('logsPager');
+        if (logsPager) {
+            logsPager.addEventListener('click', function(ev){
+                const btn = ev.target.closest('button[data-action]');
+                if(!btn) return;
+                const act = btn.getAttribute('data-action');
+                const total = window.allBudgetLogs ? window.allBudgetLogs.length : 0;
+                const totalPages = Math.ceil(total / logsPageSize);
+                
+                if(act === 'prev'){ 
+                    currentLogsPage = Math.max(1, currentLogsPage - 1); 
+                    renderBudgetLogsTable(window.allBudgetLogs); 
+                }
+                if(act === 'next'){ 
+                    currentLogsPage = Math.min(totalPages, currentLogsPage + 1); 
+                    renderBudgetLogsTable(window.allBudgetLogs); 
+                }
+            });
+        }
 
         function fetchBudgets() {
             const token = localStorage.getItem('jwt');
@@ -325,8 +359,8 @@
             // Show loading state
             renderLoadingState();
 
-            // Use the internal session-based route instead of the API route
-            fetch('/psm/budget-management/all', {
+            // Fetch from API
+            fetch('/api/v1/psm/budget-management/all', {
                 method: 'GET',
                 headers: {
                     'Authorization': token ? `Bearer ${token}` : '',
@@ -508,8 +542,9 @@
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             
             renderLogsLoadingState();
-
-            fetch('/psm/budget-logs/all', {
+            
+            // Fetch from API
+            fetch('/api/v1/psm/budget-logs/all', {
                 method: 'GET',
                 headers: {
                     'Authorization': token ? `Bearer ${token}` : '',
@@ -558,7 +593,26 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            logs.forEach(log => {
+            // Sort logs: latest first
+            logs.sort((a, b) => {
+                const dateA = new Date(a.bud_spent_date || 0);
+                const dateB = new Date(b.bud_spent_date || 0);
+                return dateB - dateA; // Descending
+            });
+
+            // Pagination Logic
+            const total = logs.length;
+            const totalPages = Math.ceil(total / logsPageSize);
+            
+            // Adjust current page if out of bounds
+            if (currentLogsPage > totalPages && totalPages > 0) currentLogsPage = totalPages;
+            if (currentLogsPage < 1) currentLogsPage = 1;
+
+            const start = (currentLogsPage - 1) * logsPageSize;
+            const end = start + logsPageSize;
+            const paginatedLogs = logs.slice(start, end);
+
+            paginatedLogs.forEach(log => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors';
                 
@@ -598,6 +652,24 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            renderLogsPager(total, totalPages);
+        }
+
+        function renderLogsPager(total, totalPages) {
+            const info = document.getElementById('logsPagerInfo');
+            const display = document.getElementById('logsPageDisplay');
+            const start = total === 0 ? 0 : ((currentLogsPage - 1) * logsPageSize) + 1;
+            const end = Math.min(currentLogsPage * logsPageSize, total);
+            
+            if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+            if (display) display.textContent = `${currentLogsPage} / ${totalPages || 1}`;
+            
+            const prev = document.getElementById('logsPrevBtn');
+            const next = document.getElementById('logsNextBtn');
+            
+            if (prev) prev.disabled = currentLogsPage <= 1;
+            if (next) next.disabled = currentLogsPage >= totalPages;
         }
 
         function renderLogsEmptyState(message = 'No budget logs yet.') {

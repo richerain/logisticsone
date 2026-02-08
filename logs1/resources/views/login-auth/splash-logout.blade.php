@@ -80,23 +80,11 @@
     </main>
 
     <script>
-        (async function() {
-            try {
-                await fetch('/api/v1/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                });
-            } catch (e) {
-                // ignore errors and proceed
-            } finally {
-                try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 1000);
-            }
+        (function() {
+            try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
         })();
     </script>
 </body>

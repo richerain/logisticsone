@@ -19,11 +19,7 @@
             --:--:--
         </span>
 
-        <!-- Bell -->
-        <button class="w-10 h-10 rounded-xl hover:bg-gray-100 active:bg-gray-200 transition flex items-center justify-center relative">
-            <i class='bx bx-bell text-xl text-gray-700'></i>
-            <span class="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white"></span>
-        </button>
+
 
         <div class="h-8 w-px bg-gray-200 hidden sm:block"></div>
 
@@ -66,9 +62,7 @@
                 <a href="#" id="profile-modal-btn" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2">
                     <i class='bx bx-user'></i> Profile
                 </a>
-                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition flex items-center gap-2">
-                    <i class='bx bx-cog'></i> Settings
-                </a>
+
                 <div class="h-px bg-gray-100"></div>
                 <a href="#" id="logout-btn" class="block px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
                     <i class='bx bx-log-out'></i> Logout
@@ -191,6 +185,10 @@
                                             <span class="text-gray-400 text-sm">No rating yet</span>
                                         @endif
                                     </div>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Company Description</label>
+                                    <p class="text-gray-900 font-medium bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 whitespace-pre-line">{{ $user->company_desc ?? 'N/A' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -506,6 +504,11 @@
                             <input type="text" name="company_type" value="{{ $user->company_type ?? '' }}" 
                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-background-main outline-none transition font-medium text-gray-800" />
                         </div>
+                        <div class="md:col-span-2 form-control space-y-1.5">
+                            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Company Description</label>
+                            <textarea name="company_desc" rows="3" 
+                                      class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-background-main outline-none transition font-medium text-gray-800 resize-none">{{ $user->company_desc ?? '' }}</textarea>
+                        </div>
                     </div>
                 </div>
                 @endif
@@ -743,7 +746,7 @@
 
         if (confirmLogoutBtn) {
             confirmLogoutBtn.addEventListener('click', () => {
-                fetch('/api/logout', {
+                fetch('/api/v1/auth/logout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -755,12 +758,12 @@
                     if (data.success) {
                          window.location.href = '{{ Auth::guard("vendor")->check() ? route("vendor.splash.logout") : route("splash.logout") }}';
                     } else {
-                        window.location.href = '/';
+                        window.location.href = '/login';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    window.location.href = '/'; 
+                    window.location.href = '/login'; 
                 });
             });
         }

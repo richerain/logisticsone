@@ -21,7 +21,6 @@
     </div>
 
     <!-- Stats Section -->
-     <p>text testing</p>
     <div id="statsSection" class="hidden grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow">
             <div class="flex items-center">

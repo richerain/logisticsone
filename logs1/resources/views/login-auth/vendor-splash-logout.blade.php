@@ -75,12 +75,9 @@
         </div>
     </main>
     <script>
-        (async function() {
-            try {
-                await fetch('/api/vendor/logout', { method: 'POST', headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
-            } catch (e) { }
+        (function() {
             try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
-            setTimeout(() => { window.location.href = '/login/vendor-portal'; }, 1000);
+            setTimeout(() => { window.location.href = '/login/vendor-portal'; }, 2000);
         })();
     </script>
 </body>

@@ -257,6 +257,7 @@
 <script>
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log('Vendor Login Script Loaded - v1.1 (Fixed Route)');
     handleLogin();
 });
 
@@ -289,13 +290,24 @@ function handleLogin() {
     const loginBtn = document.getElementById('loginBtn'); const loginText = document.getElementById('loginText'); const loginSpinner = document.getElementById('loginSpinner');
     loginBtn.disabled = true; loginText.textContent = 'Logging in...'; loginSpinner.classList.remove('hidden');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    fetch('/api/vendor/login', {
+    fetch('/api/v1/vendor/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
         credentials: 'include',
         body: JSON.stringify({ email: email, password: password })
     })
-    .then(response => { if (!response.ok) { return response.json().then(errorData => { throw new Error("Incorrect credential please try again!"); }).catch(() => { throw new Error("Incorrect credential please try again!"); }); } return response.json(); })
+    .then(response => { 
+        if (!response.ok) { 
+            return response.json().then(errorData => { 
+                console.error('Vendor login error:', errorData);
+                throw new Error(errorData.message || "Incorrect credential please try again!"); 
+            }).catch(e => { 
+                console.error('Vendor login parse error:', e);
+                throw new Error("Incorrect credential please try again!"); 
+            }); 
+        } 
+        return response.json(); 
+    })
     .then(data => { 
         if (data.success) { 
             if (data.requires_otp) { 

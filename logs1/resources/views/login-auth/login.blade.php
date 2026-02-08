@@ -444,6 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Login Form Submission
+    console.log('Login Script Loaded - v1.1 (Fixed Route)');
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
@@ -578,7 +579,7 @@ function handleLogin() {
     console.log('Making login request with CSRF token:', csrfToken ? 'Present' : 'Missing');
 
     // Make API request with CSRF token
-    fetch('/api/login', {
+    fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -596,8 +597,10 @@ function handleLogin() {
         console.log('Login response status:', response.status);
         if (!response.ok) {
             return response.json().then(errorData => {
-                throw new Error("Incorrect credential please try again!");
-            }).catch(() => {
+                console.error('Login error details:', errorData);
+                throw new Error(errorData.message || "Incorrect credential please try again!");
+            }).catch(e => {
+                console.error('Login error parsing:', e);
                 throw new Error("Incorrect credential please try again!");
             });
         }

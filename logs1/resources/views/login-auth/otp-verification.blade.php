@@ -120,7 +120,7 @@
                     </div>
 
                     <!-- otp form start -->
-                    <form id="otp-form" class="space-y-6" novalidate>
+                    <form id="otp-form" class="space-y-6" novalidate onsubmit="return false;">
                         @csrf
                         <!-- hidden email -->
                         <input type="hidden" name="email" id="email" value="{{ request()->get('email', 'mail@site.com') }}" />
@@ -219,6 +219,7 @@
             }
             
             init() {
+                console.log('OTP Script Loaded - v1.1 (Fixed Routes)');
                 this.setupOTPInputs();
                 this.setupEventListeners();
                 this.startTimer();
@@ -307,7 +308,7 @@
                 this.setVerifyButtonLoading(true);
                 
                 try {
-                    const response = await fetch(this.portal === 'vendor' ? '/api/vendor/verify-otp' : '/api/verify-otp', {
+                    const response = await fetch(this.portal === 'vendor' ? '/api/v1/vendor/auth/verify-otp' : '/api/v1/auth/verify-otp', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
