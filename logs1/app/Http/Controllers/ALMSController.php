@@ -11,6 +11,7 @@ class ALMSController extends Controller
 {
     public function getAssets()
     {
+        // 1. Sync from SWS (Local)
         try {
             $items = DB::connection('sws')->table('sws_items as i')
                 ->leftJoin('sws_categories as c', 'c.cat_id', '=', 'i.item_category_id')
@@ -41,8 +42,64 @@ class ALMSController extends Controller
                 ]);
             }
         } catch (\Exception $e) {
-            // If SWS not accessible, continue returning current ALMS assets
+            // If SWS not accessible, continue
         }
+
+        // 2. Sync from External Vehicles API
+        try {
+            $response = Http::timeout(5)->get('https://log2.microfinancial-1.com/api/vehicles_api.php', [
+                'key' => 'd4f8a9b3c6e2f1a4b7d9e0c3f2a1b4d6'
+            ]);
+
+            if ($response->successful()) {
+                $vData = $response->json();
+                $vehicles = $vData['data'] ?? [];
+                
+                foreach ($vehicles as $v) {
+                    // Map Status
+                    $statusMap = [
+                        'Active' => 'operational',
+                        'Inactive' => 'out_of_service',
+                        'Maintenance' => 'under_maintenance'
+                    ];
+                    $dbStatus = $statusMap[$v['status'] ?? ''] ?? 'operational';
+
+                    // Use vehicle + plate for unique name check to avoid duplicates
+                    // User requested asset_name = "Toyota Hiace" (from vehicle field)
+                    // But to ensure uniqueness we must check if we already imported this specific plate.
+                    // We will check by asset_name matching the pattern or check via a unique identifier if we stored one.
+                    // Since we don't have external_id column, we'll construct a unique name.
+                    // "Toyota Hiace - ABC-1234"
+                    $uniqueName = ($v['vehicle'] ?? 'Unknown') . ' - ' . ($v['plate'] ?? 'NoPlate');
+                    
+                    $exists = DB::connection('alms')->table('alms_assets')
+                        ->where('asset_name', $uniqueName)
+                        ->where('asset_category', 'Vehicle')
+                        ->exists();
+
+                    if ($exists) {
+                        continue;
+                    }
+
+                    $code = 'AST'.now()->format('Ymd').strtoupper(Str::random(5));
+                    
+                    DB::connection('alms')->table('alms_assets')->insert([
+                        'asset_code' => $code,
+                        'asset_name' => $uniqueName, // Storing "Vehicle - Plate" to be unique
+                        'asset_category' => 'Vehicle',
+                        'asset_location' => 'Garage',
+                        'asset_status' => $dbStatus,
+                        'last_maintenance' => $v['last_maintenance'] ?? now()->toDateString(),
+                        'next_maintenance' => null, // "na" mapped to null
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            // Log error or ignore
+        }
+
         $assets = DB::connection('alms')->table('alms_assets')
             ->orderByDesc('created_at')
             ->get();
