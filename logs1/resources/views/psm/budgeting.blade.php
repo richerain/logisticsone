@@ -280,7 +280,7 @@
 </div>
 
 <!-- Request Budget Modal -->
-<div id="requestBudgetModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<div id="requestBudgetModal" class="fixed inset-0 z-[110] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeRequestBudgetModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -297,48 +297,11 @@
             
             <div class="p-8 bg-gray-50">
                 <form id="requestBudgetForm" class="space-y-6">
-                    <!-- Section 1: Requester Information -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                        <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Requester Information</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="req_by" class="block text-sm font-medium text-gray-700 mb-1">Requested By</label>
-                                <div class="relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class='bx bx-user text-gray-400'></i>
-                                    </div>
-                                    <input type="text" name="req_by" id="req_by" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" placeholder="Full Name" required>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="req_dept" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                                <div class="relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class='bx bx-building text-gray-400'></i>
-                                    </div>
-                                    <input type="text" name="req_dept" id="req_dept" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" placeholder="Department Name" required>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="req_contact" class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-                                <div class="relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class='bx bx-phone text-gray-400'></i>
-                                    </div>
-                                    <input type="text" name="req_contact" id="req_contact" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" placeholder="e.g. +63 912 345 6789" required>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="req_date" class="block text-sm font-medium text-gray-700 mb-1">Request Date</label>
-                                <div class="relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class='bx bx-calendar text-gray-400'></i>
-                                    </div>
-                                    <input type="date" name="req_date" id="req_date" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Hidden Requester Information (Automatically Filled) -->
+                    <input type="hidden" name="req_by" id="req_by" value="{{ Auth::check() ? Auth::user()->name : '' }}">
+                    <input type="hidden" name="req_dept" id="req_dept" value="Logistics 1">
+                    <input type="hidden" name="req_contact" id="req_contact" value="logistic1.microfinancial@gmail.com / +63 912 345 6789">
+                    <input type="hidden" name="req_date" id="req_date">
 
                     <!-- Section 2: Financial Details -->
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
@@ -379,7 +342,7 @@
 </div>
 
 <!-- Request Budget Status Modal -->
-<div id="requestStatusModal" class="fixed inset-0 z-40 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<div id="requestStatusModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity" aria-hidden="true" onclick="closeRequestStatusModal()"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -473,6 +436,11 @@
     // --- Request Budget Modal Logic ---
     window.openRequestBudgetModal = function() {
         document.getElementById('requestBudgetForm').reset();
+        
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('req_date').value = today;
+        
         document.getElementById('requestBudgetModal').classList.remove('hidden');
     };
 
