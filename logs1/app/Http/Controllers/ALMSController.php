@@ -214,11 +214,23 @@ class ALMSController extends Controller
             ])->get('https://hr4.microfinancial-1.com/allemployees');
 
             if ($response->successful()) {
-                $employees = $response->json();
+                $data = $response->json();
+                $employees = $data['data'] ?? $data;
                 
                 foreach ($employees as $emp) {
+                    if (!is_array($emp)) continue;
+
                     $empId = $emp['employee_id'] ?? null;
                     if (!$empId) continue;
+
+                    // Parse Position
+                    $position = $emp['job']['job_title'] ?? ($emp['position']['department'] ?? 'External Staff');
+                    
+                    // Filter: Only allow specific positions
+                    $allowedPositions = ['Cleaning Staff', 'Technician', 'Mechanic'];
+                    if (!in_array($position, $allowedPositions)) {
+                        continue;
+                    }
 
                     // Check if exists by rep_id
                     $exists = DB::connection('alms')->table('almns_repair_personnel')
@@ -236,9 +248,6 @@ class ALMSController extends Controller
                         $firstname = $lastname; // Fallback
                         $lastname = '';
                     }
-
-                    // Parse Position
-                    $position = $emp['job']['job_title'] ?? ($emp['position']['department'] ?? 'External Staff');
                     
                     // Parse Status
                     $status = (strtolower($emp['status'] ?? '') === 'active') ? 'active' : 'inactive';
@@ -246,9 +255,9 @@ class ALMSController extends Controller
                     DB::connection('alms')->table('almns_repair_personnel')->insert([
                         'rep_id' => $empId,
                         'firstname' => $firstname,
-                        'middlename' => null, // API doesn't provide distinct middle name easily
+                        'middlename' => null,
                         'lastname' => $lastname,
-                        'position' => substr($position, 0, 100), // Limit length
+                        'position' => substr($position, 0, 100),
                         'status' => $status,
                     ]);
                 }
