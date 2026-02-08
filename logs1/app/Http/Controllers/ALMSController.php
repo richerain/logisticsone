@@ -126,77 +126,102 @@ class ALMSController extends Controller
 
     public function getRequestMaintenance()
     {
-        // Get processed external IDs
-        $processedExternalIds = DB::connection('alms')->table('alms_processed_external_requests')
-            ->pluck('external_id')->toArray();
-
-        // Local data
-        $localRows = DB::connection('alms')->table('alms_request_maintenance')
-            ->orderByDesc('id')
-            ->get()
-            ->map(function ($row) {
-                // Generate display ID: REQM + YYYYMMDD + 5 chars from hash of ID
-                $dateStr = date('Ymd', strtotime($row->req_date));
-                $hash = strtoupper(substr(md5($row->req_id . 'local'), 0, 5));
-                $row->req_code = "REQM{$dateStr}{$hash}";
-                return $row;
-            });
-
-        // External data
-        $externalRows = [];
         try {
-            $response = Http::withoutVerifying()->timeout(5)->get('https://log2.microfinancial-1.com/api/maintenance_api.php', [
-                'key' => 'd4f8a9b3c6e2f1a4b7d9e0c3f2a1b4d6'
-            ]);
-            
-            if ($response->successful()) {
-                $data = $response->json();
-                // Assume data is in 'data' key or root array
-                $items = $data['data'] ?? ($data['requests'] ?? ($data ?? []));
-                if (is_array($items)) {
-                    foreach ($items as $item) {
-                        $rawId = $item['req_id'] ?? ($item['id'] ?? null);
-                        if (!$rawId) continue;
-                        
-                        // Check if processed locally
-                        $isProcessed = in_array($rawId, $processedExternalIds);
+            // Get processed external IDs
+            $processedExternalIds = [];
+            try {
+                $processedExternalIds = DB::connection('alms')->table('alms_processed_external_requests')
+                    ->pluck('external_id')->toArray();
+            } catch (\Exception $e) {
+                // Table might not exist or connection issue, ignore for now
+            }
 
-                        // Construct unique asset name from vehicle + plate if available
-                        $vehicleName = $item['vehicle'] ?? ($item['req_asset_name'] ?? ($item['asset_name'] ?? 'Unknown Asset'));
-                        $plate = $item['plate'] ?? '';
-                        $assetName = $vehicleName . ($plate ? ' - ' . $plate : '');
-                        
-                        // Consistent external ID for logic
-                        $extId = 'EXT-' . $rawId;
+            // Local data
+            $localRows = DB::connection('alms')->table('alms_request_maintenance')
+                ->orderByDesc('id')
+                ->get()
+                ->map(function ($row) {
+                    // Generate display ID: REQM + YYYYMMDD + 5 chars from hash of ID
+                    $dateStr = date('Ymd', strtotime($row->req_date));
+                    // Use md5 to ensure stability of the ID for the same record
+                    $hash = strtoupper(substr(md5($row->id . 'local'), 0, 5));
+                    
+                    // We preserve the original ID for actions
+                    $row->real_id = $row->req_id; // Original REQ... from DB
+                    $row->req_id = "REQM{$dateStr}{$hash}"; // Display ID
+                    
+                    $row->is_external = false;
+                    return $row;
+                });
 
-                        // Generate display ID
-                        $dateVal = $item['req_date'] ?? ($item['date'] ?? now()->toDateString());
-                        $dateStr = date('Ymd', strtotime($dateVal));
-                        $hash = strtoupper(substr(md5($extId . 'external'), 0, 5));
-                        $reqCode = "REQM{$dateStr}{$hash}";
+            // External data
+            $externalRows = [];
+            try {
+                $response = Http::withoutVerifying()->timeout(10)->get('https://log2.microfinancial-1.com/api/maintenance_api.php', [
+                    'key' => 'd4f8a9b3c6e2f1a4b7d9e0c3f2a1b4d6'
+                ]);
+                
+                if ($response->successful()) {
+                    $data = $response->json();
+                    // Assume data is in 'data' key or root array
+                    $items = $data['data'] ?? ($data['requests'] ?? ($data ?? []));
+                    
+                    if (is_array($items)) {
+                        foreach ($items as $item) {
+                            $rawId = $item['req_id'] ?? ($item['id'] ?? null);
+                            if (!$rawId) continue;
+                            
+                            // Check if processed locally
+                            // We assume we store the raw ID in the tracking table
+                            $isProcessed = in_array((string)$rawId, $processedExternalIds);
 
-                        $externalRows[] = (object) [
-                            'req_id' => $extId,
-                            'req_code' => $reqCode,
-                            'req_asset_name' => $assetName,
-                            'req_date' => $dateVal,
-                            'req_priority' => strtolower($item['req_priority'] ?? ($item['priority'] ?? 'low')),
-                            'req_processed' => $isProcessed ? 1 : ($item['req_processed'] ?? 0),
-                            'req_type' => $item['req_type'] ?? ($item['type'] ?? 'External'),
-                            'is_external' => true
-                        ];
+                            // Construct unique asset name from vehicle + plate if available
+                            $vehicleName = $item['vehicle'] ?? ($item['req_asset_name'] ?? ($item['asset_name'] ?? 'Unknown Asset'));
+                            $plate = $item['plate'] ?? '';
+                            // Format: "Vehicle - Plate"
+                            $assetName = $vehicleName . ($plate ? ' - ' . $plate : '');
+                            
+                            // Consistent external ID for logic
+                            // We use EXT- prefix for the 'id' field to avoid collision with local IDs in frontend
+                            $extId = 'EXT-' . $rawId;
+
+                            // Generate display ID
+                            $dateVal = $item['req_date'] ?? ($item['date'] ?? now()->toDateString());
+                            $dateStr = date('Ymd', strtotime($dateVal));
+                            // Stable hash for external item
+                            $hash = strtoupper(substr(md5($rawId . 'external'), 0, 5));
+                            $reqCode = "REQM{$dateStr}{$hash}";
+
+                            $externalRows[] = (object) [
+                                'id' => $extId, // Unique identifier for the row
+                                'real_id' => $extId, // For actions (EXT-...)
+                                'req_id' => $reqCode, // Formatted ID as requested
+                                'req_asset_name' => $assetName,
+                                'req_date' => $dateVal,
+                                'req_priority' => strtolower($item['req_priority'] ?? ($item['priority'] ?? 'low')),
+                                'req_processed' => $isProcessed ? 1 : ($item['req_processed'] ?? 0),
+                                'req_type' => $item['req_type'] ?? ($item['type'] ?? 'External'),
+                                'is_external' => true
+                            ];
+                        }
                     }
                 }
+            } catch (\Exception $e) {
+                // Log error but continue with local data
+                // Log::error("Maintenance API Error: " . $e->getMessage());
             }
+
+            // Merge and sort (latest date first)
+            $merged = $localRows->merge($externalRows);
+            $sorted = $merged->sortByDesc('req_date')->values();
+
+            return response()->json(['data' => $sorted]);
         } catch (\Exception $e) {
-            // Log error but continue with local data
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        // Merge and sort (latest date first)
-        $merged = $localRows->merge($externalRows);
-        $sorted = $merged->sortByDesc('req_date')->values();
-
-        return response()->json(['data' => $sorted]);
     }
 
     public function showAsset($id)

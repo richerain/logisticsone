@@ -543,8 +543,8 @@
                             '<td class="whitespace-nowrap">'+ mntPriorityBadge(r.req_priority) +'</td>'+
                             '<td class="whitespace-nowrap">'+
                                 '<div class="flex items-center gap-2">'+
-                                    (processed ? '' : '<button class="btn btn-xs btn-success text-white" title="Schedule Maintenance" data-action="schedule-req" data-id="'+(r.req_id||'')+'"><i class="bx bx-calendar-plus mr-1"></i>Scheduled Maintenance</button>')+
-                                    (isExternal ? '' : '<button class="text-red-600 transition-colors p-2 rounded-lg hover:bg-gray-50" title="Delete Request" data-action="delete-req" data-id="'+(r.req_id||'')+'"><i class="bx bx-trash text-xl"></i></button>')+
+                                    (processed ? '' : '<button class="btn btn-xs btn-success text-white" title="Schedule Maintenance" data-action="schedule-req" data-id="'+(r.real_id||'')+'"><i class="bx bx-calendar-plus mr-1"></i>Scheduled Maintenance</button>')+
+                                    (isExternal ? '' : '<button class="text-red-600 transition-colors p-2 rounded-lg hover:bg-gray-50" title="Delete Request" data-action="delete-req" data-id="'+(r.real_id||'')+'"><i class="bx bx-trash text-xl"></i></button>')+
                                 '</div>'+
                             '</td>'+
                         '</tr>';
@@ -593,7 +593,7 @@
                     var id = btn.getAttribute('data-id');
                     if(action === 'schedule-req'){
                         var dataRow = (Array.isArray(window.requestListData) ? window.requestListData : []);
-                        var reqItem = dataRow.find(function(x){ return String(x.req_id) === String(id); });
+                        var reqItem = dataRow.find(function(x){ return String(x.real_id) === String(id); });
                         if(!reqItem){ return; }
                         openScheduleFromRequestModal(reqItem);
                     } else if(action === 'delete-req'){
@@ -677,7 +677,7 @@
                       if(res.ok){
                           if(Toast) Toast.fire({ icon: 'success', title: 'Maintenance scheduled' });
                           close('scheduleFromRequestModal');
-                          var reqId = currentReqToSchedule ? currentReqToSchedule.req_id : null;
+                          var reqId = currentReqToSchedule ? currentReqToSchedule.real_id : null;
                           currentReqToSchedule = null;
                           loadMaintenanceSchedules();
                           if(reqId){
