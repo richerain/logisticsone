@@ -297,10 +297,42 @@
             
             <div class="p-8 bg-gray-50">
                 <form id="requestBudgetForm" class="space-y-6">
+                    @php
+                        $user = Auth::guard('sws')->user();
+                        if (!$user) {
+                            $user = Auth::user();
+                        }
+                        
+                        $reqName = '';
+                        $reqContact = 'logistic1.microfinancial@gmail.com / +63 912 345 6789'; // Default fallback
+
+                        if ($user) {
+                            // Construct Name: First Last - Role
+                            $firstName = $user->firstname ?? $user->name ?? ''; // Fallback to name if firstname missing
+                            $lastName = $user->lastname ?? '';
+                            $role = $user->roles ?? 'Staff';
+                            
+                            $fullName = trim($firstName . ' ' . $lastName);
+                            if (empty($fullName) && !empty($user->name)) {
+                                $fullName = $user->name;
+                            }
+                            
+                            $reqName = $fullName . ' - ' . ucfirst($role);
+
+                            // Construct Contact: Email / Phone
+                            $email = $user->email ?? '';
+                            $phone = $user->contactnum ?? '';
+                            
+                            if (!empty($email) || !empty($phone)) {
+                                $reqContact = trim($email . ' / ' . $phone, ' / ');
+                            }
+                        }
+                    @endphp
+
                     <!-- Hidden Requester Information (Automatically Filled) -->
-                    <input type="hidden" name="req_by" id="req_by" value="{{ Auth::check() ? Auth::user()->name : '' }}">
+                    <input type="hidden" name="req_by" id="req_by" value="{{ $reqName }}">
                     <input type="hidden" name="req_dept" id="req_dept" value="Logistics 1">
-                    <input type="hidden" name="req_contact" id="req_contact" value="logistic1.microfinancial@gmail.com / +63 912 345 6789">
+                    <input type="hidden" name="req_contact" id="req_contact" value="{{ $reqContact }}">
                     <input type="hidden" name="req_date" id="req_date">
 
                     <!-- Section 2: Financial Details -->
@@ -457,6 +489,16 @@
 
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+        
+        // Safety check for hidden fields
+        if (!data.req_by || !data.req_dept || !data.req_contact) {
+             Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'User information is missing. Please reload the page.',
+            });
+            return;
+        }
         
         const token = localStorage.getItem('jwt');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
