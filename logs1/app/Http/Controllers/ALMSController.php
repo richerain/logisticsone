@@ -134,7 +134,7 @@ class ALMSController extends Controller
         // External data
         $externalRows = [];
         try {
-            $response = Http::timeout(5)->get('https://log2.microfinancial-1.com/api/maintenance_api.php', [
+            $response = Http::withoutVerifying()->timeout(5)->get('https://log2.microfinancial-1.com/api/maintenance_api.php', [
                 'key' => 'd4f8a9b3c6e2f1a4b7d9e0c3f2a1b4d6'
             ]);
             
@@ -144,11 +144,16 @@ class ALMSController extends Controller
                 $items = $data['data'] ?? ($data['requests'] ?? ($data ?? []));
                 if (is_array($items)) {
                     foreach ($items as $item) {
+                        // Construct unique asset name from vehicle + plate if available
+                        $vehicleName = $item['vehicle'] ?? ($item['req_asset_name'] ?? ($item['asset_name'] ?? 'Unknown Asset'));
+                        $plate = $item['plate'] ?? '';
+                        $assetName = $vehicleName . ($plate ? ' - ' . $plate : '');
+
                         $externalRows[] = (object) [
                             'req_id' => $item['req_id'] ?? ($item['id'] ?? 'EXT-' . uniqid()),
-                            'req_asset_name' => $item['req_asset_name'] ?? ($item['asset_name'] ?? 'Unknown Asset'),
+                            'req_asset_name' => $assetName,
                             'req_date' => $item['req_date'] ?? ($item['date'] ?? now()->toDateString()),
-                            'req_priority' => $item['req_priority'] ?? ($item['priority'] ?? 'low'),
+                            'req_priority' => strtolower($item['req_priority'] ?? ($item['priority'] ?? 'low')),
                             'req_processed' => $item['req_processed'] ?? 0,
                             'req_type' => $item['req_type'] ?? ($item['type'] ?? 'External'),
                             'is_external' => true

@@ -543,7 +543,7 @@
                             '<td class="whitespace-nowrap">'+ mntPriorityBadge(r.req_priority) +'</td>'+
                             '<td class="whitespace-nowrap">'+
                                 '<div class="flex items-center gap-2">'+
-                                    (processed || isExternal ? '' : '<button class="text-amber-600 transition-colors p-2 rounded-lg hover:bg-gray-50" title="Schedule Maintenance" data-action="schedule-req" data-id="'+(r.req_id||'')+'"><i class="bx bx-calendar-plus text-xl"></i></button>')+
+                                    (processed ? '' : '<button class="btn btn-xs btn-success text-white" title="Schedule Maintenance" data-action="schedule-req" data-id="'+(r.req_id||'')+'"><i class="bx bx-calendar-plus mr-1"></i>Scheduled Maintenance</button>')+
                                     (isExternal ? '' : '<button class="text-red-600 transition-colors p-2 rounded-lg hover:bg-gray-50" title="Delete Request" data-action="delete-req" data-id="'+(r.req_id||'')+'"><i class="bx bx-trash text-xl"></i></button>')+
                                 '</div>'+
                             '</td>'+
