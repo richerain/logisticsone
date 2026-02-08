@@ -34,7 +34,10 @@ class DashboardController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching announcements: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to fetch announcements'], 500);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Failed to fetch announcements: ' . $e->getMessage()
+            ], 500);
         }
     }
 
