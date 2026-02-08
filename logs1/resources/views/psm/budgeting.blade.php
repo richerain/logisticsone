@@ -394,17 +394,19 @@
                         <table class="min-w-full divide-y divide-gray-200" id="requestStatusTable">
                             <thead class="bg-gray-100">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Req ID</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requested By</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Dept</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Req ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Requested By</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Contact</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Dept</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Purpose</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Status</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200" id="requestStatusTableBody">
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
+                                    <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">
                                         <div class="flex flex-col items-center justify-center">
                                             <i class='bx bx-loader-alt bx-spin text-3xl mb-2 text-blue-500'></i>
                                             <span>Loading requests...</span>
@@ -524,13 +526,22 @@
                 closeRequestBudgetModal();
                 closeRequestStatusModal();
 
-                // 3. Show Success Alert
-                Swal.fire({
+                // 3. Show Success Alert (Toast)
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
                     icon: 'success',
-                    title: 'Request Sent!',
-                    text: 'Your budget request has been successfully submitted.',
-                    confirmButtonText: 'Great!',
-                    confirmButtonColor: '#3085d6'
+                    title: 'Request successfully submitted'
                 });
             } else {
                 Swal.fire({
@@ -597,7 +608,7 @@
         tbody.innerHTML = '';
 
         if (requests.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
             return;
         }
 
@@ -627,8 +638,10 @@
                             ${req.req_by}
                         </div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_contact}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${window.formatDateGlobal(req.req_date)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_dept}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title="${req.req_purpose}">${req.req_purpose}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} items-center gap-1">
