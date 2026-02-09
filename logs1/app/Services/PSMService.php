@@ -445,7 +445,7 @@ class PSMService
      */
     public function createVendor($data)
     {
-        DB::beginTransaction();
+        DB::connection('psm')->beginTransaction();
         try {
             if (!isset($data['ven_id'])) {
                 $data['ven_id'] = $this->generateVendorId();
@@ -453,7 +453,7 @@ class PSMService
 
             $vendor = $this->psmRepository->createVendor($data);
 
-            DB::commit();
+            DB::connection('psm')->commit();
 
             return [
                 'success' => true,
@@ -461,7 +461,7 @@ class PSMService
                 'data' => $vendor,
             ];
         } catch (Exception $e) {
-            DB::rollBack();
+            DB::connection('psm')->rollBack();
 
             return [
                 'success' => false,
@@ -535,12 +535,12 @@ class PSMService
      */
     public function updateVendor($id, $data)
     {
-        DB::beginTransaction();
+        DB::connection('psm')->beginTransaction();
         try {
             $vendor = $this->psmRepository->updateVendor($id, $data);
 
             if ($vendor) {
-                DB::commit();
+                DB::connection('psm')->commit();
 
                 return [
                     'success' => true,
@@ -548,7 +548,7 @@ class PSMService
                     'data' => $vendor,
                 ];
             } else {
-                DB::rollBack();
+                DB::connection('psm')->rollBack();
 
                 return [
                     'success' => false,
@@ -557,7 +557,7 @@ class PSMService
                 ];
             }
         } catch (Exception $e) {
-            DB::rollBack();
+            DB::connection('psm')->rollBack();
 
             return [
                 'success' => false,
@@ -826,7 +826,7 @@ class PSMService
      */
     public function createProduct($data)
     {
-        DB::beginTransaction();
+        DB::connection('psm')->beginTransaction();
         try {
             $data['prod_id'] = $this->generateProductId();
             
@@ -837,13 +837,13 @@ class PSMService
             if (isset($data['prod_picture']) && $data['prod_picture'] instanceof \Illuminate\Http\UploadedFile) {
                 $file = $data['prod_picture'];
                 $filename = 'prod_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('storage/products'), $filename);
-                $data['prod_picture'] = 'storage/products/' . $filename;
+                $file->move(public_path('images/product-picture'), $filename); // Changed to correct path
+                $data['prod_picture'] = 'images/product-picture/' . $filename; // Changed to correct path
             }
 
             $product = $this->psmRepository->createProduct($data);
 
-            DB::commit();
+            DB::connection('psm')->commit();
 
             return [
                 'success' => true,
@@ -851,7 +851,7 @@ class PSMService
                 'data' => $product,
             ];
         } catch (Exception $e) {
-            DB::rollBack();
+            DB::connection('psm')->rollBack();
 
             return [
                 'success' => false,

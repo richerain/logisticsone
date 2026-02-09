@@ -632,10 +632,18 @@ class PSMController extends Controller
                             'ven_address' => $user->address,
                             'ven_type' => $user->company_type ?? 'supplies',
                             'ven_status' => $user->status,
+                            'ven_rating' => $user->rating ?? 0,
+                            'ven_product' => 0,
                             'ven_desc' => $user->company_desc,
+                            'ven_module_from' => 'main',
+                            'ven_submodule_from' => 'sync',
                         ];
                         \Log::info('Syncing vendor to PSM:', $vendorData);
-                        $this->psmService->createVendor($vendorData);
+                        $syncResult = $this->psmService->createVendor($vendorData);
+                        
+                        if (!$syncResult['success']) {
+                            throw new \Exception('Failed to sync vendor profile: ' . $syncResult['message']);
+                        }
                     }
                 }
 
