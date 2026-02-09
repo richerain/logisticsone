@@ -359,6 +359,19 @@ class PSMService
         }
     }
 
+    public function getPSMVendor($venId)
+    {
+        try {
+            $vendor = $this->psmRepository->getVendorByVendorId($venId);
+            if ($vendor) {
+                return ['success' => true, 'data' => $vendor];
+            }
+            return ['success' => false, 'message' => 'Vendor not found in PSM'];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
     public function getVendorByVendorId($venId)
     {
         try {
@@ -434,7 +447,9 @@ class PSMService
     {
         DB::beginTransaction();
         try {
-            $data['ven_id'] = $this->generateVendorId();
+            if (!isset($data['ven_id'])) {
+                $data['ven_id'] = $this->generateVendorId();
+            }
 
             $vendor = $this->psmRepository->createVendor($data);
 

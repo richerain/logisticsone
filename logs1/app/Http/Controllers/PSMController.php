@@ -608,10 +608,38 @@ class PSMController extends Controller
         try {
             \Log::info('Creating product payload:', $request->all());
 
+            $vendorId = null;
             if (\Auth::guard('vendor')->check()) {
-                \Log::info('Vendor Authenticated: ' . \Auth::guard('vendor')->id());
+                $vendorId = \Auth::guard('vendor')->user()->vendorid;
+                \Log::info('Vendor Authenticated: ' . $vendorId);
             } else {
                 \Log::info('Vendor NOT Authenticated in Controller');
+            }
+
+            // Merge authenticated vendor ID into request if available
+            if ($vendorId) {
+                // Check if vendor exists in PSM, if not sync it
+                $psmVendor = $this->psmService->getPSMVendor($vendorId);
+                if (!$psmVendor['success']) {
+                    $user = \Auth::guard('vendor')->user();
+                    if ($user) {
+                        $vendorData = [
+                            'ven_id' => $user->vendorid,
+                            'ven_company_name' => $user->company_name,
+                            'ven_contact_person' => trim($user->firstname . ' ' . $user->lastname),
+                            'ven_email' => $user->email,
+                            'ven_phone' => $user->contactnum,
+                            'ven_address' => $user->address,
+                            'ven_type' => $user->company_type ?? 'supplies',
+                            'ven_status' => $user->status,
+                            'ven_desc' => $user->company_desc,
+                        ];
+                        \Log::info('Syncing vendor to PSM:', $vendorData);
+                        $this->psmService->createVendor($vendorData);
+                    }
+                }
+
+                $request->merge(['prod_vendor' => $vendorId]);
             }
 
             $validated = $request->validate([
