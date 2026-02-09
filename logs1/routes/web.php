@@ -160,8 +160,6 @@ Route::get('/login', function (Request $request) {
 
         // Dashboard Route
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-        Route::post('/dashboard/announcements', [DashboardController::class, 'storeAnnouncement'])->name('dashboard.announcements.store');
-        // Route::get('/dashboard/announcements', [DashboardController::class, 'fetchAnnouncements'])->name('dashboard.announcements.fetch');
         
         // Profile Update
         Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
