@@ -405,7 +405,8 @@ class SWSRepository
                         'item_description' => $item->item_description,
                     ];
                 });
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SWSRepository getItemsWithStockInfo error: ' . $e->getMessage());
             return [];
         }
     }

@@ -254,6 +254,7 @@ class SWSService
     public function getItemsWithStockInfo()
     {
         try {
+            Log::info('SWSService: getItemsWithStockInfo called');
             $items = $this->swsRepository->getItemsWithStockInfo();
 
             return [
@@ -261,13 +262,14 @@ class SWSService
                 'data' => $items,
                 'message' => 'Items with stock info retrieved successfully',
             ];
-        } catch (\Exception $e) {
-            Log::error('Error retrieving items with stock info: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Error getting items with stock info: '.$e->getMessage());
+            Log::error($e->getTraceAsString());
 
             return [
                 'success' => false,
-                'data' => [],
-                'message' => 'Failed to retrieve items with stock info',
+                'message' => 'Failed to retrieve items',
+                'error' => $e->getMessage(),
             ];
         }
     }
