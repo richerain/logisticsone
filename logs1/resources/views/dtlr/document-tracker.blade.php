@@ -15,12 +15,6 @@
             Upload Document
         </button>
     </div>
-
-    <div>
-        <p>
-            testing
-        </p>
-    </div>
     
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" id="dtlrStats">
         <div class="stat-card bg-blue-50 p-4 rounded-lg text-center">
