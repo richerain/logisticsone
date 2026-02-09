@@ -21,6 +21,11 @@ class SWSRepository
         return Item::with('category')->find($id);
     }
 
+    public function getItemBySku($sku)
+    {
+        return Item::where('item_stock_keeping_unit', $sku)->first();
+    }
+
     public function createItem(array $data)
     {
         // Generate item code before creating

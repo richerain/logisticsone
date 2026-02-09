@@ -329,7 +329,7 @@ class SWSController extends Controller
         $validated = $request->validate([
             'item_name' => ['required', 'string', 'max:255'],
             'item_description' => ['nullable', 'string'],
-            'item_stock_keeping_unit' => ['nullable', 'string', 'max:100', 'unique:sws.sws_items,item_stock_keeping_unit'],
+            'item_stock_keeping_unit' => ['nullable', 'string', 'max:100'],
             'item_category_id' => ['nullable', 'string', 'exists:sws.sws_categories,cat_id'],
             'item_stored_from' => ['nullable', 'string', 'max:100'],
             'item_item_type' => ['required', Rule::in(['liquid', 'illiquid', 'hybrid'])],

@@ -77,6 +77,9 @@ class SWSService
                 $data['item_stock_keeping_unit'] = 'SKU-'.date('YmdHis').rand(100, 999);
             }
 
+            // Check if item exists by SKU
+            $existingItem = $this->swsRepository->getItemBySku($data['item_stock_keeping_unit']);
+
             // Extract PSM fields if present
             $psmPurchaseId = $data['psm_purchase_id'] ?? null;
             $psmItemIndex = $data['psm_item_index'] ?? null;
@@ -85,7 +88,20 @@ class SWSService
             unset($data['psm_purchase_id']);
             unset($data['psm_item_index']);
 
-            $item = $this->swsRepository->createItem($data);
+            if ($existingItem) {
+                // Update existing item
+                $newStock = $existingItem->item_current_stock + ($data['item_current_stock'] ?? 0);
+                $updateData = [
+                    'item_current_stock' => $newStock,
+                    'item_unit_price' => $data['item_unit_price'] ?? $existingItem->item_unit_price,
+                ];
+                
+                $item = $this->swsRepository->updateItem($existingItem->item_id, $updateData);
+                $message = 'Existing item updated: Stock added and price updated.';
+            } else {
+                $item = $this->swsRepository->createItem($data);
+                $message = 'Item created successfully';
+            }
 
             // Update PSM if needed
             if ($psmPurchaseId && $psmItemIndex !== null) {
@@ -97,7 +113,7 @@ class SWSService
             return [
                 'success' => true,
                 'data' => $item,
-                'message' => 'Item created successfully',
+                'message' => $message,
             ];
         } catch (\Exception $e) {
             DB::connection('sws')->rollBack();

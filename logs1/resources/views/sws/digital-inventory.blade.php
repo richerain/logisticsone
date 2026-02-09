@@ -1595,10 +1595,16 @@ function onPurchaseItemSelected(e) {
     const item = incomingAssetsData[index];
     if (!item) return;
     
+    console.log('Selected item for autofill:', item);
+
     // Populate Form Fields
     
     // SKU - Use Prod ID
-    skuInput.value = item.purcprod_prod_id || '';
+    if (item.purcprod_prod_id) {
+        skuInput.value = item.purcprod_prod_id;
+    } else {
+        skuInput.value = '';
+    }
     
     // Description
     document.getElementById('item_description').value = item.purcprod_desc || '';
@@ -1606,7 +1612,7 @@ function onPurchaseItemSelected(e) {
     // Stock (Aggregated Units)
     document.getElementById('item_current_stock').value = item.purcprod_prod_unit || 0;
     
-    // Price (Aggregated Price - assumed Total Amount based on user request)
+    // Price (Aggregated Price)
     document.getElementById('item_unit_price').value = item.purcprod_prod_price || 0;
 
     // Expiration Date
@@ -1984,7 +1990,7 @@ async function saveItem(e) {
         const result = await response.json();
         
         if (result.success) {
-            notify('Item created successfully', 'success');
+            notify(result.message || 'Item created successfully', 'success');
             closeAddItemModal();
             // Reload all data
             await Promise.all([

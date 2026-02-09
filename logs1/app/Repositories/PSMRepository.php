@@ -431,4 +431,26 @@ class PSMRepository
     {
         return BudgetLog::orderBy('created_at', 'desc')->get();
     }
+
+    /**
+     * Get quotes for a specific vendor
+     */
+    public function getQuotesForVendor($companyName)
+    {
+        return Quote::join('psm_purchase', 'psm_quote.quo_purchase_id', '=', 'psm_purchase.id')
+            ->where('psm_purchase.pur_company_name', $companyName)
+            ->select('psm_quote.*')
+            ->orderBy('psm_quote.created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get products for a specific vendor
+     */
+    public function getVendorProducts($venId)
+    {
+        return Product::where('prod_vendor', $venId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
 }
