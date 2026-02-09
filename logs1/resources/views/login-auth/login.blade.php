@@ -247,36 +247,75 @@
                     <div class="space-y-6">
                         <!-- Section 1 -->
                         <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">1. Acceptance of Terms</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">1. System Usage & Authorization</h4>
                             <p class="text-gray-700 text-sm leading-relaxed">
-                                By accessing and using the Microfinancial Logistics I System, you acknowledge that you have read, understood, and agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must not use this system.
+                                Access to the Microfinancial Logistics I System is restricted to authorized personnel only. Unauthorized access, use, or modification of this system is strictly prohibited and may result in disciplinary action or legal prosecution. By logging in, you agree to comply with the organization’s Information Security Policy (ISO/IEC 27001 Annex A.9).
                             </p>
                         </div>
 
                         <!-- Section 2 -->
                         <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">2. User Responsibilities</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">2. User Accountability</h4>
                             <div class="space-y-2 text-sm text-gray-700">
-                                <p class="flex items-start">
-                                    <i class='bx bxs-check-circle text-brand-primary mr-2 mt-0.5 flex-shrink-0'></i>
-                                    <span>You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.</span>
-                                </p>
-                                <p class="flex items-start">
-                                    <i class='bx bxs-check-circle text-brand-primary mr-2 mt-0.5 flex-shrink-0'></i>
-                                    <span>You must provide accurate and complete information during registration and keep it updated.</span>
-                                </p>
-                                <p class="flex items-start">
-                                    <i class='bx bxs-check-circle text-brand-primary mr-2 mt-0.5 flex-shrink-0'></i>
-                                    <span>You agree to use the system only for legitimate business purposes related to logistics management.</span>
-                                </p>
+                                <p>You are responsible for all activities conducted under your user account (ISO/IEC 27001 Annex A.9.2). You must:</p>
+                                <ul class="list-disc list-inside space-y-1 ml-4">
+                                    <li>Keep your login credentials confidential and not share them with anyone.</li>
+                                    <li>Lock your screen or log out when leaving your workstation unattended.</li>
+                                    <li>Report any suspicious activity or unauthorized access immediately.</li>
+                                </ul>
                             </div>
                         </div>
 
                         <!-- Section 3 -->
                         <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">3. System Usage</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">3. Data Protection & Confidentiality</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                This system processes sensitive business and personal data. You are required to handle all information in accordance with Data Protection Laws and the organization’s Data Classification Guidelines (ISO/IEC 27001 Annex A.8). Disclosure of confidential information to unauthorized parties is a violation of company policy.
+                            </p>
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div class="space-y-3">
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">4. Operational Security & Audit Logging</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                All user activities within the system are logged and monitored for security and auditing purposes (ISO/IEC 27001 Annex A.12.4). The organization reserves the right to review these logs to ensure compliance with security policies and to investigate incidents.
+                            </p>
+                        </div>
+
+                        <!-- Section 5 -->
+                        <div class="space-y-3">
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">5. Prohibited Actions</h4>
                             <div class="space-y-2 text-sm text-gray-700">
-                                <p>The Microfinancial Logistics I System provides the following modules:</p>
+                                <p>Users must not:</p>
+                                <ul class="list-disc list-inside space-y-1 ml-4">
+                                    <li>Attempt to bypass security controls or access data beyond their authorized level.</li>
+                                    <li>Install unauthorized software or use the system for personal gain.</li>
+                                    <li>Introduce malicious software (viruses, ransomware, etc.) into the network.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Section 6 -->
+                        <div class="space-y-3">
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">6. Incident Reporting</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                Any security incident, including lost passwords, data breaches, or system anomalies, must be reported immediately to the IT Security Team or System Administrator (ISO/IEC 27001 Annex A.16). Failure to report incidents may result in disciplinary action.
+                            </p>
+                        </div>
+
+                        <!-- Section 7 -->
+                        <div class="space-y-3">
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">7. Access Revocation</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                The organization reserves the right to revoke or suspend user access at any time without prior notice if a violation of these terms is detected or upon termination of employment.
+                            </p>
+                        </div>
+
+                        <!-- Section 8 -->
+                        <div class="space-y-3">
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">8. Authorized Modules & Access Rights</h4>
+                            <div class="space-y-2 text-sm text-gray-700">
+                                <p>Access is granted only to modules required for your role:</p>
                                 <ul class="list-disc list-inside space-y-1 ml-4">
                                     <li>Procurement & Sourcing Management (PSM)</li>
                                     <li>Smart Warehousing System (SWS)</li>
@@ -284,81 +323,46 @@
                                     <li>Asset Lifecycle & Maintenance (ALMS)</li>
                                     <li>Document Tracking & Logistics Record (DTLR)</li>
                                 </ul>
-                                <p>You agree to use these modules in accordance with their intended purposes and company policies.</p>
+                                <p>Attempting to access restricted modules constitutes a security violation.</p>
                             </div>
-                        </div>
-
-                        <!-- Section 4 -->
-                        <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">4. Data Privacy and Security</h4>
-                            <p class="text-gray-700 text-sm leading-relaxed">
-                                We are committed to protecting your privacy and the security of your data. All personal and business information is stored securely and accessed only by authorized personnel. By using this system, you consent to the collection and processing of your data as described in our Privacy Policy.
-                            </p>
-                        </div>
-
-                        <!-- Section 5 -->
-                        <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">5. Prohibited Activities</h4>
-                            <div class="space-y-2 text-sm text-gray-700">
-                                <p>You agree not to:</p>
-                                <ul class="list-disc list-inside space-y-1 ml-4">
-                                    <li>Attempt to gain unauthorized access to any part of the system</li>
-                                    <li>Interfere with or disrupt the system's functionality</li>
-                                    <li>Share your login credentials with others</li>
-                                    <li>Use the system for any illegal or unauthorized purpose</li>
-                                    <li>Upload or transmit malicious code or viruses</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- Section 6 -->
-                        <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">6. System Availability</h4>
-                            <p class="text-gray-700 text-sm leading-relaxed">
-                                We strive to maintain 24/7 system availability but do not guarantee uninterrupted access. Scheduled maintenance may occur periodically, and we reserve the right to modify or discontinue any system feature with reasonable notice.
-                            </p>
-                        </div>
-
-                        <!-- Section 7 -->
-                        <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">7. Intellectual Property</h4>
-                            <p class="text-gray-700 text-sm leading-relaxed">
-                                All content, features, and functionality of the Microfinancial Logistics I System are the exclusive property of the company and are protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without explicit permission.
-                            </p>
-                        </div>
-
-                        <!-- Section 8 -->
-                        <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">8. Termination</h4>
-                            <p class="text-gray-700 text-sm leading-relaxed">
-                                We reserve the right to suspend or terminate your access to the system at our discretion, without prior notice, for violations of these terms or for any other reason we deem appropriate.
-                            </p>
                         </div>
 
                         <!-- Section 9 -->
                         <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">9. Limitation of Liability</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">9. Compliance & Disciplinary Action</h4>
                             <p class="text-gray-700 text-sm leading-relaxed">
-                                To the fullest extent permitted by law, the company shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use or inability to use the system.
+                                Non-compliance with these Terms & Conditions constitutes a breach of company policy and may lead to disciplinary actions, up to and including termination of employment and legal action.
                             </p>
                         </div>
 
                         <!-- Section 10 -->
                         <div class="space-y-3">
-                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">10. Changes to Terms</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">10. Amendments</h4>
                             <p class="text-gray-700 text-sm leading-relaxed">
-                                We may update these Terms and Conditions from time to time. Continued use of the system after such changes constitutes your acceptance of the new terms. We will notify users of significant changes through system notifications or email.
+                                These terms may be updated periodically to reflect changes in security standards (e.g., ISO 27001 revisions) or company policies. Users will be notified of significant changes upon login.
                             </p>
                         </div>
 
-                        <!-- Contact Information -->
-                        <div class="bg-gray-50 rounded-lg p-4 mt-6">
-                            <h5 class="font-semibold text-gray-800 mb-2">Contact Information</h5>
-                            <p class="text-sm text-gray-600">
-                                For questions about these Terms and Conditions, please contact the system administrator at 
-                                <a href="mailto:logistic1.microfinancial@gmail.com" class="text-brand-primary hover:underline">logistic1.microfinancial@gmail.com</a> 
-                                or your department supervisor.
+                        <!-- Section 11 -->
+                        <div class="space-y-3">
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">11. Governing Law</h4>
+                            <p class="text-gray-700 text-sm leading-relaxed">
+                                These terms are governed by the laws applicable to the organization’s jurisdiction and internal regulations.
                             </p>
+                        </div>
+
+                        <!-- Section 12 -->
+                        <div class="space-y-3">
+                            <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">12. Contact Information</h4>
+                            <div class="bg-gray-50 rounded-lg p-4 mt-2">
+                                <p class="text-sm text-gray-600 mb-2">
+                                    For security concerns or clarifications regarding these terms, please contact:
+                                </p>
+                                <div class="flex items-center text-sm text-brand-primary font-medium">
+                                    <i class='bx bxs-envelope mr-2'></i>
+                                    <a href="mailto:logistic1.microfinancial@gmail.com" class="hover:underline">logistic1.microfinancial@gmail.com</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

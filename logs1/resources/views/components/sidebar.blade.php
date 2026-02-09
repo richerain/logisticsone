@@ -88,14 +88,14 @@
         <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
           <i class='bx bxs-cart text-xl'></i>
         </span>
-        <span class="leading-tight">Procurement & Sourcing</span>
+        <span class="leading-tight">Procurement & Sourcing Management</span>
       </span>
       <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
     </button>
     <div class="submenu hidden mt-1">
       <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
         <a href="#" data-module="psm-purchase" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-purchase-tag'></i> Purchase Mgmt
+          <i class='bx bxs-purchase-tag'></i> Purchase Management
         </a>
         @if(in_array($role, ['superadmin', 'admin', 'manager']))
         <a href="#" data-module="psm-budgeting" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
@@ -114,7 +114,7 @@
         <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
           <i class='bx bxs-store text-xl'></i>
         </span>
-        <span class="leading-tight">Smart Warehousing</span>
+        <span class="leading-tight">Smart Warehousing System</span>
       </span>
       <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
     </button>
@@ -127,7 +127,7 @@
           <i class='bx bxs-archive-in'></i> Digital Inventory
         </a>
         <a href="#" data-module="sws-warehouse-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bx-store'></i> Warehouse Mgmt
+          <i class='bx bx-store'></i> Warehouse Management
         </a>
       </div>
     </div>
@@ -138,7 +138,7 @@
         <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
           <i class='bx bxs-truck text-xl'></i>
         </span>
-        <span class="leading-tight">Project Logistics</span>
+        <span class="leading-tight">Project Logistics Tracker</span>
       </span>
       <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
     </button>
@@ -150,34 +150,34 @@
       </div>
     </div>
 
-    <!-- Asset Lifecycle & Maintenance -->
+    <!-- Asset Lifecycle & Maintenance System -->
     <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
       <span class="flex items-center gap-3 text-left">
         <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
           <i class='bx bxs-hard-hat text-xl'></i>
         </span>
-        <span class="leading-tight">Asset Lifecycle</span>
+        <span class="leading-tight">Asset Lifecycle & Maintenance System</span>
       </span>
       <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
     </button>
     <div class="submenu hidden mt-1">
       <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
         <a href="#" data-module="alms-asset-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-archive'></i> Asset Mgmt
+          <i class='bx bxs-archive'></i> Asset Management
         </a>
         <a href="#" data-module="alms-maintenance-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-wrench'></i> Maintenance Mgmt
+          <i class='bx bxs-wrench'></i> Maintenance Management
         </a>
       </div>
     </div>
 
-    <!-- Document Tracking -->
+    <!-- Document Tracking & Logistics Records -->
     <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
       <span class="flex items-center gap-3 text-left">
         <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
           <i class='bx bxs-map text-xl'></i>
         </span>
-        <span class="leading-tight">Document Tracking</span>
+        <span class="leading-tight">Document Tracking & Logistics Records</span>
       </span>
       <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
     </button>
@@ -209,7 +209,7 @@
     <div class="submenu hidden mt-1">
       <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
         <a href="#" data-module="um-account-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-user-detail'></i> Account Mgmt
+          <i class='bx bxs-user-detail'></i> Account Management
         </a>
         <a href="#" data-module="um-audit-trail" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bx-history'></i> Audit Trail
