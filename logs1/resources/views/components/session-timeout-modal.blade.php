@@ -1,5 +1,20 @@
+@php
+    $isVendor = Auth::guard('vendor')->check();
+    $logoutUrl = $isVendor ? route('vendor.splash.logout') : route('splash.logout');
+    // Get session lifetime from config (in minutes) and convert to milliseconds
+    // Default to 3 minutes if not set
+    $sessionLifetimeMinutes = config('session.lifetime', 3);
+    $sessionLifetimeMs = $sessionLifetimeMinutes * 60 * 1000;
+    // Warn 1 minute before expiration, or 30 seconds if lifetime is very short
+    $warningTimeMs = ($sessionLifetimeMinutes <= 1) ? 30000 : 60000; 
+@endphp
+
 <!-- Session Timeout Modal -->
-<div id="session-timeout-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4">
+<div id="session-timeout-modal" 
+     class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
+     data-logout-url="{{ $logoutUrl }}"
+     data-session-lifetime="{{ $sessionLifetimeMs }}"
+     data-warning-time="{{ $warningTimeMs }}">
     <div class="bg-white rounded-lg p-6 w-80 mx-4">
         <div class="flex items-center mb-4">
             <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
@@ -13,7 +28,7 @@
         <div class="mb-4">
             <div class="flex items-center text-sm text-gray-600 mb-2">
                 <i class='bx bx-info-circle mr-2 p-1 text-blue-500'></i>
-                <span>Your session is about to expire due to inactivity. You will be logged out automatically.</span>
+                <span>Your session is about to expire. You will be logged out automatically.</span>
             </div>
             <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
                 <p class="text-xs text-yellow-800 text-center">
@@ -24,8 +39,9 @@
         </div>
         
         <div class="flex justify-end space-x-3">
-            <button id="extend-session-btn" class="btn btn-primary border-none text-white bg-green-600 hover:bg-green-700">
-                <i class='bx bx-time mr-1'></i>Stay Logged In
+            <!-- Extend button removed as per requirement -->
+            <button onclick="window.location.href='{{ $logoutUrl }}'" class="btn btn-sm btn-error text-white">
+                Logout Now
             </button>
         </div>
     </div>
@@ -36,18 +52,16 @@ class SessionTimeoutHandler {
     constructor() {
         this.timeoutModal = document.getElementById('session-timeout-modal');
         this.countdownTimer = document.getElementById('countdown-timer');
-        this.extendSessionBtn = document.getElementById('extend-session-btn');
-        this.modalContent = this.timeoutModal?.querySelector('.bg-white');
         
-        this.sessionLifetime = 40 * 60 * 1000; // 5 minutes in milliseconds
-        this.warningTime = 60000; // Show warning 1 minute before expiry
-        this.countdownTime = 60000; // 1 minute countdown
+        // Get configuration from data attributes
+        this.logoutUrl = this.timeoutModal?.dataset.logoutUrl || '/splash-logout';
+        this.sessionLifetime = parseInt(this.timeoutModal?.dataset.sessionLifetime || (3 * 60 * 1000)); 
+        this.warningTime = parseInt(this.timeoutModal?.dataset.warningTime || 60000);
+        
+        this.countdownTime = this.warningTime; // Countdown matches the warning duration
         this.countdownInterval = null;
         this.warningTimeout = null;
         this.isModalActive = false;
-        this.isExtendingSession = false;
-        this.extensionAttempts = 0;
-        this.maxExtensionAttempts = 5;
         this.lastActivity = Date.now();
         
         this.init();
@@ -57,6 +71,7 @@ class SessionTimeoutHandler {
         this.resetTimers();
         this.setupEventListeners();
         this.startTimeoutTimer();
+        console.log(`Session Timeout Initialized: Lifetime=${this.sessionLifetime/1000}s, Warning=${this.warningTime/1000}s`);
     }
     
     setupEventListeners() {
@@ -67,39 +82,34 @@ class SessionTimeoutHandler {
         
         activityEvents.forEach(event => {
             document.addEventListener(event, (e) => {
-                // Don't reset timers if the event is within the modal
-                if (!this.isEventInModal(e)) {
-                    this.lastActivity = Date.now();
-                    this.resetTimers();
-                }
+                // Don't reset timers if the event is within the modal (though extend logic is gone, we still might want to pause/reset if they interact elsewhere? 
+                // Actually, if extend logic is gone, activity shouldn't extend the session implicitly if we are strictly following "3 mins only". 
+                // BUT usually "session timeout" means "inactivity timeout". 
+                // If the user is active, the PHP session keeps getting extended on requests.
+                // The JS timer mimics this. If the user moves mouse, we reset the local timer.
+                // If we don't reset, they will be logged out even if working.
+                // So yes, we must reset on activity.
+                
+                this.lastActivity = Date.now();
+                this.resetTimers();
+                
             }, { passive: true });
         });
-        
-        // Extend session button
-        this.extendSessionBtn.addEventListener('click', () => this.extendSession());
         
         // Visibility change (tab switch)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                this.checkSessionStatus();
+                // If coming back to tab, verify if we should have timed out
+                const now = Date.now();
+                if (now - this.lastActivity > this.sessionLifetime) {
+                    this.logoutDueToTimeout();
+                } else {
+                    this.resetTimers(); // Adjust/restart timer based on remaining time? 
+                    // Actually resetTimers just restarts the full duration. 
+                    // For precision we might want to calculate remaining, but resetting to full 3 mins on activity is standard "idle timeout" behavior.
+                }
             }
         });
-        
-        // Prevent modal from closing when clicking inside modal content
-        if (this.modalContent) {
-            this.modalContent.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
-    }
-    
-    isEventInModal(event) {
-        if (!this.timeoutModal || this.timeoutModal.classList.contains('hidden')) {
-            return false;
-        }
-        
-        // Check if the event target is within the modal
-        return this.timeoutModal.contains(event.target);
     }
     
     startTimeoutTimer() {
@@ -107,16 +117,20 @@ class SessionTimeoutHandler {
             clearTimeout(this.warningTimeout);
         }
         
+        // Schedule the warning modal
+        const timeUntilWarning = Math.max(0, this.sessionLifetime - this.warningTime);
+        
         this.warningTimeout = setTimeout(() => {
             this.showWarningModal();
-        }, this.sessionLifetime - this.warningTime);
+        }, timeUntilWarning);
     }
     
     showWarningModal() {
+        if (!this.timeoutModal) return;
+        
         this.timeoutModal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         this.isModalActive = true;
-        this.extensionAttempts = 0; // Reset attempts for new warning
         
         // Disable sidebar interactions
         this.disableSidebar();
@@ -142,12 +156,8 @@ class SessionTimeoutHandler {
             
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            this.countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            // Enable extension button even at low time
-            if (timeLeft <= 5) {
-                this.extendSessionBtn.disabled = false;
-                this.extendSessionBtn.innerHTML = '<i class="bx bx-time mr-1"></i>Stay Logged In';
+            if (this.countdownTimer) {
+                this.countdownTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
             
             if (timeLeft <= 0) {
@@ -156,179 +166,9 @@ class SessionTimeoutHandler {
         }, 100);
     }
     
-    async extendSession() {
-        if (this.isExtendingSession) {
-            return;
-        }
-        
-        this.extensionAttempts++;
-        
-        if (this.extensionAttempts > this.maxExtensionAttempts) {
-            this.showTemporaryMessage('Too many extension attempts. Please login again.', 'error');
-            setTimeout(() => {
-                window.location.href = '/splash-logout';
-            }, 2000);
-            return;
-        }
-        
-        this.isExtendingSession = true;
-        this.extendSessionBtn.disabled = true;
-        this.extendSessionBtn.innerHTML = '<i class="bx bx-loader bx-spin mr-1"></i>Extending...';
-        
-        try {
-            // First, check if session is still valid
-            const sessionCheck = await this.checkSessionStatus();
-            if (!sessionCheck.authenticated) {
-                throw new Error('Session no longer valid');
-            }
-            
-            const csrfToken = this.getCsrfToken();
-            
-            const response = await fetch('/api/refresh-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                credentials: 'same-origin'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Successful extension of session');
-                this.handleSuccessfulExtension(data);
-                return;
-            }
-            
-            // Handle CSRF token mismatch
-            if (response.status === 419) {
-                await this.refreshCsrfToken();
-                const newCsrfToken = this.getCsrfToken();
-                
-                const retryResponse = await fetch('/api/refresh-session', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': newCsrfToken
-                    },
-                    credentials: 'same-origin'
-                });
-                
-                if (retryResponse.ok) {
-                    const retryData = await retryResponse.json();
-                    console.log('Successful extension of session');
-                    this.handleSuccessfulExtension(retryData);
-                    return;
-                } else {
-                    throw new Error('Failed to extend session after CSRF refresh');
-                }
-            }
-            
-            // Handle other errors
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-            
-        } catch (error) {
-            if (error.message.includes('expired') || error.message.includes('419') || error.message.includes('401') || error.message.includes('not valid')) {
-                this.showTemporaryMessage('Session has expired. Please login again.', 'error');
-                setTimeout(() => {
-                    window.location.href = '/splash-logout';
-                }, 2000);
-            } else {
-                this.showTemporaryMessage('Failed to extend session. Please try again.', 'error');
-                this.resetExtendButton();
-            }
-        } finally {
-            this.isExtendingSession = false;
-        }
-    }
-    
-    async checkSessionStatus() {
-        try {
-            const response = await fetch('/api/v1/auth/check-session', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': this.getCsrfToken()
-                },
-                credentials: 'same-origin'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.csrf_token) {
-                    this.updateCsrfToken(data.csrf_token);
-                }
-                return data;
-            } else {
-                return { authenticated: false };
-            }
-        } catch (error) {
-            return { authenticated: false };
-        }
-    }
-    
-    handleSuccessfulExtension(data) {
-        // Update CSRF token if provided
-        if (data.csrf_token) {
-            this.updateCsrfToken(data.csrf_token);
-        }
-        
-        this.hideWarningModal();
-        this.resetTimers();
-        this.showTemporaryMessage('Session extended successfully!', 'success');
-        this.resetExtendButton();
-        this.extensionAttempts = 0; // Reset attempts after successful extension
-        this.lastActivity = Date.now(); // Update last activity
-    }
-    
-    resetExtendButton() {
-        this.extendSessionBtn.disabled = false;
-        this.extendSessionBtn.innerHTML = '<i class="bx bx-time mr-1"></i>Stay Logged In';
-    }
-    
-    async refreshCsrfToken() {
-        try {
-            const response = await fetch('/api/v1/auth/csrf-token', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.csrf_token) {
-                    this.updateCsrfToken(data.csrf_token);
-                }
-            }
-        } catch (error) {
-            // Silent fail
-        }
-    }
-    
-    getCsrfToken() {
-        const metaTag = document.querySelector('meta[name="csrf-token"]');
-        return metaTag ? metaTag.getAttribute('content') : '';
-    }
-    
-    updateCsrfToken(newToken) {
-        const metaTag = document.querySelector('meta[name="csrf-token"]');
-        if (metaTag) {
-            metaTag.setAttribute('content', newToken);
-        }
-        
-        // Also update any hidden CSRF input fields
-        const csrfInputs = document.querySelectorAll('input[name="_token"]');
-        csrfInputs.forEach(input => {
-            input.value = newToken;
-        });
-    }
-    
     hideWarningModal() {
+        if (!this.timeoutModal) return;
+        
         this.timeoutModal.classList.add('hidden');
         document.body.style.overflow = '';
         this.isModalActive = false;
@@ -342,7 +182,44 @@ class SessionTimeoutHandler {
     
     resetTimers() {
         if (this.isModalActive) {
-            return; // Don't reset timers if modal is active
+            return; // Don't reset timers if modal is active (user must logout or wait)
+            // Since extend logic is removed, once the modal shows, it's the end of the line unless they refresh the page manually?
+            // If they move the mouse while modal is open, should it disappear?
+            // "remove the logics of the session timeout extend sessions"
+            // If I just hide the modal on activity, that IS extending the session.
+            // So if modal is active, we IGNORE activity. They must logout or let it timeout.
+            // Wait, standard behavior: if I move mouse, I am active.
+            // But the user specifically wanted to REMOVE extend session logic.
+            // Usually that means removing the "button" to extend.
+            // If I let mouse movement dismiss the modal, that's effectively auto-extending.
+            // If the modal is up, it means they were idle for (Lifetime - WarningTime).
+            // If they come back now, usually they click "Stay Logged In".
+            // If I remove that button, they HAVE to logout?
+            // Or does "remove extend session" mean "no manual extension, but activity still prevents it"?
+            // If activity prevents it, then once the modal is up (meaning they were idle), how do they recover?
+            // If they can't recover, then the modal is just a death sentence countdown.
+            // That seems harsh.
+            // "remove the logics of the session timeout extend sessions" likely refers to the "Extend Session" button/API call.
+            // If the user wakes up during the countdown, can they save their session?
+            // Without an extend button, they can't.
+            // Unless I make any activity dismiss the modal?
+            // BUT, the user said "remove the logics... extend sessions".
+            // This might mean: STRICT timeout. 3 minutes and you are out, regardless of activity?
+            // "make sure that the current session-timeout set into 3mins only"
+            // Usually "session timeout" implies idle timeout.
+            // But "remove extend sessions" might mean "absolute timeout"?
+            // Let's look at the phrasing: "remove the logics of the session timeout extend sessions".
+            // The original code had a button "Extend Session" which called `/api/refresh-session`.
+            // Removing that logic means no more API calls to refresh.
+            // So, once the modal appears, can they continue?
+            // If I don't provide a way to continue, then yes, they are forced to logout.
+            // Is that what they want?
+            // "if the employee... when session timeout they will automatically logout"
+            // It sounds like they want a strict auto-logout.
+            // I will implement it such that once the modal appears, it counts down to logout. No escape.
+            // BUT, if they are active *before* the modal appears, the timer resets (standard idle timer).
+            // So: Idle for 2 mins -> Warning Modal (1 min countdown) -> Logout.
+            // During the 1 min countdown, there is no button to stop it. This matches "remove extend logic".
         }
         
         if (this.warningTimeout) {
@@ -359,53 +236,29 @@ class SessionTimeoutHandler {
     async logoutDueToTimeout() {
         if (this.warningTimeout) clearTimeout(this.warningTimeout);
         if (this.countdownInterval) clearInterval(this.countdownInterval);
-        this.showTemporaryMessage('Session expired. Logging out...', 'warning');
+        
+        // Call API logout to clear server session
         try {
             await fetch('/api/logout', {
                 method: 'POST',
-                headers: { 'Accept': 'application/json' },
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                },
                 credentials: 'same-origin'
             });
-        } catch (e) {}
-        try { localStorage.removeItem('jwt'); localStorage.removeItem('jwt_exp'); } catch (e) {}
-        setTimeout(() => { window.location.href = '/splash-logout'; }, 500);
-    }
-    
-    showTemporaryMessage(message, type = 'info') {
-        // Remove any existing temporary message
-        const existingMessage = document.getElementById('temp-session-message');
-        if (existingMessage) {
-            existingMessage.remove();
+        } catch (e) {
+            console.error('Logout failed', e);
         }
         
-        const messageDiv = document.createElement('div');
-        messageDiv.id = 'temp-session-message';
-        messageDiv.className = `fixed top-4 right-4 z-[10000] p-4 rounded-lg shadow-lg ${
-            type === 'success' ? 'bg-green-500 text-white' :
-            type === 'error' ? 'bg-red-500 text-white' :
-            type === 'warning' ? 'bg-yellow-500 text-white' :
-            'bg-blue-500 text-white'
-        }`;
-        messageDiv.innerHTML = `
-            <div class="flex items-center">
-                <i class='bx ${
-                    type === 'success' ? 'bxs-check-circle' :
-                    type === 'error' ? 'bxs-error-circle' :
-                    type === 'warning' ? 'bxs-time' :
-                    'bxs-info-circle'
-                } mr-2'></i>
-                <span>${message}</span>
-            </div>
-        `;
+        // Clear local storage
+        try { 
+            localStorage.removeItem('jwt'); 
+            localStorage.removeItem('jwt_exp'); 
+        } catch (e) {}
         
-        document.body.appendChild(messageDiv);
-        
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.remove();
-            }
-        }, 3000);
+        // Redirect
+        window.location.href = this.logoutUrl;
     }
     
     disableSidebar() {
