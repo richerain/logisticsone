@@ -37,7 +37,7 @@
         
         <!-- Button -->
         <div class="flex justify-center">
-            <button onclick="window.location.href='{{ $logoutUrl }}'" 
+            <button id="session-timeout-ok-btn" 
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition duration-200 shadow-lg hover:shadow-red-500/30 flex items-center justify-center gap-2 group">
                 <span>Ok</span>
                 <i class='bx bx-right-arrow-alt group-hover:translate-x-1 transition-transform'></i>
@@ -199,7 +199,7 @@ class SessionTimeoutHandler {
         
         // Call API logout to clear server session
         try {
-            await fetch('/api/logout', {
+            await fetch('/api/v1/auth/logout', {
                 method: 'POST',
                 headers: { 
                     'Accept': 'application/json',
