@@ -190,6 +190,8 @@
         <form id="addItemForm">
             <input type="hidden" id="psm_purchase_id" name="psm_purchase_id">
             <input type="hidden" id="psm_item_index" name="psm_item_index">
+            <input type="hidden" id="psm_prod_id" name="psm_prod_id">
+            <input type="hidden" id="psm_purcprod_id" name="psm_purcprod_id">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
@@ -1589,6 +1591,8 @@ function onPurchaseItemSelected(e) {
     // Clear fields initially
     document.getElementById('psm_purchase_id').value = '';
     document.getElementById('psm_item_index').value = '';
+    document.getElementById('psm_prod_id').value = '';
+    document.getElementById('psm_purcprod_id').value = '';
     
     if (index === '') return;
     
@@ -1598,6 +1602,14 @@ function onPurchaseItemSelected(e) {
     console.log('Selected item for autofill:', item);
 
     // Populate Form Fields
+    
+    // Set PSM tracking IDs
+    if (item.purcprod_prod_id) {
+        document.getElementById('psm_prod_id').value = item.purcprod_prod_id;
+    }
+    if (item.purcprod_id) {
+        document.getElementById('psm_purcprod_id').value = item.purcprod_id;
+    }
     
     // SKU - Use Prod ID
     if (item.purcprod_prod_id) {
@@ -1909,6 +1921,8 @@ async function saveItem(e) {
         item_name: itemName,
         psm_purchase_id: document.getElementById('psm_purchase_id').value || null,
         psm_item_index: document.getElementById('psm_item_index').value ? parseInt(document.getElementById('psm_item_index').value) : null,
+        psm_prod_id: document.getElementById('psm_prod_id').value || null,
+        psm_purcprod_id: document.getElementById('psm_purcprod_id').value || null,
         item_description: document.getElementById('item_description').value.trim() || null,
         item_stock_keeping_unit: document.getElementById('item_stock_keeping_unit').value.trim() || null,
         item_category_id: categoryVal || null,

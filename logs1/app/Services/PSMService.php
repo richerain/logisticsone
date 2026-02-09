@@ -13,6 +13,7 @@ use App\Models\VendorAccount;
 use App\Repositories\PSMRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PSMService
@@ -33,6 +34,26 @@ class PSMService
             return $this->psmRepository->getPurchaseProducts();
         } catch (Exception $e) {
             throw new Exception('Error fetching purchase products: ' . $e->getMessage());
+        }
+    }
+
+    public function markProductsAsReceivedByProdId($prodId)
+    {
+        try {
+            return $this->psmRepository->markProductsAsReceivedByProdId($prodId);
+        } catch (Exception $e) {
+            Log::error('Error marking products as received by prod ID: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function markProductAsReceivedById($id)
+    {
+        try {
+            return $this->psmRepository->markProductAsReceivedById($id);
+        } catch (Exception $e) {
+            Log::error('Error marking product as received by ID: ' . $e->getMessage());
+            return false;
         }
     }
 

@@ -17,8 +17,21 @@ class PSMRepository
      */
     public function getPurchaseProducts($filters = [])
     {
-        $query = PurchaseProduct::orderBy('created_at', 'desc');
+        $query = PurchaseProduct::where('purcprod_status', '!=', 'Received')
+            ->orderBy('created_at', 'desc');
         return $query->get();
+    }
+
+    public function markProductsAsReceivedByProdId($prodId)
+    {
+        return PurchaseProduct::where('purcprod_prod_id', $prodId)
+            ->update(['purcprod_status' => 'Received']);
+    }
+
+    public function markProductAsReceivedById($id)
+    {
+        return PurchaseProduct::where('purcprod_id', $id)
+            ->update(['purcprod_status' => 'Received']);
     }
 
     /**

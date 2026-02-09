@@ -81,10 +81,14 @@ class SWSService
             // Extract PSM fields if present
             $psmPurchaseId = $data['psm_purchase_id'] ?? null;
             $psmItemIndex = $data['psm_item_index'] ?? null;
+            $psmProdId = $data['psm_prod_id'] ?? null;
+            $psmPurcprodId = $data['psm_purcprod_id'] ?? null;
             
             // Remove them from data before sending to repo
             unset($data['psm_purchase_id']);
             unset($data['psm_item_index']);
+            unset($data['psm_prod_id']);
+            unset($data['psm_purcprod_id']);
 
             if ($existingItem) {
                 // Update existing item
@@ -101,10 +105,11 @@ class SWSService
                 $message = 'Item created successfully';
             }
 
-            // Update PSM if needed
-            if ($psmPurchaseId && $psmItemIndex !== null) {
-                // Resolve PSMService dynamically to avoid circular dependency
-                app(PSMService::class)->markItemAsInventory($psmPurchaseId, $psmItemIndex);
+            // Mark PurchaseProduct as Received if applicable
+            if ($psmProdId) {
+                app(PSMService::class)->markProductsAsReceivedByProdId($psmProdId);
+            } elseif ($psmPurcprodId) {
+                app(PSMService::class)->markProductAsReceivedById($psmPurcprodId);
             }
 
             DB::connection('sws')->commit();
