@@ -728,6 +728,12 @@ function openUpdateStatus(id, current) {
 if (elements.confirmUpdateStatusBtn) {
     elements.confirmUpdateStatusBtn.addEventListener('click', async function() {
         if (!selectedQuoteId) return;
+        
+        // Show loading state on button
+        const originalBtnText = elements.confirmUpdateStatusBtn.innerHTML;
+        elements.confirmUpdateStatusBtn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Updating...';
+        elements.confirmUpdateStatusBtn.disabled = true;
+
         try {
             const response = await fetch(`${PSM_QUOTES_API}/${selectedQuoteId}`, {
                 method: 'PUT',
@@ -741,29 +747,69 @@ if (elements.confirmUpdateStatusBtn) {
                 credentials: 'include',
                 body: JSON.stringify({ quo_status: elements.statusSelect.value })
             });
-            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            const result = await response.json();
-            if (result.success) {
-                // Update UI immediately for better UX
-                selectedQuoteId = null;
-                elements.updateStatusModal?.close();
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
+            const result = await response.json();
+            
+            if (result.success) {
+                // Close modal forcefully
+                const modal = document.getElementById('updateStatusModal');
+                if (modal) modal.close();
+                selectedQuoteId = null;
+
+                // Show success message
                 if (elements.statusSelect.value === 'Completed') {
-                    if (typeof Toast !== 'undefined') {
-                        Toast.fire({
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Purchase order complete',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                } else {
+                    if (typeof showNotification === 'function') {
+                        showNotification('Quote status updated', 'success');
+                    } else {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
                             icon: 'success',
-                            title: 'purchase order complete'
+                            title: 'Quote status updated',
+                            showConfirmButton: false,
+                            timer: 3000
                         });
                     }
-                } else {
-                    if (typeof showNotification === 'function') showNotification('Quote status updated', 'success');
                 }
 
-                // Reload data in background
+                // Reload data
                 await loadQuotes();
                 await loadNotifications(); 
+            } else {
+                throw new Error(result.message || 'Update failed');
             }
-        } catch(e) { if (typeof showNotification === 'function') showNotification('Error updating status: ' + (e && e.message ? e.message : 'Unknown error'), 'error'); }
+        } catch(e) { 
+            console.error('Update status error:', e);
+            if (typeof showNotification === 'function') {
+                showNotification('Error updating status: ' + (e && e.message ? e.message : 'Unknown error'), 'error'); 
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error updating status: ' + (e && e.message ? e.message : 'Unknown error')
+                });
+            }
+        } finally {
+            // Restore button state
+            if (elements.confirmUpdateStatusBtn) {
+                elements.confirmUpdateStatusBtn.innerHTML = originalBtnText;
+                elements.confirmUpdateStatusBtn.disabled = false;
+            }
+        }
     });
 }
 
