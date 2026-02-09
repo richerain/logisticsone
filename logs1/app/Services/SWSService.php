@@ -10,12 +10,10 @@ use App\Services\PSMService;
 class SWSService
 {
     protected $swsRepository;
-    protected $psmService;
 
-    public function __construct(SWSRepository $swsRepository, PSMService $psmService)
+    public function __construct(SWSRepository $swsRepository)
     {
         $this->swsRepository = $swsRepository;
-        $this->psmService = $psmService;
     }
 
     public function getAllItems()
@@ -105,7 +103,8 @@ class SWSService
 
             // Update PSM if needed
             if ($psmPurchaseId && $psmItemIndex !== null) {
-                $this->psmService->markItemAsInventory($psmPurchaseId, $psmItemIndex);
+                // Resolve PSMService dynamically to avoid circular dependency
+                app(PSMService::class)->markItemAsInventory($psmPurchaseId, $psmItemIndex);
             }
 
             DB::connection('sws')->commit();
