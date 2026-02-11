@@ -178,13 +178,13 @@
     </div>
 
     <!-- Pagination -->
-    <div id="requisitionPager" class="flex items-center justify-between mt-4">
-        <div id="requisitionPagerInfo" class="text-sm text-gray-600 font-medium"></div>
-        <div class="flex items-center gap-2">
-            <button id="prevBtn" class="px-4 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold">Prev</button>
-            <span id="pageDisplay" class="px-4 py-1.5 bg-gray-100 rounded-lg text-sm font-bold text-gray-700">1 / 1</span>
-            <button id="nextBtn" class="px-4 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold">Next</button>
-        </div>
+    <div id="purchasesPager" class="flex items-center justify-between mt-3"> 
+        <div id="purchasesPagerInfo" class="text-sm text-gray-600"></div> 
+        <div class="join"> 
+            <button class="btn btn-sm join-item" id="purchasesPrevBtn" data-action="prev">Prev</button> 
+            <span class="btn btn-sm join-item" id="purchasesPageDisplay">1 / 1</span> 
+            <button class="btn btn-sm join-item" id="purchasesNextBtn" data-action="next">Next</button> 
+        </div> 
     </div>
 </div>
 
@@ -346,8 +346,10 @@
     const searchInput = document.getElementById('searchInput');
     const statusFilter = document.getElementById('statusFilter');
     const deptFilter = document.getElementById('deptFilter');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('purchasesPrevBtn');
+    const nextBtn = document.getElementById('purchasesNextBtn');
+    const pageDisplay = document.getElementById('purchasesPageDisplay');
+    const pagerInfo = document.getElementById('purchasesPagerInfo');
     const addItemBtn = document.getElementById('addItemBtn');
     const itemsContainer = document.getElementById('itemsContainer');
     
@@ -467,7 +469,7 @@
             if (result.success) {
                 currentRequisitions = result.data;
                 renderRequisitions(result.data);
-                updatePagination(result.meta);
+                updatePager(result.meta);
                 updateStats(result.stats);
             }
         } catch (error) {
@@ -581,12 +583,14 @@
         }
     }
 
-    function updatePagination(meta) {
+    function updatePager(meta) {
         if (!meta) return;
         currentPage = meta.current_page;
         totalPages = meta.last_page;
-        document.getElementById('pageDisplay').textContent = `${currentPage} / ${totalPages}`;
-        document.getElementById('requisitionPagerInfo').textContent = `Showing ${(meta.current_page - 1) * meta.per_page + 1} to ${Math.min(meta.current_page * meta.per_page, meta.total)} of ${meta.total} results`;
+        
+        pageDisplay.textContent = `${currentPage} / ${totalPages}`;
+        pagerInfo.textContent = `Showing ${meta.from || 0} to ${meta.to || 0} of ${meta.total} requisitions`;
+        
         prevBtn.disabled = currentPage === 1;
         nextBtn.disabled = currentPage === totalPages;
     }
