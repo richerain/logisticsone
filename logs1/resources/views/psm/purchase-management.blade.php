@@ -90,10 +90,6 @@
                 <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Purchase Orders</h3>
             </div>
             <div class="flex gap-2">
-                <button id="approveRequisitionBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-emerald-100 active:scale-95">
-                    <i class='bx bx-check-shield text-lg'></i>
-                    Approve Purchase Requisition
-                </button>
                 <button id="addPurchaseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-blue-100 active:scale-95">
                     <i class='bx bx-plus-circle text-lg'></i>
                     New Purchase Order
@@ -286,25 +282,6 @@
     </div>
 </div>
 
-<!-- Budget Approval Modal -->
-<div id="budgetApprovalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-4xl">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Budget Approval</h3>
-            <button id="closeBudgetApprovalModal" class="text-gray-500 hover:text-gray-700">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        <div id="budgetApprovalContent" class="space-y-4 mb-4">
-            
-        </div>
-        <div class="flex justify-end gap-3">
-            <button type="button" id="rejectBudgetBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Reject</button>
-            <button type="button" id="approveBudgetBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Approve</button>
-        </div>
-    </div>
-</div>
-
 <!-- Cancel Purchase Modal -->
 <div id="cancelPurchaseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
@@ -328,6 +305,7 @@
 // API Configuration
 var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
 var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
+var PSM_REQUISITIONS_API = `${API_BASE_URL}/psm/requisitions`;
 var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -408,11 +386,6 @@ const elements = {
     itemSearch: document.getElementById('itemSearch'),
     availableItemsList: document.getElementById('availableItemsList'),
     purDesc: document.getElementById('pur_desc'),
-    budgetApprovalModal: document.getElementById('budgetApprovalModal'),
-    closeBudgetApprovalModal: document.getElementById('closeBudgetApprovalModal'),
-    budgetApprovalContent: document.getElementById('budgetApprovalContent'),
-    rejectBudgetBtn: document.getElementById('rejectBudgetBtn'),
-    approveBudgetBtn: document.getElementById('approveBudgetBtn'),
     cancelPurchaseModal: document.getElementById('cancelPurchaseModal'),
     closeCancelPurchaseModal: document.getElementById('closeCancelPurchaseModal'),
     cancelPurchaseContent: document.getElementById('cancelPurchaseContent'),
@@ -498,11 +471,6 @@ function initializeEventListeners() {
     if (elements.cancelAddItemModal) elements.cancelAddItemModal.addEventListener('click', closeAddItemModal);
     if (elements.itemSearch) elements.itemSearch.addEventListener('input', debounce(filterAvailableItems, 300));
     
-    // Budget approval modal
-    if (elements.closeBudgetApprovalModal) elements.closeBudgetApprovalModal.addEventListener('click', closeBudgetApprovalModal);
-    if (elements.rejectBudgetBtn) elements.rejectBudgetBtn.addEventListener('click', handleBudgetRejection);
-    if (elements.approveBudgetBtn) elements.approveBudgetBtn.addEventListener('click', handleBudgetApproval);
-    
     // Cancel purchase modal
     if (elements.closeCancelPurchaseModal) elements.closeCancelPurchaseModal.addEventListener('click', closeCancelPurchaseModal);
     if (elements.cancelCancelPurchaseBtn) elements.cancelCancelPurchaseBtn.addEventListener('click', closeCancelPurchaseModal);
@@ -521,14 +489,6 @@ function initializeEventListeners() {
         elements.addItemModal.addEventListener('click', function(e) {
             if (e.target === elements.addItemModal) {
                 closeAddItemModal();
-            }
-        });
-    }
-    
-    if (elements.budgetApprovalModal) {
-        elements.budgetApprovalModal.addEventListener('click', function(e) {
-            if (e.target === elements.budgetApprovalModal) {
-                closeBudgetApprovalModal();
             }
         });
     }
@@ -878,6 +838,7 @@ async function loadPurchases() {
     const params = new URLSearchParams();
     
     try {
+        // Fetch Purchase Orders
         const purchasesUrl = `${PSM_PURCHASES_API}`;
         params.append('t', new Date().getTime());
         console.log('📡 Fetching purchases from:', `${purchasesUrl}?${params}`);
@@ -893,7 +854,7 @@ async function loadPurchases() {
             credentials: 'include'
         });
         
-        console.log('📨 Response status:', response.status);
+        console.log('📨 Purchases response status:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -902,13 +863,63 @@ async function loadPurchases() {
         const result = await response.json();
         console.log('📊 Purchases response:', result);
         
+        let purchaseOrders = [];
         if (result.success) {
-            currentPurchases = result.data || [];
-            displayPurchases(currentPurchases);
-            loadStats();
+            purchaseOrders = result.data || [];
         } else {
             throw new Error(result.message || 'Failed to load purchases');
         }
+
+        // Fetch Approved Requisitions
+        let approvedRequisitions = [];
+        try {
+            const reqResponse = await fetch(`${PSM_REQUISITIONS_API}?status=Approved`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include'
+            });
+
+            if (reqResponse.ok) {
+                const reqResult = await reqResponse.json();
+                if (reqResult.success) {
+                    // Map requisitions to match purchase order structure for the table
+                    approvedRequisitions = (reqResult.data || []).map(req => ({
+                        id: `req_${req.id}`, // Prefix ID to avoid collision
+                        is_requisition: true,
+                        pur_id: req.req_id || `REQ-${req.id}`,
+                        pur_name_items: req.req_items || [],
+                        pur_company_name: req.req_department || 'N/A',
+                        pur_ven_type: 'Requisition',
+                        pur_unit: req.req_total_items || 0,
+                        pur_total_amount: req.req_estimated_cost || 0,
+                        pur_delivery_date: req.req_needed_date || req.created_at,
+                        pur_order_by: req.req_requested_by,
+                        pur_approved_by: req.req_approved_by,
+                        pur_status: 'Approved' // They are all approved
+                    }));
+                }
+            }
+        } catch (reqError) {
+            console.error('❌ Error loading approved requisitions:', reqError);
+        }
+
+        // Combine both
+        currentPurchases = [...purchaseOrders, ...approvedRequisitions];
+        
+        // Sort by date (descending)
+        currentPurchases.sort((a, b) => {
+            const dateA = new Date(a.pur_delivery_date || a.created_at || 0);
+            const dateB = new Date(b.pur_delivery_date || b.created_at || 0);
+            return dateB - dateA;
+        });
+
+        displayPurchases(currentPurchases);
+        loadStats();
         
     } catch (error) {
         console.error('❌ Error loading purchases:', error);
@@ -976,6 +987,7 @@ function displayPurchases(purchases) {
         const isInProgress = purchase.pur_status === 'In-Progress';
         const isCancelled = purchase.pur_status === 'Cancel';
         const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
+        const isRequisition = purchase.is_requisition === true;
         
         const orderedByHtml = formatUserLabelDisplay(purchase.pur_order_by, 'Not specified');
         const approvedSource = purchase.pur_status === 'Cancel'
@@ -983,15 +995,61 @@ function displayPurchases(purchases) {
             : (purchase.pur_approved_by || 'Not approved');
         const approvedByHtml = formatUserLabelDisplay(approvedSource, purchase.pur_status === 'Cancel' ? 'Unknown Approver' : 'Not approved');
         
-        const companyTypeHtml = `
+        const companyTypeHtml = isRequisition 
+            ? `
+            <div class="flex flex-col leading-tight">
+                <span class="text-sm font-semibold text-blue-900">${purchase.pur_company_name}</span>
+                <span class="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-md w-fit mt-1 uppercase font-bold">REQUISITION</span>
+            </div>
+            `
+            : `
             <div class="flex flex-col leading-tight">
                 <span class="text-sm font-semibold text-gray-900">${purchase.pur_company_name}</span>
                 <span class="text-xs text-gray-500 capitalize">${purchase.pur_ven_type}</span>
             </div>
         `;
         
+        const actionButtons = isRequisition 
+            ? `
+            <button onclick="viewRequisition('${purchase.id.replace('req_', '')}')" 
+                    class="text-blue-700 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                    title="View Requisition">
+                <i class='bx bx-file-find text-xl'></i>
+            </button>
+            <button onclick="convertRequisitionToPO('${purchase.id.replace('req_', '')}')" 
+                    class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50"
+                    title="Convert to Purchase Order">
+                <i class='bx bx-transfer-alt text-xl'></i>
+            </button>
+            `
+            : `
+            <button onclick="viewPurchase(${purchase.id})" 
+                    class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50"
+                    title="View Purchase">
+                <i class='bx bx-show-alt text-xl'></i>
+            </button>
+            ${isApproved || isCompleted || isCancelled || isInProgress ? '' : `
+            <button onclick="editPurchase(${purchase.id})" 
+                    class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                    title="Edit Purchase">
+                <i class='bx bx-edit-alt text-xl'></i>
+            </button>`}
+            
+            ${isCompleted ? '' : (canCancel ? `
+            <button onclick="cancelPurchase(${purchase.id})" 
+                    class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn"
+                    title="Cancel Purchase">
+                <i class='bx bx-x-circle text-xl'></i>
+            </button>` : '')}
+            <button onclick="deletePurchase(${purchase.id})" 
+                    class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50"
+                    title="Delete Purchase">
+                <i class='bx bx-trash text-xl'></i>
+            </button>
+            `;
+
         return `
-        <tr class="${rowClass}" data-purchase-id="${purchase.id}">
+        <tr class="${rowClass} ${isRequisition ? 'border-l-4 border-l-blue-500' : ''}" data-purchase-id="${purchase.id}">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                 ${purchase.pur_id}
             </td>
@@ -1027,35 +1085,7 @@ function displayPurchases(purchases) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex items-center space-x-2">
-                    <button onclick="viewPurchase(${purchase.id})" 
-                            class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50"
-                            title="View Purchase">
-                        <i class='bx bx-show-alt text-xl'></i>
-                    </button>
-                    ${canApprove ? `
-                    <button onclick="openBudgetApproval(${purchase.id})" 
-                            class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50"
-                            title="Budget Approval">
-                        <i class='bx bx-check-shield text-xl'></i>
-                    </button>` : ''}
-                    ${isApproved || isCompleted || isCancelled || isInProgress ? '' : `
-                    <button onclick="editPurchase(${purchase.id})" 
-                            class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
-                            title="Edit Purchase">
-                        <i class='bx bx-edit-alt text-xl'></i>
-                    </button>`}
-                    
-                    ${isCompleted ? '' : (canCancel ? `
-                    <button onclick="cancelPurchase(${purchase.id})" 
-                            class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn"
-                            title="Cancel Purchase">
-                        <i class='bx bx-x-circle text-xl'></i>
-                    </button>` : '')}
-                    <button onclick="deletePurchase(${purchase.id})" 
-                            class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50"
-                            title="Delete Purchase">
-                        <i class='bx bx-trash text-xl'></i>
-                    </button>
+                    ${actionButtons}
                 </div>
             </td>
         </tr>
@@ -1165,268 +1195,54 @@ function formatUserLabelDisplay(label, fallback) {
     `;
 }
 
-// Budget Approval Functions
-async function openBudgetApproval(purchaseId) {
-    const purchase = currentPurchases.find(p => p.id == purchaseId);
-    if (!purchase) return;
-    
-    // Store the purchase ID for the approval/rejection handlers
-    if (elements.budgetApprovalModal) {
-        elements.budgetApprovalModal.dataset.purchaseId = purchaseId;
-        elements.budgetApprovalModal.classList.remove('hidden');
-    }
-
-    // Reset and disable approve button initially while loading
-    if (elements.approveBudgetBtn) {
-        elements.approveBudgetBtn.disabled = true;
-        elements.approveBudgetBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-
-    if (elements.budgetApprovalContent) {
-        elements.budgetApprovalContent.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading budget details...</div>';
-    }
-
-    try {
-        const response = await fetch('/api/v1/psm/budget-management/current', {
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            }
-        });
-        
-        let budgetHtml = '';
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success && result.data) {
-                const budget = result.data;
-                const remaining = parseFloat(budget.bud_remaining_amount);
-                const purchaseAmount = parseFloat(purchase.pur_total_amount);
-                const newRemaining = remaining - purchaseAmount;
-                const isInsufficient = newRemaining < 0;
-                
-                // Update approve button state based on budget sufficiency
-                if (elements.approveBudgetBtn) {
-                    elements.approveBudgetBtn.disabled = isInsufficient;
-                    if (isInsufficient) {
-                        elements.approveBudgetBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                        elements.approveBudgetBtn.title = "Insufficient Budget - Cannot Approve";
-                    } else {
-                        elements.approveBudgetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        elements.approveBudgetBtn.title = "Approve Budget";
-                    }
-                }
-
-                const colorClass = isInsufficient ? 'red' : 'green';
-                
-                budgetHtml = `
-                    <div class="bg-${colorClass}-50 p-4 rounded-lg h-full border border-${colorClass}-200">
-                        <h4 class="font-semibold text-${colorClass}-800 mb-4 text-lg border-b border-${colorClass}-200 pb-2">
-                            Budget Calculation
-                        </h4>
-                        
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center">
-                                <span class="text-${colorClass}-700 font-medium">Remaining Budget</span>
-                                <span class="font-bold text-${colorClass}-900 text-lg">${formatCurrency(remaining)}</span>
-                            </div>
-                            
-                            <div class="flex justify-between items-center text-${colorClass}-600 pl-4 relative">
-                                <span class="absolute left-0 top-1/2 -translate-y-1/2 font-bold text-xl">-</span>
-                                <span class="ml-2">Item Total Amount</span>
-                                <span class="font-medium">${formatCurrency(purchaseAmount)}</span>
-                            </div>
-                            
-                            <div class="border-t-2 border-${colorClass}-300 pt-3 flex justify-between items-center">
-                                <span class="font-bold text-${colorClass}-800 text-lg">= Current Remaining Budget</span>
-                                <span class="font-bold text-${colorClass}-900 text-xl ${isInsufficient ? 'text-red-600' : ''}">${formatCurrency(newRemaining)}</span>
-                            </div>
-                        </div>
-                        
-                        ${isInsufficient ? `
-                            <div class="mt-6 p-3 bg-red-100 text-red-800 rounded-lg text-center font-bold flex items-center justify-center gap-2 border border-red-200">
-                                <i class='bx bx-error-circle text-xl'></i> 
-                                Insufficient Budget
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            } else {
-                budgetHtml = `<div class="bg-red-50 p-3 rounded-lg h-full text-red-800">Failed to load budget info</div>`;
-            }
-        } else {
-             budgetHtml = `<div class="bg-red-50 p-3 rounded-lg h-full text-red-800">Failed to load budget info</div>`;
-        }
-        
-        if (elements.budgetApprovalContent) {
-            elements.budgetApprovalContent.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm h-full">
-                        <h4 class="font-semibold text-gray-800 mb-4 text-lg border-b border-gray-100 pb-2">Purchase Details</h4>
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">PO Number:</span>
-                                <span class="font-medium text-gray-900">${purchase.pur_id}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Company:</span>
-                                <span class="font-medium text-gray-900">${purchase.pur_company_name}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Ordered By:</span>
-                                <span class="font-medium text-gray-900">${purchase.pur_order_by || 'Not specified'}</span>
-                            </div>
-                            <div class="flex justify-between pt-2 border-t border-gray-100 mt-2">
-                                <span class="text-gray-800 font-semibold">Total Amount:</span>
-                                <span class="font-bold text-green-600 text-lg">${formatCurrency(purchase.pur_total_amount)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    ${budgetHtml}
-                </div>
-            `;
-        }
-
-    } catch (e) {
-        console.error("Error fetching budget", e);
-        if (elements.budgetApprovalContent) {
-             elements.budgetApprovalContent.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-blue-50 p-3 rounded-lg">
-                        <h4 class="font-semibold text-blue-800">Purchase Details</h4>
-                        <p><strong>PO Number:</strong> ${purchase.pur_id}</p>
-                        <p><strong>Company:</strong> ${purchase.pur_company_name}</p>
-                        <p><strong>Ordered By:</strong> ${purchase.pur_order_by || 'Not specified'}</p>
-                        <p><strong>Total Amount:</strong> ${formatCurrency(purchase.pur_total_amount)}</p>
-                    </div>
-                    <div class="bg-red-50 p-3 rounded-lg">
-                        <p class="text-red-800">Error loading budget details.</p>
-                    </div>
-                </div>
-            `;
-        }
-    }
+function viewRequisition(id) {
+    window.location.href = `{{ url('/psm/purchase-requisition') }}?view=${id}`;
 }
 
-function closeBudgetApprovalModal() {
-    if (elements.budgetApprovalModal) {
-        elements.budgetApprovalModal.classList.add('hidden');
-        delete elements.budgetApprovalModal.dataset.purchaseId;
-    }
-}
+async function convertRequisitionToPO(id) {
+    const requisition = currentPurchases.find(p => p.id === `req_${id}`);
+    if (!requisition) return;
 
-async function handleBudgetApproval() {
-    const purchaseId = elements.budgetApprovalModal ? elements.budgetApprovalModal.dataset.purchaseId : null;
-    if (!purchaseId) return;
-    
-    const approvedBy = (CURRENT_USER_LABEL || '').trim();
-    if (!approvedBy) {
-        showNotification('Unable to determine approving user', 'error');
-        return;
-    }
-    
-    showLoading();
-    
-    try {
-        const response = await fetch(`${PSM_PURCHASES_API}/${purchaseId}/budget-approval`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include',
-            body: JSON.stringify({ 
-                action: 'approve',
-                approved_by: approvedBy
-            })
-        });
+    const result = await Swal.fire({
+        title: 'Convert to Purchase Order?',
+        text: `Do you want to convert Requisition ${requisition.pur_id} into a new Purchase Order?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, convert',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#10b981'
+    });
+
+    if (result.isConfirmed) {
+        // Open the modal and populate with requisition data
+        openAddModal();
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Populate description with reference
+        if (elements.purDesc) {
+            elements.purDesc.value = `Converted from Requisition: ${requisition.pur_id}. Original Department: ${requisition.pur_company_name}`;
         }
         
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification('Purchase approved successfully', 'success');
-            closeBudgetApprovalModal();
-            loadPurchases();
+        // Set the items from requisition
+        const items = Array.isArray(requisition.pur_name_items) ? requisition.pur_name_items : [];
+        selectedItems = items.map(item => {
+            const itemName = typeof item === 'object' ? item.name : item;
+            const itemPrice = typeof item === 'object' ? item.price : 0;
             
-            // Disable the budget approval button for this purchase
-            const approveBtn = document.querySelector(`[onclick="openBudgetApproval(${purchaseId})"]`);
-            if (approveBtn) {
-                approveBtn.disabled = true;
-                approveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            }
-        } else {
-            throw new Error(result.message || 'Failed to approve purchase');
-        }
-        
-    } catch (error) {
-        console.error('Error approving purchase:', error);
-        showNotification('Error approving purchase: ' + error.message, 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-async function handleBudgetRejection() {
-    const purchaseId = elements.budgetApprovalModal ? elements.budgetApprovalModal.dataset.purchaseId : null;
-    if (!purchaseId) return;
-    
-    const approvedBy = (CURRENT_USER_LABEL || '').trim();
-    if (!approvedBy) {
-        showNotification('Unable to determine rejecting user', 'error');
-        return;
-    }
-    
-    showLoading();
-    
-    try {
-        const response = await fetch(`${PSM_PURCHASES_API}/${purchaseId}/budget-approval`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include',
-            body: JSON.stringify({ 
-                action: 'reject',
-                approved_by: approvedBy
-            })
+            return {
+                id: Date.now() + Math.random(), 
+                itemId: Date.now() + Math.random(), 
+                name: itemName,
+                price: itemPrice,
+                picture: null,
+                warranty: null,
+                expiration: null
+            };
         });
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        updateSelectedItemsDisplay();
+        if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
         
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification('Purchase rejected successfully', 'success');
-            closeBudgetApprovalModal();
-            loadPurchases();
-            
-            // Disable the budget approval button for this purchase
-            const approveBtn = document.querySelector(`[onclick="openBudgetApproval(${purchaseId})"]`);
-            if (approveBtn) {
-                approveBtn.disabled = true;
-                approveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            }
-        } else {
-            throw new Error(result.message || 'Failed to reject purchase');
-        }
-        
-    } catch (error) {
-        console.error('Error rejecting purchase:', error);
-        showNotification('Error rejecting purchase: ' + error.message, 'error');
-    } finally {
-        hideLoading();
+        showNotification('Requisition items loaded. Please select a vendor to proceed.', 'info');
     }
 }
 
