@@ -190,7 +190,7 @@
 
 <!-- Main Requisition Modal (New/View) -->
 <div id="requisitionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl transition-all scale-95 transform">
+    <div id="modalContainer" class="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl transition-all scale-95 transform">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
             <h3 id="modalTitle" class="text-xl font-bold text-gray-800">New Purchase Requisition</h3>
         </div>
@@ -200,48 +200,90 @@
             <input type="hidden" id="req_id" name="req_id">
             <input type="hidden" id="req_date" name="req_date">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Requester Name *</label>
-                    <input type="text" id="req_requester" name="req_requester" required placeholder="Enter requester name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Department *</label>
-                    <select id="req_dept" name="req_dept" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Select Department</option>
-                        <option value="Human Resource Department">Human Resource Department</option>
-                        <option value="Core Transaction Office">Core Transaction Office</option>
-                        <option value="Logistics Office">Logistics Office</option>
-                        <option value="Administrative Office">Administrative Office</option>
-                        <option value="Financial Department">Financial Department</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Requested Items *</label>
-                <div id="itemsContainer" class="space-y-2 mb-2">
-                    <div class="flex gap-2 item-row">
-                        <input type="text" name="items[]" required placeholder="Enter item name/description" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <button type="button" class="remove-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                            <i class='bx bx-trash text-xl'></i>
-                        </button>
+            <!-- New/Create Mode Content -->
+            <div id="createModeContent" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Requester Name *</label>
+                        <input type="text" id="req_requester" name="req_requester" required placeholder="Enter requester name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Department *</label>
+                        <select id="req_dept" name="req_dept" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Department</option>
+                            <option value="Human Resource Department">Human Resource Department</option>
+                            <option value="Core Transaction Office">Core Transaction Office</option>
+                            <option value="Logistics Office">Logistics Office</option>
+                            <option value="Administrative Office">Administrative Office</option>
+                            <option value="Financial Department">Financial Department</option>
+                        </select>
                     </div>
                 </div>
-                <button type="button" id="addItemBtn" class="text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
-                    <i class='bx bx-plus-circle'></i> Add Another Item
-                </button>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Requested Items *</label>
+                    <div id="itemsContainer" class="space-y-2 mb-2">
+                        <div class="flex gap-2 item-row">
+                            <input type="text" name="items[]" required placeholder="Enter item name/description" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button type="button" class="remove-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                <i class='bx bx-trash text-xl'></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" id="addItemBtn" class="text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                        <i class='bx bx-plus-circle'></i> Add Another Item
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Notes / Remarks</label>
+                    <textarea id="req_note" name="req_note" rows="3" placeholder="Additional details about the requisition..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Notes / Remarks</label>
-                <textarea id="req_note" name="req_note" rows="3" placeholder="Additional details about the requisition..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+            <!-- View Mode Content (Professional Structured Layout) -->
+            <div id="viewModeContent" class="hidden space-y-6">
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requisition ID</p>
+                        <p id="view_req_id" class="text-sm font-bold text-blue-600"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Date Requested</p>
+                        <p id="view_req_date" class="text-sm font-bold text-gray-700"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requester</p>
+                        <p id="view_req_requester" class="text-sm font-bold text-gray-700"></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>
+                        <p id="view_req_dept" class="text-sm font-bold text-gray-700"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Requested Items</p>
+                    <div id="view_items_list" class="space-y-2">
+                        <!-- Items will be injected here -->
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Notes / Remarks</p>
+                    <div id="view_req_note" class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg italic border-l-4 border-gray-200"></div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t">
+                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Current Status</p>
+                    <div id="view_req_status"></div>
+                </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-6 border-t" id="modalActions">
-                <button type="button" id="cancelModalBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold transition-colors">Cancel</button>
+                <button type="button" id="cancelModalBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold transition-colors">Close</button>
                 <button type="submit" id="submitBtn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-colors flex items-center gap-2">
-                    <i class='bx bx-send'></i> Submit Purchase Requisition
+                    <i class='bx bx-send'></i> Submit Requisition
                 </button>
             </div>
         </form>
@@ -332,33 +374,54 @@
         itemsContainer.innerHTML = '';
         const modalTitle = document.getElementById('modalTitle');
         const submitBtn = document.getElementById('submitBtn');
+        const createContent = document.getElementById('createModeContent');
+        const viewContent = document.getElementById('viewModeContent');
         const inputs = form.querySelectorAll('input, select, textarea');
         
         if (mode === 'new') {
             modalTitle.textContent = 'New Purchase Requisition';
             submitBtn.classList.remove('hidden');
-            addItemBtn.classList.remove('hidden');
+            createContent.classList.remove('hidden');
+            viewContent.classList.add('hidden');
             inputs.forEach(i => { if(i.id !== 'req_id') i.disabled = false; });
             document.getElementById('req_id').value = generateReqID();
-            document.getElementById('req_date').valueAsDate = new Date();
+            document.getElementById('req_date').value = new Date().toISOString().split('T')[0];
             addEmptyItemRow();
         } else if (mode === 'view') {
-            modalTitle.textContent = `View Requisition: ${data.req_id}`;
+            modalTitle.textContent = `Requisition Details`;
             submitBtn.classList.add('hidden');
-            addItemBtn.classList.add('hidden');
-            inputs.forEach(i => i.disabled = true);
+            createContent.classList.add('hidden');
+            viewContent.classList.remove('hidden');
             
-            document.getElementById('req_id').value = data.req_id;
-            document.getElementById('req_date').value = data.req_date ? data.req_date.split('T')[0] : '';
-            document.getElementById('req_requester').value = data.req_requester;
-            document.getElementById('req_dept').value = data.req_dept;
-            document.getElementById('req_note').value = data.req_note || '';
+            // Structured View Mapping
+            document.getElementById('view_req_id').textContent = data.req_id;
+            document.getElementById('view_req_date').textContent = new Date(data.req_date).toLocaleDateString();
+            document.getElementById('view_req_requester').textContent = data.req_requester;
+            document.getElementById('view_req_dept').textContent = data.req_dept;
+            document.getElementById('view_req_note').textContent = data.req_note || 'No additional notes.';
             
+            // Status Badge in View
+            const statusBadge = document.getElementById('view_req_status');
+            statusBadge.innerHTML = `
+                <span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 ${getStatusBadgeClass(data.req_status)}">
+                    ${getStatusIcon(data.req_status)}
+                    ${data.req_status}
+                </span>
+            `;
+
+            // Items List in View
             const items = Array.isArray(data.req_items) ? data.req_items : JSON.parse(data.req_items || '[]');
-            items.forEach(item => addItemRow(item, true));
+            const itemsList = document.getElementById('view_items_list');
+            itemsList.innerHTML = items.map(item => `
+                <div class="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
+                    <i class='bx bx-check text-green-500 font-bold'></i>
+                    <span class="text-sm text-gray-700 font-medium">${item}</span>
+                </div>
+            `).join('');
         }
         
         modal.classList.remove('hidden');
+        setTimeout(() => modal.querySelector('div').classList.remove('scale-95'), 10);
     }
 
     function addEmptyItemRow() {
@@ -421,45 +484,43 @@
             return;
         }
 
-        tbody.innerHTML = requisitions.map(req => `
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${req.req_id}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">
-                    <div class="max-w-[200px] truncate" title="${formatItemsList(req.req_items)}">
-                        ${formatItemsList(req.req_items)}
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <div class="font-semibold text-gray-800">${req.req_requester}</div>
-                    <div class="text-[10px] text-gray-400 uppercase font-bold">${req.req_dept}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(req.req_date)}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">
-                    <div class="max-w-[150px] truncate" title="${req.req_note || '-'}">
-                        ${req.req_note || '-'}
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-3 py-1 text-[10px] font-bold rounded-full flex items-center gap-1 w-fit ${getStatusClass(req.req_status)}">
-                        ${getStatusIcon(req.req_status)}
-                        ${req.req_status.toUpperCase()}
-                    </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
-                    <div class="flex justify-end gap-1">
-                        <button onclick="viewRequisition(${req.id})" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View">
-                            <i class='bx bx-show text-xl'></i>
-                        </button>
-                        <button onclick="openStatusUpdate(${req.id}, '${req.req_id}', '${req.req_status}')" class="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Update Status">
-                            <i class='bx bx-edit text-xl'></i>
-                        </button>
-                        <button onclick="confirmDelete(${req.id}, '${req.req_id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                            <i class='bx bx-trash text-xl'></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = requisitions.map(req => {
+            const items = Array.isArray(req.req_items) ? req.req_items : JSON.parse(req.req_items || '[]');
+            return `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${req.req_id}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="${items.join(', ')}">
+                        ${items.length > 0 ? items[0] : 'No items'} 
+                        ${items.length > 1 ? `<span class="text-blue-600 font-semibold">(+${items.length - 1})</span>` : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-bold text-gray-800">${req.req_requester}</div>
+                        <div class="text-xs text-gray-500">${req.req_dept}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${new Date(req.req_date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${req.req_note || ''}">${req.req_note || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 w-fit ${getStatusBadgeClass(req.req_status)}">
+                            ${getStatusIcon(req.req_status)}
+                            ${req.req_status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="viewRequisition(${req.id})" title="View Details" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90">
+                                <i class='bx bx-show text-xl'></i>
+                            </button>
+                            <button onclick="openStatusUpdate(${req.id}, '${req.req_id}', '${req.req_status}')" title="Update Status" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90">
+                                <i class='bx bx-edit text-xl'></i>
+                            </button>
+                            <button onclick="confirmDelete(${req.id}, '${req.req_id}')" title="Delete Requisition" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90">
+                                <i class='bx bx-trash text-xl'></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     function formatItemsList(items) {
@@ -488,6 +549,15 @@
             case 'pending': return "<i class='bx bx-time-five'></i>";
             case 'rejected': return "<i class='bx bx-x-circle'></i>";
             default: return "<i class='bx bx-help-circle'></i>";
+        }
+    }
+
+    function getStatusBadgeClass(status) {
+        switch (status.toLowerCase()) {
+            case 'approved': return "bg-green-700 text-white shadow-sm border border-green-800";
+            case 'pending': return "bg-yellow-600 text-white shadow-sm border border-yellow-700";
+            case 'rejected': return "bg-red-700 text-white shadow-sm border border-red-800";
+            default: return "bg-gray-600 text-white border border-gray-700";
         }
     }
 
