@@ -90,6 +90,10 @@
                 <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Purchase Orders</h3>
             </div>
             <div class="flex gap-2">
+                <button id="openRequisitionsBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-emerald-100 active:scale-95">
+                    <i class='bx bx-list-check text-lg'></i>
+                    New Purchase Requisition
+                </button>
                 <button id="addPurchaseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-blue-100 active:scale-95">
                     <i class='bx bx-plus-circle text-lg'></i>
                     New Purchase Order
@@ -301,6 +305,43 @@
     </div>
 </div>
 
+<!-- Approved Requisitions Modal -->
+<div id="requisitionsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-3">
+                <i class='bx bx-list-check text-2xl text-emerald-600'></i>
+                <h3 class="text-xl font-bold text-gray-800">Approved Purchase Requisitions</h3>
+            </div>
+            <button id="closeRequisitionsModal" class="text-gray-500 hover:text-gray-700 transition-colors">
+                <i class='bx bx-x text-3xl'></i>
+            </button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Req ID</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Items</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Department</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requisitionsTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Requisitions will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-4 flex justify-end">
+            <button type="button" id="closeRequisitionsModalBtn" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
 // API Configuration
 var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
@@ -390,8 +431,13 @@ const elements = {
     closeCancelPurchaseModal: document.getElementById('closeCancelPurchaseModal'),
     cancelPurchaseContent: document.getElementById('cancelPurchaseContent'),
     cancelCancelPurchaseBtn: document.getElementById('cancelCancelPurchaseBtn'),
-    confirmCancelPurchaseBtn: document.getElementById('confirmCancelPurchaseBtn')
-};
+            confirmCancelPurchaseBtn: document.getElementById('confirmCancelPurchaseBtn'),
+            requisitionsModal: document.getElementById('requisitionsModal'),
+            closeRequisitionsModal: document.getElementById('closeRequisitionsModal'),
+            closeRequisitionsModalBtn: document.getElementById('closeRequisitionsModalBtn'),
+            openRequisitionsBtn: document.getElementById('openRequisitionsBtn'),
+            requisitionsTableBody: document.getElementById('requisitionsTableBody')
+        };
 
 function getProductImageUrl(path) {
     if (!path) return '';
@@ -476,6 +522,11 @@ function initializeEventListeners() {
     if (elements.cancelCancelPurchaseBtn) elements.cancelCancelPurchaseBtn.addEventListener('click', closeCancelPurchaseModal);
     if (elements.confirmCancelPurchaseBtn) elements.confirmCancelPurchaseBtn.addEventListener('click', handleConfirmCancelPurchase);
     
+    // Approved Requisitions modal
+    if (elements.openRequisitionsBtn) elements.openRequisitionsBtn.addEventListener('click', openRequisitionsModal);
+    if (elements.closeRequisitionsModal) elements.closeRequisitionsModal.addEventListener('click', closeRequisitionsModal);
+    if (elements.closeRequisitionsModalBtn) elements.closeRequisitionsModalBtn.addEventListener('click', closeRequisitionsModal);
+    
     // Close modals when clicking outside
     if (elements.purchaseModal) {
         elements.purchaseModal.addEventListener('click', function(e) {
@@ -497,6 +548,14 @@ function initializeEventListeners() {
         elements.cancelPurchaseModal.addEventListener('click', function(e) {
             if (e.target === elements.cancelPurchaseModal) {
                 closeCancelPurchaseModal();
+            }
+        });
+    }
+
+    if (elements.requisitionsModal) {
+        elements.requisitionsModal.addEventListener('click', function(e) {
+            if (e.target === elements.requisitionsModal) {
+                closeRequisitionsModal();
             }
         });
     }
@@ -838,7 +897,6 @@ async function loadPurchases() {
     const params = new URLSearchParams();
     
     try {
-        // Fetch Purchase Orders
         const purchasesUrl = `${PSM_PURCHASES_API}`;
         params.append('t', new Date().getTime());
         console.log('📡 Fetching purchases from:', `${purchasesUrl}?${params}`);
@@ -854,7 +912,7 @@ async function loadPurchases() {
             credentials: 'include'
         });
         
-        console.log('📨 Purchases response status:', response.status);
+        console.log('📨 Response status:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -863,63 +921,13 @@ async function loadPurchases() {
         const result = await response.json();
         console.log('📊 Purchases response:', result);
         
-        let purchaseOrders = [];
         if (result.success) {
-            purchaseOrders = result.data || [];
+            currentPurchases = result.data || [];
+            displayPurchases(currentPurchases);
+            loadStats();
         } else {
             throw new Error(result.message || 'Failed to load purchases');
         }
-
-        // Fetch Approved Requisitions
-        let approvedRequisitions = [];
-        try {
-            const reqResponse = await fetch(`${PSM_REQUISITIONS_API}?status=Approved`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-                },
-                credentials: 'include'
-            });
-
-            if (reqResponse.ok) {
-                const reqResult = await reqResponse.json();
-                if (reqResult.success) {
-                    // Map requisitions to match purchase order structure for the table
-                    approvedRequisitions = (reqResult.data || []).map(req => ({
-                        id: `req_${req.id}`, // Prefix ID to avoid collision
-                        is_requisition: true,
-                        pur_id: req.req_id || `REQ-${req.id}`,
-                        pur_name_items: req.req_items || [],
-                        pur_company_name: req.req_department || 'N/A',
-                        pur_ven_type: 'Requisition',
-                        pur_unit: req.req_total_items || 0,
-                        pur_total_amount: req.req_estimated_cost || 0,
-                        pur_delivery_date: req.req_needed_date || req.created_at,
-                        pur_order_by: req.req_requested_by,
-                        pur_approved_by: req.req_approved_by,
-                        pur_status: 'Approved' // They are all approved
-                    }));
-                }
-            }
-        } catch (reqError) {
-            console.error('❌ Error loading approved requisitions:', reqError);
-        }
-
-        // Combine both
-        currentPurchases = [...purchaseOrders, ...approvedRequisitions];
-        
-        // Sort by date (descending)
-        currentPurchases.sort((a, b) => {
-            const dateA = new Date(a.pur_delivery_date || a.created_at || 0);
-            const dateB = new Date(b.pur_delivery_date || b.created_at || 0);
-            return dateB - dateA;
-        });
-
-        displayPurchases(currentPurchases);
-        loadStats();
         
     } catch (error) {
         console.error('❌ Error loading purchases:', error);
@@ -987,7 +995,6 @@ function displayPurchases(purchases) {
         const isInProgress = purchase.pur_status === 'In-Progress';
         const isCancelled = purchase.pur_status === 'Cancel';
         const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
-        const isRequisition = purchase.is_requisition === true;
         
         const orderedByHtml = formatUserLabelDisplay(purchase.pur_order_by, 'Not specified');
         const approvedSource = purchase.pur_status === 'Cancel'
@@ -995,61 +1002,15 @@ function displayPurchases(purchases) {
             : (purchase.pur_approved_by || 'Not approved');
         const approvedByHtml = formatUserLabelDisplay(approvedSource, purchase.pur_status === 'Cancel' ? 'Unknown Approver' : 'Not approved');
         
-        const companyTypeHtml = isRequisition 
-            ? `
-            <div class="flex flex-col leading-tight">
-                <span class="text-sm font-semibold text-blue-900">${purchase.pur_company_name}</span>
-                <span class="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-md w-fit mt-1 uppercase font-bold">REQUISITION</span>
-            </div>
-            `
-            : `
+        const companyTypeHtml = `
             <div class="flex flex-col leading-tight">
                 <span class="text-sm font-semibold text-gray-900">${purchase.pur_company_name}</span>
                 <span class="text-xs text-gray-500 capitalize">${purchase.pur_ven_type}</span>
             </div>
         `;
         
-        const actionButtons = isRequisition 
-            ? `
-            <button onclick="viewRequisition('${purchase.id.replace('req_', '')}')" 
-                    class="text-blue-700 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
-                    title="View Requisition">
-                <i class='bx bx-file-find text-xl'></i>
-            </button>
-            <button onclick="convertRequisitionToPO('${purchase.id.replace('req_', '')}')" 
-                    class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50"
-                    title="Convert to Purchase Order">
-                <i class='bx bx-transfer-alt text-xl'></i>
-            </button>
-            `
-            : `
-            <button onclick="viewPurchase(${purchase.id})" 
-                    class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50"
-                    title="View Purchase">
-                <i class='bx bx-show-alt text-xl'></i>
-            </button>
-            ${isApproved || isCompleted || isCancelled || isInProgress ? '' : `
-            <button onclick="editPurchase(${purchase.id})" 
-                    class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
-                    title="Edit Purchase">
-                <i class='bx bx-edit-alt text-xl'></i>
-            </button>`}
-            
-            ${isCompleted ? '' : (canCancel ? `
-            <button onclick="cancelPurchase(${purchase.id})" 
-                    class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn"
-                    title="Cancel Purchase">
-                <i class='bx bx-x-circle text-xl'></i>
-            </button>` : '')}
-            <button onclick="deletePurchase(${purchase.id})" 
-                    class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50"
-                    title="Delete Purchase">
-                <i class='bx bx-trash text-xl'></i>
-            </button>
-            `;
-
         return `
-        <tr class="${rowClass} ${isRequisition ? 'border-l-4 border-l-blue-500' : ''}" data-purchase-id="${purchase.id}">
+        <tr class="${rowClass}" data-purchase-id="${purchase.id}">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                 ${purchase.pur_id}
             </td>
@@ -1085,7 +1046,29 @@ function displayPurchases(purchases) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex items-center space-x-2">
-                    ${actionButtons}
+                    <button onclick="viewPurchase(${purchase.id})" 
+                            class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50"
+                            title="View Purchase">
+                        <i class='bx bx-show-alt text-xl'></i>
+                    </button>
+                    ${isApproved || isCompleted || isCancelled || isInProgress ? '' : `
+                    <button onclick="editPurchase(${purchase.id})" 
+                            class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
+                            title="Edit Purchase">
+                        <i class='bx bx-edit-alt text-xl'></i>
+                    </button>`}
+                    
+                    ${isCompleted ? '' : (canCancel ? `
+                    <button onclick="cancelPurchase(${purchase.id})" 
+                            class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn"
+                            title="Cancel Purchase">
+                        <i class='bx bx-x-circle text-xl'></i>
+                    </button>` : '')}
+                    <button onclick="deletePurchase(${purchase.id})" 
+                            class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50"
+                            title="Delete Purchase">
+                        <i class='bx bx-trash text-xl'></i>
+                    </button>
                 </div>
             </td>
         </tr>
@@ -1195,55 +1178,196 @@ function formatUserLabelDisplay(label, fallback) {
     `;
 }
 
-function viewRequisition(id) {
-    window.location.href = `{{ url('/psm/purchase-requisition') }}?view=${id}`;
+function openRequisitionsModal() {
+    if (elements.requisitionsModal) {
+        elements.requisitionsModal.classList.remove('hidden');
+        loadApprovedRequisitions();
+    }
 }
 
-async function convertRequisitionToPO(id) {
-    const requisition = currentPurchases.find(p => p.id === `req_${id}`);
-    if (!requisition) return;
+function closeRequisitionsModal() {
+    if (elements.requisitionsModal) {
+        elements.requisitionsModal.classList.add('hidden');
+    }
+}
 
-    const result = await Swal.fire({
-        title: 'Convert to Purchase Order?',
-        text: `Do you want to convert Requisition ${requisition.pur_id} into a new Purchase Order?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, convert',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#10b981'
-    });
-
-    if (result.isConfirmed) {
-        // Open the modal and populate with requisition data
-        openAddModal();
-        
-        // Populate description with reference
-        if (elements.purDesc) {
-            elements.purDesc.value = `Converted from Requisition: ${requisition.pur_id}. Original Department: ${requisition.pur_company_name}`;
-        }
-        
-        // Set the items from requisition
-        const items = Array.isArray(requisition.pur_name_items) ? requisition.pur_name_items : [];
-        selectedItems = items.map(item => {
-            const itemName = typeof item === 'object' ? item.name : item;
-            const itemPrice = typeof item === 'object' ? item.price : 0;
-            
-            return {
-                id: Date.now() + Math.random(), 
-                itemId: Date.now() + Math.random(), 
-                name: itemName,
-                price: itemPrice,
-                picture: null,
-                warranty: null,
-                expiration: null
-            };
+async function loadApprovedRequisitions() {
+    if (!elements.requisitionsTableBody) return;
+    
+    elements.requisitionsTableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                <div class="flex justify-center items-center py-4">
+                    <div class="loading loading-spinner mr-3"></div>
+                    Loading approved requisitions...
+                </div>
+            </td>
+        </tr>
+    `;
+    
+    try {
+        const response = await fetch(`${PSM_REQUISITIONS_API}?status=Approved`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
         });
         
-        updateSelectedItemsDisplay();
-        if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        showNotification('Requisition items loaded. Please select a vendor to proceed.', 'info');
+        const result = await response.json();
+        
+        if (result.success) {
+            displayApprovedRequisitions(result.data || []);
+        } else {
+            throw new Error(result.message || 'Failed to load requisitions');
+        }
+    } catch (error) {
+        console.error('Error loading requisitions:', error);
+        elements.requisitionsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-red-500">
+                    <i class='bx bx-error-circle text-4xl mb-2'></i>
+                    <p>Error loading requisitions: ${error.message}</p>
+                </td>
+            </tr>
+        `;
     }
+}
+
+function displayApprovedRequisitions(requisitions) {
+    if (!elements.requisitionsTableBody) return;
+    
+    if (requisitions.length === 0) {
+        elements.requisitionsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                    <i class='bx bx-list-check text-4xl text-gray-300 mb-2'></i>
+                    <p>No approved requisitions found</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    elements.requisitionsTableBody.innerHTML = requisitions.map(req => {
+        const items = Array.isArray(req.req_items) ? req.req_items : [];
+        const itemsString = items.slice(0, 2).map(item => 
+            typeof item === 'object' ? item.name : item
+        ).join(', ') + (items.length > 2 ? '...' : '');
+        
+        return `
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                    ${req.req_id || `REQ-${req.id}`}
+                </td>
+                <td class="px-4 py-4 text-sm text-gray-700">
+                    <div class="max-w-xs truncate" title="${items.map(i => typeof i === 'object' ? i.name : i).join(', ')}">
+                        ${itemsString}
+                    </div>
+                    <small class="text-xs text-gray-500">${items.length} item(s)</small>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
+                    ${req.req_department || 'N/A'}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                    ${formatCurrency(req.req_estimated_cost || 0)}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                    ${formatDate(req.req_needed_date || req.created_at)}
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm">
+                    <div class="flex gap-2">
+                        <button onclick="viewRequisition('${req.id}')" 
+                                class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="View Details">
+                            <i class='bx bx-show text-xl'></i>
+                        </button>
+                        <button onclick="convertReqToPOInModal('${req.id}')" 
+                                class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-xs font-bold flex items-center gap-1">
+                            <i class='bx bx-transfer-alt'></i>
+                            Convert to PO
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Global scope helper to convert req from modal
+window.convertReqToPOInModal = async function(id) {
+    // We need to fetch the specific requisition data or find it in a global cache
+    // For now, let's fetch it to ensure we have the latest items
+    try {
+        showLoading();
+        const response = await fetch(`${PSM_REQUISITIONS_API}/${id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const result = await response.json();
+        if (result.success && result.data) {
+            const req = result.data;
+            
+            const confirm = await Swal.fire({
+                title: 'Convert to PO?',
+                text: `Do you want to convert Requisition ${req.req_id || `REQ-${req.id}`} to a Purchase Order?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, convert',
+                cancelButtonText: 'Cancel'
+            });
+            
+            if (confirm.isConfirmed) {
+                closeRequisitionsModal();
+                openAddModal();
+                
+                // Set description
+                if (elements.purDesc) {
+                    elements.purDesc.value = `Converted from Requisition: ${req.req_id || `REQ-${req.id}`}. Original Department: ${req.req_department}`;
+                }
+                
+                // Set items
+                const items = Array.isArray(req.req_items) ? req.req_items : [];
+                selectedItems = items.map(item => ({
+                    id: Date.now() + Math.random(), 
+                    itemId: Date.now() + Math.random(), 
+                    name: typeof item === 'object' ? item.name : item,
+                    price: typeof item === 'object' ? item.price : 0,
+                    picture: null,
+                    warranty: null,
+                    expiration: null
+                }));
+                
+                updateSelectedItemsDisplay();
+                if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
+                
+                showNotification('Requisition items loaded. Please select a vendor to proceed.', 'info');
+            }
+        }
+    } catch (error) {
+        console.error('Error converting requisition:', error);
+        showNotification('Error: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+};
+
+function viewRequisition(id) {
+    window.location.href = `{{ url('/psm/purchase-requisition') }}?view=${id}`;
 }
 
 // Modal Functions
