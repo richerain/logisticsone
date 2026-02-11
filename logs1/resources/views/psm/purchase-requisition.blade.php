@@ -11,7 +11,7 @@
 <!-- Stats Section -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <!-- Total Requisitions -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+    <div onclick="filterByStatus('')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-file text-6xl text-blue-600'></i>
         </div>
@@ -31,7 +31,7 @@
     </div>
     
     <!-- Approved -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+    <div onclick="filterByStatus('Approved')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-check-circle text-6xl text-green-600'></i>
         </div>
@@ -51,7 +51,7 @@
     </div>
     
     <!-- Pending -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+    <div onclick="filterByStatus('Pending')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <!-- Pulse Notification Badge -->
         <div id="pendingBadgePulse" class="hidden absolute top-4 right-4 z-20">
             <span class="relative flex h-6 w-6">
@@ -79,7 +79,7 @@
     </div>
     
     <!-- Rejected -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+    <div onclick="filterByStatus('Rejected')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-x-circle text-6xl text-red-600'></i>
         </div>
@@ -102,7 +102,10 @@
 <div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">Requisition Records</h3>
+        <h3 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <i class='bx bx-list-ul text-blue-600'></i>
+            Requisition Records
+        </h3>
         <button id="addRequisitionBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95">
             <i class='bx bx-plus text-xl'></i>
             New Requisition
@@ -519,6 +522,12 @@
     }
 
     // Action Functions
+    window.filterByStatus = (status) => {
+        currentFilters.status = status;
+        statusFilter.value = status;
+        fetchRequisitions(1);
+    };
+
     window.viewRequisition = (id) => {
         const req = currentRequisitions.find(r => r.id === id);
         if (req) showModal('view', req);
