@@ -247,18 +247,13 @@
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-6">
     <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white shadow-sm">
-                <i class='bx bx-package text-2xl'></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Inventory Details</h3>
-                <p class="text-xs text-gray-500 mt-1">Manage and track your warehouse stock items</p>
-            </div>
+            <i class='bx bx-package text-2xl text-gray-800'></i>
+            <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Inventory Details</h3>
         </div>
     </div>
     <div class="p-6">
-        <div class="overflow-x-auto">
-        <table class="table table-zebra w-full rounded-lg">
+        <div class="overflow-x-auto rounded-xl border border-gray-100">
+        <table class="table table-zebra w-full">
             <thead class="bg-gray-800 font-bold text-white">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Item Code</th>
@@ -1590,12 +1585,12 @@ function renderInventoryItems() {
         html += `
             <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 group">
                 <td class="px-4 py-4 whitespace-nowrap">
-                    <div class="text-sm font-black text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 w-fit">${itemCode}</div>
+                    <div class="text-sm font-bold text-gray-900">${itemCode}</div>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap font-mono text-sm text-gray-600">${sku}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">${itemName}</td>
                 <td class="px-4 py-4 whitespace-nowrap">
-                    <span class="px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 w-fit ${getCategoryBadgeClass(category)}">
+                    <span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 w-fit ${getCategoryBadgeClass(category)}">
                         ${getCategoryIcon(category)}
                         ${category}
                     </span>
@@ -1606,14 +1601,14 @@ function renderInventoryItems() {
                 <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-emerald-600">${formatCurrency(unitPrice)}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-black text-emerald-700">${formatCurrency(totalValue)}</td>
                 <td class="px-4 py-4 whitespace-nowrap">
-                    <span class="px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 w-fit ${getStatusBadgeClass(status)}">
+                    <span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 w-fit ${getStatusBadgeClass(status)}">
                         ${getStatusIcon(status)}
                         ${status}
                     </span>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-[11px] font-medium text-gray-500">${formatDate(lastUpdated)}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-500">${formatDate(lastUpdated)}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-right">
-                    <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="flex justify-end gap-1">
                         <button class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90 view-item-btn" 
                                 title="View Details" data-id="${item.item_id}">
                             <i class='bx bx-show text-lg'></i>
