@@ -502,7 +502,7 @@
     // Fetch products for selected vendor
     async function fetchVendorProducts(vendorId) {
         try {
-            const response = await fetch(`/api/v1/psm/vendors/${vendorId}/products`, {
+            const response = await fetch(`/api/v1/psm/product-management/by-vendor/${vendorId}`, {
                 headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
             });
             const result = await response.json();
@@ -704,6 +704,8 @@
     const cancelStatusBtn = document.getElementById('cancelStatusBtn');
     const updateStatusBtn = document.getElementById('updateStatusBtn');
     const newStatusSelect = document.getElementById('newStatus');
+    const hideModal = () => modal.classList.add('hidden');
+    cancelBtn.addEventListener('click', hideModal);
     let activeStatusId = null;
 
     // Generate Requisition ID
@@ -790,9 +792,6 @@
         itemsContainer.appendChild(div);
     }
 
-    addBtn.addEventListener('click', () => showModal('new'));
-    const hideModal = () => modal.classList.add('hidden');
-    cancelBtn.addEventListener('click', hideModal);
     addItemBtn.addEventListener('click', addEmptyItemRow);
 
     itemsContainer.addEventListener('click', (e) => {
