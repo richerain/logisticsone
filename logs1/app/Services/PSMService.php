@@ -824,6 +824,61 @@ class PSMService
         }
     }
 
+    /**
+     * Update requisition status
+     */
+    public function updateRequisitionStatus($id, $status)
+    {
+        try {
+            $requisition = $this->psmRepository->updateRequisitionStatus($id, $status);
+
+            if ($requisition) {
+                return [
+                    'success' => true,
+                    'data' => $requisition,
+                    'message' => 'Requisition status updated successfully',
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Requisition not found',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to update requisition status: '.$e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Delete requisition
+     */
+    public function deleteRequisition($id)
+    {
+        try {
+            $deleted = $this->psmRepository->deleteRequisition($id);
+
+            if ($deleted) {
+                return [
+                    'success' => true,
+                    'message' => 'Requisition deleted successfully',
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Requisition not found or could not be deleted',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to delete requisition: '.$e->getMessage(),
+            ];
+        }
+    }
+
     public function getVendorProducts($venId)
     {
         try {

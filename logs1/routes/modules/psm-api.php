@@ -59,6 +59,8 @@ Route::prefix('budget-logs')->group(function () {
 Route::prefix('requisitions')->group(function () {
     Route::get('/', [PSMController::class, 'getRequisitions']);
     Route::post('/', [PSMController::class, 'storeRequisition']);
+    Route::patch('/{id}/status', [PSMController::class, 'updateRequisitionStatus']);
+    Route::delete('/{id}', [PSMController::class, 'deleteRequisition']);
 });
 
 

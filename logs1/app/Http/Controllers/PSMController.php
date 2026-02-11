@@ -576,6 +576,7 @@ class PSMController extends Controller
         try {
             $filters = [
                 'status' => $request->get('status'),
+                'dept' => $request->get('dept'),
                 'search' => $request->get('search'),
                 'page_size' => $request->get('per_page', 10),
             ];
@@ -587,6 +588,41 @@ class PSMController extends Controller
                 'success' => false,
                 'message' => 'Failed to fetch requisitions: '.$e->getMessage(),
                 'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
+     * Update requisition status
+     */
+    public function updateRequisitionStatus(Request $request, $id)
+    {
+        try {
+            $status = $request->get('status');
+            $result = $this->psmService->updateRequisitionStatus($id, $status);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete requisition
+     */
+    public function deleteRequisition($id)
+    {
+        try {
+            $result = $this->psmService->deleteRequisition($id);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete requisition: '.$e->getMessage(),
             ], 500);
         }
     }

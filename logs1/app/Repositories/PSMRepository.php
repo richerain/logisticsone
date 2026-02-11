@@ -305,6 +305,10 @@ class PSMRepository
             $query->where('req_status', $filters['status']);
         }
 
+        if (! empty($filters['dept'])) {
+            $query->where('req_dept', $filters['dept']);
+        }
+
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
@@ -324,6 +328,39 @@ class PSMRepository
     public function createRequisition($data)
     {
         return Requisition::create($data);
+    }
+
+    /**
+     * Get requisition by ID
+     */
+    public function getRequisition($id)
+    {
+        return Requisition::find($id);
+    }
+
+    /**
+     * Update requisition status
+     */
+    public function updateRequisitionStatus($id, $status)
+    {
+        $requisition = Requisition::find($id);
+        if ($requisition) {
+            $requisition->update(['req_status' => $status]);
+            return $requisition;
+        }
+        return null;
+    }
+
+    /**
+     * Delete requisition
+     */
+    public function deleteRequisition($id)
+    {
+        $requisition = Requisition::find($id);
+        if ($requisition) {
+            return $requisition->delete();
+        }
+        return false;
     }
 
     /**
