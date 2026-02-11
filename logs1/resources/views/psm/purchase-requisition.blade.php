@@ -150,22 +150,12 @@
     <div class="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl transition-all scale-95 transform">
         <div class="flex justify-between items-center mb-6 border-b pb-4">
             <h3 id="modalTitle" class="text-xl font-bold text-gray-800">New Purchase Requisition</h3>
-            <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <i class='bx bx-x text-3xl'></i>
-            </button>
         </div>
         
         <form id="requisitionForm" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Requisition ID</label>
-                    <input type="text" id="req_id" name="req_id" readonly class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg font-mono text-blue-600 font-bold">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Date</label>
-                    <input type="date" id="req_date" name="req_date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
+            <!-- Hidden Fields for Background Functionality -->
+            <input type="hidden" id="req_id" name="req_id">
+            <input type="hidden" id="req_date" name="req_date">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -220,9 +210,6 @@
     <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl transition-all transform">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
             <h3 class="text-lg font-bold text-gray-800">Update Status</h3>
-            <button id="closeStatusModal" class="text-gray-400 hover:text-gray-600">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
         </div>
         <div class="space-y-4">
             <p class="text-sm text-gray-600">Change status for <span id="statusTargetId" class="font-bold text-blue-600"></span></p>
@@ -270,7 +257,6 @@
     const modal = document.getElementById('requisitionModal');
     const form = document.getElementById('requisitionForm');
     const addBtn = document.getElementById('addRequisitionBtn');
-    const closeBtn = document.getElementById('closeModal');
     const cancelBtn = document.getElementById('cancelModalBtn');
     const searchInput = document.getElementById('searchInput');
     const statusFilter = document.getElementById('statusFilter');
@@ -282,7 +268,6 @@
     
     // Status Modal Elements
     const statusModal = document.getElementById('statusModal');
-    const closeStatusModal = document.getElementById('closeStatusModal');
     const cancelStatusBtn = document.getElementById('cancelStatusBtn');
     const updateStatusBtn = document.getElementById('updateStatusBtn');
     const newStatusSelect = document.getElementById('newStatus');
@@ -353,7 +338,6 @@
 
     addBtn.addEventListener('click', () => showModal('new'));
     const hideModal = () => modal.classList.add('hidden');
-    closeBtn.addEventListener('click', hideModal);
     cancelBtn.addEventListener('click', hideModal);
     addItemBtn.addEventListener('click', addEmptyItemRow);
 
@@ -396,7 +380,7 @@
 
         tbody.innerHTML = requisitions.map(req => `
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${req.req_id}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${req.req_id}</td>
                 <td class="px-6 py-4 text-sm text-gray-600">
                     <div class="max-w-[200px] truncate" title="${formatItemsList(req.req_items)}">
                         ${formatItemsList(req.req_items)}
@@ -413,7 +397,8 @@
                     </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-3 py-1 text-[10px] font-bold rounded-full ${getStatusClass(req.req_status)}">
+                    <span class="px-3 py-1 text-[10px] font-bold rounded-full flex items-center gap-1 w-fit ${getStatusClass(req.req_status)}">
+                        ${getStatusIcon(req.req_status)}
                         ${req.req_status.toUpperCase()}
                     </span>
                 </td>
@@ -454,6 +439,15 @@
         }
     }
 
+    function getStatusIcon(status) {
+        switch (status.toLowerCase()) {
+            case 'approved': return "<i class='bx bx-check-circle'></i>";
+            case 'pending': return "<i class='bx bx-time-five'></i>";
+            case 'rejected': return "<i class='bx bx-x-circle'></i>";
+            default: return "<i class='bx bx-help-circle'></i>";
+        }
+    }
+
     function updateStats(stats) {
         if (!stats) return;
         document.getElementById('totalReqCount').textContent = stats.total || 0;
@@ -489,7 +483,6 @@
         statusModal.classList.add('hidden');
         activeStatusId = null;
     };
-    closeStatusModal.addEventListener('click', hideStatusModal);
     cancelStatusBtn.addEventListener('click', hideStatusModal);
 
     updateStatusBtn.addEventListener('click', async () => {
