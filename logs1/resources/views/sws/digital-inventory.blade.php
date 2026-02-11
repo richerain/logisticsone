@@ -246,9 +246,14 @@
 <!-- digital inventory main table area start -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-6">
     <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
-        <div class="flex items-center gap-2">
-            <div class="w-1.5 h-6 bg-brand-primary rounded-full"></div>
-            <h3 class="text-lg font-bold text-gray-800 tracking-tight">Inventory Details</h3>
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center text-white shadow-sm">
+                <i class='bx bx-package text-2xl'></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Inventory Details</h3>
+                <p class="text-xs text-gray-500 mt-1">Manage and track your warehouse stock items</p>
+            </div>
         </div>
     </div>
     <div class="p-6">
@@ -409,16 +414,36 @@
 </div>
 
 <!-- View Item Modal -->
-<div id="viewItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Item Details</h3>
-            <button id="closeViewItemModal" class="text-gray-500 hover:text-gray-700">
+<div id="viewItemModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm">
+                    <i class='bx bx-info-circle text-2xl'></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 leading-none">Item Details</h3>
+                    <p class="text-xs text-gray-500 mt-1">Complete information for the selected inventory item</p>
+                </div>
+            </div>
+            <button id="closeViewItemModal" class="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
                 <i class='bx bx-x text-2xl'></i>
             </button>
         </div>
-        <div id="viewItemContent"></div>
-</div>
+        
+        <!-- Modal Body -->
+        <div id="viewItemContent" class="p-6 overflow-y-auto custom-scrollbar bg-white">
+            <!-- Content populated by JS -->
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
+            <button type="button" onclick="closeViewItemModal()" class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 shadow-sm">
+                Close
+            </button>
+        </div>
+    </div>
 </div>
 <!-- transfer modal-->
 <div id="transferItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
@@ -891,112 +916,155 @@
     </div>
 </div>
 <!-- Edit Item Modal -->
-<div id="editItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Edit Inventory Item</h3>
-            <button id="closeEditItemModal" class="text-gray-500 hover:text-gray-700">
+<div id="editItemModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shadow-sm">
+                    <i class='bx bx-edit text-2xl'></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 leading-none">Edit Inventory Item</h3>
+                    <p class="text-xs text-gray-500 mt-1">Update existing inventory item information</p>
+                </div>
+            </div>
+            <button id="closeEditItemModal" class="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
                 <i class='bx bx-x text-2xl'></i>
             </button>
         </div>
-        <form id="editItemForm">
-            <input type="hidden" id="edit_item_id">
-            
-            <!-- Read-only fields for Item Code and SKU -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Item Code</label>
-                    <input type="text" id="edit_item_code" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg cursor-not-allowed">
-                    <p class="text-xs text-gray-500 mt-1">Item Code cannot be changed</p>
+        
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto custom-scrollbar bg-white">
+            <form id="editItemForm" class="space-y-6">
+                <input type="hidden" id="edit_item_id">
+                
+                <!-- Read-only Identifiers Section -->
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Item Code</label>
+                        <input type="text" id="edit_item_code" readonly class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 text-gray-500 font-mono font-bold rounded-xl cursor-not-allowed text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Product ID / SKU</label>
+                        <input type="text" id="edit_item_stock_keeping_unit" readonly class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 text-gray-500 font-mono font-bold rounded-xl cursor-not-allowed text-sm">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                    <input type="text" id="edit_item_stock_keeping_unit" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg cursor-not-allowed">
-                    <p class="text-xs text-gray-500 mt-1">SKU cannot be changed</p>
+                
+                <!-- Main Form Fields -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Item Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit_item_name" required class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Description</label>
+                        <textarea id="edit_item_description" rows="3" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800 resize-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Category</label>
+                            <select id="edit_item_category_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234a5568%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.75rem_center] bg-no-repeat">
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Stored Warehouse</label>
+                            <select id="edit_item_stored_from" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234a5568%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.75rem_center] bg-no-repeat">
+                                <option value="">Select Warehouse</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Item Type <span class="text-red-500">*</span></label>
+                            <select id="edit_item_item_type" required class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234a5568%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.75rem_center] bg-no-repeat">
+                                <option value="liquid">Liquid</option>
+                                <option value="illiquid">Illiquid</option>
+                                <option value="hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Risk Level <span class="text-red-500">*</span></label>
+                            <select id="edit_item_liquidity_risk_level" required class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234a5568%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.75rem_center] bg-no-repeat">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Current Stock <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="number" id="edit_item_current_stock" required min="0" class="w-full pl-4 pr-12 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-bold text-gray-800">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">QTY</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Max Capacity <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <input type="number" id="edit_item_max_stock" required min="1" class="w-full pl-4 pr-12 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-bold text-gray-800">
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">MAX</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Unit Price (₱)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₱</span>
+                                <input type="number" id="edit_item_unit_price" min="0" step="0.01" class="w-full pl-8 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-bold text-emerald-600">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Expiration Date</label>
+                            <input type="date" id="edit_item_expiration_date" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">Warranty End</label>
+                            <input type="date" id="edit_item_warranty_end" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-medium text-gray-800">
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <div class="relative flex items-center justify-center">
+                                <input type="checkbox" id="edit_item_is_fixed" class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:bg-brand-primary checked:border-brand-primary transition-all">
+                                <i class='bx bx-check absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none'></i>
+                            </div>
+                            <span class="text-sm font-bold text-gray-700 group-hover:text-brand-primary transition-colors">Fixed Asset</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <div class="relative flex items-center justify-center">
+                                <input type="checkbox" id="edit_item_is_collateral" class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:bg-brand-primary checked:border-brand-primary transition-all">
+                                <i class='bx bx-check absolute text-white opacity-0 peer-checked:opacity-100 pointer-events-none'></i>
+                            </div>
+                            <span class="text-sm font-bold text-gray-700 group-hover:text-brand-primary transition-colors">Is Collateral</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
-                <input type="text" id="edit_item_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea id="edit_item_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select id="edit_item_category_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Select Category</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Stored From</label>
-                    <select id="edit_item_stored_from" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Select Warehouse</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Item Type *</label>
-                    <select id="edit_item_item_type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="liquid">Liquid</option>
-                        <option value="illiquid">Illiquid</option>
-                        <option value="hybrid">Hybrid</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Liquidity Risk Level *</label>
-                    <select id="edit_item_liquidity_risk_level" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </select>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Stock *</label>
-                    <input type="number" id="edit_item_current_stock" required min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Stock</label>
-                    <input type="number" id="edit_item_max_stock" required min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (₱)</label>
-                    <input type="number" id="edit_item_unit_price" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
-                    <input type="date" id="edit_item_expiration_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Warranty End</label>
-                    <input type="date" id="edit_item_warranty_end" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div class="flex items-center">
-                    <input type="checkbox" id="edit_item_is_fixed" class="mr-2">
-                    <label class="text-sm font-medium text-gray-700">Fixed Asset</label>
-                </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="edit_item_is_collateral" class="mr-2">
-                    <label class="text-sm font-medium text-gray-700">Is Collateral</label>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3">
-                <button type="button" id="cancelEditItemModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
-                <button type="submit" id="updateItemBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update Item</button>
-            </div>
-        </form>
+            </form>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
+            <button type="button" id="cancelEditItemModal" class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 shadow-sm">
+                Cancel
+            </button>
+            <button type="submit" form="editItemForm" id="updateItemBtn" class="px-8 py-2.5 bg-brand-primary text-white font-bold rounded-xl hover:bg-brand-primary/90 transition-all active:scale-95 shadow-lg shadow-brand-primary/20 flex items-center gap-2">
+                <i class='bx bx-save'></i>
+                Update Item
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1520,9 +1588,9 @@ function renderInventoryItems() {
         const lastUpdated = item.last_updated || 'N/A';
         
         html += `
-            <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+            <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 group">
                 <td class="px-4 py-4 whitespace-nowrap">
-                    <div class="text-sm font-bold text-gray-900">${itemCode}</div>
+                    <div class="text-sm font-black text-gray-900 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200 w-fit">${itemCode}</div>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap font-mono text-sm text-gray-600">${sku}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">${itemName}</td>
@@ -1543,18 +1611,18 @@ function renderInventoryItems() {
                         ${status}
                     </span>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">${formatDate(lastUpdated)}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-[11px] font-medium text-gray-500">${formatDate(lastUpdated)}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-right">
-                    <div class="flex justify-end gap-1">
-                        <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90 view-item-btn" 
+                    <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90 view-item-btn" 
                                 title="View Details" data-id="${item.item_id}">
                             <i class='bx bx-show text-lg'></i>
                         </button>
-                        <button class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90 edit-item-btn" 
+                        <button class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90 edit-item-btn" 
                                 title="Edit Item" data-id="${item.item_id}">
                             <i class='bx bx-edit text-lg'></i>
                         </button>
-                        <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90 delete-item-btn" 
+                        <button class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90 delete-item-btn" 
                                 title="Delete Item" data-id="${item.item_id}">
                             <i class='bx bx-trash text-lg'></i>
                         </button>
@@ -2333,24 +2401,129 @@ async function viewItem(itemId) {
             const itemCode = item.item_code || 'N/A';
             
             const content = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><span class="text-sm text-gray-500">Item Code</span><p class="font-semibold font-mono">${itemCode}</p></div>
-                    <div><span class="text-sm text-gray-500">SKU</span><p class="font-semibold font-mono">${item.item_stock_keeping_unit || 'N/A'}</p></div>
-                    <div><span class="text-sm text-gray-500">Item Name</span><p class="font-semibold">${item.item_name || 'N/A'}</p></div>
-                    <div><span class="text-sm text-gray-500">Category</span><p class="font-semibold">${item.category?.cat_name || 'Uncategorized'}</p></div>
-                    <div><span class="text-sm text-gray-500">Stored From</span><p class="font-semibold">${item.item_stored_from || 'N/A'}</p></div>
-                    <div><span class="text-sm text-gray-500">Item Type</span><p class="font-semibold">${item.item_item_type || 'N/A'}</p></div>
-                    <div><span class="text-sm text-gray-500">Current Stock</span><p class="font-semibold">${formatNumber(item.item_current_stock)}</p></div>
-                    <div><span class="text-sm text-gray-500">Max Stock</span><p class="font-semibold">${formatNumber(item.item_max_stock)}</p></div>
-                    <div><span class="text-sm text-gray-500">Unit Price</span><p class="font-semibold">${formatCurrency(unitPrice)}</p></div>
-                    <div><span class="text-sm text-gray-500">Total Value</span><p class="font-semibold">${formatCurrency(totalValue)}</p></div>
-                    <div><span class="text-sm text-gray-500">Liquidity Risk</span><p class="font-semibold">${item.item_liquidity_risk_level || 'N/A'}</p></div>
-                    <div><span class="text-sm text-gray-500">Fixed Asset</span><p class="font-semibold">${item.item_is_fixed ? 'Yes' : 'No'}</p></div>
-                    <div><span class="text-sm text-gray-500">Is Collateral</span><p class="font-semibold">${item.item_is_collateral ? 'Yes' : 'No'}</p></div>
-                    <div><span class="text-sm text-gray-500">Expiration Date</span><p class="font-semibold">${formatDate(item.item_expiration_date)}</p></div>
-                    <div><span class="text-sm text-gray-500">Warranty End</span><p class="font-semibold">${formatDate(item.item_warranty_end)}</p></div>
-                    <div><span class="text-sm text-gray-500">Last Updated</span><p class="font-semibold">${formatDate(lastUpdated)}</p></div>
-                    <div class="md:col-span-2"><span class="text-sm text-gray-500">Description</span><p class="font-semibold break-words">${item.item_description || 'N/A'}</p></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Basic Info -->
+                    <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Identity</span>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Item Code</span>
+                                <p class="font-bold font-mono text-gray-800">${itemCode}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">SKU / Product ID</span>
+                                <p class="font-bold font-mono text-gray-800">${item.item_stock_keeping_unit || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Item Name</span>
+                                <p class="font-bold text-gray-800">${item.item_name || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category & Type -->
+                    <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Classification</span>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Category</span>
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700 inline-block mt-1">
+                                    <i class='bx bx-category-alt mr-1'></i>${item.category?.cat_name || 'Uncategorized'}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Item Type</span>
+                                <p class="font-bold text-gray-800 capitalize">${item.item_item_type || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Stored From</span>
+                                <p class="font-bold text-gray-800">${item.item_stored_from || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Info -->
+                    <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Inventory Level</span>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Current Stock</span>
+                                <p class="text-xl font-black text-gray-800">${formatNumber(item.item_current_stock)}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Max Stock Capacity</span>
+                                <p class="font-bold text-gray-600">${formatNumber(item.item_max_stock)}</p>
+                            </div>
+                            <div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                    <div class="bg-brand-primary h-2 rounded-full" style="width: ${Math.min((item.item_current_stock / item.item_max_stock) * 100, 100)}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financials -->
+                    <div class="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-100/50">
+                        <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider mb-2 block">Financial Data</span>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs text-emerald-600/70 block">Unit Price</span>
+                                <p class="text-lg font-bold text-emerald-700">${formatCurrency(unitPrice)}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-emerald-600/70 block">Total Inventory Value</span>
+                                <p class="text-2xl font-black text-emerald-800">${formatCurrency(totalValue)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk & Dates -->
+                    <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Risk & Compliance</span>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Liquidity Risk</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${item.item_liquidity_risk_level === 'high' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">
+                                    ${item.item_liquidity_risk_level || 'N/A'}
+                                </span>
+                            </div>
+                            <div class="flex gap-4">
+                                <div>
+                                    <span class="text-xs text-gray-500 block">Fixed Asset</span>
+                                    <p class="font-bold text-gray-800">${item.item_is_fixed ? 'Yes' : 'No'}</p>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-gray-500 block">Collateral</span>
+                                    <p class="font-bold text-gray-800">${item.item_is_collateral ? 'Yes' : 'No'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timestamps -->
+                    <div class="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Timeline</span>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Expiration Date</span>
+                                <p class="font-bold text-gray-800">${formatDate(item.item_expiration_date)}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Warranty End</span>
+                                <p class="font-bold text-gray-800">${formatDate(item.item_warranty_end)}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Last Activity</span>
+                                <p class="text-xs font-medium text-gray-500 italic">${formatDate(lastUpdated)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="md:col-span-2 lg:col-span-3 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Item Description</span>
+                        <p class="text-sm text-gray-700 leading-relaxed">${item.item_description || 'No description provided for this item.'}</p>
+                    </div>
                 </div>
             `;
             els.viewItemContent.innerHTML = content;
