@@ -96,6 +96,22 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Relocated Search and Filter section -->
+                <div class="mt-8 pt-6 border-t border-gray-100">
+                    <div class="flex flex-col gap-4">
+                        <div class="relative w-full">
+                            <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
+                            <input id="di_search" type="text" placeholder="Search item, code, category, stored from..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all duration-200 outline-none text-sm" />
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-200 overflow-x-auto no-scrollbar">
+                            <button class="btn btn-xs border-none bg-white shadow-sm text-brand-primary font-bold px-3 py-1 rounded-lg hover:bg-white transition-all duration-200 whitespace-nowrap" data-di-status="">All</button>
+                            <button class="btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="In Stock">In Stock</button>
+                            <button class="btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Low Stock">Low Stock</button>
+                            <button class="btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Out of Stock">Out of Stock</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- Stock Levels by Category section end -->
 
@@ -151,22 +167,6 @@
                 </div> 
             </div>
             <!-- Quick Actions section end -->
-        </div>
-
-        <!-- Relocated Search and Filter section -->
-        <div class="mt-8 pt-6 border-t border-gray-100">
-            <div class="flex flex-col md:flex-row items-center gap-4">
-                <div class="relative flex-1 w-full">
-                    <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
-                    <input id="di_search" type="text" placeholder="Search item, code, category, stored from..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all duration-200 outline-none text-sm" />
-                </div>
-                <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200 w-full md:w-auto overflow-x-auto">
-                    <button class="btn btn-sm border-none bg-white shadow-sm text-brand-primary font-bold px-4 rounded-lg hover:bg-white transition-all duration-200 whitespace-nowrap" data-di-status="">All</button>
-                    <button class="btn btn-sm border-none bg-transparent text-gray-500 font-medium px-4 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="In Stock">In Stock</button>
-                    <button class="btn btn-sm border-none bg-transparent text-gray-500 font-medium px-4 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Low Stock">Low Stock</button>
-                    <button class="btn btn-sm border-none bg-transparent text-gray-500 font-medium px-4 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Out of Stock">Out of Stock</button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
