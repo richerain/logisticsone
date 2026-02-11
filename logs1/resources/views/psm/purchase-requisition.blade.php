@@ -221,6 +221,16 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Select Vendor (Optional)</label>
+                    <div class="relative">
+                        <i class='bx bx-buildings absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
+                        <select id="req_vendor_select" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                            <option value="">Choose a Vendor Company...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Requested Items *</label>
                     <div id="itemsContainer" class="space-y-2 mb-2">
                         <div class="flex gap-2 item-row">
@@ -311,6 +321,41 @@
     </div>
 </div>
 
+<!-- Vendor Products Side Modal -->
+<div id="vendorProductsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[55]">
+    <div class="bg-white rounded-xl p-6 w-full max-w-xl max-h-[85vh] overflow-y-auto shadow-2xl transition-all transform -translate-x-full md:-translate-x-[60%] lg:-translate-x-[75%]">
+        <div class="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class='bx bx-package text-blue-600'></i>
+                <span id="sideModalVendorName">Vendor Products</span>
+            </h3>
+            <button type="button" id="closeSideModal" class="text-gray-400 hover:text-gray-600">
+                <i class='bx bx-x text-2xl'></i>
+            </button>
+        </div>
+        
+        <div class="mb-4 relative">
+            <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
+            <input type="text" id="productSearch" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+        </div>
+
+        <div class="overflow-hidden border border-gray-100 rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Product</th>
+                        <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="px-4 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="vendorProductsTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Products will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
 (function() {
     const API_URL = '/api/v1/psm/requisitions';
@@ -353,6 +398,186 @@
     const addItemBtn = document.getElementById('addItemBtn');
     const itemsContainer = document.getElementById('itemsContainer');
     
+    // Vendor Selection Elements
+    const vendorSelect = document.getElementById('req_vendor_select');
+    const vendorProductsModal = document.getElementById('vendorProductsModal');
+    const closeSideModalBtn = document.getElementById('closeSideModal');
+    const vendorProductsTableBody = document.getElementById('vendorProductsTableBody');
+    const productSearchInput = document.getElementById('productSearch');
+    const sideModalVendorName = document.getElementById('sideModalVendorName');
+    
+    let allVendors = [];
+    let currentVendorProducts = [];
+    let selectedItems = new Map(); // Track items and counts
+
+    // Fetch Vendors for dropdown
+    async function fetchVendors() {
+        try {
+            const response = await fetch('/api/v1/psm/vendors', {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                allVendors = result.data;
+                populateVendorDropdown(allVendors);
+            }
+        } catch (error) {
+            console.error('Error fetching vendors:', error);
+        }
+    }
+
+    function populateVendorDropdown(vendors) {
+        vendorSelect.innerHTML = '<option value="">Choose a Vendor Company...</option>';
+        vendors.forEach(vendor => {
+            const option = document.createElement('option');
+            option.value = vendor.id;
+            option.textContent = `${vendor.ven_company_name} (${vendor.ven_type})`;
+            vendorSelect.appendChild(option);
+        });
+    }
+
+    // Fetch products for selected vendor
+    async function fetchVendorProducts(vendorId) {
+        try {
+            const response = await fetch(`/api/v1/psm/vendors/${vendorId}/products`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                currentVendorProducts = result.data;
+                renderVendorProducts(currentVendorProducts);
+            }
+        } catch (error) {
+            console.error('Error fetching vendor products:', error);
+        }
+    }
+
+    function renderVendorProducts(products) {
+        const searchTerm = productSearchInput.value.toLowerCase();
+        const filtered = products.filter(p => 
+            p.prod_name.toLowerCase().includes(searchTerm) || 
+            (p.prod_desc && p.prod_desc.toLowerCase().includes(searchTerm)) ||
+            p.prod_id.toLowerCase().includes(searchTerm)
+        );
+
+        vendorProductsTableBody.innerHTML = filtered.map(p => `
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-xs font-bold text-gray-900">${p.prod_name}</div>
+                    <div class="text-[10px] text-gray-500">${p.prod_id}</div>
+                </td>
+                <td class="px-4 py-3 text-[11px] text-gray-600 max-w-[150px] truncate" title="${p.prod_desc || ''}">
+                    ${p.prod_desc || '-'}
+                </td>
+                <td class="px-4 py-3 text-right">
+                    <button type="button" onclick="window.addItemToRequisition('${p.prod_name}')" 
+                        class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all active:scale-90">
+                        <i class='bx bx-plus text-lg'></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.addItemToRequisition = (itemName) => {
+        if (selectedItems.has(itemName)) {
+            selectedItems.set(itemName, selectedItems.get(itemName) + 1);
+        } else {
+            selectedItems.set(itemName, 1);
+        }
+        updateItemsContainer();
+        Toast.fire({ icon: 'success', title: `Added ${itemName} to list` });
+    };
+
+    function updateItemsContainer() {
+        itemsContainer.innerHTML = '';
+        if (selectedItems.size === 0) {
+            addEmptyItemRow();
+            return;
+        }
+
+        selectedItems.forEach((count, name) => {
+            const displayValue = count > 1 ? `${name} (x${count})` : name;
+            addItemRow(displayValue, false, name);
+        });
+    }
+
+    function addItemRow(value = '', disabled = false, originalName = null) {
+        const div = document.createElement('div');
+        div.className = 'flex gap-2 item-row';
+        div.dataset.originalName = originalName || value;
+        div.innerHTML = `
+            <input type="text" name="items[]" required value="${value}" ${disabled ? 'disabled' : ''} 
+                placeholder="Enter item name/description" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            ${!disabled ? `
+            <button type="button" class="remove-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                <i class='bx bx-trash text-xl'></i>
+            </button>` : ''}
+        `;
+        itemsContainer.appendChild(div);
+    }
+
+    // Event Listeners for Vendor Selection
+    vendorSelect.addEventListener('change', (e) => {
+        const vendorId = e.target.value;
+        if (vendorId) {
+            const vendor = allVendors.find(v => v.id == vendorId);
+            sideModalVendorName.textContent = `${vendor.ven_company_name} Products`;
+            fetchVendorProducts(vendorId);
+            vendorProductsModal.classList.remove('hidden');
+        } else {
+            vendorProductsModal.classList.add('hidden');
+        }
+    });
+
+    closeSideModalBtn.addEventListener('click', () => {
+        vendorProductsModal.classList.add('hidden');
+    });
+
+    productSearchInput.addEventListener('input', () => {
+        renderVendorProducts(currentVendorProducts);
+    });
+
+    // Modified showModal to fetch vendors
+    const originalShowModal = showModal;
+    showModal = function(mode = 'new', data = null) {
+        selectedItems.clear();
+        if (mode === 'new') {
+            fetchVendors();
+            vendorSelect.classList.remove('hidden');
+        } else {
+            vendorSelect.classList.add('hidden');
+            vendorProductsModal.classList.add('hidden');
+        }
+        originalShowModal(mode, data);
+    };
+
+    // Modified itemsContainer click handler to handle selectedItems map
+    itemsContainer.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-item')) {
+            const row = e.target.closest('.item-row');
+            const name = row.dataset.originalName;
+            
+            if (selectedItems.has(name)) {
+                selectedItems.delete(name);
+            }
+            
+            const rows = itemsContainer.querySelectorAll('.item-row');
+            if (rows.length > 1) row.remove();
+            else {
+                row.remove();
+                addEmptyItemRow();
+            }
+        }
+    });
+
+    // Modified form reset to clear map
+    form.addEventListener('reset', () => {
+        selectedItems.clear();
+        vendorSelect.value = '';
+        vendorProductsModal.classList.add('hidden');
+    });
+
     // Status Modal Elements
     const statusModal = document.getElementById('statusModal');
     const cancelStatusBtn = document.getElementById('cancelStatusBtn');
