@@ -55,6 +55,11 @@ Route::prefix('budget-logs')->group(function () {
     Route::get('/all', [PSMController::class, 'getBudgetLogs']);
 });
 
+// PSM Requisition Routes
+Route::prefix('requisitions')->group(function () {
+    Route::get('/', [PSMController::class, 'getRequisitions']);
+});
+
 
 // PSM Active Vendors for Purchase
 Route::get('/active-vendors', [PSMController::class, 'getActiveVendorsForPurchase']);

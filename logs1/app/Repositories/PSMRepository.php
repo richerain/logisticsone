@@ -9,6 +9,7 @@ use App\Models\PSM\Purchase;
 use App\Models\PSM\Quote;
 use App\Models\PSM\Vendor;
 use App\Models\PSM\PurchaseProduct;
+use App\Models\PSM\Requisition;
 
 class PSMRepository
 {
@@ -291,6 +292,20 @@ class PSMRepository
         $query->orderBy($sortField, $sortOrder);
 
         return $query->get($columns);
+    }
+
+    /**
+     * Get all requisitions
+     */
+    public function getRequisitions($filters = [])
+    {
+        $query = Requisition::orderBy('created_at', 'desc');
+
+        if (! empty($filters['status'])) {
+            $query->where('req_status', $filters['status']);
+        }
+
+        return $query->get();
     }
 
     public function getVendorStats()

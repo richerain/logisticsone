@@ -774,6 +774,28 @@ class PSMService
         }
     }
 
+    /**
+     * Get all requisitions
+     */
+    public function getRequisitions($filters = [])
+    {
+        try {
+            $requisitions = $this->psmRepository->getRequisitions($filters);
+
+            return [
+                'success' => true,
+                'data' => $requisitions,
+                'message' => 'Requisitions retrieved successfully',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch requisitions: '.$e->getMessage(),
+                'data' => [],
+            ];
+        }
+    }
+
     public function getVendorProducts($venId)
     {
         try {

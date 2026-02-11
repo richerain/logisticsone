@@ -569,6 +569,25 @@ class PSMController extends Controller
     }
 
     /**
+     * Get all requisitions
+     */
+    public function getRequisitions(Request $request)
+    {
+        try {
+            $filters = $request->only(['status']);
+            $result = $this->psmService->getRequisitions($filters);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch requisitions: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
      * Get products for external API (restricted columns)
      */
     public function getExternalProducts(Request $request)
