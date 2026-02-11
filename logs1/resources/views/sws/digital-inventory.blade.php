@@ -204,7 +204,14 @@
             <p id="totalValue" class="text-2xl font-black text-gray-800">₱0.00</p>
         </div>
 
-        <div id="di_card_low" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
+        <div id="di_card_low" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group relative">
+            <!-- Pulse Notification Badge -->
+            <div id="lowStockBadgePulse" class="hidden absolute top-4 right-4 z-20">
+                <span class="relative flex h-6 w-6">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                    <span id="lowStockPulseCount" class="relative inline-flex rounded-full h-6 w-6 bg-yellow-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
+                </span>
+            </div>
             <div class="flex items-center justify-between mb-3">
                 <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-yellow-600 group-hover:text-white transition-all duration-300">
                     <i class='bx bx-error text-2xl'></i>
@@ -215,7 +222,14 @@
             <p id="lowStockItems" class="text-2xl font-black text-gray-800">0</p>
         </div>
 
-        <div id="di_card_out" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
+        <div id="di_card_out" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group relative">
+            <!-- Pulse Notification Badge -->
+            <div id="outOfStockBadgePulse" class="hidden absolute top-4 right-4 z-20">
+                <span class="relative flex h-6 w-6">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span id="outOfStockPulseCount" class="relative inline-flex rounded-full h-6 w-6 bg-red-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
+                </span>
+            </div>
             <div class="flex items-center justify-between mb-3">
                 <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all duration-300">
                     <i class='bx bx-error-circle text-2xl'></i>
@@ -1331,6 +1345,30 @@ function renderInventoryStats(stats) {
     els.totalValue.textContent = formatCurrency(stats.total_value || 0);
     els.lowStockItems.textContent = formatNumber(stats.low_stock_items || 0);
     els.outOfStockItems.textContent = formatNumber(stats.out_of_stock_items || 0);
+
+    // Update pulsing notification for Low Stock
+    const lowStockBadgePulse = document.getElementById('lowStockBadgePulse');
+    const lowStockPulseCount = document.getElementById('lowStockPulseCount');
+    const lowStockCount = stats.low_stock_items || 0;
+    
+    if (lowStockCount > 0) {
+        lowStockBadgePulse.classList.remove('hidden');
+        lowStockPulseCount.textContent = lowStockCount;
+    } else {
+        lowStockBadgePulse.classList.add('hidden');
+    }
+
+    // Update pulsing notification for Out of Stock
+    const outOfStockBadgePulse = document.getElementById('outOfStockBadgePulse');
+    const outOfStockPulseCount = document.getElementById('outOfStockPulseCount');
+    const outOfStockCount = stats.out_of_stock_items || 0;
+    
+    if (outOfStockCount > 0) {
+        outOfStockBadgePulse.classList.remove('hidden');
+        outOfStockPulseCount.textContent = outOfStockCount;
+    } else {
+        outOfStockBadgePulse.classList.add('hidden');
+    }
 }
 
 // Calculate total value from inventory items
