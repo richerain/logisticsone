@@ -104,11 +104,11 @@
                             <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
                             <input id="di_search" type="text" placeholder="Search item, code, category, stored from..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all duration-200 outline-none text-sm" />
                         </div>
-                        <div class="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-200 overflow-x-auto no-scrollbar">
-                            <button class="btn btn-xs border-none bg-white shadow-sm text-brand-primary font-bold px-3 py-1 rounded-lg hover:bg-white transition-all duration-200 whitespace-nowrap" data-di-status="">All</button>
-                            <button class="btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="In Stock">In Stock</button>
-                            <button class="btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Low Stock">Low Stock</button>
-                            <button class="btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Out of Stock">Out of Stock</button>
+                        <div class="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-200">
+                            <button class="flex-1 btn btn-xs border-none bg-white shadow-sm text-brand-primary font-bold px-3 py-1 rounded-lg hover:bg-white transition-all duration-200 whitespace-nowrap" data-di-status="">All</button>
+                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="In Stock">In Stock</button>
+                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Low Stock">Low Stock</button>
+                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Out of Stock">Out of Stock</button>
                         </div>
                     </div>
                 </div>
