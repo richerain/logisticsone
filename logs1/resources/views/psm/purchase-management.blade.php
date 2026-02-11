@@ -90,10 +90,19 @@
                 <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Purchase Orders</h3>
             </div>
             <div class="flex gap-2">
-                <button id="openRequisitionsBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-emerald-100 active:scale-95">
-                    <i class='bx bx-list-check text-lg'></i>
-                    New Purchase Requisition
-                </button>
+                <div class="relative">
+                    <button id="openRequisitionsBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-emerald-100 active:scale-95">
+                        <i class='bx bx-list-check text-lg'></i>
+                        New Purchase Requisition
+                    </button>
+                    <!-- Pulse Notification Badge for Approved Requisitions -->
+                    <div id="approvedReqBadgePulse" class="hidden absolute -top-2 -right-2 z-20">
+                        <span class="relative flex h-5 w-5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span id="approvedReqPulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-emerald-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
+                        </span>
+                    </div>
+                </div>
                 <button id="addPurchaseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-blue-100 active:scale-95">
                     <i class='bx bx-plus-circle text-lg'></i>
                     New Purchase Order
@@ -324,10 +333,9 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Req ID</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Items</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Department</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requester / Dept</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody id="requisitionsTableBody" class="bg-white divide-y divide-gray-200">
@@ -1223,6 +1231,7 @@ async function loadApprovedRequisitions() {
         
         if (result.success) {
             displayApprovedRequisitions(result.data || []);
+            updateRequisitionBadge(result.data ? result.data.length : 0);
         } else {
             throw new Error(result.message || 'Failed to load requisitions');
         }
@@ -1230,12 +1239,25 @@ async function loadApprovedRequisitions() {
         console.error('Error loading requisitions:', error);
         elements.requisitionsTableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="px-6 py-8 text-center text-red-500">
+                <td colspan="5" class="px-6 py-8 text-center text-red-500">
                     <i class='bx bx-error-circle text-4xl mb-2'></i>
                     <p>Error loading requisitions: ${error.message}</p>
                 </td>
             </tr>
         `;
+    }
+}
+
+function updateRequisitionBadge(count) {
+    const badge = document.getElementById('approvedReqBadgePulse');
+    const countDisplay = document.getElementById('approvedReqPulseCount');
+    if (badge && countDisplay) {
+        if (count > 0) {
+            countDisplay.textContent = count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
     }
 }
 
@@ -1245,7 +1267,7 @@ function displayApprovedRequisitions(requisitions) {
     if (requisitions.length === 0) {
         elements.requisitionsTableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
                     <i class='bx bx-list-check text-4xl text-gray-300 mb-2'></i>
                     <p>No approved requisitions found</p>
                 </td>
@@ -1255,7 +1277,7 @@ function displayApprovedRequisitions(requisitions) {
     }
     
     elements.requisitionsTableBody.innerHTML = requisitions.map(req => {
-        const items = Array.isArray(req.req_items) ? req.req_items : [];
+        const items = Array.isArray(req.req_items) ? req.req_items : (typeof req.req_items === 'string' ? JSON.parse(req.req_items) : []);
         const itemsString = items.slice(0, 2).map(item => 
             typeof item === 'object' ? item.name : item
         ).join(', ') + (items.length > 2 ? '...' : '');
@@ -1271,32 +1293,111 @@ function displayApprovedRequisitions(requisitions) {
                     </div>
                     <small class="text-xs text-gray-500">${items.length} item(s)</small>
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                    ${req.req_department || 'N/A'}
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                    ${formatCurrency(req.req_estimated_cost || 0)}
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <div class="text-sm font-bold text-gray-800">${req.req_requester || 'Unknown'}</div>
+                    <div class="text-xs text-gray-500">${req.req_dept || 'N/A'}</div>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    ${formatDate(req.req_needed_date || req.created_at)}
+                    ${formatDate(req.req_date || req.created_at)}
                 </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm">
-                    <div class="flex gap-2">
-                        <button onclick="viewRequisition('${req.id}')" 
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-right">
+                    <div class="flex justify-end gap-2">
+                        <button onclick="viewRequisitionInModal(${req.id})" 
                                 class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                 title="View Details">
-                            <i class='bx bx-show text-xl'></i>
+                            <i class='bx bx-show-alt text-xl'></i>
                         </button>
                         <button onclick="convertReqToPOInModal('${req.id}')" 
-                                class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-xs font-bold flex items-center gap-1">
-                            <i class='bx bx-transfer-alt'></i>
-                            Convert to PO
+                                class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                title="Convert to PO">
+                            <i class='bx bx-transfer-alt text-xl'></i>
                         </button>
                     </div>
                 </td>
             </tr>
         `;
     }).join('');
+}
+
+async function viewRequisitionInModal(id) {
+    try {
+        showLoading();
+        const response = await fetch(`${PSM_REQUISITIONS_API}/${id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const result = await response.json();
+        if (result.success && result.data) {
+            const req = result.data;
+            const items = Array.isArray(req.req_items) ? req.req_items : (typeof req.req_items === 'string' ? JSON.parse(req.req_items) : []);
+            
+            // Format items list for Swal
+            const itemsHtml = items.map(item => `
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-100 text-left">
+                    <i class='bx bx-check text-green-500'></i>
+                    <span class="text-sm">${typeof item === 'object' ? item.name : item}</span>
+                </div>
+            `).join('');
+
+            Swal.fire({
+                title: `<div class="flex items-center gap-2 justify-center"><i class='bx bx-file text-blue-600'></i> Requisition Details</div>`,
+                html: `
+                    <div class="space-y-4 text-left">
+                        <div class="grid grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">
+                            <div>
+                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requisition ID</p>
+                                <p class="text-sm font-bold text-blue-600">${req.req_id || `REQ-${req.id}`}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Date</p>
+                                <p class="text-sm font-bold text-gray-700">${formatDate(req.req_date)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requester</p>
+                                <p class="text-sm font-bold text-gray-700">${req.req_requester || 'Unknown'}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>
+                                <p class="text-sm font-bold text-gray-700">${req.req_dept || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Requested Items</p>
+                            <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                        ${req.req_note ? `
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Notes</p>
+                            <p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">${req.req_note}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                `,
+                width: '600px',
+                showCloseButton: true,
+                showConfirmButton: false,
+                customClass: {
+                    container: 'z-[70]'
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error viewing requisition:', error);
+        showNotification('Error: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
 }
 
 // Global scope helper to convert req from modal
