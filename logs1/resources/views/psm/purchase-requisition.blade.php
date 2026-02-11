@@ -493,7 +493,7 @@
         vendorSelect.innerHTML = '<option value="">Choose a Vendor Company...</option>';
         vendors.forEach(vendor => {
             const option = document.createElement('option');
-            option.value = vendor.id;
+            option.value = vendor.ven_id; // Changed from vendor.id to vendor.ven_id
             option.textContent = `${vendor.ven_company_name} (${vendor.ven_type})`;
             vendorSelect.appendChild(option);
         });
@@ -597,11 +597,11 @@
 
     // Event Listeners for Vendor Selection
     vendorSelect.addEventListener('change', (e) => {
-        const vendorId = e.target.value;
-        if (vendorId) {
-            const vendor = allVendors.find(v => v.id == vendorId);
+        const venId = e.target.value;
+        if (venId) {
+            const vendor = allVendors.find(v => v.ven_id == venId);
             sideModalVendorName.textContent = `${vendor.ven_company_name} Products`;
-            fetchVendorProducts(vendorId);
+            fetchVendorProducts(venId);
         } else {
             vendorProductsTableBody.innerHTML = `
                 <tr>
