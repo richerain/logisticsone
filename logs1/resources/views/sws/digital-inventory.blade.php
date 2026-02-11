@@ -152,49 +152,85 @@
             </div>
             <!-- Quick Actions section end -->
         </div>
+
+        <!-- Relocated Search and Filter section -->
+        <div class="mt-8 pt-6 border-t border-gray-100">
+            <div class="flex flex-col md:flex-row items-center gap-4">
+                <div class="relative flex-1 w-full">
+                    <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
+                    <input id="di_search" type="text" placeholder="Search item, code, category, stored from..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all duration-200 outline-none text-sm" />
+                </div>
+                <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200 w-full md:w-auto overflow-x-auto">
+                    <button class="btn btn-sm border-none bg-white shadow-sm text-brand-primary font-bold px-4 rounded-lg hover:bg-white transition-all duration-200 whitespace-nowrap" data-di-status="">All</button>
+                    <button class="btn btn-sm border-none bg-transparent text-gray-500 font-medium px-4 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="In Stock">In Stock</button>
+                    <button class="btn btn-sm border-none bg-transparent text-gray-500 font-medium px-4 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Low Stock">Low Stock</button>
+                    <button class="btn btn-sm border-none bg-transparent text-gray-500 font-medium px-4 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Out of Stock">Out of Stock</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-<!-- digital inventory main table area start -->
-<div class="bg-white rounded-lg shadow-lg p-6 mt-5">
-    <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">Inventory</h3>
-    </div>
-    <!-- stats-card section start -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div id="di_card_total" class="stat-card bg-blue-50 p-4 rounded-lg text-center cursor-pointer">
-            <i class='bx bx-package text-3xl text-blue-600 mb-2'></i>
-            <h3 class="font-semibold text-blue-800">Total Items</h3>
-            <p id="totalItems" class="text-2xl font-bold text-blue-600">0</p>
-        </div>
-        <div class="stat-card bg-green-50 p-4 rounded-lg text-center">
-            <i class='bx bx-money text-3xl text-green-600 mb-2'></i>
-            <h3 class="font-semibold text-green-800">Total Value</h3>
-            <p id="totalValue" class="text-2xl font-bold text-green-600">₱0.00</p>
-        </div>
-        <div id="di_card_low" class="stat-card bg-yellow-50 p-4 rounded-lg text-center cursor-pointer">
-            <i class='bx bx-error text-3xl text-yellow-600 mb-2'></i>
-            <h3 class="font-semibold text-yellow-800">Low Stock</h3>
-            <p id="lowStockItems" class="text-2xl font-bold text-yellow-600">0</p>
-        </div>
-        <div id="di_card_out" class="stat-card bg-red-50 p-4 rounded-lg text-center cursor-pointer">
-            <i class='bx bx-error-circle text-3xl text-red-600 mb-2'></i>
-            <h3 class="font-semibold text-red-800">Out of Stock</h3>
-            <p id="outOfStockItems" class="text-2xl font-bold text-red-600">0</p>
-        </div>
-    </div>
-    <!-- stats-card section end -->
-    <!-- digital inventory main table area section start -->
-    <div class="mb-4 flex items-center gap-3">
-        <input id="di_search" type="text" placeholder="Search item, code, category, stored from" class="px-3 py-2 border border-gray-300 rounded-lg flex-1" />
-        <div class="flex items-center gap-2">
-            <button class="btn btn-ghost btn-sm" data-di-status="">All</button>
-            <button class="btn btn-ghost btn-sm" data-di-status="In Stock">In Stock</button>
-            <button class="btn btn-ghost btn-sm" data-di-status="Low Stock">Low Stock</button>
-            <button class="btn btn-ghost btn-sm" data-di-status="Out of Stock">Out of Stock</button>
-        </div>
-    </div>
 
-    <div class="overflow-x-auto">
+<!-- Inventory Metrics section start -->
+<div class="mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div id="di_card_total" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                    <i class='bx bx-package text-2xl'></i>
+                </div>
+                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Items</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Total Items</h3>
+            <p id="totalItems" class="text-2xl font-black text-gray-800">0</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
+                    <i class='bx bx-money text-2xl'></i>
+                </div>
+                <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">Value</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Total Value</h3>
+            <p id="totalValue" class="text-2xl font-black text-gray-800">₱0.00</p>
+        </div>
+
+        <div id="di_card_low" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-yellow-600 group-hover:text-white transition-all duration-300">
+                    <i class='bx bx-error text-2xl'></i>
+                </div>
+                <span class="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-lg">Alert</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Low Stock</h3>
+            <p id="lowStockItems" class="text-2xl font-black text-gray-800">0</p>
+        </div>
+
+        <div id="di_card_out" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all duration-300">
+                    <i class='bx bx-error-circle text-2xl'></i>
+                </div>
+                <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg">Critical</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Out of Stock</h3>
+            <p id="outOfStockItems" class="text-2xl font-black text-gray-800">0</p>
+        </div>
+    </div>
+</div>
+<!-- Inventory Metrics section end -->
+
+<!-- digital inventory main table area start -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+    <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100">
+        <div class="flex items-center gap-2">
+            <div class="w-1.5 h-6 bg-brand-primary rounded-full"></div>
+            <h3 class="text-lg font-bold text-gray-800 tracking-tight">Inventory Details</h3>
+        </div>
+    </div>
+    <div class="p-6">
+        <div class="overflow-x-auto">
         <table class="table table-zebra w-full rounded-lg">
             <thead>
                 <tr class="bg-gray-700 font-bold text-white">
