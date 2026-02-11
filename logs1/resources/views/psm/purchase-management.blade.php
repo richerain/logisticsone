@@ -1319,7 +1319,7 @@ function displayApprovedRequisitions(requisitions) {
     }).join('');
 }
 
-async function viewRequisitionInModal(id) {
+window.viewRequisitionInModal = async function(id) {
     try {
         showLoading();
         const response = await fetch(`${PSM_REQUISITIONS_API}/${id}`, {
@@ -2091,9 +2091,21 @@ const Toast = Swal.mixin({
 });
 
 function showNotification(message, type = 'info') { 
-    Toast.fire({ 
-        icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info', 
-        title: message 
-    }); 
+    if (typeof Toast !== 'undefined') {
+        Toast.fire({ 
+            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info', 
+            title: message 
+        }); 
+    } else {
+        // Fallback if Toast is not yet initialized
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
+            title: message
+        });
+    }
 }
 </script>

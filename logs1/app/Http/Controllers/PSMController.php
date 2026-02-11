@@ -593,6 +593,24 @@ class PSMController extends Controller
     }
 
     /**
+     * Get single requisition
+     */
+    public function getRequisition($id)
+    {
+        try {
+            $result = $this->psmService->getRequisition($id);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch requisition: '.$e->getMessage(),
+                'data' => null,
+            ], 500);
+        }
+    }
+
+    /**
      * Update requisition status
      */
     public function updateRequisitionStatus(Request $request, $id)

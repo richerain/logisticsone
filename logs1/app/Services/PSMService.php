@@ -804,6 +804,36 @@ class PSMService
     }
 
     /**
+     * Get requisition by ID
+     */
+    public function getRequisition($id)
+    {
+        try {
+            $requisition = $this->psmRepository->getRequisition($id);
+
+            if ($requisition) {
+                return [
+                    'success' => true,
+                    'data' => $requisition,
+                    'message' => 'Requisition retrieved successfully',
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Requisition not found',
+                    'data' => null,
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch requisition: '.$e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
+
+    /**
      * Create new requisition
      */
     public function createRequisition($data)
