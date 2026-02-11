@@ -497,6 +497,7 @@ async function initPurchaseManagement() {
     initializeEventListeners();
     loadPurchases();
     loadActiveVendors();
+    loadApprovedRequisitions();
 }
 
 if (document.readyState === 'loading') {
