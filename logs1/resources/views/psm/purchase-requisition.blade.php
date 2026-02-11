@@ -1,7 +1,7 @@
-<!-- resources/views/psm/request-purchases.blade.php -->
+<!-- resources/views/psm/purchase-requisition.blade.php -->
 <div class="mb-6 flex items-center justify-between gap-4">
     <div class="flex items-center">
-        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bx-clipboard'></i>Request Purchases</h2>
+        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bx-clipboard'></i>Purchase Requisition</h2>
     </div>
     <div class="text-right">
         <span class="text-md text-gray-600">Procurement & Sourcing Management</span>
@@ -11,16 +11,16 @@
 <div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Header Section -->
     <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">Purchase Requests</h3>
+        <h3 class="text-xl font-semibold text-gray-800">Requisition Records</h3>
         <div class="flex gap-3">
-            <button id="addRequestBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+            <button id="addRequisitionBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
                 <i class='bx bx-plus'></i>
-                New Purchase Request
+                New Requisition
             </button>
         </div>
     </div>
 
-    <!-- Stats Section (Static Design) -->
+    <!-- Stats Section -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow">
             <div class="flex items-center">
@@ -28,7 +28,7 @@
                     <i class='bx bx-file text-white text-2xl'></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-blue-700">Total Requests</p>
+                    <p class="text-sm font-medium text-blue-700">Total Requisitions</p>
                     <p class="text-2xl font-bold text-blue-900">0</p>
                 </div>
             </div>
@@ -76,7 +76,7 @@
         <table class="w-full text-left">
             <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
-                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Request ID</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Requisition ID</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Requester</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Department</th>
@@ -89,7 +89,7 @@
                     <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                         <div class="flex flex-col items-center gap-2">
                             <i class='bx bx-clipboard text-4xl text-gray-300'></i>
-                            <p>No purchase requests found</p>
+                            <p>No requisition records found</p>
                         </div>
                     </td>
                 </tr>

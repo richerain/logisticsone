@@ -176,7 +176,7 @@ Route::get('/login', function (Request $request) {
                 'alms-maintenance-management' => 'alms.maintenance-management',
                 'dtlr-document-tracker' => 'dtlr.document-tracker',
                 'dtlr-logistics-record' => 'dtlr.logistics-record',
-                'psm-request-purchases' => 'psm.request-purchases',
+                'psm-purchase-requisition' => 'psm.purchase-requisition',
                 'psm-purchase' => 'psm.purchase-management',
                 'psm-budgeting' => 'psm.budgeting',
                 'psm-vendor-management' => 'psm.vendor-management',

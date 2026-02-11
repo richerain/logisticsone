@@ -118,8 +118,8 @@
     </button>
     <div class="submenu hidden mt-1">
       <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
-        <a href="#" data-module="psm-request-purchases" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bx-clipboard'></i> Request Purchases
+        <a href="#" data-module="psm-purchase-requisition" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bx-clipboard'></i> Purchase Requisition
         </a>
         <a href="#" data-module="psm-purchase" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bxs-purchase-tag'></i> Purchase Management
