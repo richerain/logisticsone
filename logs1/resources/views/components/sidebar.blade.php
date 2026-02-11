@@ -82,32 +82,6 @@
     @if(!$isVendor && in_array($role, ['staff', 'manager', 'admin', 'superadmin']))
     <div class="text-xs font-bold text-gray-400 tracking-wider px-2 mt-6 mb-2">TEAM MANAGEMENT</div>
 
-    <!-- Procurement & Sourcing Management -->
-    <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
-      <span class="flex items-center gap-3 text-left">
-        <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
-          <i class='bx bxs-cart text-xl'></i>
-        </span>
-        <span class="leading-tight">Procurement & Sourcing Management</span>
-      </span>
-      <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
-    </button>
-    <div class="submenu hidden mt-1">
-      <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
-        <a href="#" data-module="psm-purchase" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-purchase-tag'></i> Purchase Management
-        </a>
-        @if(in_array($role, ['superadmin', 'admin', 'manager']))
-        <a href="#" data-module="psm-budgeting" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-wallet'></i> Budgeting
-        </a>
-        @endif
-        <a href="#" data-module="psm-vendor-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-user-detail'></i> Logistics Vendors
-        </a>
-      </div>
-    </div>
-
     <!-- Smart Warehousing System -->
     <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
       <span class="flex items-center gap-3 text-left">
@@ -120,14 +94,43 @@
     </button>
     <div class="submenu hidden mt-1">
       <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
-        <a href="#" data-module="sws-inventory-flow" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bx-sync'></i> Inventory Flow
-        </a>
         <a href="#" data-module="sws-digital-inventory" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bxs-archive-in'></i> Digital Inventory
         </a>
+        <a href="#" data-module="sws-inventory-flow" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bx-sync'></i> Inventory Flow
+        </a>
         <a href="#" data-module="sws-warehouse-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bx-store'></i> Warehouse Management
+        </a>
+      </div>
+    </div>
+
+    <!-- Procurement & Sourcing Management -->
+    <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
+      <span class="flex items-center gap-3 text-left">
+        <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
+          <i class='bx bxs-cart text-xl'></i>
+        </span>
+        <span class="leading-tight">Procurement & Sourcing Management</span>
+      </span>
+      <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
+    </button>
+    <div class="submenu hidden mt-1">
+      <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
+        <a href="#" data-module="psm-request-purchases" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bx-clipboard'></i> Request Purchases
+        </a>
+        <a href="#" data-module="psm-purchase" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bxs-purchase-tag'></i> Purchase Management
+        </a>
+        @if(in_array($role, ['superadmin', 'admin', 'manager']))
+        <a href="#" data-module="psm-budgeting" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bxs-wallet'></i> Budgeting
+        </a>
+        @endif
+        <a href="#" data-module="psm-vendor-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bxs-user-detail'></i> Logistics Vendors
         </a>
       </div>
     </div>
