@@ -9,53 +9,93 @@
 </div>
 
 <!-- Stats Section -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white border-l-4 border-blue-500 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs font-bold text-blue-500 uppercase tracking-wider">Total Requisitions</p>
-                <p id="totalReqCount" class="text-2xl font-bold text-gray-800">0</p>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <!-- Total Requisitions -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-file text-6xl text-blue-600'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                    <i class='bx bx-file text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Requisitions</h4>
             </div>
-            <div class="p-3 bg-blue-50 rounded-full">
-                <i class='bx bx-file text-blue-500 text-2xl'></i>
+            <div class="flex items-end gap-2">
+                <span id="totalReqCount" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs font-bold text-gray-400 mb-1 uppercase">Records</span>
             </div>
         </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-500"></div>
     </div>
     
-    <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs font-bold text-green-500 uppercase tracking-wider">Approved</p>
-                <p id="approvedReqCount" class="text-2xl font-bold text-gray-800">0</p>
+    <!-- Approved -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-check-circle text-6xl text-green-600'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-green-50 rounded-xl text-green-600">
+                    <i class='bx bx-check-circle text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Approved</h4>
             </div>
-            <div class="p-3 bg-green-50 rounded-full">
-                <i class='bx bx-check-circle text-green-500 text-2xl'></i>
+            <div class="flex items-end gap-2">
+                <span id="approvedReqCount" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs font-bold text-green-500 mb-1 uppercase">Cleared</span>
             </div>
         </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-green-500"></div>
     </div>
     
-    <div class="bg-white border-l-4 border-yellow-500 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs font-bold text-yellow-500 uppercase tracking-wider">Pending</p>
-                <p id="pendingReqCount" class="text-2xl font-bold text-gray-800">0</p>
+    <!-- Pending -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+        <!-- Pulse Notification Badge -->
+        <div id="pendingBadgePulse" class="hidden absolute top-4 right-4 z-20">
+            <span class="relative flex h-6 w-6">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                <span id="pendingPulseCount" class="relative inline-flex rounded-full h-6 w-6 bg-yellow-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
+            </span>
+        </div>
+        
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-time text-6xl text-yellow-600'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
+                    <i class='bx bx-time text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending</h4>
             </div>
-            <div class="p-3 bg-yellow-50 rounded-full">
-                <i class='bx bx-time text-yellow-500 text-2xl'></i>
+            <div class="flex items-end gap-2">
+                <span id="pendingReqCount" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs font-bold text-yellow-600 mb-1 uppercase">Waiting</span>
             </div>
         </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-yellow-500"></div>
     </div>
     
-    <div class="bg-white border-l-4 border-red-500 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs font-bold text-red-500 uppercase tracking-wider">Rejected</p>
-                <p id="rejectedReqCount" class="text-2xl font-bold text-gray-800">0</p>
+    <!-- Rejected -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-x-circle text-6xl text-red-600'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-red-50 rounded-xl text-red-600">
+                    <i class='bx bx-x-circle text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Rejected</h4>
             </div>
-            <div class="p-3 bg-red-50 rounded-full">
-                <i class='bx bx-x-circle text-red-500 text-2xl'></i>
+            <div class="flex items-end gap-2">
+                <span id="rejectedReqCount" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs font-bold text-red-500 mb-1 uppercase">Denied</span>
             </div>
         </div>
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-red-500"></div>
     </div>
 </div>
 
@@ -454,6 +494,18 @@
         document.getElementById('approvedReqCount').textContent = stats.approved || 0;
         document.getElementById('pendingReqCount').textContent = stats.pending || 0;
         document.getElementById('rejectedReqCount').textContent = stats.rejected || 0;
+
+        // Pulse Notification for Pending
+        const pendingPulse = document.getElementById('pendingBadgePulse');
+        const pendingPulseCount = document.getElementById('pendingPulseCount');
+        const pendingCount = parseInt(stats.pending) || 0;
+
+        if (pendingCount > 0) {
+            pendingPulseCount.textContent = pendingCount;
+            pendingPulse.classList.remove('hidden');
+        } else {
+            pendingPulse.classList.add('hidden');
+        }
     }
 
     function updatePagination(meta) {
