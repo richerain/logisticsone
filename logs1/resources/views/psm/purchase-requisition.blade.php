@@ -221,16 +221,6 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Select Vendor (Optional)</label>
-                    <div class="relative">
-                        <i class='bx bx-buildings absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
-                        <select id="req_vendor_select" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                            <option value="">Choose a Vendor Company...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Requested Items *</label>
                     <div id="itemsContainer" class="space-y-2 mb-2">
                         <div class="flex gap-2 item-row">
@@ -323,35 +313,102 @@
 
 <!-- Vendor Products Side Modal -->
 <div id="vendorProductsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[55]">
-    <div class="bg-white rounded-xl p-6 w-full max-w-xl max-h-[85vh] overflow-y-auto shadow-2xl transition-all transform -translate-x-full md:-translate-x-[60%] lg:-translate-x-[75%]">
-        <div class="flex justify-between items-center mb-4 border-b pb-2">
-            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <i class='bx bx-package text-blue-600'></i>
-                <span id="sideModalVendorName">Vendor Products</span>
-            </h3>
-            <button type="button" id="closeSideModal" class="text-gray-400 hover:text-gray-600">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        
-        <div class="mb-4 relative">
-            <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
-            <input type="text" id="productSearch" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+    <div class="flex gap-6 w-full max-w-7xl px-4 items-start">
+        <!-- Left Side: Vendor Product Modal -->
+        <div class="bg-white rounded-xl p-6 w-full max-w-xl max-h-[85vh] overflow-y-auto shadow-2xl transition-all transform">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class='bx bx-package text-blue-600'></i>
+                    <span id="sideModalVendorName">Vendor Products</span>
+                </h3>
+            </div>
+
+            <!-- Vendor Selection moved here -->
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Select Vendor Company</label>
+                <div class="relative">
+                    <i class='bx bx-buildings absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
+                    <select id="req_vendor_select" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                        <option value="">Choose a Vendor Company...</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-4 relative">
+                <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
+                <input type="text" id="productSearch" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+            </div>
+
+            <div class="overflow-hidden border border-gray-100 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Product</th>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-4 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vendorProductsTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="3" class="px-4 py-8 text-center text-gray-500 text-sm">
+                                Please select a vendor to see products
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="overflow-hidden border border-gray-100 rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Product</th>
-                        <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Description</th>
-                        <th class="px-4 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="vendorProductsTableBody" class="bg-white divide-y divide-gray-200">
-                    <!-- Products will be injected here -->
-                </tbody>
-            </table>
+        <!-- Right Side: New Purchase Requisition Modal Content -->
+        <div id="sideRequisitionContainer" class="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl transition-all transform">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h3 class="text-xl font-bold text-gray-800">New Purchase Requisition</h3>
+                <button type="button" id="closeSideModal" class="text-gray-400 hover:text-gray-600">
+                    <i class='bx bx-x text-2xl'></i>
+                </button>
+            </div>
+            
+            <form id="sideRequisitionForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Requester Name *</label>
+                        <input type="text" id="side_req_requester" name="req_requester" required placeholder="Enter requester name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Department *</label>
+                        <select id="side_req_dept" name="req_dept" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Department</option>
+                            <option value="Human Resource Department">Human Resource Department</option>
+                            <option value="Core Transaction Office">Core Transaction Office</option>
+                            <option value="Logistics Office">Logistics Office</option>
+                            <option value="Administrative Office">Administrative Office</option>
+                            <option value="Financial Department">Financial Department</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Requested Items *</label>
+                    <div id="sideItemsContainer" class="space-y-2 mb-2">
+                        <!-- Items will be injected here via JS -->
+                    </div>
+                    <button type="button" id="sideAddItemBtn" class="text-sm text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                        <i class='bx bx-plus-circle'></i> Add Another Item
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Notes / Remarks</label>
+                    <textarea id="side_req_note" name="req_note" rows="3" placeholder="Additional details about the requisition..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-6 border-t">
+                    <button type="button" id="sideCancelBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold transition-colors">Close</button>
+                    <button type="submit" id="sideSubmitBtn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-colors flex items-center gap-2">
+                        <i class='bx bx-send'></i> Submit Requisition
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -405,6 +462,12 @@
     const vendorProductsTableBody = document.getElementById('vendorProductsTableBody');
     const productSearchInput = document.getElementById('productSearch');
     const sideModalVendorName = document.getElementById('sideModalVendorName');
+    
+    // Side Requisition Elements
+    const sideRequisitionForm = document.getElementById('sideRequisitionForm');
+    const sideItemsContainer = document.getElementById('sideItemsContainer');
+    const sideAddItemBtn = document.getElementById('sideAddItemBtn');
+    const sideCancelBtn = document.getElementById('sideCancelBtn');
     
     let allVendors = [];
     let currentVendorProducts = [];
@@ -460,6 +523,17 @@
             p.prod_id.toLowerCase().includes(searchTerm)
         );
 
+        if (filtered.length === 0) {
+            vendorProductsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="px-4 py-8 text-center text-gray-500 text-sm">
+                        No products found matching "${searchTerm}"
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
         vendorProductsTableBody.innerHTML = filtered.map(p => `
             <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-4 py-3 whitespace-nowrap">
@@ -470,7 +544,7 @@
                     ${p.prod_desc || '-'}
                 </td>
                 <td class="px-4 py-3 text-right">
-                    <button type="button" onclick="window.addItemToRequisition('${p.prod_name}')" 
+                    <button type="button" onclick="window.addItemToRequisition('${p.prod_name.replace(/'/g, "\\'")}')" 
                         class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all active:scale-90">
                         <i class='bx bx-plus text-lg'></i>
                     </button>
@@ -485,24 +559,24 @@
         } else {
             selectedItems.set(itemName, 1);
         }
-        updateItemsContainer();
+        updateSideItemsContainer();
         Toast.fire({ icon: 'success', title: `Added ${itemName} to list` });
     };
 
-    function updateItemsContainer() {
-        itemsContainer.innerHTML = '';
+    function updateSideItemsContainer() {
+        sideItemsContainer.innerHTML = '';
         if (selectedItems.size === 0) {
-            addEmptyItemRow();
+            addEmptySideItemRow();
             return;
         }
 
         selectedItems.forEach((count, name) => {
             const displayValue = count > 1 ? `${name} (x${count})` : name;
-            addItemRow(displayValue, false, name);
+            addSideItemRow(displayValue, false, name);
         });
     }
 
-    function addItemRow(value = '', disabled = false, originalName = null) {
+    function addSideItemRow(value = '', disabled = false, originalName = null) {
         const div = document.createElement('div');
         div.className = 'flex gap-2 item-row';
         div.dataset.originalName = originalName || value;
@@ -510,11 +584,15 @@
             <input type="text" name="items[]" required value="${value}" ${disabled ? 'disabled' : ''} 
                 placeholder="Enter item name/description" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             ${!disabled ? `
-            <button type="button" class="remove-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+            <button type="button" class="remove-side-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                 <i class='bx bx-trash text-xl'></i>
             </button>` : ''}
         `;
-        itemsContainer.appendChild(div);
+        sideItemsContainer.appendChild(div);
+    }
+
+    function addEmptySideItemRow() {
+        addSideItemRow('', false);
     }
 
     // Event Listeners for Vendor Selection
@@ -524,9 +602,15 @@
             const vendor = allVendors.find(v => v.id == vendorId);
             sideModalVendorName.textContent = `${vendor.ven_company_name} Products`;
             fetchVendorProducts(vendorId);
-            vendorProductsModal.classList.remove('hidden');
         } else {
-            vendorProductsModal.classList.add('hidden');
+            vendorProductsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="px-4 py-8 text-center text-gray-500 text-sm">
+                        Please select a vendor to see products
+                    </td>
+                </tr>
+            `;
+            sideModalVendorName.textContent = 'Vendor Products';
         }
     });
 
@@ -534,27 +618,18 @@
         vendorProductsModal.classList.add('hidden');
     });
 
+    sideCancelBtn.addEventListener('click', () => {
+        vendorProductsModal.classList.add('hidden');
+    });
+
     productSearchInput.addEventListener('input', () => {
         renderVendorProducts(currentVendorProducts);
     });
 
-    // Modified showModal to fetch vendors
-    const originalShowModal = showModal;
-    showModal = function(mode = 'new', data = null) {
-        selectedItems.clear();
-        if (mode === 'new') {
-            fetchVendors();
-            vendorSelect.classList.remove('hidden');
-        } else {
-            vendorSelect.classList.add('hidden');
-            vendorProductsModal.classList.add('hidden');
-        }
-        originalShowModal(mode, data);
-    };
+    sideAddItemBtn.addEventListener('click', addEmptySideItemRow);
 
-    // Modified itemsContainer click handler to handle selectedItems map
-    itemsContainer.addEventListener('click', (e) => {
-        if (e.target.closest('.remove-item')) {
+    sideItemsContainer.addEventListener('click', (e) => {
+        if (e.target.closest('.remove-side-item')) {
             const row = e.target.closest('.item-row');
             const name = row.dataset.originalName;
             
@@ -562,23 +637,69 @@
                 selectedItems.delete(name);
             }
             
-            const rows = itemsContainer.querySelectorAll('.item-row');
+            const rows = sideItemsContainer.querySelectorAll('.item-row');
             if (rows.length > 1) row.remove();
             else {
                 row.remove();
-                addEmptyItemRow();
+                addEmptySideItemRow();
             }
         }
     });
 
-    // Modified form reset to clear map
-    form.addEventListener('reset', () => {
-        selectedItems.clear();
-        vendorSelect.value = '';
-        vendorProductsModal.classList.add('hidden');
+    // Modified sideRequisitionForm submit
+    sideRequisitionForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(sideRequisitionForm);
+        const data = {
+            req_id: generateReqID(),
+            req_date: new Date().toISOString().split('T')[0],
+            req_requester: formData.get('req_requester'),
+            req_dept: formData.get('req_dept'),
+            req_note: formData.get('req_note'),
+            req_items: Array.from(formData.getAll('items[]')).filter(i => i.trim() !== ''),
+            req_status: 'Pending'
+        };
+
+        if (data.req_items.length === 0) {
+            Toast.fire({ icon: 'error', title: 'Please add at least one item' });
+            return;
+        }
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${JWT_TOKEN}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                Toast.fire({ icon: 'success', title: 'Requisition submitted successfully' });
+                vendorProductsModal.classList.add('hidden');
+                fetchRequisitions(1);
+            } else {
+                Toast.fire({ icon: 'error', title: result.message || 'Failed to submit' });
+            }
+        } catch (error) {
+            console.error('Error submitting requisition:', error);
+            Toast.fire({ icon: 'error', title: 'Error connecting to server' });
+        }
     });
 
-    // Status Modal Elements
+    // Handle New Requisition Button
+    addBtn.addEventListener('click', () => {
+        sideRequisitionForm.reset();
+        selectedItems.clear();
+        updateSideItemsContainer();
+        fetchVendors();
+        vendorProductsModal.classList.remove('hidden');
+    });
+
+    // Original Modal Logic for View/Edit (remains for viewing)
+    // Elements
     const statusModal = document.getElementById('statusModal');
     const cancelStatusBtn = document.getElementById('cancelStatusBtn');
     const updateStatusBtn = document.getElementById('updateStatusBtn');
