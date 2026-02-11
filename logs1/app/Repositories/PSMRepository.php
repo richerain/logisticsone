@@ -316,7 +316,10 @@ class PSMRepository
      */
     public function getProduct($id, $columns = ['*'])
     {
-        return Product::select($columns)->find($id);
+        return Product::select($columns)
+            ->where('id', $id)
+            ->orWhere('prod_id', $id)
+            ->first();
     }
 
     /**
