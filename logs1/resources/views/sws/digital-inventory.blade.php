@@ -254,20 +254,20 @@
     <div class="p-6">
         <div class="overflow-x-auto">
         <table class="table table-zebra w-full rounded-lg">
-            <thead>
-                <tr class="bg-gray-700 font-bold text-white">
-                    <th class="whitespace-nowrap">Item Code</th>
-                    <th class="whitespace-nowrap">SKU</th>
-                    <th class="whitespace-nowrap">Item Name</th>
-                    <th class="whitespace-nowrap">Category</th>
-                    <th class="whitespace-nowrap">Stored From</th>
-                    <th class="whitespace-nowrap">Current Stock</th>
-                    <th class="whitespace-nowrap">Max Stock</th>
-                    <th class="whitespace-nowrap">Unit Price</th>
-                    <th class="whitespace-nowrap">Total Value</th>
-                    <th class="whitespace-nowrap">Status</th>
-                    <th class="whitespace-nowrap">Last Updated</th>
-                    <th class="whitespace-nowrap">Actions</th>
+            <thead class="bg-gray-800 font-bold text-white">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Item Code</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Product ID</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Item Name</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Category</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Stored From</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Current Stock</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Max Stock</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Unit Price</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Total Value</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Last Updated</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase text-right">Actions</th>
                 </tr>
             </thead>
             <tbody id="inventoryTableBody">
@@ -1477,43 +1477,86 @@ function renderInventoryItems() {
         const unitPrice = item.unit_price || 0;
         const totalValue = item.total_value || 0;
         const status = item.status || 'Unknown';
-        const statusClass = item.status_class || 'badge-info';
-        const statusIcon = (status === 'In Stock') ? "<i class='bx bx-check-circle mr-1'></i>" :
-                           (status === 'Low Stock') ? "<i class='bx bx-error mr-1'></i>" :
-                           (status === 'Out of Stock') ? "<i class='bx bx-error-circle mr-1'></i>" :
-                           "<i class='bx bx-help-circle mr-1 text-gray-600'></i>";
+        
+        // Status & Category Badge Helper Functions
+        const getStatusBadgeClass = (status) => {
+            switch ((status || '').toLowerCase()) {
+                case 'in stock': return "bg-green-700 text-white shadow-sm border border-green-800";
+                case 'low stock': return "bg-yellow-600 text-white shadow-sm border border-yellow-700";
+                case 'out of stock': return "bg-red-700 text-white shadow-sm border border-red-800";
+                default: return "bg-gray-600 text-white border border-gray-700";
+            }
+        };
+
+        const getStatusIcon = (status) => {
+            switch ((status || '').toLowerCase()) {
+                case 'in stock': return "<i class='bx bx-check-circle'></i>";
+                case 'low stock': return "<i class='bx bx-time-five'></i>";
+                case 'out of stock': return "<i class='bx bx-x-circle'></i>";
+                default: return "<i class='bx bx-help-circle'></i>";
+            }
+        };
+
+        const getCategoryBadgeClass = (cat) => {
+            switch ((cat || '').toLowerCase()) {
+                case 'equipment': return "bg-blue-700 text-white shadow-sm border border-blue-800";
+                case 'supplies': return "bg-purple-700 text-white shadow-sm border border-purple-800";
+                case 'furniture': return "bg-orange-700 text-white shadow-sm border border-orange-800";
+                case 'automotive': return "bg-slate-700 text-white shadow-sm border border-slate-800";
+                default: return "bg-gray-600 text-white border border-gray-700";
+            }
+        };
+
+        const getCategoryIcon = (cat) => {
+            switch ((cat || '').toLowerCase()) {
+                case 'equipment': return "<i class='bx bx-wrench'></i>";
+                case 'supplies': return "<i class='bx bx-package'></i>";
+                case 'furniture': return "<i class='bx bx-chair'></i>";
+                case 'automotive': return "<i class='bx bx-car'></i>";
+                default: return "<i class='bx bx-category'></i>";
+            }
+        };
+
         const lastUpdated = item.last_updated || 'N/A';
         
         html += `
-            <tr>
-                <td class="font-semibold font-mono whitespace-nowrap">${itemCode}</td>
-                <td class="font-mono text-sm whitespace-nowrap">${sku}</td>
-                <td class="whitespace-nowrap">${itemName}</td>
-                <td class="whitespace-nowrap">${category}</td>
-                <td class="whitespace-nowrap">${storedFrom}</td>
-                <td class="text-center whitespace-nowrap">${formatNumber(currentStock)}</td>
-                <td class="text-center whitespace-nowrap">${formatNumber(maxStock)}</td>
-                <td class="text-right whitespace-nowrap">${formatCurrency(unitPrice)}</td>
-                <td class="text-right font-semibold whitespace-nowrap">${formatCurrency(totalValue)}</td>
-                <td class="whitespace-nowrap">
-                    <span class="badge ${statusClass} whitespace-nowrap flex items-center">
-                        ${statusIcon}${status}
+            <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <div class="text-sm font-bold text-gray-900">${itemCode}</div>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap font-mono text-sm text-gray-600">${sku}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">${itemName}</td>
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 w-fit ${getCategoryBadgeClass(category)}">
+                        ${getCategoryIcon(category)}
+                        ${category}
                     </span>
                 </td>
-                <td class="whitespace-nowrap">${formatDate(lastUpdated)}</td>
-                <td class="whitespace-nowrap">
-                    <div class="flex gap-2">
-                        <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50 view-item-btn" 
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">${storedFrom}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-bold text-gray-700">${formatNumber(currentStock)}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-500">${formatNumber(maxStock)}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-emerald-600">${formatCurrency(unitPrice)}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-black text-emerald-700">${formatCurrency(totalValue)}</td>
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 w-fit ${getStatusBadgeClass(status)}">
+                        ${getStatusIcon(status)}
+                        ${status}
+                    </span>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">${formatDate(lastUpdated)}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-right">
+                    <div class="flex justify-end gap-1">
+                        <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90 view-item-btn" 
                                 title="View Details" data-id="${item.item_id}">
-                            <i class='bx bx-show-alt text-xl'></i>
+                            <i class='bx bx-show text-lg'></i>
                         </button>
-                        <button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50 edit-item-btn" 
+                        <button class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90 edit-item-btn" 
                                 title="Edit Item" data-id="${item.item_id}">
-                            <i class='bx bx-edit text-xl'></i>
+                            <i class='bx bx-edit text-lg'></i>
                         </button>
-                        <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50 delete-item-btn" 
+                        <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90 delete-item-btn" 
                                 title="Delete Item" data-id="${item.item_id}">
-                            <i class='bx bx-trash text-xl'></i>
+                            <i class='bx bx-trash text-lg'></i>
                         </button>
                     </div>
                 </td>
