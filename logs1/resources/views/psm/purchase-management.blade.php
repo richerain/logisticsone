@@ -8,80 +8,80 @@
     </div>
 </div>
 
-<div class="bg-white rounded-lg shadow-lg p-6">
-    <!-- Stats Section -->
-    <div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 shadow-lg shadow-blue-100 group hover:scale-[1.02] transition-all duration-300">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-blue-100 text-sm font-medium mb-1">Total Orders</p>
-                    <h3 id="totalOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-                </div>
-                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                    <i class='bx bx-shopping-bag text-white text-2xl'></i>
-                </div>
+<!-- Stats Section -->
+<div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 shadow-lg shadow-blue-100 group hover:scale-[1.02] transition-all duration-300">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-blue-100 text-sm font-medium mb-1">Total Orders</p>
+                <h3 id="totalOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
             </div>
-            <div class="mt-4 flex items-center text-blue-100 text-xs">
-                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Overview</span>
-                <span>Cumulative total</span>
+            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                <i class='bx bx-shopping-bag text-white text-2xl'></i>
             </div>
         </div>
-        
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-lg shadow-emerald-100 group hover:scale-[1.02] transition-all duration-300">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-emerald-100 text-sm font-medium mb-1">Approved</p>
-                    <h3 id="approvedOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-                </div>
-                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                    <i class='bx bx-check-double text-white text-2xl'></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-emerald-100 text-xs">
-                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Verified</span>
-                <span>Ready for processing</span>
-            </div>
-        </div>
-        
-        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-5 shadow-lg shadow-amber-100 group hover:scale-[1.02] transition-all duration-300 relative overflow-hidden">
-            <div class="absolute top-2 right-2 flex space-x-1" id="pendingPulse" style="display: none;">
-                <span class="relative flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                </span>
-            </div>
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-amber-100 text-sm font-medium mb-1">Pending</p>
-                    <h3 id="pendingOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-                </div>
-                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                    <i class='bx bx-time-five text-white text-2xl'></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-amber-100 text-xs">
-                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Action Required</span>
-                <span>Awaiting review</span>
-            </div>
-        </div>
-        
-        <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-5 shadow-lg shadow-rose-100 group hover:scale-[1.02] transition-all duration-300">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-rose-100 text-sm font-medium mb-1">Cancelled</p>
-                    <h3 id="cancelledOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-                </div>
-                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                    <i class='bx bx-x-circle text-white text-2xl'></i>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-rose-100 text-xs">
-                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Inactive</span>
-                <span>Voided orders</span>
-            </div>
+        <div class="mt-4 flex items-center text-blue-100 text-xs">
+            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Overview</span>
+            <span>Cumulative total</span>
         </div>
     </div>
+    
+    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-lg shadow-emerald-100 group hover:scale-[1.02] transition-all duration-300">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-emerald-100 text-sm font-medium mb-1">Approved</p>
+                <h3 id="approvedOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
+            </div>
+            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                <i class='bx bx-check-double text-white text-2xl'></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-emerald-100 text-xs">
+            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Verified</span>
+            <span>Ready for processing</span>
+        </div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-5 shadow-lg shadow-amber-100 group hover:scale-[1.02] transition-all duration-300 relative overflow-hidden">
+        <div class="absolute top-2 right-2 flex space-x-1" id="pendingPulse" style="display: none;">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+            </span>
+        </div>
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-amber-100 text-sm font-medium mb-1">Pending</p>
+                <h3 id="pendingOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
+            </div>
+            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                <i class='bx bx-time-five text-white text-2xl'></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-amber-100 text-xs">
+            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Action Required</span>
+            <span>Awaiting review</span>
+        </div>
+    </div>
+    
+    <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-5 shadow-lg shadow-rose-100 group hover:scale-[1.02] transition-all duration-300">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-rose-100 text-sm font-medium mb-1">Cancelled</p>
+                <h3 id="cancelledOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
+            </div>
+            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                <i class='bx bx-x-circle text-white text-2xl'></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-rose-100 text-xs">
+            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Inactive</span>
+            <span>Voided orders</span>
+        </div>
+    </div>
+</div>
 
+<div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Header Section -->
     <div class="flex flex-col space-y-4 mb-6">
         <div class="flex justify-between items-center">
