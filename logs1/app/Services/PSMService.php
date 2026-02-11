@@ -784,7 +784,14 @@ class PSMService
 
             return [
                 'success' => true,
-                'data' => $requisitions,
+                'data' => $requisitions->items(),
+                'meta' => [
+                    'current_page' => $requisitions->currentPage(),
+                    'last_page' => $requisitions->lastPage(),
+                    'per_page' => $requisitions->perPage(),
+                    'total' => $requisitions->total(),
+                ],
+                'stats' => $this->psmRepository->getRequisitionStats(),
                 'message' => 'Requisitions retrieved successfully',
             ];
         } catch (Exception $e) {
@@ -792,6 +799,27 @@ class PSMService
                 'success' => false,
                 'message' => 'Failed to fetch requisitions: '.$e->getMessage(),
                 'data' => [],
+            ];
+        }
+    }
+
+    /**
+     * Create new requisition
+     */
+    public function createRequisition($data)
+    {
+        try {
+            $requisition = $this->psmRepository->createRequisition($data);
+
+            return [
+                'success' => true,
+                'data' => $requisition,
+                'message' => 'Requisition created successfully',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to create requisition: '.$e->getMessage(),
             ];
         }
     }

@@ -574,7 +574,11 @@ class PSMController extends Controller
     public function getRequisitions(Request $request)
     {
         try {
-            $filters = $request->only(['status']);
+            $filters = [
+                'status' => $request->get('status'),
+                'search' => $request->get('search'),
+                'page_size' => $request->get('per_page', 10),
+            ];
             $result = $this->psmService->getRequisitions($filters);
 
             return response()->json($result);
@@ -583,6 +587,35 @@ class PSMController extends Controller
                 'success' => false,
                 'message' => 'Failed to fetch requisitions: '.$e->getMessage(),
                 'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
+     * Create new requisition
+     */
+    public function storeRequisition(Request $request)
+    {
+        try {
+            $data = $request->only([
+                'req_id',
+                'req_items',
+                'req_requester',
+                'req_dept',
+                'req_date',
+                'req_note',
+            ]);
+
+            // Set default status
+            $data['req_status'] = 'Pending';
+
+            $result = $this->psmService->createRequisition($data);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create requisition: '.$e->getMessage(),
             ], 500);
         }
     }

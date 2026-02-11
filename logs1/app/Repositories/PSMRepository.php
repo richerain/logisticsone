@@ -295,7 +295,7 @@ class PSMRepository
     }
 
     /**
-     * Get all requisitions
+     * Get all requisitions with pagination
      */
     public function getRequisitions($filters = [])
     {
@@ -305,7 +305,38 @@ class PSMRepository
             $query->where('req_status', $filters['status']);
         }
 
-        return $query->get();
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('req_id', 'like', "%{$search}%")
+                    ->orWhere('req_requester', 'like', "%{$search}%")
+                    ->orWhere('req_dept', 'like', "%{$search}%");
+            });
+        }
+
+        $pageSize = $filters['page_size'] ?? 10;
+        return $query->paginate($pageSize);
+    }
+
+    /**
+     * Create new requisition
+     */
+    public function createRequisition($data)
+    {
+        return Requisition::create($data);
+    }
+
+    /**
+     * Get requisition stats
+     */
+    public function getRequisitionStats()
+    {
+        return [
+            'total' => Requisition::count(),
+            'approved' => Requisition::where('req_status', 'Approved')->count(),
+            'pending' => Requisition::where('req_status', 'Pending')->count(),
+            'rejected' => Requisition::where('req_status', 'Rejected')->count(),
+        ];
     }
 
     public function getVendorStats()
