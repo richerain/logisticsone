@@ -9,98 +9,132 @@
 </div>
 
 <div class="bg-white rounded-lg shadow-lg p-6">
-    <!-- Header Section -->
-    <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">Purchase Orders</h3>
-        <div class="flex gap-3">
-            <button id="addPurchaseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-plus'></i>
-                New Purchase Order
-            </button>
-        </div>
-    </div>
-
     <!-- Stats Section -->
-    <div id="statsSection" class="hidden grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 bg-blue-500 rounded-lg">
-                    <i class='bx bx-purchase-tag text-white text-2xl'></i>
+    <div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 shadow-lg shadow-blue-100 group hover:scale-[1.02] transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-blue-100 text-sm font-medium mb-1">Total Orders</p>
+                    <h3 id="totalOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-blue-700">Total Orders</p>
-                    <p id="totalOrders" class="text-2xl font-bold text-blue-900">0</p>
+                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                    <i class='bx bx-shopping-bag text-white text-2xl'></i>
                 </div>
+            </div>
+            <div class="mt-4 flex items-center text-blue-100 text-xs">
+                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Overview</span>
+                <span>Cumulative total</span>
             </div>
         </div>
         
-        <div class="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 bg-green-500 rounded-lg">
-                    <i class='bx bx-check-circle text-white text-2xl'></i>
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-lg shadow-emerald-100 group hover:scale-[1.02] transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-emerald-100 text-sm font-medium mb-1">Approved</p>
+                    <h3 id="approvedOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-green-700">Approved</p>
-                    <p id="approvedOrders" class="text-2xl font-bold text-green-900">0</p>
+                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                    <i class='bx bx-check-double text-white text-2xl'></i>
                 </div>
+            </div>
+            <div class="mt-4 flex items-center text-emerald-100 text-xs">
+                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Verified</span>
+                <span>Ready for processing</span>
             </div>
         </div>
         
-        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 bg-yellow-500 rounded-lg">
-                    <i class='bx bx-time text-white text-2xl'></i>
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-5 shadow-lg shadow-amber-100 group hover:scale-[1.02] transition-all duration-300 relative overflow-hidden">
+            <div class="absolute top-2 right-2 flex space-x-1" id="pendingPulse" style="display: none;">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                </span>
+            </div>
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-amber-100 text-sm font-medium mb-1">Pending</p>
+                    <h3 id="pendingOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-yellow-700">Pending</p>
-                    <p id="pendingOrders" class="text-2xl font-bold text-yellow-900">0</p>
+                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                    <i class='bx bx-time-five text-white text-2xl'></i>
                 </div>
+            </div>
+            <div class="mt-4 flex items-center text-amber-100 text-xs">
+                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Action Required</span>
+                <span>Awaiting review</span>
             </div>
         </div>
         
-        <div class="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div class="flex items-center">
-                <div class="p-3 bg-red-500 rounded-lg">
+        <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-5 shadow-lg shadow-rose-100 group hover:scale-[1.02] transition-all duration-300">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-rose-100 text-sm font-medium mb-1">Cancelled</p>
+                    <h3 id="cancelledOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
+                </div>
+                <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
                     <i class='bx bx-x-circle text-white text-2xl'></i>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-red-700">Cancelled</p>
-                    <p id="cancelledOrders" class="text-2xl font-bold text-red-900">0</p>
-                </div>
+            </div>
+            <div class="mt-4 flex items-center text-rose-100 text-xs">
+                <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Inactive</span>
+                <span>Voided orders</span>
             </div>
         </div>
     </div>
 
-    <!-- Filters and Search Section -->
-    <div class="hidden mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Search -->
-        <div class="md:col-span-2">
-            <input type="text" id="searchInput" placeholder="Search by PO number, company, items, order by, or approved by..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+    <!-- Header Section -->
+    <div class="flex flex-col space-y-4 mb-6">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class='bx bx-cart-alt text-2xl text-gray-800'></i>
+                <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Purchase Orders</h3>
+            </div>
+            <div class="flex gap-2">
+                <button id="approveRequisitionBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-emerald-100 active:scale-95">
+                    <i class='bx bx-check-shield text-lg'></i>
+                    Approve Purchase Requisition
+                </button>
+                <button id="addPurchaseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-blue-100 active:scale-95">
+                    <i class='bx bx-plus-circle text-lg'></i>
+                    New Purchase Order
+                </button>
+            </div>
         </div>
-        
-        <!-- Status Filter -->
-        <div>
-            <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Cancel">Cancelled</option>
-                <option value="Vendor-Review">Vendor Review</option>
-                <option value="In-Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-            </select>
-        </div>
-        
-        <!-- Vendor Type Filter -->
-        <div>
-            <select id="vendorTypeFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">All Types</option>
-                <option value="equipment">Equipment</option>
-                <option value="supplies">Supplies</option>
-                <option value="furniture">Furniture</option>
-                <option value="automotive">Automotive</option>
-            </select>
+
+        <!-- Filters and Search Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <!-- Search -->
+            <div class="md:col-span-2 relative">
+                <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
+                <input type="text" id="searchInput" placeholder="Search by PO number, company, items..." class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+            </div>
+            
+            <!-- Vendor Type Filter -->
+            <div class="relative">
+                <i class='bx bx-buildings absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
+                <select id="vendorTypeFilter" class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all">
+                    <option value="">Company / Type</option>
+                    <option value="equipment">Equipment</option>
+                    <option value="supplies">Supplies</option>
+                    <option value="furniture">Furniture</option>
+                    <option value="automotive">Automotive</option>
+                </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="relative">
+                <i class='bx bx-filter-alt absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
+                <select id="statusFilter" class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none transition-all">
+                    <option value="">Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Cancel">Cancelled</option>
+                    <option value="Vendor-Review">Vendor Review</option>
+                    <option value="In-Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -871,6 +905,7 @@ async function loadPurchases() {
         if (result.success) {
             currentPurchases = result.data || [];
             displayPurchases(currentPurchases);
+            loadStats();
         } else {
             throw new Error(result.message || 'Failed to load purchases');
         }
@@ -884,7 +919,27 @@ async function loadPurchases() {
     }
 }
 
-function loadStats() {}
+function loadStats() {
+    if (!currentPurchases) return;
+    
+    const stats = {
+        total: currentPurchases.length,
+        approved: currentPurchases.filter(p => p.pur_status === 'Approved').length,
+        pending: currentPurchases.filter(p => p.pur_status === 'Pending').length,
+        cancelled: currentPurchases.filter(p => p.pur_status === 'Cancel').length
+    };
+    
+    if (elements.totalOrders) elements.totalOrders.textContent = stats.total;
+    if (elements.approvedOrders) elements.approvedOrders.textContent = stats.approved;
+    if (elements.pendingOrders) elements.pendingOrders.textContent = stats.pending;
+    if (elements.cancelledOrders) elements.cancelledOrders.textContent = stats.cancelled;
+    
+    // Toggle pulse notification for pending
+    const pulse = document.getElementById('pendingPulse');
+    if (pulse) {
+        pulse.style.display = stats.pending > 0 ? 'flex' : 'none';
+    }
+}
 
 function displayPurchases(purchases) {
     if (!elements.purchasesTableBody) return;
@@ -937,7 +992,7 @@ function displayPurchases(purchases) {
         
         return `
         <tr class="${rowClass}" data-purchase-id="${purchase.id}">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                 ${purchase.pur_id}
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">
@@ -965,8 +1020,8 @@ function displayPurchases(purchases) {
                 ${approvedByHtml}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(purchase.pur_status)}">
-                    <i class='bx ${getStatusIcon(purchase.pur_status)} mr-1'></i>
+                <span class="${getStatusBadgeClass(purchase.pur_status)}">
+                    ${getStatusIcon(purchase.pur_status)}
                     ${purchase.pur_status}
                 </span>
             </td>
@@ -1062,28 +1117,28 @@ if (elements.vendorTypeFilter) elements.vendorTypeFilter.addEventListener('chang
 
 function getStatusBadgeClass(status) {
     const statusClasses = {
-        'Pending': 'bg-yellow-100 text-yellow-800',
-        'Approved': 'bg-blue-100 text-blue-800',
-        'Rejected': 'bg-red-100 text-red-800',
-        'Cancel': 'bg-red-100 text-red-800',
-        'Vendor-Review': 'bg-purple-100 text-purple-800',
-        'In-Progress': 'bg-indigo-100 text-indigo-800',
-        'Completed': 'bg-green-100 text-green-800'
+        'Approved': 'bg-green-700 text-white shadow-sm border border-green-800',
+        'Pending': 'bg-yellow-600 text-white shadow-sm border border-yellow-700',
+        'Rejected': 'bg-red-700 text-white shadow-sm border border-red-700',
+        'Cancel': 'bg-red-700 text-white shadow-sm border border-red-700',
+        'Vendor-Review': 'bg-purple-700 text-white shadow-sm border border-purple-800',
+        'In-Progress': 'bg-indigo-700 text-white shadow-sm border border-indigo-800',
+        'Completed': 'bg-emerald-700 text-white shadow-sm border border-emerald-800'
     };
-    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+    return (statusClasses[status] || 'bg-gray-600 text-white border border-gray-700') + ' px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 w-fit';
 }
 
 function getStatusIcon(status) {
     const statusIcons = {
-        'Pending': 'bx-time',
-        'Approved': 'bx-check-circle',
-        'Rejected': 'bx-x-circle',
-        'Cancel': 'bx-x-circle',
-        'Vendor-Review': 'bx-user-voice',
-        'In-Progress': 'bx-cog',
-        'Completed': 'bx-check-circle'
+        'Pending': "<i class='bx bx-time-five'></i>",
+        'Approved': "<i class='bx bx-check-circle'></i>",
+        'Rejected': "<i class='bx bx-x-circle'></i>",
+        'Cancel': "<i class='bx bx-x-circle'></i>",
+        'Vendor-Review': "<i class='bx bx-user-voice'></i>",
+        'In-Progress': "<i class='bx bx-cog'></i>",
+        'Completed': "<i class='bx bx-check-double'></i>"
     };
-    return statusIcons[status] || 'bx-question-mark';
+    return statusIcons[status] || "<i class='bx bx-help-circle'></i>";
 }
 
 function formatUserLabelDisplay(label, fallback) {
