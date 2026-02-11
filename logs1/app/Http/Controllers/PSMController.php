@@ -568,6 +568,69 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * Get products for external API (restricted columns)
+     */
+    public function getExternalProducts(Request $request)
+    {
+        try {
+            $filters = [
+                'vendor' => $request->get('vendor'),
+                'search' => $request->get('search'),
+                'type' => $request->get('type'),
+                'sort_field' => $request->get('sort_field', 'created_at'),
+                'sort_order' => $request->get('sort_order', 'desc'),
+            ];
+
+            // Restricted columns for external API
+            $columns = ['prod_id', 'prod_name', 'prod_desc'];
+
+            $result = $this->psmService->getProducts($filters, $columns);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch products: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    public function getProduct($id)
+    {
+        try {
+            $result = $this->psmService->getProduct($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch product: '.$e->getMessage(),
+                'data' => null,
+            ], 500);
+        }
+    }
+
+    /**
+     * Get single product for external API (restricted columns)
+     */
+    public function getExternalProduct($id)
+    {
+        try {
+            // Restricted columns for external API
+            $columns = ['prod_id', 'prod_name', 'prod_desc'];
+
+            $result = $this->psmService->getProduct($id, $columns);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch product: '.$e->getMessage(),
+                'data' => null,
+            ], 500);
+        }
+    }
+
     public function getProductsByVendor($venId)
     {
         try {

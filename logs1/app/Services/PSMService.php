@@ -726,10 +726,39 @@ class PSMService
         }
     }
 
-    public function getProducts($filters = [])
+    /**
+     * Get product by ID
+     */
+    public function getProduct($id, $columns = ['*'])
     {
         try {
-            $products = $this->psmRepository->getProducts($filters);
+            $product = $this->psmRepository->getProduct($id, $columns);
+            if ($product) {
+                return [
+                    'success' => true,
+                    'data' => $product,
+                    'message' => 'Product retrieved successfully',
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Product not found',
+                'data' => null,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to fetch product: '.$e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
+
+    public function getProducts($filters = [], $columns = ['*'])
+    {
+        try {
+            $products = $this->psmRepository->getProducts($filters, $columns);
 
             return [
                 'success' => true,

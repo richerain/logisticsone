@@ -270,7 +270,7 @@ class PSMRepository
         return false;
     }
 
-    public function getProducts($filters = [])
+    public function getProducts($filters = [], $columns = ['*'])
     {
         $query = Product::query();
         if (! empty($filters['vendor'])) {
@@ -290,7 +290,7 @@ class PSMRepository
         $sortOrder = $filters['sort_order'] ?? 'desc';
         $query->orderBy($sortField, $sortOrder);
 
-        return $query->get();
+        return $query->get($columns);
     }
 
     public function getVendorStats()
@@ -314,9 +314,9 @@ class PSMRepository
     /**
      * Get product by ID
      */
-    public function getProduct($id)
+    public function getProduct($id, $columns = ['*'])
     {
-        return Product::find($id);
+        return Product::select($columns)->find($id);
     }
 
     /**
