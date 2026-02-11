@@ -8,74 +8,150 @@
     </div>
 </div>
 <!-- digital inventory section start -->
-<div class="bg-white rounded-lg shadow-lg p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-800">Inventory Overview</h3> 
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-1.5 h-6 bg-brand-primary rounded-full"></div>
+            <h3 class="text-lg font-bold text-gray-800 tracking-tight">Inventory Overview</h3>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-medium text-gray-400 bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm">
+            <i class='bx bx-time-five'></i>
+            <span>Updated: {{ date('M d, Y') }}</span>
+        </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Stock Levels by Category section start -->
-        <div class="inventory-section">
-            <h4 class="font-semibold mb-4">Stock Levels by Category</h4>
-            <div id="stockLevelsContainer" class="space-y-3">
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span>Equipment</span>
-                        <span>0%</span>
-                    </div>
-                    <progress class="progress progress-primary w-full" value="0" max="100"></progress>
+    
+    <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Stock Levels by Category section start -->
+            <div class="lg:col-span-7">
+                <div class="flex items-center justify-between mb-6">
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                        <i class='bx bx-chart text-brand-primary'></i>
+                        Stock Levels by Category
+                    </h4>
                 </div>
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span>Supplies</span>
-                        <span>0%</span>
+                
+                <div id="stockLevelsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <!-- Equipment -->
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
+                                    <i class='bx bx-wrench text-lg'></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-700">Equipment</span>
+                            </div>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <progress class="progress progress-warning w-full" value="0" max="100"></progress>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span>Furniture</span>
-                        <span>0%</span>
+
+                    <!-- Supplies -->
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300">
+                                    <i class='bx bx-package text-lg'></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-700">Supplies</span>
+                            </div>
+                            <span class="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-yellow-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <progress class="progress progress-success w-full" value="0" max="100"></progress>
-                </div>
-                <div>
-                    <div class="flex justify-between mb-1">
-                        <span>Automotive</span>
-                        <span>0%</span>
+
+                    <!-- Furniture -->
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
+                                    <i class='bx bx-chair text-lg'></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-700">Furniture</span>
+                            </div>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-green-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <progress class="progress progress-secondary w-full" value="0" max="100"></progress>
+
+                    <!-- Automotive -->
+                    <div class="group">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
+                                    <i class='bx bx-car text-lg'></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-700">Automotive</span>
+                            </div>
+                            <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-purple-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <!-- Stock Levels by Category section end -->
+
+            <!-- Quick Actions section start -->
+            <div class="lg:col-span-5 bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6 flex items-center gap-2">
+                    <i class='bx bx-bolt-circle text-brand-primary'></i>
+                    Quick Management
+                </h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="transferBtn" class="flex flex-col items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                            <i class='bx bx-transfer text-xl'></i>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-tighter">Transfer</span>
+                    </button>
+                    
+                    <button id="viewLocationsBtn" class="flex flex-col items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                        <div class="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                            <i class='bx bx-map text-xl'></i>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-tighter">Location</span>
+                    </button>
+
+                    <button id="viewCategoriesBtn" class="flex flex-col items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                        <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                            <i class='bx bx-category-alt text-xl'></i>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-tighter">Category</span>
+                    </button>
+
+                    <button id="generateReportBtn" class="flex flex-col items-center justify-center gap-2 p-4 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                            <i class='bx bxs-report text-xl'></i>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-tighter">Reports</span>
+                    </button>
+
+                    <button id="purchaseNewItemBtn" class="col-span-2 flex items-center justify-center gap-3 p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-sm uppercase tracking-wide">
+                        <i class='bx bxs-purchase-tag'></i>
+                        Purchase New Item
+                    </button>
+
+                    <button id="inventoryNewItemBtn" class="flex items-center justify-center gap-2 p-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-xs uppercase tracking-tight">
+                        <i class='bx bxs-down-arrow-square'></i>
+                        Inventory Item
+                    </button>
+
+                    <button id="incomingAssetsBtn" class="flex items-center justify-center gap-2 p-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-xs uppercase tracking-tight">
+                        <i class='bx bx-import'></i>
+                        Incoming Assets
+                    </button>
+                </div> 
+            </div>
+            <!-- Quick Actions section end -->
         </div>
-        <!-- Stock Levels by Category section end -->
-        <!-- Quick Actions section start -->
-        <div class="inventory-section">
-            <h4 class="font-semibold mb-4">Quick Actions</h4>
-            <div class="grid grid-cols-2 gap-3">
-                <button id="transferBtn" class="btn btn-info text-white">
-                    <i class='bx bx-transfer mr-2'></i>Transfer
-                </button>
-                <button id="viewLocationsBtn" class="btn btn-warning text-white">
-                    <i class='bx bx-map mr-2'></i>Location
-                </button>
-                <button id="viewCategoriesBtn" class="btn btn-warning text-white">
-                    <i class='bx bx-category-alt mr-2'></i>Category
-                </button>
-                <button id="generateReportBtn" class="btn btn-secondary text-white">
-                    <i class='bx bxs-report mr-2'></i>Generate Report
-                </button>
-                <button id="purchaseNewItemBtn" class="btn btn-success px-9 text-white">
-                    <i class='bx bxs-purchase-tag mr-2'></i>Purchase New Item
-                </button>
-                <button id="inventoryNewItemBtn" class="btn btn-primary px-9 text-white">
-                    <i class='bx bxs-down-arrow-square mr-2'></i>Inventory New Item
-                </button>
-                <button id="incomingAssetsBtn" class="btn btn-primary px-9 text-white">
-                    <i class='bx bx-import mr-2'></i>Incoming Assets
-                </button>
-            </div> 
-        </div>
-        <!-- Quick Actions section end -->
     </div>
 </div>
 <!-- digital inventory main table area start -->
