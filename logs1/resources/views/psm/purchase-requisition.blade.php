@@ -589,9 +589,9 @@
         totalPages = meta.last_page;
         
         pageDisplay.textContent = `${currentPage} / ${totalPages}`;
-        pagerInfo.textContent = `Showing ${meta.from || 0} to ${meta.to || 0} of ${meta.total} requisitions`;
-        
-        prevBtn.disabled = currentPage === 1;
+         pagerInfo.textContent = `Showing ${meta.from || 0}-${meta.to || 0} of ${meta.total}`;
+         
+         prevBtn.disabled = currentPage === 1;
         nextBtn.disabled = currentPage === totalPages;
     }
 
