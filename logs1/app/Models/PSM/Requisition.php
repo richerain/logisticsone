@@ -22,6 +22,7 @@ class Requisition extends Model
         'req_date',
         'req_note',
         'req_status',
+        'is_consolidated',
     ];
 
     protected $casts = [

@@ -1530,10 +1530,11 @@ class PSMService
     }
 
     /**
-     * Create consolidated budget request
+     * Create consolidated budget request and mark requisitions as consolidated
      */
     public function createBudgetRequest($data)
     {
+        DB::connection('psm')->beginTransaction();
         try {
             $budgetRequestData = [
                 'req_id' => $this->generateBudgetRequestId(),
@@ -1551,6 +1552,13 @@ class PSMService
             $result = $this->psmRepository->createBudgetRequest($budgetRequestData);
 
             if ($result) {
+                // Mark included requisitions as consolidated
+                if (isset($data['included_req_ids']) && is_array($data['included_req_ids'])) {
+                    $this->psmRepository->markRequisitionsAsConsolidated($data['included_req_ids']);
+                }
+
+                DB::connection('psm')->commit();
+
                 return [
                     'success' => true,
                     'message' => 'Budget request created successfully',
@@ -1558,11 +1566,13 @@ class PSMService
                 ];
             }
 
+            DB::connection('psm')->rollBack();
             return [
                 'success' => false,
                 'message' => 'Failed to create budget request'
             ];
         } catch (Exception $e) {
+            DB::connection('psm')->rollBack();
             throw new Exception('Error creating budget request: '.$e->getMessage());
         }
     }

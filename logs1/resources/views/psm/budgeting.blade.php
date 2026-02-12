@@ -624,7 +624,7 @@
         function fetchApprovedRequisitions() {
             const token = localStorage.getItem('jwt');
             
-            fetch('/api/v1/psm/requisitions', {
+            fetch('/api/v1/psm/requisitions?status=Approved&is_consolidated=0', {
                 method: 'GET',
                 headers: {
                     'Authorization': token ? `Bearer ${token}` : '',
@@ -635,7 +635,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success && Array.isArray(data.data)) {
-                    allApprovedRequisitions = data.data.filter(req => req.req_status === 'Approved');
+                    allApprovedRequisitions = data.data;
                     allApprovedRequisitions.sort((a, b) => (b.id || 0) - (a.id || 0));
                     applyConsolidatedFilters();
                 } else {
@@ -925,9 +925,10 @@
             const token = localStorage.getItem('jwt');
             const totalAmount = calculateTotalAmount(filteredRequisitions);
             
-            // Collect purpose details
-            const reqIds = filteredRequisitions.map(r => r.req_id).join(', ');
-            const purpose = `Consolidated budget for: ${reqIds}`;
+            // Collect purpose details and IDs to mark as consolidated
+            const reqIds = filteredRequisitions.map(r => r.req_id);
+            const reqIdsStr = reqIds.join(', ');
+            const purpose = `Consolidated budget for: ${reqIdsStr}`;
 
             fetch('/api/v1/psm/budget-management/requests', {
                 method: 'POST',
@@ -939,7 +940,8 @@
                     req_amount: totalAmount,
                     req_purpose: purpose,
                     req_dept: 'Logistics 1',
-                    req_by: currentUser
+                    req_by: currentUser,
+                    included_req_ids: reqIds
                 })
             })
             .then(res => res.json())
@@ -950,6 +952,7 @@
                         title: 'Budget request generated successfully'
                     });
                     document.getElementById('consolidatedConfirmModal').close();
+                    fetchApprovedRequisitions(); // Refresh the table to clear consolidated items
                     openBudgetStatusModal();
                 } else {
                     Swal.fire({

@@ -309,6 +309,10 @@ class PSMRepository
             $query->where('req_status', $filters['status']);
         }
 
+        if (isset($filters['is_consolidated'])) {
+            $query->where('is_consolidated', $filters['is_consolidated']);
+        }
+
         if (! empty($filters['dept'])) {
             $query->where('req_dept', $filters['dept']);
         }
@@ -324,6 +328,15 @@ class PSMRepository
 
         $pageSize = $filters['page_size'] ?? 10;
         return $query->paginate($pageSize);
+    }
+
+    /**
+     * Mark requisitions as consolidated
+     */
+    public function markRequisitionsAsConsolidated($reqIds)
+    {
+        return Requisition::whereIn('req_id', $reqIds)
+            ->update(['is_consolidated' => true]);
     }
 
     /**
