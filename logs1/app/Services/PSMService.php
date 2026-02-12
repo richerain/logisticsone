@@ -1449,6 +1449,42 @@ class PSMService
         }
     }
 
+    /**
+     * Get budget requests for external API (excluding req_contact)
+     */
+    public function getExternalBudgetRequests()
+    {
+        try {
+            $requests = $this->psmRepository->getBudgetRequests();
+
+            // Remove req_contact from each request
+            return collect($requests)->map(function ($request) {
+                if (is_object($request)) {
+                    if (isset($request->req_contact)) {
+                        unset($request->req_contact);
+                    }
+                } elseif (is_array($request)) {
+                    unset($request['req_contact']);
+                }
+                return $request;
+            });
+        } catch (Exception $e) {
+            throw new Exception('Error fetching external budget requests: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Update budget request status
+     */
+    public function updateBudgetRequestStatus($id, $status)
+    {
+        try {
+            return $this->psmRepository->updateBudgetRequestStatus($id, $status);
+        } catch (Exception $e) {
+            throw new Exception('Error updating budget request status: '.$e->getMessage());
+        }
+    }
+
     public function getApprovedPurchasesForQuote()
     {
         try {

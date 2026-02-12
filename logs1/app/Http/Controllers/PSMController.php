@@ -480,21 +480,47 @@ class PSMController extends Controller
     public function getExternalBudgetRequests(Request $request)
     {
         try {
-            $key = $request->query('key');
-            $validKey = '63cfb7730dcc34299fa38cb1a620f701';
-
-            if ($key !== $validKey) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized access'
-                ], 401);
-            }
-
-            $requests = $this->psmService->getBudgetRequests();
+            $requests = $this->psmService->getExternalBudgetRequests();
             return response()->json([
                 'success' => true,
                 'data' => $requests
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update external budget request status
+     */
+    public function updateExternalBudgetRequestStatus(Request $request, $id)
+    {
+        try {
+            $status = $request->input('req_status');
+            
+            if (!$status) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Status is required'
+                ], 400);
+            }
+
+            $result = $this->psmService->updateBudgetRequestStatus($id, $status);
+
+            if ($result) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Budget request status updated successfully'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Budget request not found or no changes made'
+                ], 404);
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

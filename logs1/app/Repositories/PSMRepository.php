@@ -550,4 +550,14 @@ class PSMRepository
     {
         return \DB::connection('psm')->table('psm_request_budget')->orderBy('req_date', 'desc')->get();
     }
+
+    /**
+     * Update budget request status
+     */
+    public function updateBudgetRequestStatus($id, $status)
+    {
+        return \DB::connection('psm')->table('psm_request_budget')
+            ->where('req_id', $id)
+            ->update(['req_status' => $status]);
+    }
 }
