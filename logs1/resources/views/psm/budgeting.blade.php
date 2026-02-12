@@ -78,7 +78,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Consolidated Amount</p>
-                    <h4 class="text-2xl font-black text-gray-800 leading-none" id="consolidatedTotalAmount">₱0.00</h4>
+                    <h4 class="text-2xl font-black text-blue-600 leading-none" id="consolidatedTotalAmount">₱0.00</h4>
                 </div>
             </div>
             <button id="consolidateBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg hover:shadow-blue-200 active:scale-95 font-bold uppercase tracking-wide text-sm">
@@ -1116,7 +1116,7 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_id || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal(req.req_price || 0)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -1126,8 +1126,8 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(req.req_date)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="${req.req_note || ''}">${req.req_note || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 text-[10px] font-black uppercase rounded-full bg-green-100 text-green-700 border border-green-200 flex items-center gap-1 w-fit">
-                            <i class='bx bxs-check-circle'></i> APPROVED
+                        <span class="px-3 py-1 text-[10px] font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1 w-fit">
+                            <i class='bx bxs-check-circle'></i> Approved
                         </span>
                     </td>
                 `;
