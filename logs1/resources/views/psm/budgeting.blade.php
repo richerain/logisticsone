@@ -304,6 +304,19 @@
 
 <script>
     (function() {
+        const currentUser = "{{ Auth::user()->name ?? 'PSM Admin' }}";
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
         console.log('Budgeting Module Initialized');
         
         // Variables for Consolidated Requisitions
@@ -926,22 +939,35 @@
                     req_amount: totalAmount,
                     req_purpose: purpose,
                     req_dept: 'Logistics 1',
-                    req_by: 'PSM Admin'
+                    req_by: currentUser
                 })
             })
             .then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    Swal.fire('Success', 'Budget request generated successfully', 'success');
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Budget request generated successfully'
+                    });
                     document.getElementById('consolidatedConfirmModal').close();
                     openBudgetStatusModal();
                 } else {
-                    Swal.fire('Error', res.message, 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: res.message,
+                        target: document.getElementById('consolidatedConfirmModal')
+                    });
                 }
             })
             .catch(err => {
                 console.error('Error creating budget request:', err);
-                Swal.fire('Error', 'Failed to generate budget request', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to generate budget request',
+                    target: document.getElementById('consolidatedConfirmModal')
+                });
             });
         };
 
@@ -1032,7 +1058,8 @@
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Yes, Cancel it!'
+                confirmButtonText: 'Yes, Cancel it!',
+                target: document.getElementById('budgetStatusModal')
             }).then((result) => {
                 if (result.isConfirmed) {
                     const token = localStorage.getItem('jwt');
@@ -1046,15 +1073,28 @@
                     .then(res => res.json())
                     .then(res => {
                         if (res.success) {
-                            Swal.fire('Cancelled', res.message, 'success');
+                            Toast.fire({
+                                icon: 'success',
+                                title: res.message || 'Budget request cancelled successfully'
+                            });
                             fetchBudgetRequests();
                         } else {
-                            Swal.fire('Error', res.message, 'error');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: res.message,
+                                target: document.getElementById('budgetStatusModal')
+                            });
                         }
                     })
                     .catch(err => {
                         console.error('Error cancelling request:', err);
-                        Swal.fire('Error', 'Failed to cancel request', 'error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to cancel request',
+                            target: document.getElementById('budgetStatusModal')
+                        });
                     });
                 }
             });
