@@ -14,6 +14,7 @@ use App\Models\PSM\PurchaseOrder;
 use App\Models\PSM\PurchaseItem;
 use App\Models\PSM\Budget;
 use App\Models\PSM\BudgetLog;
+use App\Models\PSM\Consolidated;
 
 class PSMRepository
 {
@@ -335,8 +336,27 @@ class PSMRepository
      */
     public function markRequisitionsAsConsolidated($reqIds)
     {
-        return Requisition::whereIn('req_id', $reqIds)
-            ->update(['is_consolidated' => true]);
+        // Get the requisitions to be consolidated
+        $requisitions = Requisition::whereIn('req_id', $reqIds)->get();
+
+        foreach ($requisitions as $req) {
+            // Save to psm_consolidated table
+            Consolidated::create([
+                'con_req_id' => $req->req_id,
+                'con_items' => $req->req_items,
+                'con_total_price' => $req->req_price,
+                'con_requester' => $req->req_requester,
+                'con_date' => $req->req_date,
+                'con_note' => $req->req_note,
+                'con_status' => $req->req_status,
+                'con_budget_approval' => 'pending',
+            ]);
+
+            // Mark the original requisition as consolidated
+            $req->update(['is_consolidated' => true]);
+        }
+
+        return true;
     }
 
     /**
