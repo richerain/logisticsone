@@ -481,18 +481,18 @@
                 </div>
                 
                 <div class="p-6 bg-gray-50 min-h-[300px]">
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                    <div class="bg-white rounded-xl shadow-sm overflow-x-auto border border-gray-200 custom-scrollbar">
                         <table class="min-w-full divide-y divide-gray-200" id="requestStatusTable">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-800 font-bold text-gray-100">
                                 <tr>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Req ID</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Requested By</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dept</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Purpose</th>
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider whitespace-nowrap">Req ID</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider whitespace-nowrap">Requested By</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider whitespace-nowrap">Date</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider whitespace-nowrap">Dept</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider whitespace-nowrap">Amount</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider whitespace-nowrap">Purpose</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider whitespace-nowrap">Status</th>
+                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider whitespace-nowrap">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100" id="requestStatusTableBody">
@@ -866,12 +866,15 @@
         const tbody = document.getElementById('requestStatusTableBody');
         tbody.innerHTML = '';
 
-        if (requests.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found.</td></tr>';
+        // Filter out old IDs that don't match the new format REQB + 2026
+        const newFormatRequests = requests.filter(req => req.req_id && req.req_id.startsWith('REQB2026'));
+
+        if (newFormatRequests.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found with new format.</td></tr>';
             return;
         }
 
-        requests.forEach(req => {
+        newFormatRequests.forEach(req => {
             let statusColor = 'bg-gray-100 text-gray-800';
             let statusIcon = 'bx-time';
             let actionButtons = '';
