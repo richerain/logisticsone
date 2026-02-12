@@ -17,6 +17,10 @@
                     <i class='bx bx-git-pull-request text-blue-600'></i>
                     Consolidated Budget Request
                 </h3>
+                <button onclick="openBudgetStatusModal()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
+                    <i class='bx bx-info-circle'></i>
+                    request budget status
+                </button>
             </div>
         </div>
 
@@ -101,109 +105,6 @@
     </div>
 </div>
 
-<!-- Budget Allocation Section -->
-<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-    <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <i class='bx bx-check-shield text-purple-600'></i>
-                Budget Allocation
-            </h3>
-            <button onclick="openBudgetStatusModal()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
-                <i class='bx bx-info-circle'></i>
-                request budget status
-            </button>
-        </div>
-
-        <!-- Table Container for Budget Allocation -->
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-800 font-bold text-gray-100">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Req ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requested By</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Allocated Amount</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Department</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="allocatedTableBody" class="bg-white divide-y divide-gray-200">
-                        <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                                <div class="flex justify-center items-center py-4">
-                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-                                    Loading allocated budgets...
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pagination for Budget Allocation -->
-        <div id="allocatedPager" class="flex items-center justify-between mt-4 px-2"> 
-            <div id="allocatedPagerInfo" class="text-sm text-gray-600"></div> 
-            <div class="join"> 
-                <button class="btn btn-sm join-item" id="allocatedPrevBtn" data-action="prev">Prev</button> 
-                <span class="btn btn-sm join-item" id="allocatedPageDisplay">1 / 1</span> 
-                <button class="btn btn-sm join-item" id="allocatedNextBtn" data-action="next">Next</button> 
-            </div> 
-        </div>
-    </div>
-</div>
-
-<!-- Budget Modal -->
-<dialog id="budgetModal" class="modal">
-    <div class="modal-box w-11/12 max-w-md">
-        <h3 class="font-bold text-lg mb-4" id="budgetModalTitle">Create New Budget</h3>
-        <form id="budgetForm" method="POST">
-            <input type="hidden" id="budgetId">
-            <div class="form-control mb-4">
-                <label class="label"><span class="label-text font-bold">Budget Amount (₱)</span></label>
-                <input type="number" id="budgetAmount" name="amount" step="0.01" min="0" required class="input input-bordered w-full">
-            </div>
-            <div class="form-control mb-4">
-                <label class="label"><span class="label-text font-bold">Valid From</span></label>
-                <input type="date" id="budgetValidFrom" name="valid_from" required class="input input-bordered w-full">
-            </div>
-            <div class="form-control mb-4">
-                <label class="label"><span class="label-text font-bold">Valid To</span></label>
-                <input type="date" id="budgetValidTo" name="valid_to" required class="input input-bordered w-full">
-            </div>
-            <div class="form-control mb-6">
-                <label class="label"><span class="label-text font-bold">Description</span></label>
-                <textarea id="budgetDescription" name="description" class="textarea textarea-bordered h-24" placeholder="Enter budget description..."></textarea>
-            </div>
-            <div class="modal-action">
-                <button type="button" onclick="closeBudgetModal()" class="btn">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="saveBudgetBtn">Save Budget</button>
-            </div>
-        </form>
-    </div>
-</dialog>
-
-<!-- Extension Modal -->
-<dialog id="extendModal" class="modal">
-    <div class="modal-box w-11/12 max-w-sm">
-        <h3 class="font-bold text-lg mb-4">Extend Budget Validity</h3>
-        <form id="extendForm" method="POST">
-            <div class="form-control mb-6">
-                <label class="label"><span class="label-text font-bold">Extension (Days)</span></label>
-                <input type="number" id="extensionDays" name="extension_days" min="1" required class="input input-bordered w-full" placeholder="Enter number of days...">
-            </div>
-            <div class="modal-action">
-                <button type="button" onclick="closeExtendModal()" class="btn">Cancel</button>
-                <button type="submit" class="btn btn-primary">Confirm Extension</button>
-            </div>
-        </form>
-    </div>
-</dialog>
-
 <!-- Budget Status Modal -->
 <dialog id="budgetStatusModal" class="modal">
     <div class="modal-box w-11/12 max-w-6xl">
@@ -212,7 +113,14 @@
                 <i class='bx bx-info-circle text-blue-600'></i>
                 Budget Request Status
             </h3>
-            <button onclick="closeBudgetStatusModal()" class="btn btn-sm btn-circle btn-ghost">✕</button>
+            <div class="flex items-center gap-4">
+                <select id="budgetStatusFilter" class="select select-bordered select-sm w-full max-w-xs">
+                    <option value="">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
         </div>
         
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -325,17 +233,10 @@
         let allApprovedRequisitions = [];
         let filteredRequisitions = [];
 
-        // Variables for Allocated Budgets
-        let currentAllocatedPage = 1;
-        const allocatedPageSize = 10;
-        let allAllocatedBudgets = [];
-        let filteredAllocatedBudgets = [];
-
-        let activeBudget = null;
+        // Variables for Budget Requests
+        let allBudgetRequests = [];
 
         function init() {
-            fetchActiveBudget();
-            fetchAllocatedBudgets();
             fetchApprovedRequisitions();
             setupEventListeners();
         }
@@ -361,262 +262,10 @@
                 });
             }
 
-            // Allocated pagination
-            const allocatedPager = document.getElementById('allocatedPager');
-            if (allocatedPager) {
-                allocatedPager.addEventListener('click', function(ev){
-                    const btn = ev.target.closest('button[data-action]');
-                    if(!btn) return;
-                    const act = btn.getAttribute('data-action');
-                    const totalPages = Math.ceil(filteredAllocatedBudgets.length / allocatedPageSize);
-                    
-                    if(act === 'prev'){ 
-                        currentAllocatedPage = Math.max(1, currentAllocatedPage - 1); 
-                        displayAllocatedTable(); 
-                    }
-                    if(act === 'next'){ 
-                        currentAllocatedPage = Math.min(totalPages, currentAllocatedPage + 1); 
-                        displayAllocatedTable(); 
-                    }
-                });
-            }
-
             // Filters
             document.getElementById('consolidatedSearchInput')?.addEventListener('input', applyConsolidatedFilters);
             document.getElementById('consolidatedDeptFilter')?.addEventListener('change', applyConsolidatedFilters);
-
-            // Forms
-            document.getElementById('budgetForm')?.addEventListener('submit', handleBudgetSubmit);
-            document.getElementById('extendForm')?.addEventListener('submit', handleExtendSubmit);
-        }
-
-        // --- Budget Logic ---
-
-        function fetchActiveBudget() {
-            const token = localStorage.getItem('jwt');
-            fetch('/api/v1/psm/budget-management/current', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.data) {
-                    activeBudget = data.data;
-                    updateActiveBudgetUI(activeBudget);
-                } else {
-                    updateActiveBudgetUI(null);
-                }
-            })
-            .catch(err => console.error('Error fetching budget:', err));
-        }
-
-        function updateActiveBudgetUI(budget) {
-            const amountEl = document.getElementById('activeBudgetAmount');
-            const periodEl = document.getElementById('activeBudgetPeriod');
-            const statusEl = document.getElementById('activeBudgetStatus');
-            const expiryEl = document.getElementById('activeBudgetExpiry');
-            const extendBtn = document.getElementById('extendBudgetBtn');
-
-            if (budget) {
-                if (amountEl) amountEl.textContent = formatCurrency(budget.amount);
-                if (periodEl) periodEl.textContent = `${formatDate(budget.valid_from)} - ${formatDate(budget.valid_to)}`;
-                
-                // Fix: Defensive check for budget.status
-                const status = budget.status || 'unknown';
-                if (statusEl) {
-                    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                    statusEl.className = `text-2xl font-black ${status === 'active' ? 'text-green-600' : 'text-red-600'}`;
-                }
-                
-                const daysLeft = Math.ceil((new Date(budget.valid_to) - new Date()) / (1000 * 60 * 60 * 24));
-                if (expiryEl) expiryEl.textContent = daysLeft > 0 ? `${daysLeft} days remaining` : 'Expired';
-                
-                if (extendBtn) extendBtn.disabled = false;
-            } else {
-                if (amountEl) amountEl.textContent = '₱0.00';
-                if (periodEl) periodEl.textContent = 'No active budget period';
-                if (statusEl) {
-                    statusEl.textContent = 'Inactive';
-                    statusEl.className = 'text-2xl font-black text-gray-400';
-                }
-                if (expiryEl) expiryEl.textContent = 'N/A';
-                if (extendBtn) extendBtn.disabled = true;
-            }
-        }
-
-        function fetchAllocatedBudgets() {
-            const token = localStorage.getItem('jwt');
-            fetch('/api/v1/psm/budget-management/allocated', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && Array.isArray(data.data)) {
-                    allAllocatedBudgets = data.data;
-                    applyAllocatedFilters();
-                } else {
-                    renderEmptyAllocatedTable('No allocated budgets found.');
-                }
-            })
-            .catch(err => {
-                console.error('Error fetching allocated budgets:', err);
-                renderEmptyAllocatedTable('Error loading allocated budgets.');
-            });
-        }
-
-        function applyAllocatedFilters() {
-            filteredAllocatedBudgets = allAllocatedBudgets;
-            currentAllocatedPage = 1;
-            displayAllocatedTable();
-        }
-
-        function displayAllocatedTable() {
-            const tbody = document.getElementById('allocatedTableBody');
-            if (!tbody) return;
-
-            if (filteredAllocatedBudgets.length === 0) {
-                renderEmptyAllocatedTable('No matching allocated budgets found.');
-                return;
-            }
-
-            const totalPages = Math.ceil(filteredAllocatedBudgets.length / allocatedPageSize);
-            const start = (currentAllocatedPage - 1) * allocatedPageSize;
-            const end = start + allocatedPageSize;
-            const paginatedData = filteredAllocatedBudgets.slice(start, end);
-
-            tbody.innerHTML = '';
-            paginatedData.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors';
-                
-                tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${item.all_id || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-semibold">${item.all_req_id || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${item.all_req_by || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${formatCurrency(item.all_budget_allocated || item.all_amount || 0)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-[10px] text-gray-500 uppercase font-semibold">${item.all_department || '-'}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(item.all_date)}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs" title="${item.all_purpose || ''}">${item.all_purpose || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-4 py-1.5 text-xs font-black rounded-full ${item.all_status === 'Allocated' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'} border shadow-sm">
-                            ${item.all_status || 'Allocated'}
-                        </span>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            updateAllocatedPager(filteredAllocatedBudgets.length, totalPages);
-        }
-
-        function updateAllocatedPager(total, totalPages) {
-            const info = document.getElementById('allocatedPagerInfo');
-            const display = document.getElementById('allocatedPageDisplay');
-            const start = total === 0 ? 0 : ((currentAllocatedPage - 1) * allocatedPageSize) + 1;
-            const end = Math.min(currentAllocatedPage * allocatedPageSize, total);
-            
-            if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
-            if (display) display.textContent = `${currentAllocatedPage} / ${totalPages || 1}`;
-            
-            const prev = document.getElementById('allocatedPrevBtn');
-            const next = document.getElementById('allocatedNextBtn');
-            
-            if (prev) prev.disabled = currentAllocatedPage <= 1;
-            if (next) next.disabled = currentAllocatedPage >= totalPages;
-        }
-
-        function renderEmptyAllocatedTable(message) {
-            const tbody = document.getElementById('allocatedTableBody');
-            if (tbody) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                            <div class="flex flex-col items-center justify-center">
-                                <i class='bx bx-data text-6xl mb-4 text-gray-300'></i>
-                                <p class="text-lg font-medium">${message}</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }
-            updateAllocatedPager(0, 1);
-        }
-
-        function fetchBudgetHistory() {
-            const token = localStorage.getItem('jwt');
-            fetch('/api/v1/psm/budget-management', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && Array.isArray(data.data)) {
-                    // No longer rendering history in the main view as requested
-                    // But keeping the data if needed for modals
-                }
-            })
-            .catch(err => console.error('Error fetching history:', err));
-        }
-
-        function handleBudgetSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('budgetId').value;
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            const token = localStorage.getItem('jwt');
-
-            const url = id ? `/api/v1/psm/budget-management/${id}` : '/api/v1/psm/budget-management';
-            const method = id ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.success) {
-                    Swal.fire('Success', res.message, 'success');
-                    closeBudgetModal();
-                    fetchActiveBudget();
-                    fetchBudgetHistory();
-                } else {
-                    Swal.fire('Error', res.message, 'error');
-                }
-            })
-            .catch(err => Swal.fire('Error', 'Failed to save budget', 'error'));
-        }
-
-        function handleExtendSubmit(e) {
-            e.preventDefault();
-            if (!activeBudget) return;
-
-            const days = document.getElementById('extensionDays').value;
-            const token = localStorage.getItem('jwt');
-
-            fetch(`/api/v1/psm/budget-management/${activeBudget.id}/extend`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ extension_days: days })
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.success) {
-                    Swal.fire('Success', res.message, 'success');
-                    closeExtendModal();
-                    fetchActiveBudget();
-                    fetchBudgetHistory();
-                } else {
-                    Swal.fire('Error', res.message, 'error');
-                }
-            })
-            .catch(err => Swal.fire('Error', 'Failed to extend budget', 'error'));
+            document.getElementById('budgetStatusFilter')?.addEventListener('change', applyBudgetStatusFilters);
         }
 
         // --- Requisition Logic ---
@@ -774,27 +423,15 @@
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
+        function applyBudgetStatusFilters() {
+            const statusFilter = document.getElementById('budgetStatusFilter')?.value || '';
+            const filteredRequests = allBudgetRequests.filter(req => {
+                return !statusFilter || req.req_status === statusFilter;
+            });
+            renderBudgetStatusTable(filteredRequests);
+        }
+
         // Global function for modal triggers
-        window.openCreateBudgetModal = function() {
-            document.getElementById('budgetForm').reset();
-            document.getElementById('budgetId').value = '';
-            document.getElementById('budgetModalTitle').textContent = 'Create New Budget';
-            document.getElementById('budgetModal').showModal();
-        };
-
-        window.openExtendBudgetModal = function() {
-            document.getElementById('extendForm').reset();
-            document.getElementById('extendModal').showModal();
-        };
-
-        window.closeBudgetModal = function() {
-            document.getElementById('budgetModal').close();
-        };
-
-        window.closeExtendModal = function() {
-            document.getElementById('extendModal').close();
-        };
-
         window.openBudgetStatusModal = function() {
             document.getElementById('budgetStatusModal').showModal();
             fetchBudgetRequests();
@@ -826,7 +463,8 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success && Array.isArray(data.data)) {
-                    renderBudgetStatusTable(data.data);
+                    allBudgetRequests = data.data;
+                    applyBudgetStatusFilters();
                 } else {
                     renderEmptyBudgetStatusTable('No budget requests found.');
                 }
@@ -1099,26 +737,6 @@
                             target: document.getElementById('budgetStatusModal')
                         });
                     });
-                }
-            });
-        };
-
-        window.editBudget = function(id) {
-            const token = localStorage.getItem('jwt');
-            fetch(`/api/v1/psm/budget-management/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.data) {
-                    const b = data.data;
-                    document.getElementById('budgetId').value = b.id;
-                    document.getElementById('budgetAmount').value = b.amount;
-                    document.getElementById('budgetValidFrom').value = b.valid_from;
-                    document.getElementById('budgetValidTo').value = b.valid_to;
-                    document.getElementById('budgetDescription').value = b.description;
-                    document.getElementById('budgetModalTitle').textContent = 'Edit Budget';
-                    document.getElementById('budgetModal').showModal();
                 }
             });
         };
