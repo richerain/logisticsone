@@ -121,14 +121,14 @@
         <a href="#" data-module="psm-purchase-requisition" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bx-clipboard'></i> Purchase Requisition
         </a>
-        <a href="#" data-module="psm-purchase" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-purchase-tag'></i> Purchase Management
-        </a>
         @if(in_array($role, ['superadmin', 'admin', 'manager']))
         <a href="#" data-module="psm-budgeting" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bxs-wallet'></i> Budgeting
         </a>
         @endif
+        <a href="#" data-module="psm-purchase" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bxs-purchase-tag'></i> Purchase Management
+        </a>
         <a href="#" data-module="psm-vendor-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bxs-user-detail'></i> Logistics Vendors
         </a>
