@@ -54,6 +54,7 @@
                     <thead class="bg-gray-800 font-bold text-gray-100">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Consolidated ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requisition ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Items</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Total Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requester / Dept</th>
@@ -65,7 +66,7 @@
                     </thead>
                     <tbody id="consolidatedTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex justify-center items-center py-4">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                     Loading approved requisitions...
@@ -274,7 +275,8 @@
         function fetchApprovedRequisitions() {
             const token = localStorage.getItem('jwt');
             
-            fetch('/api/v1/psm/requisitions?status=Approved&is_consolidated=0', {
+            // We fetch from consolidated view to see both CONS ID and Requisition ID
+            fetch('/api/v1/psm/requisitions?view_consolidated=1', {
                 method: 'GET',
                 headers: {
                     'Authorization': token ? `Bearer ${token}` : '',
@@ -286,10 +288,10 @@
             .then(data => {
                 if (data.success && Array.isArray(data.data)) {
                     allApprovedRequisitions = data.data;
-                    allApprovedRequisitions.sort((a, b) => (b.id || 0) - (a.id || 0));
+                    allApprovedRequisitions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                     applyConsolidatedFilters();
                 } else {
-                    renderEmptyConsolidatedTable('No approved requisitions found.');
+                    renderEmptyConsolidatedTable('No consolidated requisitions found.');
                 }
             })
             .catch(error => {
@@ -304,8 +306,9 @@
 
             filteredRequisitions = allApprovedRequisitions.filter(req => {
                 const matchesSearch = 
+                    (req.con_req_id && req.con_req_id.toLowerCase().includes(searchTerm)) ||
                     (req.req_id && req.req_id.toLowerCase().includes(searchTerm)) ||
-                    (req.req_requester && req.req_requester.toLowerCase().includes(searchTerm)) ||
+                    (req.con_requester && req.con_requester.toLowerCase().includes(searchTerm)) ||
                     (req.req_dept && req.req_dept.toLowerCase().includes(searchTerm));
                 
                 const matchesDept = !deptFilter || req.req_dept === deptFilter;
@@ -331,44 +334,47 @@
             const end = start + consolidatedPageSize;
             const paginatedData = filteredRequisitions.slice(start, end);
 
-            tbody.innerHTML = '';
-            paginatedData.forEach(req => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors';
-                
-                let itemsList = '-';
-                try {
-                    const items = typeof req.req_items === 'string' ? JSON.parse(req.req_items) : req.req_items;
-                    if (Array.isArray(items)) {
-                        itemsList = items.join(', ');
+                tbody.innerHTML = '';
+                paginatedData.forEach(req => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50 transition-colors';
+                    
+                    let itemsList = '-';
+                    try {
+                        const items = typeof req.con_items === 'string' ? JSON.parse(req.con_items) : req.con_items;
+                        if (Array.isArray(items)) {
+                            itemsList = items.join(', ');
+                        }
+                    } catch (e) {
+                        itemsList = req.con_items || '-';
                     }
-                } catch (e) {
-                    itemsList = req.req_items || '-';
-                }
 
-                tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.req_price || 0) : formatCurrency(req.req_price || 0)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-bold text-gray-800">${req.req_requester || '-'}</div>
-                        <div class="text-[10px] text-gray-500 uppercase font-semibold">${req.req_dept || '-'}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(req.req_date)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="${req.req_note || ''}">${req.req_note || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-4 py-1.5 text-xs font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1.5 w-fit shadow-sm">
-                            <i class='bx bxs-check-circle text-sm'></i> Approved
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-4 py-1.5 text-xs font-black rounded-full bg-yellow-500 text-white border border-yellow-600 flex items-center gap-1.5 w-fit shadow-sm">
-                            <i class='bx bx-time-five text-sm'></i> Pending
-                        </span>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                    const isBudgetApproved = req.con_budget_approval === 'Approved';
+
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${req.con_req_id || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-800">${req.con_requester || '-'}</div>
+                            <div class="text-[10px] text-gray-500 uppercase font-semibold">${req.req_dept || '-'}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(req.con_date)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="${req.con_note || ''}">${req.con_note || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-4 py-1.5 text-xs font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1.5 w-fit shadow-sm">
+                                <i class='bx bxs-check-circle text-sm'></i> Approved
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-4 py-1.5 text-xs font-black rounded-full ${isBudgetApproved ? 'bg-green-600 border-green-700' : 'bg-yellow-500 border-yellow-600'} text-white border flex items-center gap-1.5 w-fit shadow-sm">
+                                <i class='bx ${isBudgetApproved ? 'bxs-check-circle' : 'bx-time-five'} text-sm'></i> ${req.con_budget_approval || 'Pending'}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
 
             updateConsolidatedPager(filteredRequisitions.length, totalPages);
         }
@@ -380,7 +386,7 @@
         }
 
         function calculateTotalAmount(requisitions) {
-            return requisitions.reduce((sum, req) => sum + parseFloat(req.req_price || 0), 0);
+            return requisitions.reduce((sum, req) => sum + parseFloat(req.con_total_price || 0), 0);
         }
 
         function updateConsolidatedPager(total, totalPages) {

@@ -878,18 +878,24 @@ class PSMController extends Controller
     }
 
     /**
-     * Get all requisitions
+     * Get requisitions
      */
     public function getRequisitions(Request $request)
     {
         try {
-            $filters = [
-                'status' => $request->get('status'),
-                'dept' => $request->get('dept'),
-                'search' => $request->get('search'),
-                'page_size' => $request->get('per_page', 10),
-            ];
+            $filters = $request->only(['status', 'is_consolidated', 'page_size', 'search', 'dept']);
             $result = $this->psmService->getRequisitions($filters);
+
+            // If we are looking for consolidated view, we should probably fetch from psm_consolidated
+            // but the user wants to fetch from psm_requisition then sync status.
+            // Let's check if the user wants to see the psm_consolidated table content.
+            if ($request->has('view_consolidated')) {
+                $consolidated = \App\Models\PSM\Consolidated::orderBy('created_at', 'desc')->get();
+                return response()->json([
+                    'success' => true,
+                    'data' => $consolidated
+                ]);
+            }
 
             return response()->json($result);
         } catch (\Exception $e) {

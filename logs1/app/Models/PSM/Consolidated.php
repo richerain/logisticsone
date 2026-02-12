@@ -15,6 +15,7 @@ class Consolidated extends Model
 
     protected $fillable = [
         'con_req_id',
+        'req_id',
         'con_items',
         'con_total_price',
         'con_requester',
@@ -22,6 +23,7 @@ class Consolidated extends Model
         'con_note',
         'con_status',
         'con_budget_approval',
+        'parent_budget_req_id',
     ];
 
     protected $casts = [

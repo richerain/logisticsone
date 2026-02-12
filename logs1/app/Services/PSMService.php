@@ -1554,7 +1554,7 @@ class PSMService
             if ($result) {
                 // Mark included requisitions as consolidated
                 if (isset($data['included_req_ids']) && is_array($data['included_req_ids'])) {
-                    $this->psmRepository->markRequisitionsAsConsolidated($data['included_req_ids']);
+                    $this->markRequisitionsAsConsolidated($data['included_req_ids'], $budgetRequestData['req_id']);
                 }
 
                 DB::connection('psm')->commit();
@@ -1617,6 +1617,14 @@ class PSMService
     }
 
     /**
+     * Mark included requisitions as consolidated
+     */
+    public function markRequisitionsAsConsolidated($reqIds, $parentBudgetReqId = null)
+    {
+        return $this->psmRepository->markRequisitionsAsConsolidated($reqIds, $parentBudgetReqId);
+    }
+
+    /**
      * Generate budget request ID
      */
     private function generateBudgetRequestId()
@@ -1624,6 +1632,18 @@ class PSMService
         $prefix = 'REQB';
         $date = now()->format('Ymd');
         $random = strtoupper(Str::random(8));
+        return $prefix . $date . $random;
+    }
+
+    /**
+     * Generate consolidated ID
+     * Format: CONS202602131A1A1
+     */
+    public function generateConsolidatedId()
+    {
+        $prefix = 'CONS';
+        $date = now()->format('Ymd');
+        $random = strtoupper(Str::random(5));
         return $prefix . $date . $random;
     }
 

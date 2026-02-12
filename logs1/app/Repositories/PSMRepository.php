@@ -15,6 +15,7 @@ use App\Models\PSM\PurchaseItem;
 use App\Models\PSM\Budget;
 use App\Models\PSM\BudgetLog;
 use App\Models\PSM\Consolidated;
+use Illuminate\Support\Str;
 
 class PSMRepository
 {
@@ -334,15 +335,19 @@ class PSMRepository
     /**
      * Mark requisitions as consolidated
      */
-    public function markRequisitionsAsConsolidated($reqIds)
+    public function markRequisitionsAsConsolidated($reqIds, $parentBudgetReqId = null)
     {
         // Get the requisitions to be consolidated
         $requisitions = Requisition::whereIn('req_id', $reqIds)->get();
 
         foreach ($requisitions as $req) {
+            // Generate CONS ID
+            $consId = 'CONS' . now()->format('Ymd') . strtoupper(Str::random(5));
+
             // Save to psm_consolidated table
             Consolidated::create([
-                'con_req_id' => $req->req_id,
+                'con_req_id' => $consId,
+                'req_id' => $req->req_id,
                 'con_items' => $req->req_items,
                 'con_total_price' => $req->req_price,
                 'con_requester' => $req->req_requester,
@@ -350,6 +355,7 @@ class PSMRepository
                 'con_note' => $req->req_note,
                 'con_status' => $req->req_status,
                 'con_budget_approval' => 'pending',
+                'parent_budget_req_id' => $parentBudgetReqId,
             ]);
 
             // Mark the original requisition as consolidated
@@ -616,8 +622,19 @@ class PSMRepository
      */
     public function updateBudgetRequestStatus($id, $status)
     {
-        return \DB::connection('psm')->table('psm_request_budget')
+        $result = \DB::connection('psm')->table('psm_request_budget')
             ->where('req_id', $id)
-            ->update(['req_status' => $status]);
+            ->update([
+                'req_status' => $status,
+                'updated_at' => now()
+            ]);
+
+        if ($result && $status === 'Approved') {
+            // Sync status to psm_consolidated table
+            Consolidated::where('parent_budget_req_id', $id)
+                ->update(['con_budget_approval' => 'Approved']);
+        }
+
+        return $result;
     }
 }
