@@ -103,60 +103,57 @@
 
 <!-- Budget Allocation Section -->
 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <i class='bx bx-check-shield text-purple-600'></i>
-            Budget Allocation
-        </h3>
-        <button onclick="openBudgetStatusModal()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
-            <i class='bx bx-info-circle'></i>
-            request budget status
-        </button>
-    </div>
-
-    <!-- Table Container for Budget Allocation -->-2">
-            <i class='bx bx-info-circle'></i>
-            request budget status
-        </button>
-    </div>
-    <!-- Table Container for Budget Allocation -->
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-800 font-bold text-gray-100">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Req ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requested By</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Allocated Amount</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Department</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="allocatedTableBody" class="bg-white divide-y divide-gray-200">
-                    <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                            <div class="flex justify-center items-center py-4">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-                                Loading allocated budgets...
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="bg-gray-50 rounded-xl p-6 border border-gray-100">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <i class='bx bx-check-shield text-purple-600'></i>
+                Budget Allocation
+            </h3>
+            <button onclick="openBudgetStatusModal()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
+                <i class='bx bx-info-circle'></i>
+                request budget status
+            </button>
         </div>
-    </div>
 
-    <!-- Pagination for Budget Allocation -->
-    <div id="allocatedPager" class="flex items-center justify-between mt-4 px-2"> 
-        <div id="allocatedPagerInfo" class="text-sm text-gray-600"></div> 
-        <div class="join"> 
-            <button class="btn btn-sm join-item" id="allocatedPrevBtn" data-action="prev">Prev</button> 
-            <span class="btn btn-sm join-item" id="allocatedPageDisplay">1 / 1</span> 
-            <button class="btn btn-sm join-item" id="allocatedNextBtn" data-action="next">Next</button> 
-        </div> 
+        <!-- Table Container for Budget Allocation -->
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-800 font-bold text-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Req ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requested By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Allocated Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Department</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allocatedTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                <div class="flex justify-center items-center py-4">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                                    Loading allocated budgets...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination for Budget Allocation -->
+        <div id="allocatedPager" class="flex items-center justify-between mt-4 px-2"> 
+            <div id="allocatedPagerInfo" class="text-sm text-gray-600"></div> 
+            <div class="join"> 
+                <button class="btn btn-sm join-item" id="allocatedPrevBtn" data-action="prev">Prev</button> 
+                <span class="btn btn-sm join-item" id="allocatedPageDisplay">1 / 1</span> 
+                <button class="btn btn-sm join-item" id="allocatedNextBtn" data-action="next">Next</button> 
+            </div> 
+        </div>
     </div>
 </div>
 
@@ -228,14 +225,13 @@
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Department</th>
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Amount</th>
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Contact</th>
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
                         </tr>
                     </thead>
                     <tbody id="budgetStatusTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex justify-center items-center py-4">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                     Loading budget requests...
@@ -795,7 +791,6 @@
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">${req.req_dept || '-'}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">${formatCurrency(req.req_amount || 0)}</td>
                     <td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="${req.req_purpose || ''}">${req.req_purpose || '-'}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500">${req.req_contact || '-'}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatDate(req.req_date)}</td>
                     <td class="px-4 py-3 whitespace-nowrap">
                         <span class="px-3 py-1 text-[10px] font-black rounded-full ${getStatusClass(req.req_status)} border shadow-sm uppercase">
@@ -821,7 +816,7 @@
             if (tbody) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <i class='bx bx-clipboard text-6xl mb-4 text-gray-300'></i>
                                 <p class="text-lg font-medium">${message}</p>
