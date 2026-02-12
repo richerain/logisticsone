@@ -855,7 +855,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end gap-2">
                             <button onclick="viewRequisition(${req.id})" title="View Details" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90">
-                                <i class='bx bx-show text-xl'></i>
+                                <i class='bx bx-show-alt text-xl'></i>
                             </button>
                             <button onclick="openStatusUpdate(${req.id}, '${req.req_id}', '${req.req_status}')" title="Update Status" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90">
                                 <i class='bx bx-edit text-xl'></i>
