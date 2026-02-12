@@ -878,7 +878,6 @@
                                 <i class="bx bx-file-blank text-5xl text-gray-300"></i>
                             </div>
                             <p class="text-gray-500 font-medium text-lg">No budget requests found!</p>
-                            <p class="text-gray-400 text-sm mt-1">Start by consolidating your approved requisitions.</p>
                         </div>
                     </td>
                 </tr>
