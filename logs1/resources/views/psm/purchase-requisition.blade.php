@@ -688,6 +688,15 @@
             totalReqPrice += (count * price);
         });
 
+        // Get custom items price if any
+        const customRows = sideItemsContainer.querySelectorAll('.item-row:not([data-original-name])');
+        customRows.forEach(row => {
+            const input = row.querySelector('input[name="items[]"]');
+            if (input && input.value.trim() !== '') {
+                // Since custom items don't have price, they contribute 0 to totalReqPrice
+            }
+        });
+
         const data = {
             req_id: generateReqID(),
             req_date: new Date().toISOString().split('T')[0],

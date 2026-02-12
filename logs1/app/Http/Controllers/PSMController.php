@@ -658,6 +658,7 @@ class PSMController extends Controller
                 'req_dept',
                 'req_date',
                 'req_note',
+                'req_price',
             ]);
 
             // Set default status
