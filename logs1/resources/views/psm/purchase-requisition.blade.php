@@ -156,6 +156,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requisition ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Items</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Total Price</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requester / Dept</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Note</th>
@@ -165,7 +166,7 @@
                 </thead>
                 <tbody id="requisitionTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                             <div class="flex justify-center items-center py-4">
                                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                 Loading requisitions...
@@ -260,16 +261,18 @@
                         <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>
                         <p id="view_req_dept" class="text-sm font-bold text-gray-700"></p>
                     </div>
-                    <div>
-                        <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Price</p>
-                        <p id="view_req_price" class="text-sm font-bold text-blue-600"></p>
-                    </div>
                 </div>
 
                 <div>
                     <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Requested Items</p>
-                    <div id="view_items_list" class="space-y-2">
+                    <div id="view_items_list" class="space-y-2 mb-4">
                         <!-- Items will be injected here -->
+                    </div>
+                    
+                    <!-- Overall Total Price Display -->
+                    <div class="flex justify-between items-center p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                        <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">Overall Total Price</span>
+                        <span id="view_req_overall_price" class="text-lg font-black text-blue-600">₱0.00</span>
                     </div>
                 </div>
 
@@ -785,7 +788,10 @@
             document.getElementById('view_req_date').textContent = new Date(data.req_date).toLocaleDateString();
             document.getElementById('view_req_requester').textContent = data.req_requester;
             document.getElementById('view_req_dept').textContent = data.req_dept;
-            document.getElementById('view_req_price').textContent = `₱${parseFloat(data.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            
+            const overallPrice = parseFloat(data.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+            document.getElementById('view_req_overall_price').textContent = `₱${overallPrice}`;
+            
             document.getElementById('view_req_note').textContent = data.req_note || 'No additional notes.';
             
             // Status Badge in View
@@ -865,7 +871,7 @@
         if (!tbody) return;
 
         if (requisitions.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-12 text-center text-gray-500"><i class='bx bx-clipboard text-4xl mb-2 block text-gray-300'></i>No records found</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-12 text-center text-gray-500"><i class='bx bx-clipboard text-4xl mb-2 block text-gray-300'></i>No records found</td></tr>`;
             return;
         }
 
@@ -877,6 +883,9 @@
                     <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="${items.join(', ')}">
                         ${items.length > 0 ? items[0] : 'No items'} 
                         ${items.length > 1 ? `<span class="text-blue-600 font-semibold">(+${items.length - 1})</span>` : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
+                        ₱${parseFloat(req.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-bold text-gray-800">${req.req_requester}</div>
