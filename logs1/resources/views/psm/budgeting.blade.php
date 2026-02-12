@@ -12,11 +12,16 @@
     <!-- Consolidated Budget Request Section -->
     <div class="">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div class="flex items-center gap-4">
             <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <i class='bx bx-git-pull-request text-blue-600'></i>
                 Consolidated Budget Request
             </h3>
+            <button onclick="openRequestStatusModal()" class="btn btn-primary btn-sm gap-2">
+                <i class='bx bx-list-ul'></i> Request Budget Status
+            </button>
         </div>
+    </div>
 
         <!-- Filters (Matching Requisition Records design) -->
         <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
@@ -99,15 +104,85 @@
     </div>
 </div>
 
+<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+    <!-- Budget Allocation Section -->
+    <div class="">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div class="flex items-center gap-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class='bx bx-coin-stack text-green-600'></i>
+                    Budget Allocation
+                </h3>
+            </div>
+        </div>
+
+        <!-- Filters (Static Design) -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div class="md:col-span-6 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class='bx bx-search text-gray-400 text-xl'></i>
+                    </div>
+                    <input type="text" placeholder="Search allocations..." 
+                        class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white shadow-sm transition-all text-sm" disabled>
+                </div>
+                <div class="md:col-span-6">
+                    <select class="block w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white shadow-sm transition-all text-sm" disabled>
+                        <option value="">All Categories</option>
+                        <option value="Operational">Operational</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="Maintenance">Maintenance</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-800 font-bold text-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Allocation ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Approved By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="bg-gray-50 rounded-full p-4 mb-4">
+                                        <i class="bx bx-file-blank text-5xl text-gray-300"></i>
+                                    </div>
+                                    <p class="text-gray-500 font-medium text-lg">No budget allocations found!</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination (Static Design) -->
+        <div class="flex items-center justify-between mt-4 px-2"> 
+            <div class="text-sm text-gray-600">Showing 0 to 0 of 0 entries</div> 
+            <div class="join"> 
+                <button class="btn btn-sm join-item" disabled>Prev</button> 
+                <span class="btn btn-sm join-item">1 / 1</span> 
+                <button class="btn btn-sm join-item" disabled>Next</button> 
+            </div> 
+        </div>
+    </div>
+</div>
+
 <div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Budget Overview Header -->
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold text-gray-800">Budget Overview</h3>
-        <div class="flex gap-2">
-            <button onclick="openRequestStatusModal()" class="btn btn-primary btn-sm gap-2">
-                <i class='bx bx-list-ul'></i> Request Budget Status
-            </button>
-        </div>
     </div>
 
     <!-- Stats Section -->
