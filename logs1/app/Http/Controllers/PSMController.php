@@ -1093,7 +1093,9 @@ class PSMController extends Controller
     public function getRequestBudgets()
     {
         try {
-            $requests = \App\Models\PSM\RequestBudget::orderBy('created_at', 'desc')->get();
+            $requests = \App\Models\PSM\RequestBudget::orderBy('created_at', 'desc')
+                ->get()
+                ->makeHidden(['req_contact']);
             
             return response()->json([
                 'success' => true,

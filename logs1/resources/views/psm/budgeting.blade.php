@@ -561,10 +561,6 @@
                         <span id="view_req_status" class="inline-flex px-2 py-1 rounded-full text-xs font-semibold"></span>
                     </div>
                     <div class="col-span-2">
-                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Contact Details</span>
-                        <span id="view_req_contact" class="font-medium text-gray-900"></span>
-                    </div>
-                    <div class="col-span-2">
                         <span class="block text-gray-500 text-xs uppercase tracking-wide mb-1">Purpose</span>
                         <div id="view_req_purpose" class="bg-gray-50 p-3 rounded border border-gray-200 text-gray-700 whitespace-pre-wrap"></div>
                     </div>
@@ -739,7 +735,6 @@
         document.getElementById('view_req_by').textContent = req.req_by;
         document.getElementById('view_req_dept').textContent = req.req_dept;
         document.getElementById('view_req_amount').textContent = window.formatCurrencyGlobal(req.req_amount);
-        document.getElementById('view_req_contact').textContent = req.req_contact;
         document.getElementById('view_req_purpose').textContent = req.req_purpose;
 
         const statusEl = document.getElementById('view_req_status');
@@ -927,7 +922,7 @@
                             <i class='bx bx-show-alt text-xl'></i>
                         </button>
                         <button onclick="confirmCancelRequest('${req.req_id}')" class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-all" title="Cancel Request">
-                            <i class='bx bx-trash text-xl'></i>
+                            <i class='bx bx-block text-xl'></i>
                         </button>
                     </div>
                 `;
