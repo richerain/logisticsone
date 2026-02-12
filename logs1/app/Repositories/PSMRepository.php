@@ -561,7 +561,7 @@ class PSMRepository
      */
     public function getBudgetRequests()
     {
-        return \DB::connection('psm')->table('psm_request_budget')->orderBy('req_date', 'desc')->get();
+        return \DB::connection('psm')->table('psm_request_budget')->orderBy('created_at', 'desc')->get();
     }
 
     /**
