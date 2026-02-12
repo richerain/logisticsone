@@ -1218,4 +1218,40 @@ class PSMController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Update budget request status externally
+     */
+    public function updateExternalBudgetRequestStatus(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'req_id' => 'required|string',
+                'req_status' => 'required|string',
+            ]);
+
+            $budgetRequest = \App\Models\PSM\RequestBudget::find($validated['req_id']);
+
+            if (!$budgetRequest) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Budget request not found.'
+                ], 404);
+            }
+
+            $budgetRequest->req_status = $validated['req_status'];
+            $budgetRequest->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Budget request status updated successfully.',
+                'data' => $budgetRequest
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update budget request status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

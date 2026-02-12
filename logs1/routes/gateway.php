@@ -65,6 +65,8 @@ Route::middleware(['api.key'])->prefix('alms/external')->group(function () {
 
 Route::middleware(['api.key'])->prefix('psm/external')->group(function () {
     Route::get('/budget-requests', [App\Http\Controllers\PSMController::class, 'getRequestBudgets']);
+    Route::patch('/budget-requests', [App\Http\Controllers\PSMController::class, 'updateExternalBudgetRequestStatus']);
+    Route::post('/budget-requests/update', [App\Http\Controllers\PSMController::class, 'updateExternalBudgetRequestStatus']);
     
     // PSM Product API Endpoints
     Route::get('/products', [App\Http\Controllers\PSMController::class, 'getExternalProducts']);
