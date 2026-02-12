@@ -13,7 +13,77 @@ class PSMController extends Controller
     public function __construct(PSMService $psMService)
     {
         $this->psmService = $psMService;
+        /**
+     * Get all budget allocations
+     */
+    public function getBudgetAllocated()
+    {
+        try {
+            $allocations = \DB::connection('psm')->table('psm_budget_allocated')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $allocations
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch budget allocations: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
     }
+
+    /**
+     * Store a new budget allocation
+     */
+    public function storeBudgetAllocated(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'all_id' => 'required|string',
+                'all_req_id' => 'required|string',
+                'all_req_by' => 'required|string',
+                'all_amount' => 'required|numeric',
+                'all_budget_allocated' => 'required|numeric',
+                'all_department' => 'required|string',
+                'all_date' => 'required|date',
+                'all_purpose' => 'required|string',
+                'all_status' => 'required|string',
+            ]);
+
+            // Check if already exists to avoid duplicates
+            $exists = \DB::connection('psm')->table('psm_budget_allocated')
+                ->where('all_req_id', $validated['all_req_id'])
+                ->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Budget already allocated for this request.'
+                ]);
+            }
+
+            $validated['created_at'] = now();
+            $validated['updated_at'] = now();
+
+            \DB::connection('psm')->table('psm_budget_allocated')->insert($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Budget allocation registered successfully.',
+                'data' => $validated
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to register budget allocation: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}
 
     /**
      * Get purchase products

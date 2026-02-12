@@ -43,6 +43,12 @@ Route::prefix('budget-management')->group(function () {
     Route::post('/{id}/extend', [PSMController::class, 'extendBudgetValidity']);
 });
 
+// PSM Budget Allocated Routes
+Route::prefix('budget-allocated')->group(function () {
+    Route::get('/', [PSMController::class, 'getBudgetAllocated']);
+    Route::post('/', [PSMController::class, 'storeBudgetAllocated']);
+});
+
 // PSM Budget Requests Routes
 Route::prefix('budget-requests')->group(function () {
     Route::get('/', [PSMController::class, 'getRequestBudgets']);

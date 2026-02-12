@@ -18,9 +18,6 @@
                     Consolidated Budget Request
                 </h3>
             </div>
-            <button onclick="openRequestStatusModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg hover:shadow-blue-200 active:scale-95 font-bold uppercase tracking-wide text-sm">
-                <i class='bx bx-list-ul'></i> Request Budget Status
-            </button>
         </div>
 
         <!-- Filters (Matching Requisition Records design) -->
@@ -114,6 +111,9 @@
                     Budget Allocation
                 </h3>
             </div>
+            <button onclick="openRequestStatusModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg hover:shadow-blue-200 active:scale-95 font-bold uppercase tracking-wide text-sm">
+                <i class='bx bx-list-ul'></i> Request Budget Status
+            </button>
         </div>
 
         <!-- Filters (Static Design) -->
@@ -144,16 +144,19 @@
                     <thead class="bg-gray-800 font-bold text-gray-100">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Allocation ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Budget Allocated</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Request ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requested By</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Amount</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Approved By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Department</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody id="allocationTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="bg-gray-50 rounded-full p-4 mb-4">
                                         <i class="bx bx-file-blank text-5xl text-gray-300"></i>
@@ -505,6 +508,55 @@
         document.getElementById('requestStatusModal').classList.add('hidden');
     };
 
+    // Budget Allocated API - Register Approved Request
+    function registerBudgetAllocation(req) {
+        const token = localStorage.getItem('jwt');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        // Allocation ID generation: ALCN + YYYYMMDD + 5 random alphanumeric
+        const nowGen = new Date();
+        const yearGen = nowGen.getFullYear();
+        const monthGen = String(nowGen.getMonth() + 1).padStart(2, '0');
+        const dayGen = String(nowGen.getDate()).padStart(2, '0');
+        const randomStrGen = Math.random().toString(36).substring(2, 7).toUpperCase();
+        const generatedAllId = `ALCN${yearGen}${monthGen}${dayGen}${randomStrGen}`;
+
+        fetch('/api/v1/psm/budget-allocated', {
+            method: 'POST',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || '',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                all_id: generatedAllId,
+                all_req_id: req.req_id,
+                all_req_by: req.req_by,
+                all_amount: req.req_amount,
+                all_budget_allocated: 0.00,
+                all_department: req.req_dept,
+                all_date: new Date().toISOString().split('T')[0],
+                all_purpose: req.req_purpose,
+                all_status: req.req_status
+            })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('Budget allocation registered successfully:', result.data);
+                if (typeof fetchBudgetAllocations === 'function') {
+                    fetchBudgetAllocations();
+                }
+            } else {
+                console.error('Failed to register budget allocation:', result.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error registering budget allocation:', error);
+        });
+    }
+
     // View Request Details Modal Logic
     window.openViewRequestDetails = function(req) {
         document.getElementById('view_req_id').textContent = '#' + req.req_id;
@@ -539,6 +591,72 @@
 
     window.closeViewRequestModal = function() {
         document.getElementById('viewRequestModal').classList.add('hidden');
+    }
+
+    // Fetch Budget Allocations
+    window.fetchBudgetAllocations = function() {
+        const token = localStorage.getItem('jwt');
+        const tbody = document.getElementById('allocationTableBody');
+
+        fetch('/api/v1/psm/budget-allocated', {
+            method: 'GET',
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success && Array.isArray(result.data)) {
+                renderAllocationTable(result.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching budget allocations:', error);
+        });
+    };
+
+    function renderAllocationTable(allocations) {
+        const tbody = document.getElementById('allocationTableBody');
+        tbody.innerHTML = '';
+
+        if (allocations.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="bg-gray-50 rounded-full p-4 mb-4">
+                                <i class="bx bx-file-blank text-5xl text-gray-300"></i>
+                            </div>
+                            <p class="text-gray-500 font-medium text-lg">No budget allocations found!</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        allocations.forEach(all => {
+            const row = `
+                <tr class="hover:bg-gray-50/50 transition-colors text-sm">
+                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${all.all_id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-bold text-green-600">₱ ${parseFloat(all.all_budget_allocated).toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">${all.all_req_id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">${all.all_req_by.split(' - ')[0]}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">₱ ${parseFloat(all.all_amount).toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">${all.all_department}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">${window.formatDateGlobal(all.all_date)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500 max-w-xs truncate font-medium" title="${all.all_purpose}">${all.all_purpose}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full bg-green-600 text-white items-center gap-1.5 shadow-sm uppercase tracking-wider">
+                            <i class='bx bx-check-circle'></i> ${all.all_status}
+                        </span>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
     }
 
     // Cancel Request Logic
@@ -665,15 +783,25 @@
             let statusColor = 'bg-gray-800 text-white';
             let statusIcon = 'bx-time';
             let actionButtons = '';
+            let rowStyle = '';
             
             if (req.req_status === 'Approved') {
                 statusColor = 'bg-green-600 text-white';
                 statusIcon = 'bx-check-circle';
+                rowStyle = 'bg-green-50 font-bold'; // Highlight entire row
                 actionButtons = `
                     <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-all" title="View Details">
                         <i class='bx bx-show-alt text-xl'></i>
                     </button>
                 `;
+                
+                // Trigger registration in Budget Allocation if not already done
+                // (This is a simplified trigger, ideally handled server-side upon status change)
+                if (typeof registerBudgetAllocation === 'function') {
+                    // Check if already registered to avoid duplicates (could be a separate API check)
+                    // For now, we call it and rely on the backend to handle existing req_id
+                    registerBudgetAllocation(req);
+                }
             } else if (req.req_status === 'Rejected') {
                 statusColor = 'bg-red-600 text-white';
                 statusIcon = 'bx-x-circle';
@@ -706,7 +834,7 @@
             }
 
             const row = `
-                <tr class="hover:bg-gray-50/50 transition-colors">
+                <tr class="${rowStyle} hover:bg-gray-50/50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="text-sm font-bold text-gray-900">${req.req_id}</span>
                     </td>
@@ -758,6 +886,7 @@
 
         function init() {
             fetchApprovedRequisitions();
+            fetchBudgetAllocations();
             setupEventListeners();
         }
 
