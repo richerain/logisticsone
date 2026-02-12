@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\PSM\Budget;
-use App\Models\PSM\BudgetLog;
 use App\Models\PSM\Product;
 use App\Models\PSM\Purchase;
 use App\Models\PSM\PurchaseProduct;
@@ -1160,84 +1158,6 @@ class PSMService
         return $prefix.str_pad($next, 5, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * Budget Methods
-     */
-
-    /**
-     * Get current budget
-     */
-    public function getCurrentBudget()
-    {
-        try {
-            $budget = $this->psmRepository->getCurrentBudget();
-
-            if ($budget) {
-                return [
-                    'success' => true,
-                    'data' => $budget,
-                    'message' => 'Budget retrieved successfully',
-                ];
-            } else {
-                return [
-                    'success' => false,
-                    'message' => 'No active budget found',
-                    'data' => null,
-                ];
-            }
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch budget: '.$e->getMessage(),
-                'data' => null,
-            ];
-        }
-    }
-
-    /**
-     * Get all budgets
-     */
-    public function getAllBudgets()
-    {
-        try {
-            $budgets = $this->psmRepository->getAllBudgets();
-
-            return [
-                'success' => true,
-                'data' => $budgets,
-                'message' => 'Budgets retrieved successfully',
-            ];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch budgets: '.$e->getMessage(),
-                'data' => [],
-            ];
-        }
-    }
-
-    /**
-     * Get all budget logs
-     */
-    public function getAllBudgetLogs()
-    {
-        try {
-            $logs = $this->psmRepository->getAllBudgetLogs();
-
-            return [
-                'success' => true,
-                'data' => $logs,
-                'message' => 'Budget logs retrieved successfully',
-            ];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch budget logs: '.$e->getMessage(),
-                'data' => [],
-            ];
-        }
-    }
-
     public function getQuotes()
     {
         try {
@@ -1486,79 +1406,9 @@ class PSMService
     }
 
     /**
-     * Extend budget validity
+     * Update purchase status
      */
-    public function extendBudgetValidity($id, $validityType, $additionalAmount = 0)
-    {
-        DB::beginTransaction();
-        try {
-            $budget = $this->psmRepository->getBudgetById($id);
-
-            if (! $budget) {
-                DB::rollBack();
-
-                return [
-                    'success' => false,
-                    'message' => 'Budget not found',
-                    'data' => null,
-                ];
-            }
-
-            $newValidTo = $this->calculateNewValidTo($budget->bud_valid_from, $validityType);
-
-            $updatedBudget = $this->psmRepository->extendBudgetValidity($id, $newValidTo, $additionalAmount);
-
-            if ($updatedBudget) {
-                DB::commit();
-
-                return [
-                    'success' => true,
-                    'message' => 'Budget extended successfully',
-                    'data' => $updatedBudget,
-                ];
-            } else {
-                DB::rollBack();
-
-                return [
-                    'success' => false,
-                    'message' => 'Failed to extend budget',
-                    'data' => null,
-                ];
-            }
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            return [
-                'success' => false,
-                'message' => 'Failed to extend budget: '.$e->getMessage(),
-                'data' => null,
-            ];
-        }
-    }
-
-    /**
-     * Calculate new valid to date based on validity type
-     */
-    private function calculateNewValidTo($validFrom, $validityType)
-    {
-        $validFrom = \Carbon\Carbon::parse($validFrom);
-
-        switch ($validityType) {
-            case 'Week':
-                return $validFrom->addWeek()->toDateString();
-            case 'Month':
-                return $validFrom->addMonth()->toDateString();
-            case 'Year':
-                return $validFrom->addYear()->toDateString();
-            default:
-                return $validFrom->addMonth()->toDateString();
-        }
-    }
-
-    /**
-     * Update purchase status with budget check
-     */
-    public function updatePurchaseStatus($id, $status, $budgetCheck = false, $approvedBy = null)
+    public function updatePurchaseStatus($id, $status, $approvedBy = null)
     {
         DB::beginTransaction();
         try {
@@ -1572,38 +1422,6 @@ class PSMService
                     'message' => 'Purchase not found',
                     'data' => null,
                 ];
-            }
-
-            // If budget check is required and status is being approved
-            if ($budgetCheck && $status === 'Approved') {
-                $budget = $this->psmRepository->getCurrentBudget();
-
-                if (! $budget) {
-                    DB::rollBack();
-
-                    return [
-                        'success' => false,
-                        'message' => 'No active budget available',
-                        'data' => null,
-                    ];
-                }
-
-                // Check if budget has sufficient funds
-                if ($budget->bud_remaining_amount < $purchase->pur_total_amount) {
-                    DB::rollBack();
-
-                    return [
-                        'success' => false,
-                        'message' => 'Insufficient budget. Remaining: '.number_format($budget->bud_remaining_amount, 2).', Required: '.number_format($purchase->pur_total_amount, 2),
-                        'data' => null,
-                    ];
-                }
-
-                // Update budget spent amount
-                $this->psmRepository->updateBudgetSpent($budget->id, $purchase->pur_total_amount);
-                
-                // Create Budget Log
-                $this->createBudgetLog($budget, $purchase);
             }
 
             // Set approved by if provided (for both approval and rejection)
@@ -1791,9 +1609,9 @@ class PSMService
     }
 
     /**
-     * Process budget approval or rejection
+     * Process purchase approval or rejection
      */
-    public function processBudgetApproval($id, $action, $approvedBy)
+    public function processPurchaseApproval($id, $action, $approvedBy)
     {
         DB::beginTransaction();
         try {
@@ -1813,36 +1631,6 @@ class PSMService
             $purchase->pur_approved_by = $approvedBy;
 
             if ($action === 'approve') {
-                // Check budget for approval
-                $budget = $this->psmRepository->getCurrentBudget();
-
-                if (! $budget) {
-                    DB::rollBack();
-
-                    return [
-                        'success' => false,
-                        'message' => 'No active budget available',
-                        'data' => null,
-                    ];
-                }
-
-                // Check if budget has sufficient funds
-                if ($budget->bud_remaining_amount < $purchase->pur_total_amount) {
-                    DB::rollBack();
-
-                    return [
-                        'success' => false,
-                        'message' => 'Insufficient budget. Remaining: '.number_format($budget->bud_remaining_amount, 2).', Required: '.number_format($purchase->pur_total_amount, 2),
-                        'data' => null,
-                    ];
-                }
-
-                // Update budget spent amount
-                $this->psmRepository->updateBudgetSpent($budget->id, $purchase->pur_total_amount);
-
-                // Create Budget Log
-                $this->createBudgetLog($budget, $purchase);
-
                 // Update purchase status to Approved
                 $purchase->pur_status = 'Approved';
             } else {
@@ -1864,31 +1652,9 @@ class PSMService
 
             return [
                 'success' => false,
-                'message' => 'Failed to process budget approval: '.$e->getMessage(),
+                'message' => 'Failed to process purchase approval: '.$e->getMessage(),
                 'data' => null,
             ];
         }
-    }
-
-    /**
-     * Create budget log entry
-     */
-    private function createBudgetLog($budget, $purchase)
-    {
-        $logId = 'BLOG' . now()->format('Ymd') . $this->generateRandomAlphanumeric(5);
-        
-        $itemNames = collect($purchase->pur_name_items)->pluck('name')->join(', ');
-        if (strlen($itemNames) > 250) {
-            $itemNames = substr($itemNames, 0, 247) . '...';
-        }
-
-        BudgetLog::create([
-            'log_code' => $logId,
-            'bud_id' => $budget->bud_id,
-            'bud_spent' => $purchase->pur_total_amount,
-            'spent_to' => $itemNames,
-            'bud_type' => 'Purchase Payment',
-            'bud_spent_date' => now(),
-        ]);
     }
 }

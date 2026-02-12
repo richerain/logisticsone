@@ -1872,14 +1872,6 @@ const Toast = Swal.mixin({
     } 
 });
 
-function openBudgetApproval() {
-    if (typeof loadModuleContent === 'function') {
-        loadModuleContent('budgeting');
-    } else {
-        console.error('loadModuleContent function not found');
-        showNotification('Error: Module loader not available', 'error');
-    }
-}
 
 function viewPurchase(id) {
     const purchase = currentPurchases.find(p => p.id == id);
@@ -2082,7 +2074,6 @@ window.viewPurchase = viewPurchase;
 window.editPurchase = editPurchase;
 window.deletePurchase = deletePurchase;
 window.cancelPurchase = cancelPurchase;
-window.openBudgetApproval = openBudgetApproval;
 window.addItemToPurchase = addItemToPurchase;
 window.removeSelectedItem = removeSelectedItem;
 window.removeItemGroup = removeItemGroup;

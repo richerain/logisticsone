@@ -33,32 +33,7 @@ Route::prefix('purchase-management')->group(function () {
     Route::delete('/{id}', [PSMController::class, 'deletePurchase']);
     Route::patch('/{id}/status', [PSMController::class, 'updatePurchaseStatus']);
     Route::post('/{id}/cancel', [PSMController::class, 'cancelPurchase']);
-    Route::post('/{id}/budget-approval', [PSMController::class, 'budgetApproval']);
-});
-
-// PSM Budget Management Routes
-Route::prefix('budget-management')->group(function () {
-    Route::get('/all', [PSMController::class, 'getAllBudgets']);
-    Route::get('/current', [PSMController::class, 'getCurrentBudget']);
-    Route::post('/{id}/extend', [PSMController::class, 'extendBudgetValidity']);
-});
-
-// PSM Budget Allocated Routes
-Route::prefix('budget-allocated')->group(function () {
-    Route::get('/', [PSMController::class, 'getBudgetAllocated']);
-    Route::post('/', [PSMController::class, 'storeBudgetAllocated']);
-});
-
-// PSM Budget Requests Routes
-Route::prefix('budget-requests')->group(function () {
-    Route::get('/', [PSMController::class, 'getRequestBudgets']);
-    Route::post('/', [PSMController::class, 'storeRequestBudget']);
-    Route::patch('/{id}/cancel', [PSMController::class, 'cancelRequestBudget']);
-});
-
-// PSM Budget Logs Routes
-Route::prefix('budget-logs')->group(function () {
-    Route::get('/all', [PSMController::class, 'getBudgetLogs']);
+    Route::post('/{id}/purchase-approval', [PSMController::class, 'purchaseApproval']);
 });
 
 // PSM Requisition Routes

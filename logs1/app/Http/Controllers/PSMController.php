@@ -16,77 +16,6 @@ class PSMController extends Controller
     }
 
     /**
-     * Get all budget allocations
-     */
-    public function getBudgetAllocated()
-    {
-        try {
-            $allocations = \DB::connection('psm')->table('psm_budget_allocated')
-                ->orderBy('created_at', 'desc')
-                ->get();
-            
-            return response()->json([
-                'success' => true,
-                'data' => $allocations
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch budget allocations: ' . $e->getMessage(),
-                'data' => []
-            ], 500);
-        }
-    }
-
-    /**
-     * Store a new budget allocation
-     */
-    public function storeBudgetAllocated(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'all_id' => 'required|string',
-                'all_req_id' => 'required|string',
-                'all_req_by' => 'required|string',
-                'all_amount' => 'required|numeric',
-                'all_budget_allocated' => 'required|numeric',
-                'all_department' => 'required|string',
-                'all_date' => 'required|date',
-                'all_purpose' => 'required|string',
-                'all_status' => 'required|string',
-            ]);
-
-            // Check if already exists to avoid duplicates
-            $exists = \DB::connection('psm')->table('psm_budget_allocated')
-                ->where('all_req_id', $validated['all_req_id'])
-                ->exists();
-
-            if ($exists) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Budget already allocated for this request.'
-                ]);
-            }
-
-            $validated['created_at'] = now();
-            $validated['updated_at'] = now();
-
-            \DB::connection('psm')->table('psm_budget_allocated')->insert($validated);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Budget allocation registered successfully.',
-                'data' => $validated
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to register budget allocation: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * Get purchase products
      */
     public function getPurchaseProducts()
@@ -281,13 +210,11 @@ class PSMController extends Controller
         try {
             $validated = $request->validate([
                 'status' => 'required|in:Pending,Approved,Rejected,Cancel,Vendor-Review,In-Progress,Completed',
-                'budget_check' => 'sometimes|boolean',
                 'approved_by' => 'nullable|string|max:255',
             ]);
 
-            $budgetCheck = $validated['budget_check'] ?? false;
             $approvedBy = $validated['approved_by'] ?? null;
-            $result = $this->psmService->updatePurchaseStatus($id, $validated['status'], $budgetCheck, $approvedBy);
+            $result = $this->psmService->updatePurchaseStatus($id, $validated['status'], $approvedBy);
 
             return response()->json($result);
         } catch (\Exception $e) {
@@ -997,111 +924,9 @@ class PSMController extends Controller
     }
 
     /**
-     * Budget Management Endpoints
+     * Purchase approval
      */
-
-
-    /**
-     * Get current budget
-     */
-    public function getCurrentBudget()
-    {
-        try {
-            $result = $this->psmService->getCurrentBudget();
-
-            return response()->json($result);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch budget: '.$e->getMessage(),
-                'data' => null,
-            ], 500);
-        }
-    }
-
-    /**
-     * Get all budgets
-     */
-    public function getAllBudgets()
-    {
-        try {
-            // Restrict access
-            $user = \Auth::guard('sws')->user();
-            $role = $user ? strtolower($user->roles ?? '') : '';
-            
-            if (!$user || !in_array($role, ['superadmin', 'admin', 'manager'])) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-            }
-
-            $result = $this->psmService->getAllBudgets();
-
-            return response()->json($result);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch budgets: '.$e->getMessage(),
-                'data' => [],
-            ], 500);
-        }
-    }
-
-    /**
-     * Get all budget logs
-     */
-    public function getBudgetLogs()
-    {
-        try {
-            // Restrict access
-            $user = \Auth::guard('sws')->user();
-            $role = $user ? strtolower($user->roles ?? '') : '';
-            
-            if (!$user || !in_array($role, ['superadmin', 'admin', 'manager'])) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-            }
-
-            $result = $this->psmService->getAllBudgetLogs();
-
-            return response()->json($result);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch budget logs: '.$e->getMessage(),
-                'data' => [],
-            ], 500);
-        }
-    }
-
-    /**
-     * Extend budget validity
-     */
-    public function extendBudgetValidity(Request $request, $id)
-    {
-        try {
-            $validated = $request->validate([
-                'validity_type' => 'required|in:Week,Month,Year',
-                'additional_amount' => 'nullable|numeric|min:0',
-            ]);
-
-            $result = $this->psmService->extendBudgetValidity(
-                $id,
-                $validated['validity_type'],
-                $validated['additional_amount'] ?? 0
-            );
-
-            return response()->json($result);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to extend budget: '.$e->getMessage(),
-                'data' => null,
-            ], 500);
-        }
-    }
-
-    /**
-     * Budget approval for purchase
-     */
-    public function budgetApproval(Request $request, $id)
+    public function purchaseApproval(Request $request, $id)
     {
         try {
             $validated = $request->validate([
@@ -1109,7 +934,7 @@ class PSMController extends Controller
                 'approved_by' => 'required|string|max:255',
             ]);
 
-            $result = $this->psmService->processBudgetApproval(
+            $result = $this->psmService->processPurchaseApproval(
                 $id,
                 $validated['action'],
                 $validated['approved_by']
@@ -1119,138 +944,8 @@ class PSMController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to process budget approval: '.$e->getMessage(),
+                'message' => 'Failed to process purchase approval: '.$e->getMessage(),
                 'data' => null,
-            ], 500);
-        }
-    }
-
-    /**
-     * Store a new budget request
-     */
-    public function storeRequestBudget(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'req_id' => 'required|string|unique:psm.psm_request_budget,req_id',
-                'req_by' => 'required|string|max:255',
-                'req_date' => 'required|date',
-                'req_dept' => 'required|string|max:255',
-                'req_amount' => 'required|numeric|min:0',
-                'req_purpose' => 'required|string',
-                'req_contact' => 'required|string|max:255',
-            ]);
-
-            $validated['req_status'] = 'Pending';
-
-            $budgetRequest = \App\Models\PSM\RequestBudget::create($validated);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Budget request created successfully.',
-                'data' => $budgetRequest
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create budget request: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Get all budget requests
-     */
-    public function getRequestBudgets()
-    {
-        try {
-            $requests = \App\Models\PSM\RequestBudget::orderBy('created_at', 'desc')
-                ->get()
-                ->makeHidden(['req_contact']);
-            
-            return response()->json([
-                'success' => true,
-                'data' => $requests
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch budget requests: ' . $e->getMessage(),
-                'data' => []
-            ], 500);
-        }
-    }
-
-    /**
-     * Cancel a budget request
-     */
-    public function cancelRequestBudget($id)
-    {
-        try {
-            $request = \App\Models\PSM\RequestBudget::find($id);
-
-            if (!$request) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Budget request not found.'
-                ], 404);
-            }
-
-            if ($request->req_status !== 'Pending') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Only pending requests can be cancelled.'
-                ], 400);
-            }
-
-            $request->req_status = 'Cancelled';
-            $request->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Budget request cancelled successfully.',
-                'data' => $request
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to cancel budget request: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Update budget request status externally
-     */
-    public function updateExternalBudgetRequestStatus(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'req_id' => 'required|string',
-                'req_status' => 'required|string',
-            ]);
-
-            $budgetRequest = \App\Models\PSM\RequestBudget::find($validated['req_id']);
-
-            if (!$budgetRequest) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Budget request not found.'
-                ], 404);
-            }
-
-            $budgetRequest->req_status = $validated['req_status'];
-            $budgetRequest->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Budget request status updated successfully.',
-                'data' => $budgetRequest
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update budget request status: ' . $e->getMessage()
             ], 500);
         }
     }
