@@ -1450,15 +1450,15 @@ class PSMService
     }
 
     /**
-     * Get budget requests for external API (excluding req_contact)
+     * Get single budget request for external API (excluding req_contact)
      */
-    public function getExternalBudgetRequests()
+    public function getExternalBudgetRequest($id)
     {
         try {
-            $requests = $this->psmRepository->getBudgetRequests();
+            $request = $this->psmRepository->getBudgetRequestById($id);
+            $key = request()->query('key');
 
-            // Remove req_contact from each request
-            return collect($requests)->map(function ($request) {
+            if ($request) {
                 if (is_object($request)) {
                     if (isset($request->req_contact)) {
                         unset($request->req_contact);
@@ -1466,6 +1466,50 @@ class PSMService
                 } elseif (is_array($request)) {
                     unset($request['req_contact']);
                 }
+
+                // Add quick action URLs
+                $baseUrl = config('app.url') . '/api/v1/psm/external/budget-requests/' . $id;
+                if (is_object($request)) {
+                    $request->approve_url = "{$baseUrl}?req_status=Approved&key={$key}";
+                    $request->reject_url = "{$baseUrl}?req_status=Rejected&key={$key}";
+                } else {
+                    $request['approve_url'] = "{$baseUrl}?req_status=Approved&key={$key}";
+                    $request['reject_url'] = "{$baseUrl}?req_status=Rejected&key={$key}";
+                }
+            }
+
+            return $request;
+        } catch (Exception $e) {
+            throw new Exception('Error fetching external budget request: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Get budget requests for external API (excluding req_contact, only Pending)
+     */
+    public function getExternalBudgetRequests()
+    {
+        try {
+            $requests = $this->psmRepository->getPendingBudgetRequests();
+            $key = request()->query('key');
+
+            // Remove req_contact from each request and add quick approve link
+            return collect($requests)->map(function ($request) use ($key) {
+                if (is_object($request)) {
+                    if (isset($request->req_contact)) {
+                        unset($request->req_contact);
+                    }
+                    $id = $request->req_id;
+                } elseif (is_array($request)) {
+                    unset($request['req_contact']);
+                    $id = $request['req_id'];
+                }
+
+                // Add quick approve URL
+                $baseUrl = config('app.url') . '/api/v1/psm/external/budget-requests/' . $id;
+                $request->approve_url = "{$baseUrl}?req_status=Approved&key={$key}";
+                $request->reject_url = "{$baseUrl}?req_status=Rejected&key={$key}";
+
                 return $request;
             });
         } catch (Exception $e) {

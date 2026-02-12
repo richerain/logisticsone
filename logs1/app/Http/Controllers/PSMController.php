@@ -527,12 +527,40 @@ class PSMController extends Controller
     }
 
     /**
+     * Get single external budget request
+     */
+    public function getExternalBudgetRequest(Request $request, $id)
+    {
+        try {
+            $budgetRequest = $this->psmService->getExternalBudgetRequest($id);
+            
+            if ($budgetRequest) {
+                return response()->json([
+                    'success' => true,
+                    'data' => $budgetRequest
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Budget request not found'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Update external budget request status
      */
     public function updateExternalBudgetRequestStatus(Request $request, $id)
     {
         try {
-            $status = $request->input('req_status');
+            // Check both body and query for req_status
+            $status = $request->input('req_status') ?? $request->query('req_status');
             
             if (!$status) {
                 return response()->json([

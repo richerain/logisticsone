@@ -552,6 +552,17 @@ class PSMRepository
     }
 
     /**
+     * Get pending budget requests
+     */
+    public function getPendingBudgetRequests()
+    {
+        return \DB::connection('psm')->table('psm_request_budget')
+            ->where('req_status', 'Pending')
+            ->orderBy('req_date', 'desc')
+            ->get();
+    }
+
+    /**
      * Get budget request by ID
      */
     public function getBudgetRequestById($id)
