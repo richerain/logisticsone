@@ -1419,9 +1419,21 @@ class PSMService
     public function getBudgetLogs()
     {
         try {
-            return $this->psmRepository->getBudgetLogs();
+            return $this->psmRepository->getAllBudgetLogs();
         } catch (Exception $e) {
             throw new Exception('Error fetching budget logs: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get allocated budgets
+     */
+    public function getAllocatedBudgets()
+    {
+        try {
+            return $this->psmRepository->getAllocatedBudgets();
+        } catch (Exception $e) {
+            throw new Exception('Error fetching allocated budgets: ' . $e->getMessage());
         }
     }
 

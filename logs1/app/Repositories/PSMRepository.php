@@ -534,4 +534,12 @@ class PSMRepository
     {
         return BudgetLog::orderBy('created_at', 'desc')->get();
     }
+
+    /**
+     * Get all allocated budgets
+     */
+    public function getAllocatedBudgets()
+    {
+        return \DB::connection('psm')->table('psm_budget_allocated')->orderBy('all_date', 'desc')->get();
+    }
 }

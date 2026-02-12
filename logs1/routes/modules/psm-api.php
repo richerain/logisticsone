@@ -43,6 +43,7 @@ Route::prefix('budget-management')->group(function () {
     Route::post('/', [PSMController::class, 'createBudget']);
     Route::put('/{id}', [PSMController::class, 'updateBudget']);
     Route::post('/{id}/extend', [PSMController::class, 'extendBudget']);
+    Route::get('/allocated', [PSMController::class, 'getAllocatedBudgets']);
 });
 
 // PSM Budget Log Routes

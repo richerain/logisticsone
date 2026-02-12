@@ -436,6 +436,25 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * Get allocated budgets
+     */
+    public function getAllocatedBudgets()
+    {
+        try {
+            $allocated = $this->psmService->getAllocatedBudgets();
+            return response()->json([
+                'success' => true,
+                'data' => $allocated
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function deleteQuote($id)
     {
         try {

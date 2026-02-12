@@ -8,50 +8,8 @@
     </div>
 </div>
 
-<!-- Budget Status Overview -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-600">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Active Budget</h3>
-            <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
-                <i class='bx bxs-wallet text-xl'></i>
-            </div>
-        </div>
-        <div class="flex flex-col">
-            <h4 class="text-2xl font-black text-gray-800" id="activeBudgetAmount">₱0.00</h4>
-            <p class="text-xs text-gray-500 mt-1" id="activeBudgetPeriod">No active budget period</p>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-600">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Status</h3>
-            <div class="bg-green-100 p-2 rounded-lg text-green-600">
-                <i class='bx bxs-check-shield text-xl'></i>
-            </div>
-        </div>
-        <div class="flex flex-col">
-            <h4 class="text-2xl font-black text-gray-800" id="activeBudgetStatus">Inactive</h4>
-            <p class="text-xs text-gray-500 mt-1" id="activeBudgetExpiry">N/A</p>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-600">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Quick Actions</h3>
-            <div class="bg-purple-100 p-2 rounded-lg text-purple-600">
-                <i class='bx bxs-zap text-xl'></i>
-            </div>
-        </div>
-        <div class="flex gap-2">
-            <button onclick="openCreateBudgetModal()" class="btn btn-sm btn-primary">New Budget</button>
-            <button onclick="openExtendBudgetModal()" id="extendBudgetBtn" class="btn btn-sm btn-outline btn-primary" disabled>Extend</button>
-        </div>
-    </div>
-</div>
-
+<!-- Consolidated Budget Request Section -->
 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-    <!-- Consolidated Requisition Section -->
     <div class="">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div class="flex items-center gap-4 w-full justify-between">
@@ -59,7 +17,6 @@
                     <i class='bx bx-git-pull-request text-blue-600'></i>
                     Consolidated Budget Request
                 </h3>
-                <button onclick="requestConsolidatedBudget()" class="btn btn-primary btn-sm">Consolidated Budget Request</button>
             </div>
         </div>
 
@@ -126,6 +83,10 @@
                     <h4 class="text-2xl font-black text-blue-600 leading-none" id="consolidatedTotalAmount">₱0.00</h4>
                 </div>
             </div>
+            <button onclick="requestConsolidatedBudget()" class="btn btn-primary btn-sm flex items-center gap-2">
+                <i class='bx bx-send'></i>
+                Consolidated Budget Request
+            </button>
         </div>
 
         <!-- Pagination (Matching Requisition Records design) -->
@@ -144,28 +105,75 @@
 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <i class='bx bx-history text-purple-600'></i>
+            <i class='bx bx-check-shield text-purple-600'></i>
             Budget Allocation
         </h3>
-        <button onclick="requestBudgetStatus()" class="btn btn-outline btn-primary btn-sm">request budget status</button>
+        <button onclick="requestBudgetStatus()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
+            <i class='bx bx-info-circle'></i>
+            request budget status
+        </button>
     </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="budgetHistoryBody" class="bg-white divide-y divide-gray-200">
-                <tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 italic">No budget history available</td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Filters for Budget Allocation (Matching Consolidated Request design) -->
+    <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="md:col-span-6 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class='bx bx-search text-gray-400 text-xl'></i>
+                </div>
+                <input type="text" id="allocatedSearchInput" placeholder="Search by ID, requester, or purpose..." 
+                    class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all text-sm">
+            </div>
+            <div class="md:col-span-6">
+                <select id="allocatedDeptFilter" class="block w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all text-sm">
+                    <option value="">All Departments</option>
+                    <option value="Human Resource Department">Human Resource Department</option>
+                    <option value="Core Transaction Office">Core Transaction Office</option>
+                    <option value="Logistics Office">Logistics Office</option>
+                    <option value="Administrative Office">Administrative Office</option>
+                    <option value="Financial Department">Financial Department</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Container for Budget Allocation -->
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-800 font-bold text-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Req ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requested By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Allocated Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Department</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="allocatedTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <div class="flex justify-center items-center py-4">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                                Loading allocated budgets...
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination for Budget Allocation -->
+    <div id="allocatedPager" class="flex items-center justify-between mt-4 px-2"> 
+        <div id="allocatedPagerInfo" class="text-sm text-gray-600"></div> 
+        <div class="join"> 
+            <button class="btn btn-sm join-item" id="allocatedPrevBtn" data-action="prev">Prev</button> 
+            <span class="btn btn-sm join-item" id="allocatedPageDisplay">1 / 1</span> 
+            <button class="btn btn-sm join-item" id="allocatedNextBtn" data-action="next">Next</button> 
+        </div> 
     </div>
 </div>
 
@@ -225,11 +233,18 @@
         const consolidatedPageSize = 10;
         let allApprovedRequisitions = [];
         let filteredRequisitions = [];
+
+        // Variables for Allocated Budgets
+        let currentAllocatedPage = 1;
+        const allocatedPageSize = 10;
+        let allAllocatedBudgets = [];
+        let filteredAllocatedBudgets = [];
+
         let activeBudget = null;
 
         function init() {
             fetchActiveBudget();
-            fetchBudgetHistory();
+            fetchAllocatedBudgets();
             fetchApprovedRequisitions();
             setupEventListeners();
         }
@@ -255,9 +270,32 @@
                 });
             }
 
-            // Consolidated filters
+            // Allocated pagination
+            const allocatedPager = document.getElementById('allocatedPager');
+            if (allocatedPager) {
+                allocatedPager.addEventListener('click', function(ev){
+                    const btn = ev.target.closest('button[data-action]');
+                    if(!btn) return;
+                    const act = btn.getAttribute('data-action');
+                    const totalPages = Math.ceil(filteredAllocatedBudgets.length / allocatedPageSize);
+                    
+                    if(act === 'prev'){ 
+                        currentAllocatedPage = Math.max(1, currentAllocatedPage - 1); 
+                        displayAllocatedTable(); 
+                    }
+                    if(act === 'next'){ 
+                        currentAllocatedPage = Math.min(totalPages, currentAllocatedPage + 1); 
+                        displayAllocatedTable(); 
+                    }
+                });
+            }
+
+            // Filters
             document.getElementById('consolidatedSearchInput')?.addEventListener('input', applyConsolidatedFilters);
             document.getElementById('consolidatedDeptFilter')?.addEventListener('change', applyConsolidatedFilters);
+            
+            document.getElementById('allocatedSearchInput')?.addEventListener('input', applyAllocatedFilters);
+            document.getElementById('allocatedDeptFilter')?.addEventListener('change', applyAllocatedFilters);
 
             // Forms
             document.getElementById('budgetForm')?.addEventListener('submit', handleBudgetSubmit);
@@ -291,26 +329,143 @@
             const extendBtn = document.getElementById('extendBudgetBtn');
 
             if (budget) {
-                amountEl.textContent = formatCurrency(budget.amount);
-                periodEl.textContent = `${formatDate(budget.valid_from)} - ${formatDate(budget.valid_to)}`;
+                if (amountEl) amountEl.textContent = formatCurrency(budget.amount);
+                if (periodEl) periodEl.textContent = `${formatDate(budget.valid_from)} - ${formatDate(budget.valid_to)}`;
                 
                 // Fix: Defensive check for budget.status
                 const status = budget.status || 'unknown';
-                statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                statusEl.className = `text-2xl font-black ${status === 'active' ? 'text-green-600' : 'text-red-600'}`;
+                if (statusEl) {
+                    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                    statusEl.className = `text-2xl font-black ${status === 'active' ? 'text-green-600' : 'text-red-600'}`;
+                }
                 
                 const daysLeft = Math.ceil((new Date(budget.valid_to) - new Date()) / (1000 * 60 * 60 * 24));
-                expiryEl.textContent = daysLeft > 0 ? `${daysLeft} days remaining` : 'Expired';
+                if (expiryEl) expiryEl.textContent = daysLeft > 0 ? `${daysLeft} days remaining` : 'Expired';
                 
                 if (extendBtn) extendBtn.disabled = false;
             } else {
-                amountEl.textContent = '₱0.00';
-                periodEl.textContent = 'No active budget period';
-                statusEl.textContent = 'Inactive';
-                statusEl.className = 'text-2xl font-black text-gray-400';
-                expiryEl.textContent = 'N/A';
+                if (amountEl) amountEl.textContent = '₱0.00';
+                if (periodEl) periodEl.textContent = 'No active budget period';
+                if (statusEl) {
+                    statusEl.textContent = 'Inactive';
+                    statusEl.className = 'text-2xl font-black text-gray-400';
+                }
+                if (expiryEl) expiryEl.textContent = 'N/A';
                 if (extendBtn) extendBtn.disabled = true;
             }
+        }
+
+        function fetchAllocatedBudgets() {
+            const token = localStorage.getItem('jwt');
+            fetch('/api/v1/psm/budget-management/allocated', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data)) {
+                    allAllocatedBudgets = data.data;
+                    applyAllocatedFilters();
+                } else {
+                    renderEmptyAllocatedTable('No allocated budgets found.');
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching allocated budgets:', err);
+                renderEmptyAllocatedTable('Error loading allocated budgets.');
+            });
+        }
+
+        function applyAllocatedFilters() {
+            const searchTerm = document.getElementById('allocatedSearchInput')?.value.toLowerCase() || '';
+            const deptFilter = document.getElementById('allocatedDeptFilter')?.value || '';
+
+            filteredAllocatedBudgets = allAllocatedBudgets.filter(item => {
+                const matchesSearch = 
+                    (item.all_id && item.all_id.toString().toLowerCase().includes(searchTerm)) ||
+                    (item.all_req_id && item.all_req_id.toLowerCase().includes(searchTerm)) ||
+                    (item.all_req_by && item.all_req_by.toLowerCase().includes(searchTerm)) ||
+                    (item.all_purpose && item.all_purpose.toLowerCase().includes(searchTerm));
+                
+                const matchesDept = !deptFilter || item.all_department === deptFilter;
+                return matchesSearch && matchesDept;
+            });
+
+            currentAllocatedPage = 1;
+            displayAllocatedTable();
+        }
+
+        function displayAllocatedTable() {
+            const tbody = document.getElementById('allocatedTableBody');
+            if (!tbody) return;
+
+            if (filteredAllocatedBudgets.length === 0) {
+                renderEmptyAllocatedTable('No matching allocated budgets found.');
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredAllocatedBudgets.length / allocatedPageSize);
+            const start = (currentAllocatedPage - 1) * allocatedPageSize;
+            const end = start + allocatedPageSize;
+            const paginatedData = filteredAllocatedBudgets.slice(start, end);
+
+            tbody.innerHTML = '';
+            paginatedData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${item.all_id || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-semibold">${item.all_req_id || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${item.all_req_by || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${formatCurrency(item.all_budget_allocated || item.all_amount || 0)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-[10px] text-gray-500 uppercase font-semibold">${item.all_department || '-'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(item.all_date)}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs" title="${item.all_purpose || ''}">${item.all_purpose || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-4 py-1.5 text-xs font-black rounded-full ${item.all_status === 'Allocated' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'} border shadow-sm">
+                            ${item.all_status || 'Allocated'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateAllocatedPager(filteredAllocatedBudgets.length, totalPages);
+        }
+
+        function updateAllocatedPager(total, totalPages) {
+            const info = document.getElementById('allocatedPagerInfo');
+            const display = document.getElementById('allocatedPageDisplay');
+            const start = total === 0 ? 0 : ((currentAllocatedPage - 1) * allocatedPageSize) + 1;
+            const end = Math.min(currentAllocatedPage * allocatedPageSize, total);
+            
+            if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
+            if (display) display.textContent = `${currentAllocatedPage} / ${totalPages || 1}`;
+            
+            const prev = document.getElementById('allocatedPrevBtn');
+            const next = document.getElementById('allocatedNextBtn');
+            
+            if (prev) prev.disabled = currentAllocatedPage <= 1;
+            if (next) next.disabled = currentAllocatedPage >= totalPages;
+        }
+
+        function renderEmptyAllocatedTable(message) {
+            const tbody = document.getElementById('allocatedTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class='bx bx-data text-6xl mb-4 text-gray-300'></i>
+                                <p class="text-lg font-medium">${message}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            updateAllocatedPager(0, 1);
         }
 
         function fetchBudgetHistory() {
@@ -321,44 +476,11 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success && Array.isArray(data.data)) {
-                    renderBudgetHistory(data.data);
+                    // No longer rendering history in the main view as requested
+                    // But keeping the data if needed for modals
                 }
             })
             .catch(err => console.error('Error fetching history:', err));
-        }
-
-        function renderBudgetHistory(budgets) {
-            const tbody = document.getElementById('budgetHistoryBody');
-            if (!tbody) return;
-
-            if (budgets.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500 italic">No budget history available</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            budgets.forEach(b => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50';
-                
-                // Fix: Defensive check for status
-                const status = b.status || 'UNKNOWN';
-                
-                tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${formatCurrency(b.amount)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(b.valid_from)} - ${formatDate(b.valid_to)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-bold rounded-full ${status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
-                            ${status.toUpperCase()}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs">${b.description || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <button onclick="editBudget(${b.id})" class="text-blue-600 hover:text-blue-900 mr-3"><i class='bx bx-edit-alt'></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         function handleBudgetSubmit(e) {
