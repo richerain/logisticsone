@@ -866,8 +866,8 @@
         const tbody = document.getElementById('requestStatusTableBody');
         tbody.innerHTML = '';
 
-        // Filter out old IDs that don't match the new format REQB + 2026
-        const newFormatRequests = requests.filter(req => req.req_id && req.req_id.startsWith('REQB2026'));
+        // Render all budget requests from the refreshed database
+        const newFormatRequests = requests;
 
         if (newFormatRequests.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found with new format.</td></tr>';
