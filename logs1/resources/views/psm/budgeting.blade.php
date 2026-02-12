@@ -481,21 +481,21 @@
                 </div>
                 
                 <div class="p-6 bg-gray-50 min-h-[300px]">
-                    <div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
                         <table class="min-w-full divide-y divide-gray-200" id="requestStatusTable">
-                            <thead class="bg-gray-100">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Req ID</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Requested By</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Date</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Dept</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Purpose</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Action</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Req ID</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Requested By</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dept</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Purpose</th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="requestStatusTableBody">
+                            <tbody class="bg-white divide-y divide-gray-100" id="requestStatusTableBody">
                                 <tr>
                                     <td colspan="9" class="px-6 py-12 text-center text-sm text-gray-500">
                                         <div class="flex flex-col items-center justify-center">
@@ -638,6 +638,16 @@
 
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+        
+        // Auto-generate Request ID: REQB + YYYYMMDD + 5 random alphanumeric
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+        const generatedReqId = `REQB${year}${month}${day}${randomStr}`;
+        
+        data.req_id = generatedReqId;
         
         // Safety check for hidden fields
         if (!data.req_by || !data.req_dept || !data.req_contact) {
@@ -867,50 +877,55 @@
             let actionButtons = '';
             
             if (req.req_status === 'Approved') {
-                statusColor = 'bg-green-100 text-green-800';
+                statusColor = 'bg-green-50 text-green-700 border-green-200';
                 statusIcon = 'bx-check-circle';
                 actionButtons = `
-                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View Details</button>
                 `;
             } else if (req.req_status === 'Rejected') {
-                statusColor = 'bg-red-100 text-red-800';
+                statusColor = 'bg-red-50 text-red-700 border-red-200';
                 statusIcon = 'bx-x-circle';
                 actionButtons = `
-                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View Details</button>
                 `;
             } else if (req.req_status === 'Cancelled') {
-                statusColor = 'bg-gray-100 text-gray-800';
+                statusColor = 'bg-gray-50 text-gray-700 border-gray-200';
                 statusIcon = 'bx-block';
                 actionButtons = `
-                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View Details</button>
                 `;
             } else if (req.req_status === 'Pending') {
-                statusColor = 'bg-yellow-100 text-yellow-800';
+                statusColor = 'bg-yellow-50 text-yellow-700 border-yellow-200';
                 statusIcon = 'bx-time-five';
                 actionButtons = `
-                    <div class="flex gap-2">
-                        <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">View</button>
-                        <button onclick="confirmCancelRequest('${req.req_id}')" class="text-red-600 hover:text-red-900 font-medium text-xs bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors">Cancel</button>
+                    <div class="flex gap-2 justify-end">
+                        <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View</button>
+                        <button onclick="confirmCancelRequest('${req.req_id}')" class="text-red-600 hover:text-red-900 font-bold text-[11px] bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-all border border-red-100 uppercase tracking-wider">Cancel</button>
                     </div>
                 `;
             }
 
             const row = `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${req.req_id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">
-                        ${req.req_by}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${window.formatDateGlobal(req.req_date)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_dept}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title="${req.req_purpose}">${req.req_purpose}</td>
+                <tr class="hover:bg-gray-50/50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} items-center gap-1">
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">${req.req_id}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-gray-900 leading-tight">${req.req_by.split(' - ')[0]}</span>
+                            <span class="text-[11px] text-gray-500 font-medium">${req.req_by.split(' - ')[1] || ''}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">${window.formatDateGlobal(req.req_date)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">${req.req_dept}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate font-medium" title="${req.req_purpose}">${req.req_purpose}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${statusColor} items-center gap-1.5 border">
                             <i class='bx ${statusIcon}'></i> ${req.req_status}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
                         ${actionButtons}
                     </td>
                 </tr>
@@ -1029,6 +1044,14 @@
                         const req_date = new Date().toISOString().split('T')[0];
                         const req_purpose = "Consolidated budget request for approved Purchase Requisitions";
                         
+                        // Auto-generate Request ID: REQB + YYYYMMDD + 5 random alphanumeric
+                        const nowGen = new Date();
+                        const yearGen = nowGen.getFullYear();
+                        const monthGen = String(nowGen.getMonth() + 1).padStart(2, '0');
+                        const dayGen = String(nowGen.getDate()).padStart(2, '0');
+                        const randomStrGen = Math.random().toString(36).substring(2, 7).toUpperCase();
+                        const generatedReqId = `REQB${yearGen}${monthGen}${dayGen}${randomStrGen}`;
+                        
                         const token = localStorage.getItem('jwt');
                         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
@@ -1041,6 +1064,7 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             },
                             body: JSON.stringify({
+                                req_id: generatedReqId,
                                 req_by,
                                 req_dept,
                                 req_contact,
