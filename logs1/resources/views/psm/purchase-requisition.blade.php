@@ -859,17 +859,79 @@
     async function fetchRequisitions(page = 1) {
         try {
             const params = new URLSearchParams({ page, ...currentFilters });
+            
+            // Fetch internal requisitions
             const response = await fetch(`${API_URL}?${params}`, {
                 headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
             });
             const result = await response.json();
             
+            let allRequisitions = [];
+            let stats = result.stats || { total: 0, approved: 0, pending: 0, rejected: 0 };
+            let meta = result.meta;
+
             if (result.success) {
-                currentRequisitions = result.data;
-                renderRequisitions(result.data);
-                updatePager(result.meta);
-                updateStats(result.stats);
+                allRequisitions = result.data;
             }
+
+            // Fetch external requisitions if it's the first page or filtering
+            // Note: In a real scenario, you might want to handle pagination for external API too
+            if (page === 1) {
+                try {
+                    const externalResponse = await fetch('https://log2.microfinancial-1.com/api/purchase_requisition.php');
+                    const externalResult = await externalResponse.json();
+                    
+                    if (externalResult && Array.isArray(externalResult)) {
+                        const externalData = externalResult.map(item => ({
+                            id: `ext_${item.id}`,
+                            req_id: item.requisition_no || `EXT-${item.id}`,
+                            req_items: item.items || '[]',
+                            req_price: item.total_amount || 0,
+                            req_requester: item.requester || 'External User',
+                            req_dept: item.department || 'External Dept',
+                            req_date: item.created_at || new Date().toISOString(),
+                            req_note: item.remarks || 'Integrated from External API',
+                            req_status: item.status || 'Pending',
+                            is_external: true
+                        }));
+
+                        // Filter external data based on current filters
+                        let filteredExternal = externalData;
+                        if (currentFilters.search) {
+                            const search = currentFilters.search.toLowerCase();
+                            filteredExternal = filteredExternal.filter(item => 
+                                item.req_id.toLowerCase().includes(search) || 
+                                item.req_requester.toLowerCase().includes(search) || 
+                                item.req_dept.toLowerCase().includes(search)
+                            );
+                        }
+                        if (currentFilters.status) {
+                            filteredExternal = filteredExternal.filter(item => item.req_status === currentFilters.status);
+                        }
+                        if (currentFilters.dept) {
+                            filteredExternal = filteredExternal.filter(item => item.req_dept === currentFilters.dept);
+                        }
+
+                        // Update stats with external data
+                        filteredExternal.forEach(item => {
+                            stats.total++;
+                            const statusKey = item.req_status.toLowerCase();
+                            if (stats[statusKey] !== undefined) stats[statusKey]++;
+                        });
+
+                        // Prepend external data to the list
+                        allRequisitions = [...filteredExternal, ...allRequisitions];
+                    }
+                } catch (extError) {
+                    console.error('Error fetching external requisitions:', extError);
+                }
+            }
+            
+            currentRequisitions = allRequisitions;
+            renderRequisitions(allRequisitions);
+            if (meta) updatePager(meta);
+            updateStats(stats);
+            
         } catch (error) {
             console.error('Error:', error);
         }
@@ -910,15 +972,21 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end gap-2">
-                            <button onclick="viewRequisition(${req.id})" title="View Details" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90">
+                            <button onclick="viewRequisition('${req.id}')" title="View Details" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90">
                                 <i class='bx bx-show-alt text-xl'></i>
                             </button>
+                            ${!req.is_external ? `
                             <button onclick="openStatusUpdate(${req.id}, '${req.req_id}', '${req.req_status}')" title="Update Status" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90">
                                 <i class='bx bx-edit text-xl'></i>
                             </button>
                             <button onclick="confirmDelete(${req.id}, '${req.req_id}')" title="Delete Requisition" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90">
                                 <i class='bx bx-trash text-xl'></i>
                             </button>
+                            ` : `
+                            <button disabled title="External Record (Read Only)" class="p-2 text-gray-400 cursor-not-allowed opacity-50">
+                                <i class='bx bx-lock-alt text-xl'></i>
+                            </button>
+                            `}
                         </div>
                     </td>
                 </tr>
@@ -1004,7 +1072,7 @@
     };
 
     window.viewRequisition = (id) => {
-        const req = currentRequisitions.find(r => r.id === id);
+        const req = currentRequisitions.find(r => r.id == id);
         if (req) showModal('view', req);
     };
 
