@@ -8,9 +8,9 @@
     </div>
 </div>
 
-<div class="bg-white rounded-lg shadow-lg p-6">
+<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
     <!-- Consolidated Budget Request Section -->
-    <div class="mb-10">
+    <div class="">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <i class='bx bx-git-pull-request text-blue-600'></i>
@@ -49,6 +49,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requisition ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Items</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requester / Dept</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Note</th>
@@ -57,7 +58,7 @@
                     </thead>
                     <tbody id="consolidatedTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex justify-center items-center py-4">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                     Loading approved requisitions...
@@ -96,7 +97,9 @@
             </div> 
         </div>
     </div>
+</div>
 
+<div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Budget Overview Header -->
     <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold text-gray-800">Budget Overview</h3>
@@ -1107,7 +1110,6 @@
                     const items = typeof req.req_items === 'string' ? JSON.parse(req.req_items) : req.req_items;
                     if (Array.isArray(items)) {
                         itemsList = items.join(', ');
-                        if (itemsList.length > 50) itemsList = itemsList.substring(0, 50) + '...';
                     }
                 } catch (e) {
                     itemsList = req.req_items || '-';
@@ -1115,13 +1117,14 @@
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${req.req_id || '-'}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${itemsList}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-bold text-gray-800">${req.req_requester || '-'}</div>
                         <div class="text-[10px] text-gray-500 uppercase font-semibold">${req.req_dept || '-'}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(req.req_date)}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500 italic">${req.req_note || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="${req.req_note || ''}">${req.req_note || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-3 py-1 text-[10px] font-black uppercase rounded-full bg-green-100 text-green-700 border border-green-200 flex items-center gap-1 w-fit">
                             <i class='bx bxs-check-circle'></i> APPROVED
@@ -1137,7 +1140,7 @@
         function updateConsolidatedTotal() {
             const total = calculateTotalAmount(filteredRequisitions);
             const totalEl = document.getElementById('consolidatedTotalAmount');
-            if (totalEl) totalEl.textContent = formatCurrency(total);
+            if (totalEl) totalEl.textContent = window.formatCurrencyGlobal(total);
         }
 
         function calculateTotalAmount(requisitions) {
@@ -1165,7 +1168,7 @@
             if (tbody) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <i class='bx bx-clipboard text-6xl mb-4 text-gray-300'></i>
                                 <p class="text-lg font-medium">${message}</p>
