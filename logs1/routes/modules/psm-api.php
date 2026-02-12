@@ -34,6 +34,7 @@ Route::prefix('purchase-management')->group(function () {
     Route::patch('/{id}/status', [PSMController::class, 'updatePurchaseStatus']);
     Route::post('/{id}/cancel', [PSMController::class, 'cancelPurchase']);
     Route::post('/{id}/purchase-approval', [PSMController::class, 'purchaseApproval']);
+    Route::get('/external-requisitions', [PSMController::class, 'getExternalRequisitions']);
 });
 
 // PSM Budget Management Routes

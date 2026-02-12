@@ -875,22 +875,24 @@
             }
 
             // Fetch external requisitions if it's the first page or filtering
-            // Note: In a real scenario, you might want to handle pagination for external API too
             if (page === 1) {
                 try {
-                    const externalResponse = await fetch('https://log2.microfinancial-1.com/api/purchase_requisition.php');
+                    // Use internal proxy to avoid CORS issues
+                    const externalResponse = await fetch('/api/v1/psm/purchase-management/external-requisitions', {
+                        headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+                    });
                     const externalResult = await externalResponse.json();
                     
-                    if (externalResult && Array.isArray(externalResult)) {
-                        const externalData = externalResult.map(item => ({
-                            id: `ext_${item.id}`,
-                            req_id: item.requisition_no || `EXT-${item.id}`,
-                            req_items: item.items || '[]',
-                            req_price: item.total_amount || 0,
+                    if (externalResult && externalResult.status === 'success' && Array.isArray(externalResult.data)) {
+                        const externalData = externalResult.data.map(item => ({
+                            id: `ext_${item.req_id}`,
+                            req_id: item.req_id,
+                            req_items: [item.requisition_item], // Wrap single item in array
+                            req_price: 0, // Not provided by external API
                             req_requester: item.requester || 'External User',
                             req_dept: item.department || 'External Dept',
-                            req_date: item.created_at || new Date().toISOString(),
-                            req_note: item.remarks || 'Integrated from External API',
+                            req_date: item.date || item.created_at || new Date().toISOString(),
+                            req_note: `Qty: ${item.quantity || 1} - Integrated from Log2 API`,
                             req_status: item.status || 'Pending',
                             is_external: true
                         }));

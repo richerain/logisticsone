@@ -526,6 +526,27 @@ class PSMController extends Controller
         }
     }
 
+    public function getExternalRequisitions(Request $request)
+    {
+        try {
+            $response = \Illuminate\Support\Facades\Http::get('https://log2.microfinancial-1.com/api/purchase_requisition.php');
+            
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch external requisitions'
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Get single external budget request
      */
