@@ -13,7 +13,11 @@ class RequestBudget extends Model
     protected $table = 'psm_request_budget';
     protected $primaryKey = 'req_id';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'req_id',
         'req_by',
         'req_date',
         'req_dept',

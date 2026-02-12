@@ -870,7 +870,19 @@
         const newFormatRequests = requests;
 
         if (newFormatRequests.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No budget requests found with new format.</td></tr>';
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="bg-gray-50 rounded-full p-4 mb-4">
+                                <i class="bx bx-file-blank text-5xl text-gray-300"></i>
+                            </div>
+                            <p class="text-gray-500 font-medium text-lg">No budget requests found!</p>
+                            <p class="text-gray-400 text-sm mt-1">Start by consolidating your approved requisitions.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
             return;
         }
 

@@ -1061,6 +1061,7 @@ class PSMController extends Controller
     {
         try {
             $validated = $request->validate([
+                'req_id' => 'required|string|unique:psm.psm_request_budget,req_id',
                 'req_by' => 'required|string|max:255',
                 'req_date' => 'required|date',
                 'req_dept' => 'required|string|max:255',
