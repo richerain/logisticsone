@@ -690,7 +690,7 @@ class PSMController extends Controller
             ];
 
             // Restricted columns for external API
-            $columns = ['prod_id', 'prod_name', 'prod_desc', 'prod_type'];
+            $columns = ['prod_id', 'prod_name', 'prod_desc', 'prod_type', 'prod_price'];
 
             $result = $this->psmService->getProducts($filters, $columns);
 
@@ -725,7 +725,7 @@ class PSMController extends Controller
     {
         try {
             // Restricted columns for external API
-            $columns = ['prod_id', 'prod_name', 'prod_desc', 'prod_type'];
+            $columns = ['prod_id', 'prod_name', 'prod_desc', 'prod_type', 'prod_price'];
 
             $result = $this->psmService->getProduct($id, $columns);
             return response()->json($result);
