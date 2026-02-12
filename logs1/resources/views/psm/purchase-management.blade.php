@@ -402,17 +402,19 @@ var selectedVendor = null;
 var selectedItems = [];
 var availableItems = [];
 
-const Toast = Swal.mixin({ 
-    toast: true, 
-    position: 'top-end', 
-    showConfirmButton: false, 
-    timer: 3000, 
-    timerProgressBar: true, 
-    didOpen: (toast) => { 
-        toast.onmouseenter = Swal.stopTimer; 
-        toast.onmouseleave = Swal.resumeTimer; 
-    } 
-});
+if (typeof Toast === 'undefined') {
+    window.Toast = Swal.mixin({ 
+        toast: true, 
+        position: 'top-end', 
+        showConfirmButton: false, 
+        timer: 3000, 
+        timerProgressBar: true, 
+        didOpen: (toast) => { 
+            toast.onmouseenter = Swal.stopTimer; 
+            toast.onmouseleave = Swal.resumeTimer; 
+        } 
+    });
+}
 
 function showNotification(message, type = 'info') { 
     if (typeof Toast !== 'undefined') {
@@ -1859,19 +1861,6 @@ function findProductPicture(productName) {
     }
     return null;
 }
-
-const Toast = Swal.mixin({ 
-    toast: true, 
-    position: 'top-end', 
-    showConfirmButton: false, 
-    timer: 3000, 
-    timerProgressBar: true, 
-    didOpen: (toast) => { 
-        toast.onmouseenter = Swal.stopTimer; 
-        toast.onmouseleave = Swal.resumeTimer; 
-    } 
-});
-
 
 function viewPurchase(id) {
     const purchase = currentPurchases.find(p => p.id == id);
