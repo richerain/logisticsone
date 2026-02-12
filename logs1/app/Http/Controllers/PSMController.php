@@ -13,7 +13,9 @@ class PSMController extends Controller
     public function __construct(PSMService $psMService)
     {
         $this->psmService = $psMService;
-        /**
+    }
+
+    /**
      * Get all budget allocations
      */
     public function getBudgetAllocated()
@@ -83,7 +85,6 @@ class PSMController extends Controller
             ], 500);
         }
     }
-}
 
     /**
      * Get purchase products

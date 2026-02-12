@@ -402,6 +402,37 @@ var selectedVendor = null;
 var selectedItems = [];
 var availableItems = [];
 
+const Toast = Swal.mixin({ 
+    toast: true, 
+    position: 'top-end', 
+    showConfirmButton: false, 
+    timer: 3000, 
+    timerProgressBar: true, 
+    didOpen: (toast) => { 
+        toast.onmouseenter = Swal.stopTimer; 
+        toast.onmouseleave = Swal.resumeTimer; 
+    } 
+});
+
+function showNotification(message, type = 'info') { 
+    if (typeof Toast !== 'undefined') {
+        Toast.fire({ 
+            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info', 
+            title: message 
+        }); 
+    } else {
+        // Fallback if Toast is not yet initialized
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
+            title: message
+        });
+    }
+}
+
 // DOM Elements
 const elements = {
     purchasesTableBody: document.getElementById('purchasesTableBody'),
@@ -1829,6 +1860,27 @@ function findProductPicture(productName) {
     return null;
 }
 
+const Toast = Swal.mixin({ 
+    toast: true, 
+    position: 'top-end', 
+    showConfirmButton: false, 
+    timer: 3000, 
+    timerProgressBar: true, 
+    didOpen: (toast) => { 
+        toast.onmouseenter = Swal.stopTimer; 
+        toast.onmouseleave = Swal.resumeTimer; 
+    } 
+});
+
+function openBudgetApproval() {
+    if (typeof loadModuleContent === 'function') {
+        loadModuleContent('budgeting');
+    } else {
+        console.error('loadModuleContent function not found');
+        showNotification('Error: Module loader not available', 'error');
+    }
+}
+
 function viewPurchase(id) {
     const purchase = currentPurchases.find(p => p.id == id);
     if (!purchase) return;
@@ -2079,34 +2131,4 @@ function formatDateRange(a, b) {
     return A || B;
 }
 
-const Toast = Swal.mixin({ 
-    toast: true, 
-    position: 'top-end', 
-    showConfirmButton: false, 
-    timer: 3000, 
-    timerProgressBar: true, 
-    didOpen: (toast) => { 
-        toast.onmouseenter = Swal.stopTimer; 
-        toast.onmouseleave = Swal.resumeTimer; 
-    } 
-});
-
-function showNotification(message, type = 'info') { 
-    if (typeof Toast !== 'undefined') {
-        Toast.fire({ 
-            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info', 
-            title: message 
-        }); 
-    } else {
-        // Fallback if Toast is not yet initialized
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
-            title: message
-        });
-    }
-}
 </script>
