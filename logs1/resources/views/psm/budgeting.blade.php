@@ -561,6 +561,10 @@
                         <span id="view_req_status" class="inline-flex px-2 py-1 rounded-full text-xs font-semibold"></span>
                     </div>
                     <div class="col-span-2">
+                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Contact Details</span>
+                        <span id="view_req_contact" class="font-medium text-gray-900"></span>
+                    </div>
+                    <div class="col-span-2">
                         <span class="block text-gray-500 text-xs uppercase tracking-wide mb-1">Purpose</span>
                         <div id="view_req_purpose" class="bg-gray-50 p-3 rounded border border-gray-200 text-gray-700 whitespace-pre-wrap"></div>
                     </div>
@@ -886,35 +890,45 @@
         }
 
         newFormatRequests.forEach(req => {
-            let statusColor = 'bg-gray-100 text-gray-800';
+            let statusColor = 'bg-gray-800 text-white';
             let statusIcon = 'bx-time';
             let actionButtons = '';
             
             if (req.req_status === 'Approved') {
-                statusColor = 'bg-green-50 text-green-700 border-green-200';
+                statusColor = 'bg-green-600 text-white';
                 statusIcon = 'bx-check-circle';
                 actionButtons = `
-                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View Details</button>
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-all" title="View Details">
+                        <i class='bx bx-show-alt text-xl'></i>
+                    </button>
                 `;
             } else if (req.req_status === 'Rejected') {
-                statusColor = 'bg-red-50 text-red-700 border-red-200';
+                statusColor = 'bg-red-600 text-white';
                 statusIcon = 'bx-x-circle';
                 actionButtons = `
-                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View Details</button>
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-all" title="View Details">
+                        <i class='bx bx-show-alt text-xl'></i>
+                    </button>
                 `;
             } else if (req.req_status === 'Cancelled') {
-                statusColor = 'bg-gray-50 text-gray-700 border-gray-200';
+                statusColor = 'bg-gray-600 text-white';
                 statusIcon = 'bx-block';
                 actionButtons = `
-                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View Details</button>
+                    <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-all" title="View Details">
+                        <i class='bx bx-show-alt text-xl'></i>
+                    </button>
                 `;
             } else if (req.req_status === 'Pending') {
-                statusColor = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+                statusColor = 'bg-yellow-500 text-white';
                 statusIcon = 'bx-time-five';
                 actionButtons = `
-                    <div class="flex gap-2 justify-end">
-                        <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-900 font-bold text-[11px] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all border border-blue-100 uppercase tracking-wider">View</button>
-                        <button onclick="confirmCancelRequest('${req.req_id}')" class="text-red-600 hover:text-red-900 font-bold text-[11px] bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-all border border-red-100 uppercase tracking-wider">Cancel</button>
+                    <div class="flex gap-1 justify-end">
+                        <button onclick='openViewRequestDetails(${JSON.stringify(req)})' class="text-blue-600 hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-all" title="View Details">
+                            <i class='bx bx-show-alt text-xl'></i>
+                        </button>
+                        <button onclick="confirmCancelRequest('${req.req_id}')" class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-all" title="Cancel Request">
+                            <i class='bx bx-trash text-xl'></i>
+                        </button>
                     </div>
                 `;
             }
@@ -922,7 +936,7 @@
             const row = `
                 <tr class="hover:bg-gray-50/50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">${req.req_id}</span>
+                        <span class="text-sm font-bold text-gray-900">${req.req_id}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex flex-col">
@@ -935,8 +949,8 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate font-medium" title="${req.req_purpose}">${req.req_purpose}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${statusColor} items-center gap-1.5 border">
-                            <i class='bx ${statusIcon}'></i> ${req.req_status}
+                        <span class="px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full ${statusColor} items-center gap-1.5 shadow-sm uppercase tracking-wider">
+                            <i class='bx ${statusIcon} text-sm'></i> ${req.req_status}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right">
