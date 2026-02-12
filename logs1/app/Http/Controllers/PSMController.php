@@ -475,6 +475,39 @@ class PSMController extends Controller
     }
 
     /**
+     * Create budget request
+     */
+    public function createBudgetRequest(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $result = $this->psmService->createBudgetRequest($data);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel budget request
+     */
+    public function cancelBudgetRequest($id)
+    {
+        try {
+            $result = $this->psmService->cancelBudgetRequest($id);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get external budget requests
      */
     public function getExternalBudgetRequests(Request $request)

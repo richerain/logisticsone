@@ -552,6 +552,22 @@ class PSMRepository
     }
 
     /**
+     * Get budget request by ID
+     */
+    public function getBudgetRequestById($id)
+    {
+        return \DB::connection('psm')->table('psm_request_budget')->where('req_id', $id)->first();
+    }
+
+    /**
+     * Create budget request
+     */
+    public function createBudgetRequest($data)
+    {
+        return \DB::connection('psm')->table('psm_request_budget')->insert($data);
+    }
+
+    /**
      * Update budget request status
      */
     public function updateBudgetRequestStatus($id, $status)

@@ -1485,6 +1485,94 @@ class PSMService
         }
     }
 
+    /**
+     * Create consolidated budget request
+     */
+    public function createBudgetRequest($data)
+    {
+        try {
+            $budgetRequestData = [
+                'req_id' => $this->generateBudgetRequestId(),
+                'req_by' => $data['req_by'] ?? 'PSM System',
+                'req_date' => now()->toDateString(),
+                'req_dept' => $data['req_dept'] ?? 'Logistics 1',
+                'req_amount' => $data['req_amount'],
+                'req_purpose' => $data['req_purpose'] ?? 'Consolidated Budget Request',
+                'req_contact' => $data['req_contact'] ?? 'N/A',
+                'req_status' => 'Pending',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            $result = $this->psmRepository->createBudgetRequest($budgetRequestData);
+
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Budget request created successfully',
+                    'data' => $budgetRequestData
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Failed to create budget request'
+            ];
+        } catch (Exception $e) {
+            throw new Exception('Error creating budget request: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Cancel budget request
+     */
+    public function cancelBudgetRequest($id)
+    {
+        try {
+            $request = $this->psmRepository->getBudgetRequestById($id);
+            if (!$request) {
+                return [
+                    'success' => false,
+                    'message' => 'Budget request not found'
+                ];
+            }
+
+            if ($request->req_status !== 'Pending') {
+                return [
+                    'success' => false,
+                    'message' => 'Only pending requests can be cancelled'
+                ];
+            }
+
+            $result = $this->psmRepository->updateBudgetRequestStatus($id, 'Cancelled');
+
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Budget request cancelled successfully'
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Failed to cancel budget request'
+            ];
+        } catch (Exception $e) {
+            throw new Exception('Error cancelling budget request: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Generate budget request ID
+     */
+    private function generateBudgetRequestId()
+    {
+        $prefix = 'REQB';
+        $date = now()->format('Ymd');
+        $random = strtoupper(Str::random(8));
+        return $prefix . $date . $random;
+    }
+
     public function getApprovedPurchasesForQuote()
     {
         try {

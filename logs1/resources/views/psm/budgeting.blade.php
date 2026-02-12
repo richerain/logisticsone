@@ -227,11 +227,12 @@
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
                             <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Action</th>
                         </tr>
                     </thead>
                     <tbody id="budgetStatusTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex justify-center items-center py-4">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                     Loading budget requests...
@@ -245,6 +246,58 @@
         
         <div class="modal-action">
             <button type="button" onclick="closeBudgetStatusModal()" class="btn">Close</button>
+        </div>
+    </div>
+</dialog>
+
+<!-- Consolidated Confirmation Modal -->
+<dialog id="consolidatedConfirmModal" class="modal">
+    <div class="modal-box w-11/12 max-w-md">
+        <div class="flex flex-col items-center text-center py-4">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <i class='bx bx-help-circle text-4xl text-blue-600'></i>
+            </div>
+            <h3 class="font-bold text-xl mb-2">Confirm Consolidated Request</h3>
+            <p class="text-gray-600 mb-6" id="consolidatedConfirmText">
+                Are you sure you want to generate a budget request for the current consolidated requisitions?
+            </p>
+            
+            <div class="w-full bg-gray-50 rounded-lg p-4 mb-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-500">Total Amount:</span>
+                    <span class="text-lg font-bold text-blue-600" id="consolidatedConfirmAmount">₱0.00</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Total Items:</span>
+                    <span class="text-sm font-bold text-gray-800" id="consolidatedConfirmItems">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex gap-3 justify-center">
+            <button onclick="document.getElementById('consolidatedConfirmModal').close()" class="btn btn-ghost flex-1">Cancel</button>
+            <button onclick="confirmConsolidatedBudget()" class="btn btn-primary flex-1">Proceed</button>
+        </div>
+    </div>
+</dialog>
+
+<!-- Budget Request View Modal -->
+<dialog id="viewBudgetRequestModal" class="modal">
+    <div class="modal-box w-11/12 max-w-md">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+                <i class='bx bx-show-alt text-blue-600'></i>
+                Budget Request Details
+            </h3>
+            <button onclick="document.getElementById('viewBudgetRequestModal').close()" class="btn btn-sm btn-circle btn-ghost">✕</button>
+        </div>
+        
+        <div class="space-y-4" id="viewBudgetRequestDetails">
+            <!-- Content will be injected via JS -->
+        </div>
+        
+        <div class="modal-action mt-8">
+            <button type="button" onclick="document.getElementById('viewBudgetRequestModal').close()" class="btn btn-primary w-full">Close</button>
         </div>
     </div>
 </dialog>
@@ -785,6 +838,8 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors';
                 
+                const isPending = req.req_status?.toLowerCase() === 'pending';
+
                 tr.innerHTML = `
                     <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${req.req_by || '-'}</td>
@@ -796,6 +851,18 @@
                         <span class="px-3 py-1 text-[10px] font-black rounded-full ${getStatusClass(req.req_status)} border shadow-sm uppercase">
                             ${req.req_status || 'Pending'}
                         </span>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm">
+                        <div class="flex gap-2">
+                            <button onclick="viewBudgetRequest('${req.req_id}')" class="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50" title="View Details">
+                                <i class='bx bx-show-alt text-lg'></i>
+                            </button>
+                            ${isPending ? `
+                                <button onclick="cancelBudgetRequest('${req.req_id}')" class="btn btn-ghost btn-xs text-red-600 hover:bg-red-50" title="Cancel Request">
+                                    <i class='bx bx-block text-lg'></i>
+                                </button>
+                            ` : ''}
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -832,27 +899,164 @@
                 Swal.fire('Info', 'No approved requisitions to consolidate.', 'info');
                 return;
             }
+
             const totalAmount = calculateTotalAmount(filteredRequisitions);
-            Swal.fire({
-                title: 'Request Consolidated Budget',
-                text: `Are you sure you want to request a budget for the total amount of ${formatCurrency(totalAmount)}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, request it',
-                cancelButtonText: 'No, cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Success', 'Consolidated budget request has been submitted.', 'success');
+            const totalItems = filteredRequisitions.length;
+
+            document.getElementById('consolidatedConfirmAmount').textContent = formatCurrency(totalAmount);
+            document.getElementById('consolidatedConfirmItems').textContent = totalItems;
+            document.getElementById('consolidatedConfirmModal').showModal();
+        };
+
+        window.confirmConsolidatedBudget = function() {
+            const token = localStorage.getItem('jwt');
+            const totalAmount = calculateTotalAmount(filteredRequisitions);
+            
+            // Collect purpose details
+            const reqIds = filteredRequisitions.map(r => r.req_id).join(', ');
+            const purpose = `Consolidated budget for: ${reqIds}`;
+
+            fetch('/api/v1/psm/budget-management/requests', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    req_amount: totalAmount,
+                    req_purpose: purpose,
+                    req_dept: 'Logistics 1',
+                    req_by: 'PSM Admin'
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    Swal.fire('Success', 'Budget request generated successfully', 'success');
+                    document.getElementById('consolidatedConfirmModal').close();
+                    openBudgetStatusModal();
+                } else {
+                    Swal.fire('Error', res.message, 'error');
                 }
+            })
+            .catch(err => {
+                console.error('Error creating budget request:', err);
+                Swal.fire('Error', 'Failed to generate budget request', 'error');
             });
         };
 
-        window.requestBudgetStatus = function() {
+        window.viewBudgetRequest = function(requestId) {
+            const token = localStorage.getItem('jwt');
+            const detailsEl = document.getElementById('viewBudgetRequestDetails');
+            
+            if (detailsEl) {
+                detailsEl.innerHTML = `
+                    <div class="flex justify-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('viewBudgetRequestModal').showModal();
+
+            fetch('/api/v1/psm/budget-management/requests', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data)) {
+                    const req = data.data.find(r => r.req_id === requestId);
+                    if (req) {
+                        renderRequestDetails(req);
+                    } else {
+                        detailsEl.innerHTML = '<p class="text-center text-red-500">Request details not found.</p>';
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching details:', err);
+                detailsEl.innerHTML = '<p class="text-center text-red-500">Error loading details.</p>';
+            });
+        };
+
+        function renderRequestDetails(req) {
+            const detailsEl = document.getElementById('viewBudgetRequestDetails');
+            if (!detailsEl) return;
+
+            detailsEl.innerHTML = `
+                <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">
+                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Request ID</p>
+                            <h4 class="text-lg font-black text-gray-800">${req.req_id}</h4>
+                        </div>
+                        <span class="px-3 py-1 text-[10px] font-black rounded-full ${getStatusClass(req.req_status)} border shadow-sm uppercase">
+                            ${req.req_status}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Requested By</p>
+                            <p class="text-sm font-bold text-gray-700">${req.req_by || '-'}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</p>
+                            <p class="text-sm font-bold text-gray-700">${req.req_dept || '-'}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</p>
+                        <p class="text-xl font-black text-blue-600">${formatCurrency(req.req_amount)}</p>
+                    </div>
+
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Purpose</p>
+                        <p class="text-sm text-gray-600 leading-relaxed">${req.req_purpose || '-'}</p>
+                    </div>
+
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date Requested</p>
+                        <p class="text-sm font-bold text-gray-700">${formatDate(req.req_date)}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.cancelBudgetRequest = function(requestId) {
             Swal.fire({
-                title: 'Budget Allocation Status',
-                text: 'Your budget allocation status request has been sent to the financial department.',
-                icon: 'info',
-                confirmButtonText: 'Close'
+                title: 'Cancel Request?',
+                text: "Are you sure you want to cancel this budget request? This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Cancel it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const token = localStorage.getItem('jwt');
+                    fetch(`/api/v1/psm/budget-management/requests/${requestId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.success) {
+                            Swal.fire('Cancelled', res.message, 'success');
+                            fetchBudgetRequests();
+                        } else {
+                            Swal.fire('Error', res.message, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error cancelling request:', err);
+                        Swal.fire('Error', 'Failed to cancel request', 'error');
+                    });
+                }
             });
         };
 
