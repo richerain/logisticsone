@@ -260,6 +260,10 @@
                         <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>
                         <p id="view_req_dept" class="text-sm font-bold text-gray-700"></p>
                     </div>
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Price</p>
+                        <p id="view_req_price" class="text-sm font-bold text-blue-600"></p>
+                    </div>
                 </div>
 
                 <div>
@@ -339,18 +343,19 @@
                 <input type="text" id="productSearch" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
             </div>
 
-            <div class="overflow-hidden border border-gray-100 rounded-lg">
+            <div class="overflow-x-auto border border-gray-100 rounded-lg">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Product</th>
-                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Description</th>
-                            <th class="px-4 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider">Action</th>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Product</th>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Description</th>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Price</th>
+                            <th class="px-4 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Action</th>
                         </tr>
                     </thead>
                     <tbody id="vendorProductsTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="3" class="px-4 py-8 text-center text-gray-500 text-sm">
+                            <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm">
                                 Please select a vendor to see products
                             </td>
                         </tr>
@@ -472,6 +477,7 @@
     let allVendors = [];
     let currentVendorProducts = [];
     let selectedItems = new Map(); // Track items and counts
+    let selectedItemPrices = new Map(); // Track item prices
 
     // Fetch Vendors for dropdown
     async function fetchVendors() {
@@ -526,7 +532,7 @@
         if (filtered.length === 0) {
             vendorProductsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="3" class="px-4 py-8 text-center text-gray-500 text-sm">
+                    <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm">
                         No products found matching "${searchTerm}"
                     </td>
                 </tr>
@@ -543,8 +549,11 @@
                 <td class="px-4 py-3 text-[11px] text-gray-600 max-w-[150px] truncate" title="${p.prod_desc || ''}">
                     ${p.prod_desc || '-'}
                 </td>
+                <td class="px-4 py-3 text-[11px] font-bold text-blue-600 whitespace-nowrap">
+                    ₱${parseFloat(p.prod_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                </td>
                 <td class="px-4 py-3 text-right">
-                    <button type="button" onclick="window.addItemToRequisition('${p.prod_name.replace(/'/g, "\\'")}')" 
+                    <button type="button" onclick="window.addItemToRequisition('${p.prod_name.replace(/'/g, "\\'")}', ${p.prod_price || 0})" 
                         class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all active:scale-90">
                         <i class='bx bx-plus text-lg'></i>
                     </button>
@@ -553,11 +562,12 @@
         `).join('');
     }
 
-    window.addItemToRequisition = (itemName) => {
+    window.addItemToRequisition = (itemName, price) => {
         if (selectedItems.has(itemName)) {
             selectedItems.set(itemName, selectedItems.get(itemName) + 1);
         } else {
             selectedItems.set(itemName, 1);
+            selectedItemPrices.set(itemName, price);
         }
         updateSideItemsContainer();
         Toast.fire({ icon: 'success', title: `Added ${itemName} to list` });
@@ -571,22 +581,40 @@
         }
 
         selectedItems.forEach((count, name) => {
+            const price = selectedItemPrices.get(name) || 0;
             const displayValue = count > 1 ? `${name} (x${count})` : name;
-            addSideItemRow(displayValue, false, name);
+            addSideItemRow(displayValue, false, name, count, price);
         });
     }
 
-    function addSideItemRow(value = '', disabled = false, originalName = null) {
+    function addSideItemRow(value = '', disabled = false, originalName = null, count = 1, price = 0) {
         const div = document.createElement('div');
-        div.className = 'flex gap-2 item-row';
+        div.className = 'flex flex-col gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 item-row mb-2';
         div.dataset.originalName = originalName || value;
+        
+        const totalPrice = count * price;
+        
         div.innerHTML = `
-            <input type="text" name="items[]" required value="${value}" ${disabled ? 'disabled' : ''} 
-                placeholder="Enter item name/description" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            ${!disabled ? `
-            <button type="button" class="remove-side-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                <i class='bx bx-trash text-xl'></i>
-            </button>` : ''}
+            <div class="flex gap-2 items-center">
+                <input type="text" name="items[]" required value="${value}" ${disabled ? 'disabled' : ''} 
+                    placeholder="Enter item name/description" class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                ${!disabled ? `
+                <button type="button" class="remove-side-item p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors">
+                    <i class='bx bx-trash text-lg'></i>
+                </button>` : ''}
+            </div>
+            ${originalName ? `
+            <div class="flex items-center justify-between text-[11px] text-gray-500 px-1">
+                <div class="flex items-center gap-2">
+                    <span>Price: ₱${parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                    <span>×</span>
+                    <span>Qty: ${count}</span>
+                </div>
+                <div class="font-bold text-blue-600">
+                    Total: ₱${parseFloat(totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                </div>
+            </div>
+            ` : ''}
         `;
         sideItemsContainer.appendChild(div);
     }
@@ -650,6 +678,13 @@
     sideRequisitionForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(sideRequisitionForm);
+        
+        let totalReqPrice = 0;
+        selectedItems.forEach((count, name) => {
+            const price = selectedItemPrices.get(name) || 0;
+            totalReqPrice += (count * price);
+        });
+
         const data = {
             req_id: generateReqID(),
             req_date: new Date().toISOString().split('T')[0],
@@ -657,6 +692,7 @@
             req_dept: formData.get('req_dept'),
             req_note: formData.get('req_note'),
             req_items: Array.from(formData.getAll('items[]')).filter(i => i.trim() !== ''),
+            req_price: totalReqPrice,
             req_status: 'Pending'
         };
 
@@ -693,6 +729,7 @@
     addBtn.addEventListener('click', () => {
         sideRequisitionForm.reset();
         selectedItems.clear();
+        selectedItemPrices.clear();
         updateSideItemsContainer();
         fetchVendors();
         vendorProductsModal.classList.remove('hidden');
@@ -748,6 +785,7 @@
             document.getElementById('view_req_date').textContent = new Date(data.req_date).toLocaleDateString();
             document.getElementById('view_req_requester').textContent = data.req_requester;
             document.getElementById('view_req_dept').textContent = data.req_dept;
+            document.getElementById('view_req_price').textContent = `₱${parseFloat(data.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
             document.getElementById('view_req_note').textContent = data.req_note || 'No additional notes.';
             
             // Status Badge in View

@@ -16,6 +16,7 @@ class Requisition extends Model
     protected $fillable = [
         'req_id',
         'req_items',
+        'req_price',
         'req_requester',
         'req_dept',
         'req_date',
