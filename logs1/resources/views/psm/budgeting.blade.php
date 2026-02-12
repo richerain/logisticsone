@@ -17,9 +17,9 @@
                     <i class='bx bx-git-pull-request text-blue-600'></i>
                     Consolidated Budget Request
                 </h3>
-                <button onclick="openBudgetStatusModal()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
+                <button onclick="openBudgetStatusModal()" class="btn btn-primary btn-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
                     <i class='bx bx-info-circle'></i>
-                    request budget status
+                    Request Budget Status
                 </button>
             </div>
         </div>
@@ -53,18 +53,19 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-800 font-bold text-gray-100">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requisition ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Consolidated ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Items</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Total Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requester / Dept</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Note</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Budget Approval</th>
                         </tr>
                     </thead>
                     <tbody id="consolidatedTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex justify-center items-center py-4">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                     Loading approved requisitions...
@@ -87,9 +88,9 @@
                     <h4 class="text-2xl font-black text-blue-600 leading-none" id="consolidatedTotalAmount">₱0.00</h4>
                 </div>
             </div>
-            <button onclick="requestConsolidatedBudget()" class="btn btn-primary btn-sm flex items-center gap-2">
+            <button onclick="requestConsolidatedBudget()" class="btn btn-primary btn-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
                 <i class='bx bx-send'></i>
-                Consolidated Budget Request
+                Submit Consolidated Budget Request
             </button>
         </div>
 
@@ -360,6 +361,11 @@
                             <i class='bx bxs-check-circle text-sm'></i> Approved
                         </span>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-4 py-1.5 text-xs font-black rounded-full bg-yellow-500 text-white border border-yellow-600 flex items-center gap-1.5 w-fit shadow-sm">
+                            <i class='bx bx-time-five text-sm'></i> Pending
+                        </span>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -398,7 +404,7 @@
             if (tbody) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <i class='bx bx-clipboard text-6xl mb-4 text-gray-300'></i>
                                 <p class="text-lg font-medium">${message}</p>
