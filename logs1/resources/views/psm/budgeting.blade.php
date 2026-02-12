@@ -491,7 +491,6 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Dept</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Purpose</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Contact</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Status</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Action</th>
                                 </tr>
@@ -556,10 +555,6 @@
                     <div>
                         <span class="block text-gray-500 text-xs uppercase tracking-wide">Amount</span>
                         <span id="view_req_amount" class="font-bold text-blue-600 text-lg"></span>
-                    </div>
-                     <div class="col-span-2">
-                        <span class="block text-gray-500 text-xs uppercase tracking-wide">Contact</span>
-                        <span id="view_req_contact" class="font-medium text-gray-900"></span>
                     </div>
                     <div class="col-span-2">
                         <span class="block text-gray-500 text-xs uppercase tracking-wide">Status</span>
@@ -910,7 +905,6 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_dept}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate" title="${req.req_purpose}">${req.req_purpose}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${req.req_contact}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor} items-center gap-1">
                             <i class='bx ${statusIcon}'></i> ${req.req_status}
@@ -1028,13 +1022,57 @@
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        const amountInput = document.getElementById('req_amount');
-                        if (amountInput) {
-                            amountInput.value = totalAmount.toFixed(2);
-                        }
-                        if (typeof openRequestBudgetModal === 'function') {
-                            openRequestBudgetModal();
-                        }
+                        const amount = totalAmount;
+                        const req_by = "{{ $reqName }}";
+                        const req_dept = "Logistics 1";
+                        const req_contact = "{{ $reqContact }}";
+                        const req_date = new Date().toISOString().split('T')[0];
+                        const req_purpose = "Consolidated budget request for approved Purchase Requisitions";
+                        
+                        const token = localStorage.getItem('jwt');
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                        fetch('/api/v1/psm/budget-requests', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': token ? `Bearer ${token}` : '',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken || '',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                req_by,
+                                req_dept,
+                                req_contact,
+                                req_date,
+                                req_amount: amount,
+                                req_purpose
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                fetchRequestStatus();
+                                openRequestStatusModal();
+                                
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Consolidated!',
+                                    text: 'Budget request has been automatically generated.',
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                });
+                            } else {
+                                Swal.fire('Error', result.message || 'Failed to generate request', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire('Error', 'An unexpected error occurred.', 'error');
+                        });
                     }
                 });
             });
@@ -1126,8 +1164,8 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(req.req_date)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="${req.req_note || ''}">${req.req_note || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 text-[10px] font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1 w-fit">
-                            <i class='bx bxs-check-circle'></i> Approved
+                        <span class="px-4 py-1.5 text-xs font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1.5 w-fit shadow-sm">
+                            <i class='bx bxs-check-circle text-sm'></i> Approved
                         </span>
                     </td>
                 `;
