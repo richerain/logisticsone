@@ -8,6 +8,48 @@
     </div>
 </div>
 
+<!-- Budget Status Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-600">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Active Budget</h3>
+            <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                <i class='bx bxs-wallet text-xl'></i>
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <h4 class="text-2xl font-black text-gray-800" id="activeBudgetAmount">₱0.00</h4>
+            <p class="text-xs text-gray-500 mt-1" id="activeBudgetPeriod">No active budget period</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-600">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Status</h3>
+            <div class="bg-green-100 p-2 rounded-lg text-green-600">
+                <i class='bx bxs-check-shield text-xl'></i>
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <h4 class="text-2xl font-black text-gray-800" id="activeBudgetStatus">Inactive</h4>
+            <p class="text-xs text-gray-500 mt-1" id="activeBudgetExpiry">N/A</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-600">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Quick Actions</h3>
+            <div class="bg-purple-100 p-2 rounded-lg text-purple-600">
+                <i class='bx bxs-zap text-xl'></i>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="openCreateBudgetModal()" class="btn btn-sm btn-primary">New Budget</button>
+            <button onclick="openExtendBudgetModal()" id="extendBudgetBtn" class="btn btn-sm btn-outline btn-primary" disabled>Extend</button>
+        </div>
+    </div>
+</div>
+
 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
     <!-- Consolidated Requisition Section -->
     <div class="">
@@ -97,17 +139,93 @@
     </div>
 </div>
 
+<!-- Budget History Section -->
+<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+        <i class='bx bx-history text-purple-600'></i>
+        Budget History
+    </h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="budgetHistoryBody" class="bg-white divide-y divide-gray-200">
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 italic">No budget history available</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Budget Modal -->
+<dialog id="budgetModal" class="modal">
+    <div class="modal-box w-11/12 max-w-md">
+        <h3 class="font-bold text-lg mb-4" id="budgetModalTitle">Create New Budget</h3>
+        <form id="budgetForm" method="POST">
+            <input type="hidden" id="budgetId">
+            <div class="form-control mb-4">
+                <label class="label"><span class="label-text font-bold">Budget Amount (₱)</span></label>
+                <input type="number" id="budgetAmount" name="amount" step="0.01" min="0" required class="input input-bordered w-full">
+            </div>
+            <div class="form-control mb-4">
+                <label class="label"><span class="label-text font-bold">Valid From</span></label>
+                <input type="date" id="budgetValidFrom" name="valid_from" required class="input input-bordered w-full">
+            </div>
+            <div class="form-control mb-4">
+                <label class="label"><span class="label-text font-bold">Valid To</span></label>
+                <input type="date" id="budgetValidTo" name="valid_to" required class="input input-bordered w-full">
+            </div>
+            <div class="form-control mb-6">
+                <label class="label"><span class="label-text font-bold">Description</span></label>
+                <textarea id="budgetDescription" name="description" class="textarea textarea-bordered h-24" placeholder="Enter budget description..."></textarea>
+            </div>
+            <div class="modal-action">
+                <button type="button" onclick="closeBudgetModal()" class="btn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveBudgetBtn">Save Budget</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Extension Modal -->
+<dialog id="extendModal" class="modal">
+    <div class="modal-box w-11/12 max-w-sm">
+        <h3 class="font-bold text-lg mb-4">Extend Budget Validity</h3>
+        <form id="extendForm" method="POST">
+            <div class="form-control mb-6">
+                <label class="label"><span class="label-text font-bold">Extension (Days)</span></label>
+                <input type="number" id="extensionDays" name="extension_days" min="1" required class="input input-bordered w-full" placeholder="Enter number of days...">
+            </div>
+            <div class="modal-action">
+                <button type="button" onclick="closeExtendModal()" class="btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Confirm Extension</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
 <script>
     (function() {
-        console.log('Budgeting Module Initialized (Cleaned)');
+        console.log('Budgeting Module Initialized');
         
-        // Variables for Consolidated Budget Requests
+        // Variables for Consolidated Requisitions
         let currentConsolidatedPage = 1;
         const consolidatedPageSize = 10;
         let allApprovedRequisitions = [];
         let filteredRequisitions = [];
+        let activeBudget = null;
 
         function init() {
+            fetchActiveBudget();
+            fetchBudgetHistory();
             fetchApprovedRequisitions();
             setupEventListeners();
         }
@@ -136,7 +254,164 @@
             // Consolidated filters
             document.getElementById('consolidatedSearchInput')?.addEventListener('input', applyConsolidatedFilters);
             document.getElementById('consolidatedDeptFilter')?.addEventListener('change', applyConsolidatedFilters);
+
+            // Forms
+            document.getElementById('budgetForm')?.addEventListener('submit', handleBudgetSubmit);
+            document.getElementById('extendForm')?.addEventListener('submit', handleExtendSubmit);
         }
+
+        // --- Budget Logic ---
+
+        function fetchActiveBudget() {
+            const token = localStorage.getItem('jwt');
+            fetch('/api/v1/psm/budget-management/current', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    activeBudget = data.data;
+                    updateActiveBudgetUI(activeBudget);
+                } else {
+                    updateActiveBudgetUI(null);
+                }
+            })
+            .catch(err => console.error('Error fetching budget:', err));
+        }
+
+        function updateActiveBudgetUI(budget) {
+            const amountEl = document.getElementById('activeBudgetAmount');
+            const periodEl = document.getElementById('activeBudgetPeriod');
+            const statusEl = document.getElementById('activeBudgetStatus');
+            const expiryEl = document.getElementById('activeBudgetExpiry');
+            const extendBtn = document.getElementById('extendBudgetBtn');
+
+            if (budget) {
+                amountEl.textContent = formatCurrency(budget.amount);
+                periodEl.textContent = `${formatDate(budget.valid_from)} - ${formatDate(budget.valid_to)}`;
+                statusEl.textContent = budget.status.charAt(0).toUpperCase() + budget.status.slice(1);
+                statusEl.className = `text-2xl font-black ${budget.status === 'active' ? 'text-green-600' : 'text-red-600'}`;
+                
+                const daysLeft = Math.ceil((new Date(budget.valid_to) - new Date()) / (1000 * 60 * 60 * 24));
+                expiryEl.textContent = daysLeft > 0 ? `${daysLeft} days remaining` : 'Expired';
+                
+                if (extendBtn) extendBtn.disabled = false;
+            } else {
+                amountEl.textContent = '₱0.00';
+                periodEl.textContent = 'No active budget period';
+                statusEl.textContent = 'Inactive';
+                statusEl.className = 'text-2xl font-black text-gray-400';
+                expiryEl.textContent = 'N/A';
+                if (extendBtn) extendBtn.disabled = true;
+            }
+        }
+
+        function fetchBudgetHistory() {
+            const token = localStorage.getItem('jwt');
+            fetch('/api/v1/psm/budget-management', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data)) {
+                    renderBudgetHistory(data.data);
+                }
+            })
+            .catch(err => console.error('Error fetching history:', err));
+        }
+
+        function renderBudgetHistory(budgets) {
+            const tbody = document.getElementById('budgetHistoryBody');
+            if (!tbody) return;
+
+            if (budgets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500 italic">No budget history available</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            budgets.forEach(b => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${formatCurrency(b.amount)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(b.valid_from)} - ${formatDate(b.valid_to)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-bold rounded-full ${b.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                            ${b.status.toUpperCase()}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs">${b.description || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editBudget(${b.id})" class="text-blue-600 hover:text-blue-900 mr-3"><i class='bx bx-edit-alt'></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleBudgetSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('budgetId').value;
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const token = localStorage.getItem('jwt');
+
+            const url = id ? `/api/v1/psm/budget-management/${id}` : '/api/v1/psm/budget-management';
+            const method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    Swal.fire('Success', res.message, 'success');
+                    closeBudgetModal();
+                    fetchActiveBudget();
+                    fetchBudgetHistory();
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            })
+            .catch(err => Swal.fire('Error', 'Failed to save budget', 'error'));
+        }
+
+        function handleExtendSubmit(e) {
+            e.preventDefault();
+            if (!activeBudget) return;
+
+            const days = document.getElementById('extensionDays').value;
+            const token = localStorage.getItem('jwt');
+
+            fetch(`/api/v1/psm/budget-management/${activeBudget.id}/extend`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ extension_days: days })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    Swal.fire('Success', res.message, 'success');
+                    closeExtendModal();
+                    fetchActiveBudget();
+                    fetchBudgetHistory();
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            })
+            .catch(err => Swal.fire('Error', 'Failed to extend budget', 'error'));
+        }
+
+        // --- Requisition Logic ---
 
         function fetchApprovedRequisitions() {
             const token = localStorage.getItem('jwt');
@@ -290,6 +565,47 @@
             if (isNaN(date.getTime())) return 'Invalid Date';
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
+
+        // Global function for modal triggers
+        window.openCreateBudgetModal = function() {
+            document.getElementById('budgetForm').reset();
+            document.getElementById('budgetId').value = '';
+            document.getElementById('budgetModalTitle').textContent = 'Create New Budget';
+            document.getElementById('budgetModal').showModal();
+        };
+
+        window.openExtendBudgetModal = function() {
+            document.getElementById('extendForm').reset();
+            document.getElementById('extendModal').showModal();
+        };
+
+        window.closeBudgetModal = function() {
+            document.getElementById('budgetModal').close();
+        };
+
+        window.closeExtendModal = function() {
+            document.getElementById('extendModal').close();
+        };
+
+        window.editBudget = function(id) {
+            const token = localStorage.getItem('jwt');
+            fetch(`/api/v1/psm/budget-management/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    const b = data.data;
+                    document.getElementById('budgetId').value = b.id;
+                    document.getElementById('budgetAmount').value = b.amount;
+                    document.getElementById('budgetValidFrom').value = b.valid_from;
+                    document.getElementById('budgetValidTo').value = b.valid_to;
+                    document.getElementById('budgetDescription').value = b.description;
+                    document.getElementById('budgetModalTitle').textContent = 'Edit Budget';
+                    document.getElementById('budgetModal').showModal();
+                }
+            });
+        };
 
         init();
     })();

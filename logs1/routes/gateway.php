@@ -64,6 +64,10 @@ Route::middleware(['api.key'])->prefix('alms/external')->group(function () {
 });
 
 Route::middleware(['api.key'])->prefix('psm/external')->group(function () {
+    // PSM Budget API Endpoints
+    Route::get('/budget', [App\Http\Controllers\PSMController::class, 'getCurrentBudget']);
+    Route::get('/budget/logs', [App\Http\Controllers\PSMController::class, 'getBudgetLogs']);
+
     // PSM Product API Endpoints
     Route::get('/products', [App\Http\Controllers\PSMController::class, 'getExternalProducts']);
     Route::get('/products/{id}', [App\Http\Controllers\PSMController::class, 'getExternalProduct']);

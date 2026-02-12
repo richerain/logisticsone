@@ -36,6 +36,20 @@ Route::prefix('purchase-management')->group(function () {
     Route::post('/{id}/purchase-approval', [PSMController::class, 'purchaseApproval']);
 });
 
+// PSM Budget Management Routes
+Route::prefix('budget-management')->group(function () {
+    Route::get('/', [PSMController::class, 'getBudgets']);
+    Route::get('/current', [PSMController::class, 'getCurrentBudget']);
+    Route::post('/', [PSMController::class, 'createBudget']);
+    Route::put('/{id}', [PSMController::class, 'updateBudget']);
+    Route::post('/{id}/extend', [PSMController::class, 'extendBudget']);
+});
+
+// PSM Budget Log Routes
+Route::prefix('budget-logs')->group(function () {
+    Route::get('/', [PSMController::class, 'getBudgetLogs']);
+});
+
 // PSM Requisition Routes
 Route::prefix('requisitions')->group(function () {
     Route::get('/', [PSMController::class, 'getRequisitions']);

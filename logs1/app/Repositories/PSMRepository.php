@@ -12,6 +12,8 @@ use App\Models\PSM\RequisitionItem;
 use App\Models\PSM\Supplier;
 use App\Models\PSM\PurchaseOrder;
 use App\Models\PSM\PurchaseItem;
+use App\Models\PSM\Budget;
+use App\Models\PSM\BudgetLog;
 
 class PSMRepository
 {
@@ -433,5 +435,103 @@ class PSMRepository
         }
 
         return false;
+    }
+
+    /**
+     * Budget Methods
+     */
+
+    /**
+     * Get current budget
+     */
+    public function getCurrentBudget()
+    {
+        return Budget::active()
+            ->byDepartmentModule('Logistics 1', 'Procurement & Sourcing Management', 'Purchase Management')
+            ->first();
+    }
+
+    /**
+     * Get all budgets
+     */
+    public function getAllBudgets()
+    {
+        return Budget::orderBy('created_at', 'desc')->get();
+    }
+
+    /**
+     * Get budget by ID
+     */
+    public function getBudgetById($id)
+    {
+        return Budget::find($id);
+    }
+
+    /**
+     * Create new budget
+     */
+    public function createBudget($data)
+    {
+        return Budget::create($data);
+    }
+
+    /**
+     * Update budget
+     */
+    public function updateBudget($id, $data)
+    {
+        $budget = Budget::find($id);
+        if ($budget) {
+            $budget->update($data);
+
+            return $budget;
+        }
+
+        return null;
+    }
+
+    /**
+     * Extend budget validity
+     */
+    public function extendBudgetValidity($id, $newValidTo, $additionalAmount = 0)
+    {
+        $budget = Budget::find($id);
+        if ($budget) {
+            $budget->bud_valid_to = $newValidTo;
+            if ($additionalAmount > 0) {
+                $budget->bud_allocated_amount += $additionalAmount;
+                $budget->bud_remaining_amount += $additionalAmount;
+            }
+            $budget->updateHealthStatus();
+
+            return $budget;
+        }
+
+        return null;
+    }
+
+    /**
+     * Update budget spent amount
+     */
+    public function updateBudgetSpent($id, $amount)
+    {
+        $budget = Budget::find($id);
+        if ($budget) {
+            $budget->bud_spent_amount += $amount;
+            $budget->bud_remaining_amount = $budget->bud_allocated_amount - $budget->bud_spent_amount;
+            $budget->updateHealthStatus();
+
+            return $budget;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get all budget logs
+     */
+    public function getAllBudgetLogs()
+    {
+        return BudgetLog::orderBy('created_at', 'desc')->get();
     }
 }

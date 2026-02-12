@@ -300,6 +300,142 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * Get all budgets
+     */
+    public function getBudgets()
+    {
+        try {
+            $budgets = $this->psmService->getBudgets();
+            return response()->json([
+                'success' => true,
+                'data' => $budgets
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get current active budget
+     */
+    public function getCurrentBudget()
+    {
+        try {
+            $budget = $this->psmService->getCurrentBudget();
+            return response()->json([
+                'success' => true,
+                'data' => $budget
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Create new budget
+     */
+    public function createBudget(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'valid_from' => 'required|date',
+            'valid_to' => 'required|date|after:valid_from',
+            'description' => 'nullable|string',
+        ]);
+
+        try {
+            $budget = $this->psmService->createBudget($validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Budget created successfully',
+                'data' => $budget
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update budget
+     */
+    public function updateBudget(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'valid_from' => 'required|date',
+            'valid_to' => 'required|date|after:valid_from',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive,expired',
+        ]);
+
+        try {
+            $budget = $this->psmService->updateBudget($id, $validated);
+            return response()->json([
+                'success' => true,
+                'message' => 'Budget updated successfully',
+                'data' => $budget
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Extend budget validity
+     */
+    public function extendBudget(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'extension_days' => 'required|integer|min:1',
+        ]);
+
+        try {
+            $budget = $this->psmService->extendBudget($id, $validated['extension_days']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Budget extended successfully',
+                'data' => $budget
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get budget logs
+     */
+    public function getBudgetLogs()
+    {
+        try {
+            $logs = $this->psmService->getBudgetLogs();
+            return response()->json([
+                'success' => true,
+                'data' => $logs
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function deleteQuote($id)
     {
         try {

@@ -1341,6 +1341,90 @@ class PSMService
         }
     }
 
+    /**
+     * Get all budgets
+     */
+    public function getBudgets()
+    {
+        try {
+            return $this->psmRepository->getAllBudgets();
+        } catch (Exception $e) {
+            throw new Exception('Error fetching budgets: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get current active budget
+     */
+    public function getCurrentBudget()
+    {
+        try {
+            return $this->psmRepository->getCurrentBudget();
+        } catch (Exception $e) {
+            throw new Exception('Error fetching current budget: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Create new budget
+     */
+    public function createBudget($data)
+    {
+        DB::beginTransaction();
+        try {
+            $budget = $this->psmRepository->createBudget($data);
+            DB::commit();
+            return $budget;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception('Error creating budget: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update budget
+     */
+    public function updateBudget($id, $data)
+    {
+        DB::beginTransaction();
+        try {
+            $budget = $this->psmRepository->updateBudget($id, $data);
+            DB::commit();
+            return $budget;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception('Error updating budget: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extend budget validity
+     */
+    public function extendBudget($id, $days)
+    {
+        DB::beginTransaction();
+        try {
+            $budget = $this->psmRepository->extendBudget($id, $days);
+            DB::commit();
+            return $budget;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception('Error extending budget: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get budget logs
+     */
+    public function getBudgetLogs()
+    {
+        try {
+            return $this->psmRepository->getBudgetLogs();
+        } catch (Exception $e) {
+            throw new Exception('Error fetching budget logs: ' . $e->getMessage());
+        }
+    }
+
     public function getApprovedPurchasesForQuote()
     {
         try {
