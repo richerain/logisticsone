@@ -49,7 +49,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requisition ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Items</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Total Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requester / Dept</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Note</th>
@@ -1116,9 +1116,9 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${req.req_id || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${req.req_id || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${window.formatCurrencyGlobal(req.req_amount)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal(req.req_price || 0)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-bold text-gray-800">${req.req_requester || '-'}</div>
                         <div class="text-[10px] text-gray-500 uppercase font-semibold">${req.req_dept || '-'}</div>
@@ -1144,7 +1144,7 @@
         }
 
         function calculateTotalAmount(requisitions) {
-            return requisitions.reduce((sum, req) => sum + parseFloat(req.req_amount || 0), 0);
+            return requisitions.reduce((sum, req) => sum + parseFloat(req.req_price || 0), 0);
         }
 
         function updateConsolidatedPager(total, totalPages) {
