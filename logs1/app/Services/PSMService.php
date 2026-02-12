@@ -1433,7 +1433,19 @@ class PSMService
         try {
             return $this->psmRepository->getAllocatedBudgets();
         } catch (Exception $e) {
-            throw new Exception('Error fetching allocated budgets: ' . $e->getMessage());
+            throw new Exception('Error fetching allocated budgets: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Get budget requests
+     */
+    public function getBudgetRequests()
+    {
+        try {
+            return $this->psmRepository->getBudgetRequests();
+        } catch (Exception $e) {
+            throw new Exception('Error fetching budget requests: '.$e->getMessage());
         }
     }
 

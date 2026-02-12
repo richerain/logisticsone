@@ -455,6 +455,54 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * Get budget requests
+     */
+    public function getBudgetRequests()
+    {
+        try {
+            $requests = $this->psmService->getBudgetRequests();
+            return response()->json([
+                'success' => true,
+                'data' => $requests
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get external budget requests
+     */
+    public function getExternalBudgetRequests(Request $request)
+    {
+        try {
+            $key = $request->query('key');
+            $validKey = '63cfb7730dcc34299fa38cb1a620f701';
+
+            if ($key !== $validKey) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 401);
+            }
+
+            $requests = $this->psmService->getBudgetRequests();
+            return response()->json([
+                'success' => true,
+                'data' => $requests
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function deleteQuote($id)
     {
         try {

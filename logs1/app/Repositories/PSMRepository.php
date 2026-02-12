@@ -542,4 +542,12 @@ class PSMRepository
     {
         return \DB::connection('psm')->table('psm_budget_allocated')->orderBy('all_date', 'desc')->get();
     }
+
+    /**
+     * Get all budget requests
+     */
+    public function getBudgetRequests()
+    {
+        return \DB::connection('psm')->table('psm_request_budget')->orderBy('req_date', 'desc')->get();
+    }
 }

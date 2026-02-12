@@ -108,34 +108,17 @@
             <i class='bx bx-check-shield text-purple-600'></i>
             Budget Allocation
         </h3>
-        <button onclick="requestBudgetStatus()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
+        <button onclick="openBudgetStatusModal()" class="btn btn-outline btn-primary btn-sm flex items-center gap-2">
             <i class='bx bx-info-circle'></i>
             request budget status
         </button>
     </div>
-    <!-- Filters for Budget Allocation (Matching Consolidated Request design) -->
-    <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div class="md:col-span-6 relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class='bx bx-search text-gray-400 text-xl'></i>
-                </div>
-                <input type="text" id="allocatedSearchInput" placeholder="Search by ID, requester, or purpose..." 
-                    class="block w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all text-sm">
-            </div>
-            <div class="md:col-span-6">
-                <select id="allocatedDeptFilter" class="block w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all text-sm">
-                    <option value="">All Departments</option>
-                    <option value="Human Resource Department">Human Resource Department</option>
-                    <option value="Core Transaction Office">Core Transaction Office</option>
-                    <option value="Logistics Office">Logistics Office</option>
-                    <option value="Administrative Office">Administrative Office</option>
-                    <option value="Financial Department">Financial Department</option>
-                </select>
-            </div>
-        </div>
-    </div>
 
+    <!-- Table Container for Budget Allocation -->-2">
+            <i class='bx bx-info-circle'></i>
+            request budget status
+        </button>
+    </div>
     <!-- Table Container for Budget Allocation -->
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
@@ -224,6 +207,52 @@
     </div>
 </dialog>
 
+<!-- Budget Status Modal -->
+<dialog id="budgetStatusModal" class="modal">
+    <div class="modal-box w-11/12 max-w-6xl">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-xl flex items-center gap-2">
+                <i class='bx bx-info-circle text-blue-600'></i>
+                Budget Request Status
+            </h3>
+            <button onclick="closeBudgetStatusModal()" class="btn btn-sm btn-circle btn-ghost">✕</button>
+        </div>
+        
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-800 font-bold text-gray-100">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Req ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requested By</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Department</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Amount</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Purpose</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Contact</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budgetStatusTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                <div class="flex justify-center items-center py-4">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                                    Loading budget requests...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="modal-action">
+            <button type="button" onclick="closeBudgetStatusModal()" class="btn">Close</button>
+        </div>
+    </div>
+</dialog>
+
 <script>
     (function() {
         console.log('Budgeting Module Initialized');
@@ -293,9 +322,6 @@
             // Filters
             document.getElementById('consolidatedSearchInput')?.addEventListener('input', applyConsolidatedFilters);
             document.getElementById('consolidatedDeptFilter')?.addEventListener('change', applyConsolidatedFilters);
-            
-            document.getElementById('allocatedSearchInput')?.addEventListener('input', applyAllocatedFilters);
-            document.getElementById('allocatedDeptFilter')?.addEventListener('change', applyAllocatedFilters);
 
             // Forms
             document.getElementById('budgetForm')?.addEventListener('submit', handleBudgetSubmit);
@@ -376,20 +402,7 @@
         }
 
         function applyAllocatedFilters() {
-            const searchTerm = document.getElementById('allocatedSearchInput')?.value.toLowerCase() || '';
-            const deptFilter = document.getElementById('allocatedDeptFilter')?.value || '';
-
-            filteredAllocatedBudgets = allAllocatedBudgets.filter(item => {
-                const matchesSearch = 
-                    (item.all_id && item.all_id.toString().toLowerCase().includes(searchTerm)) ||
-                    (item.all_req_id && item.all_req_id.toLowerCase().includes(searchTerm)) ||
-                    (item.all_req_by && item.all_req_by.toLowerCase().includes(searchTerm)) ||
-                    (item.all_purpose && item.all_purpose.toLowerCase().includes(searchTerm));
-                
-                const matchesDept = !deptFilter || item.all_department === deptFilter;
-                return matchesSearch && matchesDept;
-            });
-
+            filteredAllocatedBudgets = allAllocatedBudgets;
             currentAllocatedPage = 1;
             displayAllocatedTable();
         }
@@ -719,6 +732,105 @@
         window.closeExtendModal = function() {
             document.getElementById('extendModal').close();
         };
+
+        window.openBudgetStatusModal = function() {
+            document.getElementById('budgetStatusModal').showModal();
+            fetchBudgetRequests();
+        };
+
+        window.closeBudgetStatusModal = function() {
+            document.getElementById('budgetStatusModal').close();
+        };
+
+        function fetchBudgetRequests() {
+            const token = localStorage.getItem('jwt');
+            const tbody = document.getElementById('budgetStatusTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <div class="flex justify-center items-center py-4">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                                Loading budget requests...
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            fetch('/api/v1/psm/budget-management/requests', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.data)) {
+                    renderBudgetStatusTable(data.data);
+                } else {
+                    renderEmptyBudgetStatusTable('No budget requests found.');
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching budget requests:', err);
+                renderEmptyBudgetStatusTable('Error loading budget requests.');
+            });
+        }
+
+        function renderBudgetStatusTable(requests) {
+            const tbody = document.getElementById('budgetStatusTableBody');
+            if (!tbody) return;
+
+            if (requests.length === 0) {
+                renderEmptyBudgetStatusTable('No budget requests found.');
+                return;
+            }
+
+            tbody.innerHTML = '';
+            requests.forEach(req => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                
+                tr.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${req.req_by || '-'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">${req.req_dept || '-'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">${formatCurrency(req.req_amount || 0)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="${req.req_purpose || ''}">${req.req_purpose || '-'}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500">${req.req_contact || '-'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatDate(req.req_date)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <span class="px-3 py-1 text-[10px] font-black rounded-full ${getStatusClass(req.req_status)} border shadow-sm uppercase">
+                            ${req.req_status || 'Pending'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getStatusClass(status) {
+            switch(status?.toLowerCase()) {
+                case 'approved': return 'bg-green-600 text-white border-green-700';
+                case 'rejected': return 'bg-red-600 text-white border-red-700';
+                case 'pending': return 'bg-yellow-500 text-white border-yellow-600';
+                default: return 'bg-blue-600 text-white border-blue-700';
+            }
+        }
+
+        function renderEmptyBudgetStatusTable(message) {
+            const tbody = document.getElementById('budgetStatusTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class='bx bx-clipboard text-6xl mb-4 text-gray-300'></i>
+                                <p class="text-lg font-medium">${message}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
 
         window.requestConsolidatedBudget = function() {
             if (filteredRequisitions.length === 0) {
