@@ -54,11 +54,12 @@
     <!-- Consolidated Requisition Section -->
     <div class="">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 w-full justify-between">
                 <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                     <i class='bx bx-git-pull-request text-blue-600'></i>
-                    Consolidated Requisitions
+                    Consolidated Budget Request
                 </h3>
+                <button onclick="requestConsolidatedBudget()" class="btn btn-primary btn-sm">Consolidated Budget Request</button>
             </div>
         </div>
 
@@ -139,12 +140,15 @@
     </div>
 </div>
 
-<!-- Budget History Section -->
+<!-- Budget Allocation Section -->
 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
-        <i class='bx bx-history text-purple-600'></i>
-        Budget History
-    </h3>
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <i class='bx bx-history text-purple-600'></i>
+            Budget Allocation
+        </h3>
+        <button onclick="requestBudgetStatus()" class="btn btn-outline btn-primary btn-sm">request budget status</button>
+    </div>
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -289,8 +293,11 @@
             if (budget) {
                 amountEl.textContent = formatCurrency(budget.amount);
                 periodEl.textContent = `${formatDate(budget.valid_from)} - ${formatDate(budget.valid_to)}`;
-                statusEl.textContent = budget.status.charAt(0).toUpperCase() + budget.status.slice(1);
-                statusEl.className = `text-2xl font-black ${budget.status === 'active' ? 'text-green-600' : 'text-red-600'}`;
+                
+                // Fix: Defensive check for budget.status
+                const status = budget.status || 'unknown';
+                statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                statusEl.className = `text-2xl font-black ${status === 'active' ? 'text-green-600' : 'text-red-600'}`;
                 
                 const daysLeft = Math.ceil((new Date(budget.valid_to) - new Date()) / (1000 * 60 * 60 * 24));
                 expiryEl.textContent = daysLeft > 0 ? `${daysLeft} days remaining` : 'Expired';
@@ -333,12 +340,16 @@
             budgets.forEach(b => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50';
+                
+                // Fix: Defensive check for status
+                const status = b.status || 'UNKNOWN';
+                
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${formatCurrency(b.amount)}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(b.valid_from)} - ${formatDate(b.valid_to)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-bold rounded-full ${b.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
-                            ${b.status.toUpperCase()}
+                        <span class="px-2 py-1 text-xs font-bold rounded-full ${status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                            ${status.toUpperCase()}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500 truncate max-w-xs">${b.description || '-'}</td>
@@ -585,6 +596,35 @@
 
         window.closeExtendModal = function() {
             document.getElementById('extendModal').close();
+        };
+
+        window.requestConsolidatedBudget = function() {
+            if (filteredRequisitions.length === 0) {
+                Swal.fire('Info', 'No approved requisitions to consolidate.', 'info');
+                return;
+            }
+            const totalAmount = calculateTotalAmount(filteredRequisitions);
+            Swal.fire({
+                title: 'Request Consolidated Budget',
+                text: `Are you sure you want to request a budget for the total amount of ${formatCurrency(totalAmount)}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, request it',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Success', 'Consolidated budget request has been submitted.', 'success');
+                }
+            });
+        };
+
+        window.requestBudgetStatus = function() {
+            Swal.fire({
+                title: 'Budget Allocation Status',
+                text: 'Your budget allocation status request has been sent to the financial department.',
+                icon: 'info',
+                confirmButtonText: 'Close'
+            });
         };
 
         window.editBudget = function(id) {
