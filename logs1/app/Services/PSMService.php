@@ -1485,12 +1485,12 @@ class PSMService
     }
 
     /**
-     * Get budget requests for external API (excluding req_contact, only Pending)
+     * Get budget requests for external API (excluding req_contact)
      */
     public function getExternalBudgetRequests()
     {
         try {
-            $requests = $this->psmRepository->getPendingBudgetRequests();
+            $requests = $this->psmRepository->getBudgetRequests();
             $key = request()->query('key');
 
             // Remove req_contact from each request and add quick approve link
