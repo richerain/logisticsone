@@ -1239,9 +1239,12 @@ function formatUserLabelDisplay(label, fallback) {
         '</div>';
 }
 
-function openRequisitionsModal() {
+async function openRequisitionsModal() {
     if (elements.requisitionsModal) {
         elements.requisitionsModal.classList.remove('hidden');
+        if (!activeVendors || activeVendors.length === 0) {
+            try { await loadActiveVendors(); } catch (e) { console.warn('Failed to pre-load vendors:', e); }
+        }
         loadApprovedRequisitions();
     }
 }
@@ -1376,6 +1379,9 @@ function displayApprovedRequisitions(consolidatedRequests) {
 
 window.viewConsolidatedInModal = async function(id) {
     try {
+        if (!activeVendors || activeVendors.length === 0) {
+            try { await loadActiveVendors(); } catch (e) { console.warn('Failed to pre-load vendors for view modal:', e); }
+        }
         showLoading();
         const response = await fetch(PSM_REQUISITIONS_API + '?approved_consolidated=1', {
             method: 'GET',
@@ -1539,11 +1545,15 @@ window.convertConsolidatedToPOInModal = async function(id) {
         if (result.isConfirmed) {
             closeRequisitionsModal();
             openAddModal();
+            if (!activeVendors || activeVendors.length === 0) {
+                try { await loadActiveVendors(); } catch (e) { console.warn('Failed to pre-load vendors for convert flow:', e); }
+            }
             const response = await fetch(PSM_REQUISITIONS_API + '?approved_consolidated=1', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
                     'X-CSRF-TOKEN': CSRF_TOKEN,
                     'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
                 },
