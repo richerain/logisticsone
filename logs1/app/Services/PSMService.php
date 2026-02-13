@@ -105,7 +105,7 @@ class PSMService
                     'quo_items' => $purchase->pur_name_items,
                     'quo_units' => $purchase->pur_unit,
                     'quo_total_amount' => $purchase->pur_total_amount,
-                    'quo_status' => 'Vendor-Review',
+                    'quo_status' => 'PO Received',
                     'quo_stored_from' => 'Main Warehouse A',
                     'quo_department_from' => 'Logistics 1',
                     'quo_module_from' => 'Procurement & Sourcing Management',
@@ -114,7 +114,7 @@ class PSMService
                 ];
                 $quoteResult = $this->createQuote($quoteData);
                 // Optionally sync purchase status for consistency
-                $this->updatePurchaseStatus($purchase->id, 'Vendor-Review', null);
+                $this->updatePurchaseStatus($purchase->id, 'PO Received', null);
             } else {
                 $quoteResult = ['success' => false, 'data' => null];
             }
@@ -1332,7 +1332,7 @@ class PSMService
         DB::beginTransaction();
         try {
             $data['quo_id'] = $this->generateQuoteId();
-            $data['quo_status'] = $data['quo_status'] ?? 'Vendor-Review';
+            $data['quo_status'] = $data['quo_status'] ?? 'PO Received';
             $data['quo_stored_from'] = $data['quo_stored_from'] ?? 'Main Warehouse A';
             $data['quo_department_from'] = 'Logistics 1';
             $data['quo_module_from'] = 'Procurement & Sourcing Management';
@@ -1394,14 +1394,19 @@ class PSMService
                     }
                 }
                 if (isset($data['quo_status']) && $quote->quo_purchase_id) {
+                    // Map quote status to purchase status (supports new and legacy values)
                     $map = [
-                        'Vendor-Review' => 'Vendor-Review',
-                        'In-Progress' => 'In-Progress',
-                        'Completed' => 'Completed',
+                        'PO Received' => 'PO Received',
+                        'Vendor-Review' => 'PO Received',
+                        'Processing Order' => 'Processing Order',
+                        'In-Progress' => 'Processing Order',
+                        'Dispatched' => 'Dispatched',
+                        'Delivered' => 'Delivered',
+                        'Completed' => 'Delivered',
                         'Cancel' => 'Cancel',
                         'Reject' => 'Rejected',
                     ];
-                    $targetStatus = $map[$data['quo_status']] ?? null;
+                    $targetStatus = $map[$data['quo_status']] ?? ($map[ucwords(strtolower($data['quo_status']))] ?? null);
                     if ($targetStatus) {
                         $statusResult = $this->updatePurchaseStatus($quote->quo_purchase_id, $targetStatus, false, null);
                         if (is_array($statusResult) && isset($statusResult['success']) && !$statusResult['success']) {
@@ -1808,19 +1813,19 @@ class PSMService
             $data['quo_items'] = $purchase->pur_name_items;
             $data['quo_units'] = $purchase->pur_unit;
             $data['quo_total_amount'] = $purchase->pur_total_amount;
-            $data['quo_status'] = 'Vendor-Review';
+            $data['quo_status'] = 'PO Received';
             $data['quo_stored_from'] = 'Main Warehouse A';
             $data['quo_department_from'] = 'Logistics 1';
             $data['quo_module_from'] = 'Procurement & Sourcing Management';
             $data['quo_submodule_from'] = 'Vendor Quote';
             $data['quo_purchase_id'] = $purchase->id;
             $quote = $this->psmRepository->createQuote($data);
-            $this->updatePurchaseStatus($purchase->id, 'Vendor-Review', false, null);
+            $this->updatePurchaseStatus($purchase->id, 'PO Received', false, null);
             DB::commit();
 
             return [
                 'success' => true,
-                'message' => 'Purchase moved to Vendor Review',
+                'message' => 'Purchase moved to PO Received',
                 'data' => $quote,
             ];
         } catch (Exception $e) {
@@ -1855,8 +1860,8 @@ class PSMService
 
             // approved_by column removed; keep parameter for compatibility but do not persist
 
-            // Calculate warranty and expiration if status is Completed
-            if ($status === 'Completed') {
+            // Calculate warranty and expiration when purchase is delivered
+            if ($status === 'Delivered') {
                 $items = $purchase->pur_name_items;
                 $warranties = [];
                 $expirations = [];
@@ -1941,7 +1946,7 @@ class PSMService
                             'purcprod_prod_price' => $item['price'] ?? 0,
                             'purcprod_prod_unit' => $prodUnit,
                             'purcprod_prod_type' => $purchase->pur_ven_type,
-                            'purcprod_status' => 'Completed', // Default status for completed purchase items
+                            'purcprod_status' => 'Delivered',
                             'purcprod_date' => now(),
                             'purcprod_warranty' => $calculatedWarrantyDate,
                             'purcprod_expiration' => $expirationDate,

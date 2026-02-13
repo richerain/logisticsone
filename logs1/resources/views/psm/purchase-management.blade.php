@@ -151,9 +151,10 @@
                     <option value="Approved">Approved</option>
                     <option value="Rejected">Rejected</option>
                     <option value="Cancel">Cancelled</option>
-                    <option value="Vendor-Review">Vendor Review</option>
-                    <option value="In-Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
+                    <option value="PO Received">PO Received</option>
+                    <option value="Processing Order">Processing Order</option>
+                    <option value="Dispatched">Dispatched</option>
+                    <option value="Delivered">Delivered</option>
                 </select>
             </div>
         </div>
@@ -1147,12 +1148,13 @@ function displayPurchases(purchases) {
         ).join(', ') + (items.length > 3 ? '...' : '');
         
         // Determine which action buttons to show based on status
-        const canCancel = purchase.pur_status === 'Pending';
-        const isApproved = purchase.pur_status === 'Approved';
-        const isCompleted = purchase.pur_status === 'Completed';
-        const isInProgress = purchase.pur_status === 'In-Progress';
-        const isCancelled = purchase.pur_status === 'Cancel';
-        const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
+        const normalizedStatus = normalizePurchaseStatus(purchase.pur_status);
+        const canCancel = normalizedStatus === 'Pending';
+        const isApproved = normalizedStatus === 'Approved';
+        const isDelivered = normalizedStatus === 'Delivered';
+        const isProcessing = normalizedStatus === 'Processing Order';
+        const isCancelled = normalizedStatus === 'Cancel';
+        const rowClass = isDelivered ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
         
         const orderedByHtml = formatUserLabelDisplay(purchase.pur_order_by, 'Not specified');
         
@@ -1164,8 +1166,8 @@ function displayPurchases(purchases) {
         
         const currencyFormatted = formatCurrency(purchase.pur_total_amount);
         const deliveryDateFormatted = formatDate(purchase.pur_delivery_date);
-        const statusBadgeClass = getStatusBadgeClass(purchase.pur_status);
-        const statusIcon = getStatusIcon(purchase.pur_status);
+        const statusBadgeClass = getStatusBadgeClass(normalizedStatus);
+        const statusIcon = getStatusIcon(normalizedStatus);
 
         let actionButtons = 
             '<button onclick="viewPurchase(' + purchase.id + ')" class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" title="View Purchase">' +
@@ -1174,7 +1176,7 @@ function displayPurchases(purchases) {
 
         /* Edit purchase removed */
 
-        if (!isCompleted && purchase.pur_status === 'Pending') {
+        if (!isDelivered && normalizedStatus === 'Pending') {
             actionButtons += 
                 '<button onclick="cancelPurchase(' + purchase.id + ')" class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn" title="Cancel Purchase">' +
                     '<i class=\'bx bx-x-circle text-xl\'></i>' +
@@ -1209,7 +1211,7 @@ function displayPurchases(purchases) {
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + orderedByHtml + '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' +
                 '<span class="' + statusBadgeClass + '">' +
-                    statusIcon + ' ' + purchase.pur_status +
+                    statusIcon + ' ' + normalizedStatus +
                 '</span>' +
             '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">' +
@@ -1240,7 +1242,7 @@ function getPurchasesFiltered(list){
     const statusVal = (elements.statusFilter?.value || '').trim().toLowerCase();
     const typeVal = (elements.vendorTypeFilter?.value || '').trim().toLowerCase();
     const q = (elements.searchInput?.value || '').trim().toLowerCase();
-    if (statusVal) purchases = purchases.filter(p => (p.pur_status || '').toLowerCase() === statusVal);
+    if (statusVal) purchases = purchases.filter(p => (normalizePurchaseStatus(p.pur_status) || '').toLowerCase() === statusVal);
     if (typeVal) purchases = purchases.filter(p => (p.pur_ven_type || '').toLowerCase() === typeVal);
     if (q) {
         purchases = purchases.filter(p => {
@@ -1271,30 +1273,42 @@ if (elements.vendorTypeFilter) elements.vendorTypeFilter.addEventListener('chang
 
 
 
+function normalizePurchaseStatus(status) {
+    const s = String(status || '').trim();
+    if (s === 'Vendor-Review') return 'PO Received';
+    if (s === 'In-Progress') return 'Processing Order';
+    if (s === 'Completed') return 'Delivered';
+    return s;
+}
+
 function getStatusBadgeClass(status) {
+    const s = normalizePurchaseStatus(status);
     const statusClasses = {
         'Approved': 'bg-green-700 text-white shadow-sm border border-green-800',
         'Pending': 'bg-yellow-600 text-white shadow-sm border border-yellow-700',
         'Rejected': 'bg-red-700 text-white shadow-sm border border-red-700',
         'Cancel': 'bg-red-700 text-white shadow-sm border border-red-700',
-        'Vendor-Review': 'bg-purple-700 text-white shadow-sm border border-purple-800',
-        'In-Progress': 'bg-indigo-700 text-white shadow-sm border border-indigo-800',
-        'Completed': 'bg-emerald-700 text-white shadow-sm border border-emerald-800'
+        'PO Received': 'bg-purple-700 text-white shadow-sm border border-purple-800',
+        'Processing Order': 'bg-indigo-700 text-white shadow-sm border border-indigo-800',
+        'Dispatched': 'bg-amber-600 text-white shadow-sm border border-amber-700',
+        'Delivered': 'bg-emerald-700 text-white shadow-sm border border-emerald-800'
     };
-    return (statusClasses[status] || 'bg-gray-600 text-white border border-gray-700') + ' px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 w-fit';
+    return (statusClasses[s] || 'bg-gray-600 text-white border border-gray-700') + ' px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 w-fit';
 }
 
 function getStatusIcon(status) {
+    const s = normalizePurchaseStatus(status);
     const statusIcons = {
         'Pending': "<i class='bx bx-time-five'></i>",
         'Approved': "<i class='bx bx-check-circle'></i>",
         'Rejected': "<i class='bx bx-x-circle'></i>",
         'Cancel': "<i class='bx bx-x-circle'></i>",
-        'Vendor-Review': "<i class='bx bx-user-voice'></i>",
-        'In-Progress': "<i class='bx bx-cog'></i>",
-        'Completed': "<i class='bx bx-check-double'></i>"
+        'PO Received': "<i class='bx bx-user-voice'></i>",
+        'Processing Order': "<i class='bx bx-cog'></i>",
+        'Dispatched': "<i class='bx bx-send'></i>",
+        'Delivered': "<i class='bx bx-check-double'></i>"
     };
-    return statusIcons[status] || "<i class='bx bx-help-circle'></i>";
+    return statusIcons[s] || "<i class='bx bx-help-circle'></i>";
 }
 
 function formatUserLabelDisplay(label, fallback) {

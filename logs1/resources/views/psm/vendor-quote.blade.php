@@ -175,9 +175,10 @@
         </div>
         <div class="space-y-3">
             <select id="statusSelect" class="select select-bordered w-full">
-                <option value="Vendor-Review">Vendor Review</option>
-                <option value="In-Progress">In-Progress</option>
-                <option value="Completed">Completed</option>
+                <option value="PO Received">PO Received</option>
+                <option value="Processing Order">Processing Order</option>
+                <option value="Dispatched">Dispatched</option>
+                <option value="Delivered">Delivered</option>
             </select>
             <div class="flex justify-end gap-2">
                 <button id="confirmUpdateStatusBtn" class="btn btn-primary btn-sm">Update</button>
@@ -696,12 +697,14 @@ function displayQuotes(list) {
     const startIdx = (currentQuotesPage - 1) * quotesPageSize;
     const pageItems = list.slice(startIdx, startIdx + quotesPageSize);
     elements.quotesTableBody.innerHTML = pageItems.map(function(q) {
-        const isInProgress = q.quo_status === 'In-Progress';
-        const isCompleted = q.quo_status === 'Completed';
-        const isVendorReview = q.quo_status === 'Vendor-Review';
-        const rowClass = isCompleted ? 'bg-gray-200' : '';
+        const normalizedStatus = normalizeQuoteStatus(q.quo_status);
+        const isProcessing = normalizedStatus === 'Processing Order';
+        const isDispatched = normalizedStatus === 'Dispatched';
+        const isDelivered = normalizedStatus === 'Delivered';
+        const isReceived = normalizedStatus === 'PO Received';
+        const rowClass = isDelivered ? 'bg-gray-200' : '';
         const idStr = String(q.id);
-        const statusStr = String(q.quo_status || '');
+        const statusStr = String(normalizedStatus || '');
         const dateStr = q.quo_delivery_date || '';
         
         const quoId = q.quo_id;
@@ -712,11 +715,11 @@ function displayQuotes(list) {
         const deliveryBtn = `<button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="delivery" data-id="${idStr}" data-date="${dateStr}" title="Set Date Delivery"><i class='bx bx-calendar text-xl'></i></button>`;
         const deleteBtn = `<button class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" data-action="delete" data-id="${idStr}" title="Delete"><i class='bx bx-trash text-xl'></i></button>`;
         
-        if (isCompleted) {
+        if (isDelivered) {
             actions = viewBtn + deleteBtn;
-        } else if (isInProgress) {
+        } else if (isProcessing || isDispatched) {
             actions = viewBtn + updateBtn + deliveryBtn + deleteBtn;
-        } else if (isVendorReview) {
+        } else if (isReceived) {
             actions = viewBtn + updateBtn + deleteBtn;
         } else {
             actions = viewBtn + updateBtn + deleteBtn;
@@ -732,8 +735,8 @@ function displayQuotes(list) {
                 <td class="px-3 py-2 whitespace-nowrap font-bold text-gray-700">${formatCurrency(q.quo_total_amount)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${formatDate(q.quo_delivery_date)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(q.quo_status)}">
-                        <i class='bx ${getStatusIcon(q.quo_status)} mr-1'></i>${q.quo_status}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(normalizedStatus)}">
+                        <i class='bx ${getStatusIcon(normalizedStatus)} mr-1'></i>${normalizedStatus}
                     </span>
                 </td>
                 <td class="px-3 py-2 whitespace-nowrap">
@@ -772,7 +775,7 @@ function viewQuote(id) {
     elements.viewQuoteContent.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><span class="text-sm text-gray-500">Quote ID</span><p class="font-semibold">${q.quo_id}</p></div>
-            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold">${q.quo_status}</p></div>
+            <div><span class="text-sm text-gray-500">Status</span><p class="font-semibold">${normalizeQuoteStatus(q.quo_status)}</p></div>
             <div class="md:col-span-2"><span class="text-sm text-gray-500">Items</span><p class="font-semibold">${Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : ''}</p></div>
             <div><span class="text-sm text-gray-500">Units</span><p class="font-semibold">${q.quo_units}</p></div>
             <div><span class="text-sm text-gray-500">Total Amount</span><p class="font-semibold">${formatCurrency(q.quo_total_amount)}</p></div>
@@ -784,7 +787,7 @@ function viewQuote(id) {
 
 function openUpdateStatus(id, current) {
     selectedQuoteId = id;
-    if (elements.statusSelect) elements.statusSelect.value = current || 'Vendor-Review';
+    if (elements.statusSelect) elements.statusSelect.value = normalizeQuoteStatus(current || 'PO Received');
     elements.updateStatusModal?.showModal();
 }
 
@@ -824,12 +827,12 @@ if (elements.confirmUpdateStatusBtn) {
                 selectedQuoteId = null;
 
                 // Show success message
-                if (elements.statusSelect.value === 'Completed') {
+                if (elements.statusSelect.value === 'Delivered') {
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
                         icon: 'success',
-                        title: 'Purchase order complete',
+                        title: 'Purchase order delivered',
                         showConfirmButton: false,
                         timer: 3000,
                         timerProgressBar: true
@@ -945,30 +948,42 @@ function showNotification(message, type) {
     });
 }
 
+function normalizeQuoteStatus(status) {
+    const s = String(status || '').trim();
+    if (s === 'Vendor-Review') return 'PO Received';
+    if (s === 'In-Progress') return 'Processing Order';
+    if (s === 'Completed') return 'Delivered';
+    return s;
+}
+
 function getStatusBadgeClass(status) {
+    const s = normalizeQuoteStatus(status);
     const statusClasses = {
         'Pending': 'bg-yellow-100 text-yellow-800',
         'Approved': 'bg-blue-100 text-blue-800',
         'Rejected': 'bg-red-100 text-red-800',
         'Cancel': 'bg-red-100 text-red-800',
-        'Vendor-Review': 'bg-purple-100 text-purple-800',
-        'In-Progress': 'bg-indigo-100 text-indigo-800',
-        'Completed': 'bg-green-100 text-green-800'
+        'PO Received': 'bg-purple-100 text-purple-800',
+        'Processing Order': 'bg-indigo-100 text-indigo-800',
+        'Dispatched': 'bg-amber-100 text-amber-800',
+        'Delivered': 'bg-green-100 text-green-800'
     };
-    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+    return statusClasses[s] || 'bg-gray-100 text-gray-800';
 }
 
 function getStatusIcon(status) {
+    const s = normalizeQuoteStatus(status);
     const statusIcons = {
         'Pending': 'bx-time',
         'Approved': 'bx-check-circle',
         'Rejected': 'bx-x-circle',
         'Cancel': 'bx-x-circle',
-        'Vendor-Review': 'bx-user-voice',
-        'In-Progress': 'bx-cog',
-        'Completed': 'bx-check-circle'
+        'PO Received': 'bx-user-voice',
+        'Processing Order': 'bx-cog',
+        'Dispatched': 'bx-send',
+        'Delivered': 'bx-check-circle'
     };
-    return statusIcons[status] || 'bx-question-mark';
+    return statusIcons[s] || 'bx-question-mark';
 }
 if (elements.notifTableBody) {
     elements.notifTableBody.addEventListener('click', function(e) {
