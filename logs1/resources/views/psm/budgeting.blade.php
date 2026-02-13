@@ -379,26 +379,26 @@
                     const isBudgetApproved = req.con_budget_approval === 'Approved';
 
                     tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">\${req.req_id || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="\${itemsList}">\${itemsList}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
-                            ${getVendorName(req.req_chosen_vendor || req.con_chosen_vendor)}
+                            \${getVendorName(req.req_chosen_vendor || req.con_chosen_vendor)}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">\${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-bold text-gray-800">${req.con_requester || '-'}</div>
-                            <div class="text-[10px] text-gray-500 uppercase font-semibold">${req.req_dept || req.con_dept || '-'}</div>
+                            <div class="text-sm font-bold text-gray-800">\${req.con_requester || '-'}</div>
+                            <div class="text-[10px] text-gray-500 uppercase font-semibold">\${req.req_dept || req.con_dept || '-'}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(req.con_date)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="${req.con_note || ''}">${req.con_note || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">\${formatDate(req.con_date)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="\${req.con_note || ''}">\${req.con_note || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-4 py-1.5 text-xs font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1.5 w-fit shadow-sm">
                                 <i class='bx bxs-check-circle text-sm'></i> Approved
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-4 py-1.5 text-xs font-black rounded-full ${isBudgetApproved ? 'bg-green-600 border-green-700' : 'bg-yellow-500 border-yellow-600'} text-white border flex items-center gap-1.5 w-fit shadow-sm">
-                                <i class='bx ${isBudgetApproved ? 'bxs-check-circle' : 'bx-time-five'} text-sm'></i> ${req.con_budget_approval || 'Pending'}
+                            <span class="px-4 py-1.5 text-xs font-black rounded-full \${isBudgetApproved ? 'bg-green-600 border-green-700' : 'bg-yellow-500 border-yellow-600'} text-white border flex items-center gap-1.5 w-fit shadow-sm">
+                                <i class='bx \${isBudgetApproved ? 'bxs-check-circle' : 'bx-time-five'} text-sm'></i> \${req.con_budget_approval || 'Pending'}
                             </span>
                         </td>
                     `;
@@ -525,40 +525,40 @@
                 return;
             }
 
-            tbody.innerHTML = '';
-            requests.forEach(req => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors';
-                
-                const isPending = req.req_status?.toLowerCase() === 'pending';
+                tbody.innerHTML = '';
+                requests.forEach(req => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50 transition-colors';
+                    
+                    const isPending = req.req_status?.toLowerCase() === 'pending';
 
-                tr.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${req.req_by || '-'}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">${req.req_dept || '-'}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">${formatCurrency(req.req_amount || 0)}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="${req.req_purpose || ''}">${req.req_purpose || '-'}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatDate(req.req_date)}</td>
-                    <td class="px-4 py-3 whitespace-nowrap">
-                        <span class="px-3 py-1 text-[10px] font-black rounded-full ${getStatusClass(req.req_status)} border shadow-sm uppercase">
-                            ${req.req_status || 'Pending'}
-                        </span>
-                    </td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm">
-                        <div class="flex gap-2">
-                            <button onclick="viewBudgetRequest('${req.req_id}')" class="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50" title="View Details">
-                                <i class='bx bx-show-alt text-lg'></i>
-                            </button>
-                            ${isPending ? `
-                                <button onclick="cancelBudgetRequest('${req.req_id}')" class="btn btn-ghost btn-xs text-red-600 hover:bg-red-50" title="Cancel Request">
-                                    <i class='bx bx-block text-lg'></i>
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">\${req.req_id || '-'}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">\${req.req_by || '-'}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">\${req.req_dept || '-'}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">\${formatCurrency(req.req_amount || 0)}</td>
+                        <td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="\${req.req_purpose || ''}">\${req.req_purpose || '-'}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">\${formatDate(req.req_date)}</td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <span class="px-3 py-1 text-[10px] font-black rounded-full \${getStatusClass(req.req_status)} border shadow-sm uppercase">
+                                \${req.req_status || 'Pending'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                            <div class="flex gap-2">
+                                <button onclick="viewBudgetRequest('\${req.req_id}')" class="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50" title="View Details">
+                                    <i class='bx bx-show-alt text-lg'></i>
                                 </button>
-                            ` : ''}
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                                \${isPending ? `
+                                    <button onclick="cancelBudgetRequest('\${req.req_id}')" class="btn btn-ghost btn-xs text-red-600 hover:bg-red-50" title="Cancel Request">
+                                        <i class='bx bx-block text-lg'></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
         }
 
         function getStatusClass(status) {
@@ -705,37 +705,37 @@
                     <div class="flex justify-between items-start border-b border-gray-100 pb-3">
                         <div>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Request ID</p>
-                            <h4 class="text-lg font-black text-gray-800">${req.req_id}</h4>
+                            <h4 class="text-lg font-black text-gray-800">\${req.req_id}</h4>
                         </div>
-                        <span class="px-3 py-1 text-[10px] font-black rounded-full ${getStatusClass(req.req_status)} border shadow-sm uppercase">
-                            ${req.req_status}
+                        <span class="px-3 py-1 text-[10px] font-black rounded-full \${getStatusClass(req.req_status)} border shadow-sm uppercase">
+                            \${req.req_status}
                         </span>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Requested By</p>
-                            <p class="text-sm font-bold text-gray-700">${req.req_by || '-'}</p>
+                            <p class="text-sm font-bold text-gray-700">\${req.req_by || '-'}</p>
                         </div>
                         <div>
                             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</p>
-                            <p class="text-sm font-bold text-gray-700">${req.req_dept || '-'}</p>
+                            <p class="text-sm font-bold text-gray-700">\${req.req_dept || '-'}</p>
                         </div>
                     </div>
 
                     <div>
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</p>
-                        <p class="text-xl font-black text-blue-600">${formatCurrency(req.req_amount)}</p>
+                        <p class="text-xl font-black text-blue-600">\${formatCurrency(req.req_amount)}</p>
                     </div>
 
                     <div>
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Purpose</p>
-                        <p class="text-sm text-gray-600 leading-relaxed">${req.req_purpose || '-'}</p>
+                        <p class="text-sm text-gray-600 leading-relaxed">\${req.req_purpose || '-'}</p>
                     </div>
 
                     <div>
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date Requested</p>
-                        <p class="text-sm font-bold text-gray-700">${formatDate(req.req_date)}</p>
+                        <p class="text-sm font-bold text-gray-700">\${formatDate(req.req_date)}</p>
                     </div>
                 </div>
             `;
