@@ -73,6 +73,15 @@ class SessionTimeoutHandler {
         this.resetTimers();
         this.setupEventListeners();
         this.startTimeoutTimer();
+        
+        // Setup OK button listener
+        const okBtn = document.getElementById('session-timeout-ok-btn');
+        if (okBtn) {
+            okBtn.addEventListener('click', () => {
+                this.logoutDueToTimeout();
+            });
+        }
+
         console.log(`Session Timeout Initialized: Lifetime=${this.sessionLifetime/1000}s, Warning=${this.warningTime/1000}s`);
     }
     
