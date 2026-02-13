@@ -383,12 +383,12 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
-                            ${getVendorName(req.req_chosen_vendor)}
+                            ${getVendorName(req.req_chosen_vendor || req.con_chosen_vendor)}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-bold text-gray-800">${req.con_requester || '-'}</div>
-                            <div class="text-[10px] text-gray-500 uppercase font-semibold">${req.req_dept || '-'}</div>
+                            <div class="text-[10px] text-gray-500 uppercase font-semibold">${req.req_dept || req.con_dept || '-'}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(req.con_date)}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="${req.con_note || ''}">${req.con_note || '-'}</td>

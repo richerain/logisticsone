@@ -949,6 +949,8 @@ class PSMController extends Controller
                         'con_req_id' => '-', // No consolidated ID yet
                         'req_id' => $item->req_id,
                         'con_items' => $item->req_items,
+                        'con_chosen_vendor' => $item->req_chosen_vendor,
+                        'con_dept' => $item->req_dept,
                         'con_total_price' => $item->req_price,
                         'con_requester' => $item->req_requester,
                         'con_date' => $item->req_date,
@@ -956,6 +958,7 @@ class PSMController extends Controller
                         'con_status' => $item->req_status,
                         'con_budget_approval' => 'Pending', // Default for non-consolidated
                         'req_dept' => $item->req_dept,
+                        'req_chosen_vendor' => $item->req_chosen_vendor,
                         'created_at' => $item->created_at,
                     ];
                 });
@@ -1046,6 +1049,7 @@ class PSMController extends Controller
                 'req_date',
                 'req_note',
                 'req_price',
+                'req_chosen_vendor',
             ]);
 
             // Set default status
