@@ -104,22 +104,11 @@
                         </p>
                         <cite class="block text-right mt-2 text-white/60">- Phil Jackson</cite>
                     </div>
-
-                    <!-- Open Vendor Opportunities Button -->
-                    <div class="w-full max-w-md mt-6 opacity-0 animate-entrance-pop delay-[1000ms]">
-                        <button type="button" id="opportunitiesBtn" 
-                            class="w-full bg-white/10 border-2 border-white/30 text-white font-bold py-3 px-4 rounded-lg
-                                    transition-all duration-300 shadow-lg hover:bg-white/20
-                                    transform active:translate-y-0 active:scale-[0.99] flex items-center justify-center gap-2">
-                            <i class='bx bx-briefcase-alt-2 text-xl'></i>
-                            <span>Open Vendor Opportunities</span>
-                        </button>
-                    </div>
                 </div>
             </section>
 
             <!-- Right Panel: Login Card -->
-            <section class="w-full lg:w-1/2 flex items-center justify-center p-8">
+            <section class="w-full lg:w-1/2 flex flex-col items-center justify-center p-8">
                 <div class="bg-white/90 w-full max-w-md backdrop-blur-lg rounded-2xl shadow-2xl p-8 opacity-0 animate-entrance-up">
                     <div class="text-center mb-6 opacity-0 animate-entrance-left delay-[500ms]">
                         <h2 class="text-3xl font-bold text-brand-text-primary">Vendor Portal</h2>
@@ -203,6 +192,17 @@
                     <div class="text-center mt-8 text-sm opacity-0 animate-entrance-pop delay-[1000ms]">
                         <p class="text-gray-500">&copy; 2026 Microfinance Logistics. All Rights Reserved.</p>
                     </div>
+                </div>
+
+                <!-- Open Vendor Opportunities Button -->
+                <div class="w-full max-w-md mt-6 opacity-0 animate-entrance-up delay-[1200ms]">
+                    <button type="button" id="opportunitiesBtn" 
+                        class="w-full bg-white/10 border-2 border-white/30 text-white font-bold py-3 px-4 rounded-lg
+                                transition-all duration-300 shadow-lg hover:bg-white/20
+                                transform active:translate-y-0 active:scale-[0.99] flex items-center justify-center gap-2">
+                        <i class='bx bx-briefcase-alt-2 text-xl'></i>
+                        <span>Open Vendor Opportunities</span>
+                    </button>
                 </div>
             </section>
         </div>
