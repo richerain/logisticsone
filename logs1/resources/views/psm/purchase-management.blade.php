@@ -350,7 +350,7 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Req ID</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Items</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Requester / Dept</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Vendor</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Chosen Vendor</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider text-right whitespace-nowrap">Total Amount</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider text-right whitespace-nowrap">Action</th>
@@ -504,6 +504,25 @@ function getProductImageUrl(path) {
     if (path.startsWith('http')) return path;
     var filename = path.split(/[/\\]/).pop();
     return '/images/product-picture/' + filename;
+}
+
+function resolveChosenVendorName(v) {
+    if (v === null || v === undefined || v === '') return 'Not chosen';
+    if (typeof v === 'object') {
+        if (v.company_name) return v.company_name;
+        if (v.name) return v.name;
+        if (v.id !== undefined && v.id !== null) {
+            var foundObj = (activeVendors || []).find(function(av){ return av.id == v.id; });
+            return foundObj ? foundObj.company_name : String(v.id);
+        }
+        return JSON.stringify(v);
+    }
+    var s = String(v).trim();
+    if (/^\d+$/.test(s)) {
+        var found = (activeVendors || []).find(function(av){ return av.id == s; });
+        return found ? found.company_name : s;
+    }
+    return s;
 }
 
 async function ensureJwtToken() {
@@ -1329,7 +1348,7 @@ function displayApprovedRequisitions(consolidatedRequests) {
                     '<div class="text-xs text-gray-500">' + (req.con_dept || 'N/A') + '</div>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap">' +
-                    '<div class="text-sm font-semibold text-gray-700">' + (req.con_chosen_vendor || 'Not chosen') + '</div>' +
+                    '<div class="text-sm font-semibold text-gray-700">' + resolveChosenVendorName(req.con_chosen_vendor) + '</div>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">' +
                     formatCurrency(req.con_total_price || 0) +
@@ -1407,7 +1426,7 @@ window.viewConsolidatedInModal = async function(id) {
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chosen Vendor</p>' +
-                                '<p class="text-sm font-bold text-blue-600">' + (req.con_chosen_vendor || 'Not chosen') + '</p>' +
+                                '<p class="text-sm font-bold text-blue-600">' + resolveChosenVendorName(req.con_chosen_vendor) + '</p>' +
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
@@ -1475,7 +1494,7 @@ function showConsolidatedPanelData(req) {
             '</div>' +
             '<div>' +
                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chosen Vendor</p>' +
-                '<p class="text-sm font-bold text-blue-600">' + (req.con_chosen_vendor || 'Not chosen') + '</p>' +
+                '<p class="text-sm font-bold text-blue-600">' + resolveChosenVendorName(req.con_chosen_vendor) + '</p>' +
             '</div>' +
             '<div>' +
                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
