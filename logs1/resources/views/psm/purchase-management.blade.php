@@ -8,75 +8,87 @@
     </div>
 </div>
 
-<!-- Stats Section -->
-<div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 shadow-lg shadow-blue-100 group hover:scale-[1.02] transition-all duration-300">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-blue-100 text-sm font-medium mb-1">Total Orders</p>
-                <h3 id="totalOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-            </div>
-            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                <i class='bx bx-shopping-bag text-white text-2xl'></i>
-            </div>
+<!-- Stats Section (Redesigned, theme-consistent) -->
+<div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <!-- Total Orders -->
+    <div onclick="filterPOStatus('')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-shopping-bag text-6xl text-blue-600'></i>
         </div>
-        <div class="mt-4 flex items-center text-blue-100 text-xs">
-            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Overview</span>
-            <span>Cumulative total</span>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                    <i class='bx bx-shopping-bag text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Orders</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="totalOrders" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">All statuses</span>
+            </div>
         </div>
     </div>
-    
-    <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 shadow-lg shadow-emerald-100 group hover:scale-[1.02] transition-all duration-300">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-emerald-100 text-sm font-medium mb-1">Approved</p>
-                <h3 id="approvedOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-            </div>
-            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                <i class='bx bx-check-double text-white text-2xl'></i>
-            </div>
+
+    <!-- Approved -->
+    <div onclick="filterPOStatus('Approved')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-check-double text-6xl text-emerald-600'></i>
         </div>
-        <div class="mt-4 flex items-center text-emerald-100 text-xs">
-            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Verified</span>
-            <span>Ready for processing</span>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+                    <i class='bx bx-check-double text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Approved</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="approvedOrders" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">Ready to proceed</span>
+            </div>
         </div>
     </div>
-    
-    <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-5 shadow-lg shadow-amber-100 group hover:scale-[1.02] transition-all duration-300 relative overflow-hidden">
-        <div class="absolute top-2 right-2 flex space-x-1" id="pendingPulse" style="display: none;">
-            <span class="relative flex h-3 w-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+
+    <!-- Pending -->
+    <div onclick="filterPOStatus('Pending')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div id="pendingPulse" class="hidden absolute -top-2 -right-2 z-10">
+            <span class="relative flex h-5 w-5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span id="pendingPulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-amber-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
             </span>
         </div>
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-amber-100 text-sm font-medium mb-1">Pending</p>
-                <h3 id="pendingOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-            </div>
-            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                <i class='bx bx-time-five text-white text-2xl'></i>
-            </div>
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-time-five text-6xl text-amber-600'></i>
         </div>
-        <div class="mt-4 flex items-center text-amber-100 text-xs">
-            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Action Required</span>
-            <span>Awaiting review</span>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-amber-50 rounded-xl text-amber-600">
+                    <i class='bx bx-time-five text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="pendingOrders" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">Awaiting review</span>
+            </div>
         </div>
     </div>
-    
-    <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-5 shadow-lg shadow-rose-100 group hover:scale-[1.02] transition-all duration-300">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-rose-100 text-sm font-medium mb-1">Cancelled</p>
-                <h3 id="cancelledOrders" class="text-3xl font-bold text-white tracking-tight">0</h3>
-            </div>
-            <div class="p-3 bg-white/20 rounded-xl backdrop-blur-md group-hover:rotate-12 transition-transform">
-                <i class='bx bx-x-circle text-white text-2xl'></i>
-            </div>
+
+    <!-- Cancelled -->
+    <div onclick="filterPOStatus('Cancel')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-x-circle text-6xl text-rose-600'></i>
         </div>
-        <div class="mt-4 flex items-center text-rose-100 text-xs">
-            <span class="bg-white/20 px-2 py-0.5 rounded-full mr-2">Inactive</span>
-            <span>Voided orders</span>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-rose-50 rounded-xl text-rose-600">
+                    <i class='bx bx-x-circle text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Cancelled</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="cancelledOrders" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">Voided orders</span>
+            </div>
         </div>
     </div>
 </div>
@@ -1095,10 +1107,16 @@ function loadStats() {
     if (elements.pendingOrders) elements.pendingOrders.textContent = stats.pending;
     if (elements.cancelledOrders) elements.cancelledOrders.textContent = stats.cancelled;
     
-    // Toggle pulse notification for pending
+    // Toggle pulse notification for pending with counter
     const pulse = document.getElementById('pendingPulse');
+    const pulseCount = document.getElementById('pendingPulseCount');
     if (pulse) {
-        pulse.style.display = stats.pending > 0 ? 'flex' : 'none';
+        if (stats.pending > 0) {
+            if (pulseCount) pulseCount.textContent = stats.pending;
+            pulse.classList.remove('hidden');
+        } else {
+            pulse.classList.add('hidden');
+        }
     }
 }
 
@@ -2346,6 +2364,14 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+function filterPOStatus(status) {
+    if (elements.statusFilter) {
+        elements.statusFilter.value = status || '';
+        currentPurchasesPage = 1;
+        displayPurchases(currentPurchases);
+    }
 }
 
 function showLoading() {
