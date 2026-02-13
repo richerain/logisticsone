@@ -108,26 +108,104 @@
         </form>
     </dialog>
     <!-- notification purchase order card modal end -->
+    <!-- Stats Section (similar to Purchase Management) -->
+    <div id="quoteStatsSection" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Total Quotes -->
+        <div onclick="filterQuoteStatus('')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bxs-quote-right text-6xl text-blue-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                        <i class='bx bxs-quote-right text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Quotes</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="totalQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">All statuses</span>
+                </div>
+            </div>
+        </div>
+        <!-- PO Received -->
+        <div onclick="filterQuoteStatus('PO Received')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-purple-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-user-voice text-6xl text-purple-700'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-purple-50 rounded-xl text-purple-700">
+                        <i class='bx bx-user-voice text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">PO Received</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="poReceivedQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Awaiting processing</span>
+                </div>
+            </div>
+        </div>
+        <!-- Processing -->
+        <div onclick="filterQuoteStatus('Processing Order')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-indigo-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-cog text-6xl text-indigo-700'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-indigo-50 rounded-xl text-indigo-700">
+                        <i class='bx bx-cog text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Processing</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="processingQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Orders in progress</span>
+                </div>
+            </div>
+        </div>
+        <!-- Delivered -->
+        <div onclick="filterQuoteStatus('Delivered')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-check-circle text-6xl text-emerald-700'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-3 bg-emerald-50 rounded-xl text-emerald-700">
+                        <i class='bx bx-check-circle text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Delivered</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="deliveredQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Completed orders</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- table start -->
-    <div class="overflow-x-auto">
-        <table id="quotesTable" class="table table-sm table-zebra w-full">
-            <thead>
-                <tr class="bg-gray-700 font-bold text-white">
-                    <th class="whitespace-nowrap">Quote ID</th>
-                    <th class="whitespace-nowrap">Items</th>
-                    <th class="whitespace-nowrap">Units</th>
-                    <th class="whitespace-nowrap">Total Amount</th>
-                    <th class="whitespace-nowrap">Delivery Date</th>
-                    <th class="whitespace-nowrap">Status</th>
-                    <th class="whitespace-nowrap">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="quotesTableBody">
-                <tr>
-                    <!-- -->
-                </tr>
-            </tbody>
-        </table>
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table id="quotesTable" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-800 font-bold text-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Quote ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Items</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Units</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Total Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Delivery Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="quotesTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <!-- -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <!-- table end -->
     <div id="quotesPager" class="mt-4 flex justify-between items-center">
@@ -261,6 +339,11 @@ var elements = {
     notifModal: document.getElementById('my_modal_4'),
     notifTableBody: document.getElementById('notifTableBody'),
     quotesTableBody: document.getElementById('quotesTableBody'),
+    // Stats
+    totalQuotes: document.getElementById('totalQuotes'),
+    poReceivedQuotes: document.getElementById('poReceivedQuotes'),
+    processingQuotes: document.getElementById('processingQuotes'),
+    deliveredQuotes: document.getElementById('deliveredQuotes'),
     viewQuoteModal: document.getElementById('viewQuoteModal'),
     viewQuoteContent: document.getElementById('viewQuoteContent'),
     updateStatusModal: document.getElementById('updateStatusModal'),
@@ -280,6 +363,7 @@ var currentQuotes = [];
 var quotesLoadingTimer = null;
 let currentQuotesPage = 1;
 const quotesPageSize = 10;
+let currentQuoteStatusFilter = '';
 
 function safeShowLoading() {
     try { if (typeof window !== 'undefined' && typeof window.showLoading === 'function') return window.showLoading(); } catch (e) {}
@@ -660,14 +744,17 @@ async function loadQuotes() {
                 }
                 return q;
             });
+            loadQuoteStats();
             displayQuotes(currentQuotes);
         } else {
             currentQuotes = [];
+            loadQuoteStats();
             displayQuotes([]);
             if (typeof showNotification === 'function') showNotification(result.message || 'Failed to load quotes', 'error');
         }
     } catch(e) {
         currentQuotes = [];
+        loadQuoteStats();
         displayQuotes([]);
         if (typeof showNotification === 'function') showNotification('Error loading quotes: ' + (e && e.message ? e.message : 'Unknown error'), 'error');
     } finally {
@@ -678,7 +765,9 @@ async function loadQuotes() {
 
 function displayQuotes(list) {
     if (!elements.quotesTableBody) return;
-    const total = (list || []).length;
+    const src = list || [];
+    const filteredList = currentQuoteStatusFilter ? src.filter(q => normalizeQuoteStatus(q.quo_status) === currentQuoteStatusFilter) : src;
+    const total = filteredList.length;
     if (!list || total === 0) {
         elements.quotesTableBody.innerHTML = `
             <tr>
@@ -695,7 +784,7 @@ function displayQuotes(list) {
     if (currentQuotesPage > totalPages) currentQuotesPage = totalPages;
     if (currentQuotesPage < 1) currentQuotesPage = 1;
     const startIdx = (currentQuotesPage - 1) * quotesPageSize;
-    const pageItems = list.slice(startIdx, startIdx + quotesPageSize);
+    const pageItems = filteredList.slice(startIdx, startIdx + quotesPageSize);
     elements.quotesTableBody.innerHTML = pageItems.map(function(q) {
         const normalizedStatus = normalizeQuoteStatus(q.quo_status);
         const isProcessing = normalizedStatus === 'Processing Order';
@@ -767,6 +856,27 @@ document.getElementById('quotesPager').addEventListener('click', function(ev){
     if(act === 'prev'){ currentQuotesPage = Math.max(1, currentQuotesPage - 1); displayQuotes(currentQuotes); }
     if(act === 'next'){ const max = Math.max(1, Math.ceil((currentQuotes.length||0)/quotesPageSize)); currentQuotesPage = Math.min(max, currentQuotesPage + 1); displayQuotes(currentQuotes); }
 });
+
+function filterQuoteStatus(status) {
+    currentQuoteStatusFilter = status || '';
+    currentQuotesPage = 1;
+    displayQuotes(currentQuotes);
+}
+
+function loadQuoteStats() {
+    const list = currentQuotes || [];
+    const countBy = (name) => list.filter(q => normalizeQuoteStatus(q.quo_status) === name).length;
+    const stats = {
+        total: list.length,
+        received: countBy('PO Received'),
+        processing: countBy('Processing Order'),
+        delivered: countBy('Delivered')
+    };
+    if (elements.totalQuotes) elements.totalQuotes.textContent = stats.total;
+    if (elements.poReceivedQuotes) elements.poReceivedQuotes.textContent = stats.received;
+    if (elements.processingQuotes) elements.processingQuotes.textContent = stats.processing;
+    if (elements.deliveredQuotes) elements.deliveredQuotes.textContent = stats.delivered;
+}
 
 function viewQuote(id) {
     const q = currentQuotes.find(x => x.id == id);
