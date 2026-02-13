@@ -1382,6 +1382,29 @@ function updateRequisitionBadge(count) {
     }
 }
 
+async function refreshApprovedReqBadge() {
+    try {
+        const response = await fetch(PSM_REQUISITIONS_API + '?approved_consolidated=1', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
+            },
+            credentials: 'include'
+        });
+        if (!response.ok) return;
+        const result = await response.json();
+        if (result && result.success && Array.isArray(result.data)) {
+            updateRequisitionBadge(result.data.length);
+            if (elements.requisitionsModal && !elements.requisitionsModal.classList.contains('hidden')) {
+                displayApprovedRequisitions(result.data);
+            }
+        }
+    } catch (e) {}
+}
+
 function displayApprovedRequisitions(consolidatedRequests) {
     if (!elements.requisitionsTableBody) return;
     
@@ -1642,8 +1665,18 @@ window.convertConsolidatedToPOInModal = async function(id) {
             if (res.success && res.data) {
                 const req = res.data.find(r => r.id == id);
                 if (req) {
-                    // Remember consolidated context for save
-                    window.currentConsolidatedForPO = { id: id, con_req_id: (req.con_req_id || null) };
+                    window.currentConsolidatedForPO = { id: id, con_req_id: (req.con_req_id || null), requester: (req.con_requester || ''), dept: (req.con_dept || '') };
+                    var ob = '';
+                    if (window.currentConsolidatedForPO.requester && window.currentConsolidatedForPO.dept) {
+                        ob = window.currentConsolidatedForPO.requester + ' / ' + window.currentConsolidatedForPO.dept;
+                    } else if (window.currentConsolidatedForPO.requester) {
+                        ob = window.currentConsolidatedForPO.requester;
+                    } else if (window.currentConsolidatedForPO.dept) {
+                        ob = window.currentConsolidatedForPO.dept;
+                    }
+                    if (elements.purOrderBy && ob) {
+                        elements.purOrderBy.value = ob;
+                    }
                     if (elements.purDesc) {
                         elements.purDesc.value = 'Converted from Consolidated Request: ' + (req.con_req_id || 'CON-' + req.id) + '. Original Department: ' + (req.con_dept || 'N/A');
                     }
@@ -1853,8 +1886,20 @@ async function handlePurchaseSubmit(e) {
         return;
     }
     
-    if (elements.purOrderBy && !elements.purOrderBy.value.trim() && CURRENT_USER_LABEL) {
-        elements.purOrderBy.value = CURRENT_USER_LABEL;
+    if (window.currentConsolidatedForPO) {
+        var ob = '';
+        if (window.currentConsolidatedForPO.requester && window.currentConsolidatedForPO.dept) {
+            ob = window.currentConsolidatedForPO.requester + ' / ' + window.currentConsolidatedForPO.dept;
+        } else if (window.currentConsolidatedForPO.requester) {
+            ob = window.currentConsolidatedForPO.requester;
+        } else if (window.currentConsolidatedForPO.dept) {
+            ob = window.currentConsolidatedForPO.dept;
+        }
+        if (elements.purOrderBy) elements.purOrderBy.value = ob || elements.purOrderBy.value;
+    } else {
+        if (elements.purOrderBy && !elements.purOrderBy.value.trim() && CURRENT_USER_LABEL) {
+            elements.purOrderBy.value = CURRENT_USER_LABEL;
+        }
     }
     if (!elements.purOrderBy || !elements.purOrderBy.value.trim()) {
         showNotification('Unable to determine ordering user', 'error');
@@ -1911,11 +1956,7 @@ async function handlePurchaseSubmit(e) {
             closePurchaseModal();
             // Clear consolidated context and refresh requisitions badge/table if open
             window.currentConsolidatedForPO = null;
-            if (typeof openRequisitionsModal === 'function') {
-                // Optionally refresh count badge
-                // Only fetch if the badge or modal is visible to avoid noise
-                // Here we simply rely on next open to re-fetch filtered list
-            }
+            refreshApprovedReqBadge();
             loadPurchases();
         } else {
             throw new Error(result.message || 'Failed to save purchase');
