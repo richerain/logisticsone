@@ -183,6 +183,17 @@
                             <span id="loginText">Sign In</span>
                             <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
                         </button>
+
+                        <!-- Open Vendor Opportunities Button -->
+                        <div class="mt-4 opacity-0 animate-entrance-pop delay-[1000ms]">
+                            <button type="button" id="opportunitiesBtn" 
+                                class="w-full bg-white border-2 border-brand-primary text-brand-primary font-bold py-3 px-4 rounded-lg
+                                        transition-all duration-300 shadow-md hover:bg-brand-primary/5
+                                        transform active:translate-y-0 active:scale-[0.99] flex items-center justify-center gap-2">
+                                <i class='bx bx-briefcase-alt-2 text-xl'></i>
+                                <span>Open Vendor Opportunities</span>
+                            </button>
+                        </div>
                         
                         <div class="mt-4 text-center opacity-0 animate-entrance-pop delay-[1000ms]">
                             <a href="/login" class="inline-block text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold text-sm">Employee Here!</a>
@@ -196,6 +207,86 @@
             </section>
         </div>
     </main>
+
+    <!-- Vendor Opportunities Section -->
+    <section id="opportunitiesSection" class="min-h-screen bg-white/50 backdrop-blur-md py-16 px-6 relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0 z-0 pointer-events-none opacity-20">
+            <div class="absolute w-64 h-64 top-10 right-10 bg-brand-primary/20 rounded-full blur-3xl"></div>
+            <div class="absolute w-96 h-96 bottom-10 left-10 bg-brand-primary/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Vendor Opportunities</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Join our network of trusted partners. We are looking for reliable vendors to grow with us and provide exceptional value to our customers.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <!-- Opportunity Card 1 -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
+                    <div class="w-16 h-16 bg-green-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class='bx bx-package text-3xl text-brand-primary'></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Product Supplies</h3>
+                    <p class="text-gray-600 mb-6">Supply high-quality office equipment, furniture, and essential business materials.</p>
+                    <button class="text-brand-primary font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                        Apply Now <i class='bx bx-right-arrow-alt'></i>
+                    </button>
+                </div>
+
+                <!-- Opportunity Card 2 -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
+                    <div class="w-16 h-16 bg-blue-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class='bx bx-wrench text-3xl text-blue-600'></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Maintenance Services</h3>
+                    <p class="text-gray-600 mb-6">Provide expert facility maintenance, electrical, and technical support services.</p>
+                    <button class="text-brand-primary font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                        Apply Now <i class='bx bx-right-arrow-alt'></i>
+                    </button>
+                </div>
+
+                <!-- Opportunity Card 3 -->
+                <div class="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 group">
+                    <div class="w-16 h-16 bg-purple-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class='bx bx-laptop text-3xl text-purple-600'></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">IT Solutions</h3>
+                    <p class="text-gray-600 mb-6">Partner with us for software licensing, hardware maintenance, and digital services.</p>
+                    <button class="text-brand-primary font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                        Apply Now <i class='bx bx-right-arrow-alt'></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Registration Call to Action -->
+            <div class="bg-brand-primary rounded-3xl p-10 text-white text-center shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i class='bx bxs-store-alt text-9xl'></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Ready to become an official vendor?</h3>
+                <p class="text-white/80 mb-8 max-w-xl mx-auto">Fill out our comprehensive vendor registration form to start the evaluation process.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="bg-white text-brand-primary font-bold py-3 px-8 rounded-xl hover:bg-gray-100 transition-colors shadow-lg">
+                        Start Application
+                    </button>
+                    <button class="bg-brand-primary-hover border border-white/30 text-white font-bold py-3 px-8 rounded-xl hover:bg-brand-primary transition-colors">
+                        Download Guide
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="text-gray-500 hover:text-brand-primary transition-colors flex items-center justify-center gap-2 mx-auto">
+                    <i class='bx bx-up-arrow-alt text-xl'></i>
+                    Back to Login
+                </button>
+            </div>
+        </div>
+    </section>
 
     <div id="terms-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4">
         <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -262,7 +353,16 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    const termsLink = document.getElementById('terms-link');
+        const opportunitiesBtn = document.getElementById('opportunitiesBtn');
+        const opportunitiesSection = document.getElementById('opportunitiesSection');
+        
+        if (opportunitiesBtn && opportunitiesSection) {
+            opportunitiesBtn.addEventListener('click', function() {
+                opportunitiesSection.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+
+        const termsLink = document.getElementById('terms-link');
     const termsModal = document.getElementById('terms-modal');
     const closeTermsModal = document.getElementById('close-terms-modal');
     const declineTerms = document.getElementById('decline-terms');
