@@ -334,6 +334,8 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Req ID</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Items</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requester / Dept</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Vendor</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Total Amount</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Action</th>
                     </tr>
@@ -1310,6 +1312,12 @@ function displayApprovedRequisitions(consolidatedRequests) {
                     '<div class="text-sm font-bold text-gray-800">' + (req.con_requester || 'Unknown') + '</div>' +
                     '<div class="text-xs text-gray-500">' + (req.req_dept || 'N/A') + '</div>' +
                 '</td>' +
+                '<td class="px-4 py-4 whitespace-nowrap">' +
+                    '<div class="text-sm font-semibold text-gray-700">' + (req.con_chosen_vendor || 'Not chosen') + '</div>' +
+                '</td>' +
+                '<td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">' +
+                    formatCurrency(req.con_total_amount || 0) +
+                '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">' +
                     formatDate(req.con_date || req.created_at) +
                 '</td>' +
@@ -1380,6 +1388,14 @@ window.viewConsolidatedInModal = async function(id) {
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>' +
                                 '<p class="text-sm font-bold text-gray-700">' + (req.req_dept || 'N/A') + '</p>' +
+                            '</div>' +
+                            '<div>' +
+                                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chosen Vendor</p>' +
+                                '<p class="text-sm font-bold text-blue-600">' + (req.con_chosen_vendor || 'Not chosen') + '</p>' +
+                            '</div>' +
+                            '<div>' +
+                                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
+                                '<p class="text-sm font-bold text-green-600">' + formatCurrency(req.con_total_amount || 0) + '</p>' +
                             '</div>' +
                         '</div>' +
                         '<div>' +
@@ -1459,7 +1475,21 @@ window.convertConsolidatedToPOInModal = async function(id) {
                     
                     if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
                     
-                    showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
+                    // Automatically select company based on con_chosen_vendor
+                    if (req.con_chosen_vendor && elements.companySelect) {
+                        const vendorName = req.con_chosen_vendor;
+                        const option = Array.from(elements.companySelect.options).find(opt => opt.value === vendorName);
+                        
+                        if (option) {
+                            elements.companySelect.value = vendorName;
+                            setSelectedVendor(option);
+                            showNotification('Consolidated items loaded and vendor automatically selected.', 'success');
+                        } else {
+                            showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
+                        }
+                    } else {
+                        showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
+                    }
                 }
             }
         }
