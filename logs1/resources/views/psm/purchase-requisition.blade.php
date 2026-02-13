@@ -634,7 +634,7 @@
                     '<span>Price: ₱' + parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
                     '<span>×</span>' +
                     '<span>Qty: ' + count + '</span>' +
-                </div>' +
+                '</div>' +
                 '<div class="font-bold text-blue-600">' +
                     'Total: ₱' + parseFloat(totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2}) +
                 '</div>' +
