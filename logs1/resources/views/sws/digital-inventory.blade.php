@@ -70,6 +70,62 @@
     </div>
 </div>
 <!-- Inventory Metrics section end -->
+<!-- Quick Management section (moved below Inventory Metrics) start -->
+<div class="mt-4 mb-4">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-3 border-b border-gray-100 flex items-center gap-2">
+            <i class='bx bx-bolt-circle text-brand-primary'></i>
+            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Quick Management</h3>
+        </div>
+        <div class="p-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                <button id="transferBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                        <i class='bx bx-transfer text-xl'></i>
+                    </div>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter">Transfer</span>
+                </button>
+
+                <button id="viewLocationsBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                        <i class='bx bx-map text-xl'></i>
+                    </div>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter">Location</span>
+                </button>
+
+                <button id="viewCategoriesBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                        <i class='bx bx-category-alt text-xl'></i>
+                    </div>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter">Category</span>
+                </button>
+
+                <button id="generateReportBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                        <i class='bx bxs-report text-xl'></i>
+                    </div>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter">Reports</span>
+                </button>
+
+                <button id="purchaseNewItemBtn" class="flex items-center justify-center gap-3 p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-sm uppercase tracking-wide">
+                    <i class='bx bxs-purchase-tag'></i>
+                    Purchase New Item
+                </button>
+
+                <button id="inventoryNewItemBtn" class="flex items-center justify-center gap-2 p-2.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-[11px] uppercase tracking-tight">
+                    <i class='bx bxs-down-arrow-square'></i>
+                    Inventory Item
+                </button>
+
+                <button id="incomingAssetsBtn" class="flex items-center justify-center gap-2 p-2.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-[11px] uppercase tracking-tight">
+                    <i class='bx bx-import'></i>
+                    Incoming Assets
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Quick Management section (moved below Inventory Metrics) end -->
 <!-- digital inventory section start -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
@@ -77,16 +133,13 @@
             <i class='bx bx-line-chart text-brand-primary text-xl'></i>
             <h3 class="text-lg font-bold text-gray-800 tracking-tight">Inventory Overview</h3>
         </div>
-        <div class="flex items-center gap-2 text-xs font-medium text-gray-400 bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm">
-            <i class='bx bx-time-five'></i>
-            <span>Updated: {{ date('M d, Y') }}</span>
-        </div>
+        
     </div>
     
     <div class="p-5">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Stock Levels by Category section start -->
-            <div class="lg:col-span-7">
+            <div class="lg:col-span-12">
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                         <i class='bx bx-chart text-brand-primary'></i>
@@ -186,58 +239,7 @@
             </div>
             <!-- Stock Levels by Category section end -->
 
-            <!-- Quick Actions section start -->
-            <div class="lg:col-span-5 bg-gray-50 rounded-xl p-4 border border-gray-100">
-                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6 flex items-center gap-2">
-                    <i class='bx bx-bolt-circle text-brand-primary'></i>
-                    Quick Management
-                </h4>
-                <div class="grid grid-cols-2 gap-3">
-                    <button id="transferBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                            <i class='bx bx-transfer text-xl'></i>
-                        </div>
-                        <span class="text-[11px] font-bold uppercase tracking-tighter">Transfer</span>
-                    </button>
-                    
-                    <button id="viewLocationsBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                        <div class="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                            <i class='bx bx-map text-xl'></i>
-                        </div>
-                        <span class="text-[11px] font-bold uppercase tracking-tighter">Location</span>
-                    </button>
-
-                    <button id="viewCategoriesBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                        <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                            <i class='bx bx-category-alt text-xl'></i>
-                        </div>
-                        <span class="text-[11px] font-bold uppercase tracking-tighter">Category</span>
-                    </button>
-
-                    <button id="generateReportBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                            <i class='bx bxs-report text-xl'></i>
-                        </div>
-                        <span class="text-[11px] font-bold uppercase tracking-tighter">Reports</span>
-                    </button>
-
-                    <button id="purchaseNewItemBtn" class="col-span-2 flex items-center justify-center gap-3 p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-sm uppercase tracking-wide">
-                        <i class='bx bxs-purchase-tag'></i>
-                        Purchase New Item
-                    </button>
-
-                    <button id="inventoryNewItemBtn" class="flex items-center justify-center gap-2 p-2.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-[11px] uppercase tracking-tight">
-                        <i class='bx bxs-down-arrow-square'></i>
-                        Inventory Item
-                    </button>
-
-                    <button id="incomingAssetsBtn" class="flex items-center justify-center gap-2 p-2.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-[11px] uppercase tracking-tight">
-                        <i class='bx bx-import'></i>
-                        Incoming Assets
-                    </button>
-                </div> 
-            </div>
-            <!-- Quick Actions section end -->
+            
         </div>
     </div>
 </div>
