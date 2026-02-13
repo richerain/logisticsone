@@ -194,17 +194,6 @@
                             <span id="loginText">Sign In</span>
                             <span id="loginSpinner" class="loading loading-spinner loading-sm hidden"></span>
                         </button>
-
-                        <!-- Open Vendor Opportunities Button -->
-                        <div class="mt-4 opacity-0 animate-entrance-pop delay-[1000ms]">
-                            <button type="button" id="opportunitiesBtn" 
-                                class="w-full bg-white border-2 border-brand-primary text-brand-primary font-bold py-3 px-4 rounded-lg
-                                        transition-all duration-300 shadow-md hover:bg-brand-primary/5
-                                        transform active:translate-y-0 active:scale-[0.99] flex items-center justify-center gap-2">
-                                <i class='bx bx-briefcase-alt-2 text-xl'></i>
-                                <span>Open Vendor Opportunities</span>
-                            </button>
-                        </div>
                         
                         <div class="mt-4 text-center opacity-0 animate-entrance-pop delay-[1000ms]">
                             <a href="/login" class="inline-block text-brand-primary hover:text-brand-primary-hover hover:underline transition-colors font-semibold text-sm">Employee Here!</a>
