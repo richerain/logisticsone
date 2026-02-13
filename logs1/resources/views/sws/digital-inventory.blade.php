@@ -74,7 +74,6 @@
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="w-1.5 h-6 bg-brand-primary rounded-full"></div>
             <i class='bx bx-line-chart text-brand-primary text-xl'></i>
             <h3 class="text-lg font-bold text-gray-800 tracking-tight">Inventory Overview</h3>
         </div>
