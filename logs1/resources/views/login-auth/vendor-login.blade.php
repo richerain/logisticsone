@@ -98,8 +98,15 @@
                         <img src="{{ asset('images/login-img/illustration-5.svg') }}" alt="Illustration 5" class="login-svg absolute inset-0 w-full h-full object-contain transition-opacity duration-1000 opacity-0">
                     </div>
 
+                    <div class="text-center mt-4 max-w-xl opacity-0 animate-entrance-pop delay-[500ms]">
+                        <p class="italic text-white/90 text-base leading-relaxed">
+                            “The strength of the team is each individual member. The strength of each member is the team.”
+                        </p>
+                        <cite class="block text-right mt-2 text-white/60">- Phil Jackson</cite>
+                    </div>
+
                     <!-- Open Vendor Opportunities Button -->
-                    <div class="w-full max-w-md mt-2 opacity-0 animate-entrance-pop delay-[1000ms]">
+                    <div class="w-full max-w-md mt-6 opacity-0 animate-entrance-pop delay-[1000ms]">
                         <button type="button" id="opportunitiesBtn" 
                             class="w-full bg-white/10 border-2 border-white/30 text-white font-bold py-3 px-4 rounded-lg
                                     transition-all duration-300 shadow-lg hover:bg-white/20
@@ -107,13 +114,6 @@
                             <i class='bx bx-briefcase-alt-2 text-xl'></i>
                             <span>Open Vendor Opportunities</span>
                         </button>
-                    </div>
-
-                    <div class="text-center mt-4 max-w-xl opacity-0 animate-entrance-pop delay-[500ms]">
-                        <p class="italic text-white/90 text-base leading-relaxed">
-                            “The strength of the team is each individual member. The strength of each member is the team.”
-                        </p>
-                        <cite class="block text-right mt-2 text-white/60">- Phil Jackson</cite>
                     </div>
                 </div>
             </section>
