@@ -17,6 +17,8 @@ class Consolidated extends Model
         'con_req_id',
         'req_id',
         'con_items',
+        'con_chosen_vendor',
+        'con_dept',
         'con_total_price',
         'con_requester',
         'con_date',

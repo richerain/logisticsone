@@ -55,6 +55,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requisition ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Items</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Chosen Vendor</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Total Price</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requester / Dept</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
@@ -65,7 +66,7 @@
                     </thead>
                     <tbody id="consolidatedTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex justify-center items-center py-4">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                     Loading approved requisitions...
@@ -356,6 +357,9 @@
                     tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
+                            ${req.req_chosen_vendor || '-'}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-bold text-gray-800">${req.con_requester || '-'}</div>
@@ -585,6 +589,11 @@
             const reqIdsStr = reqIds.join(', ');
             const purpose = `Consolidated budget for: ${reqIdsStr}`;
 
+            // Determine the department for the budget request
+            const departments = [...new Set(pendingItems.map(item => item.req_dept).filter(Boolean))];
+            const deptFilter = document.getElementById('consolidatedDeptFilter')?.value;
+            const consolidatedDept = deptFilter || (departments.length === 1 ? departments[0] : 'Logistics 1');
+
             fetch('/api/v1/psm/budget-management/requests', {
                 method: 'POST',
                 headers: {
@@ -594,7 +603,7 @@
                 body: JSON.stringify({
                     req_amount: totalAmount,
                     req_purpose: purpose,
-                    req_dept: 'Logistics 1',
+                    req_dept: consolidatedDept,
                     req_by: currentUser,
                     included_req_ids: reqIds
                 })

@@ -349,6 +349,8 @@ class PSMRepository
                 'con_req_id' => $consId,
                 'req_id' => $req->req_id,
                 'con_items' => $req->req_items,
+                'con_chosen_vendor' => $req->req_chosen_vendor,
+                'con_dept' => $req->req_dept,
                 'con_total_price' => $req->req_price,
                 'con_requester' => $req->req_requester,
                 'con_date' => $req->req_date,
