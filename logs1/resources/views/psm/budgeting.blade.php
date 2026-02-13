@@ -53,7 +53,6 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-800 font-bold text-gray-100">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Consolidated ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Requisition ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Items</th>
                             <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Total Price</th>
@@ -66,7 +65,7 @@
                     </thead>
                     <tbody id="consolidatedTableBody" class="bg-white divide-y divide-gray-200">
                         <tr>
-                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                                 <div class="flex justify-center items-center py-4">
                                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
                                     Loading approved requisitions...
@@ -352,7 +351,6 @@
                     const isBudgetApproved = req.con_budget_approval === 'Approved';
 
                     tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${req.con_req_id || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
