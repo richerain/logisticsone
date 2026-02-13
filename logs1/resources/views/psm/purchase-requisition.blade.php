@@ -222,10 +222,11 @@
                     </div>
                 </div>
 223→
-224→                <div>
-225→                    <label class="block text-sm font-semibold text-gray-700 mb-1">Chosen Vendor</label>
-226→                    <input type="text" id="req_chosen_vendor" name="req_chosen_vendor" placeholder="Select a vendor from the products modal" readonly class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed">
-227→                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Chosen Vendor</label>
+                    <input type="text" id="req_chosen_vendor_display" placeholder="Select a vendor from the products modal" readonly class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed">
+                    <input type="hidden" id="req_chosen_vendor" name="req_chosen_vendor">
+                </div>
 228→
 229→                <div>
 230→                    <label class="block text-sm font-semibold text-gray-700 mb-2">Requested Items *</label>
@@ -493,6 +494,12 @@
     const sideCancelBtn = document.getElementById('sideCancelBtn');
     
     let allVendors = [];
+    
+    function getVendorName(vendorId) {
+        if (!vendorId) return '-';
+        const vendor = allVendors.find(v => v.ven_id == vendorId);
+        return vendor ? vendor.ven_company_name : vendorId;
+    }
     let currentVendorProducts = [];
     let selectedItems = new Map(); // Track items and counts
     let selectedItemPrices = new Map(); // Track item prices
@@ -649,10 +656,18 @@
                 sideModalVendorName.textContent = `${vendor.ven_company_name} Products`;
                 
                 // Populate Chosen Vendor fields
-                const chosenVendorFields = ['req_chosen_vendor', 'side_req_chosen_vendor'];
-                chosenVendorFields.forEach(id => {
+                // Display names
+                const displayFields = ['req_chosen_vendor_display', 'side_req_chosen_vendor_display'];
+                displayFields.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.value = vendor.ven_company_name;
+                });
+
+                // IDs
+                const idFields = ['req_chosen_vendor', 'side_req_chosen_vendor'];
+                idFields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = vendor.ven_id;
                 });
 
                 fetchVendorProducts(venId);
@@ -666,9 +681,9 @@
                 `;
                 sideModalVendorName.textContent = 'Vendor Products';
 
-                // Clear Chosen Vendor fields if no vendor selected
-                const chosenVendorFields = ['req_chosen_vendor', 'side_req_chosen_vendor'];
-                chosenVendorFields.forEach(id => {
+                // Clear fields
+                const fields = ['req_chosen_vendor', 'side_req_chosen_vendor', 'req_chosen_vendor_display', 'side_req_chosen_vendor_display'];
+                fields.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.value = '';
                 });
@@ -828,7 +843,7 @@
             document.getElementById('view_req_date').textContent = new Date(data.req_date).toLocaleDateString();
             document.getElementById('view_req_requester').textContent = data.req_requester;
             document.getElementById('view_req_dept').textContent = data.req_dept;
-            document.getElementById('view_req_chosen_vendor').textContent = data.req_chosen_vendor || '-';
+            document.getElementById('view_req_chosen_vendor').textContent = getVendorName(data.req_chosen_vendor);
             
             const overallPrice = parseFloat(data.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
             document.getElementById('view_req_overall_price').textContent = `₱${overallPrice}`;
@@ -990,7 +1005,7 @@
                         ${items.length > 1 ? `<span class="text-blue-600 font-semibold">(+${items.length - 1})</span>` : ''}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
-                        ${req.req_chosen_vendor || '-'}
+                        ${getVendorName(req.req_chosen_vendor)}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
                         ₱${parseFloat(req.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}
@@ -1210,6 +1225,7 @@
             req_date: formData.get('req_date'),
             req_requester: formData.get('req_requester'),
             req_dept: formData.get('req_dept'),
+            req_chosen_vendor: formData.get('req_chosen_vendor'),
             req_items: Array.from(formData.getAll('items[]')).filter(i => i.trim() !== ''),
             req_note: formData.get('req_note')
         };
@@ -1235,6 +1251,7 @@
         }
     });
 
+    fetchVendors();
     fetchRequisitions();
 })();
 </script>

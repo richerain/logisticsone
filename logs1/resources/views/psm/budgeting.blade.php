@@ -215,6 +215,7 @@
 <script>
     (function() {
         const currentUser = "{{ Auth::user()->name ?? 'PSM Admin' }}";
+        let allVendors = [];
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -238,7 +239,30 @@
         // Variables for Budget Requests
         let allBudgetRequests = [];
 
+        async function fetchVendors() {
+            try {
+                const token = localStorage.getItem('jwt');
+                const response = await fetch('/api/v1/psm/vendors', {
+                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    allVendors = result.data;
+                    displayConsolidatedTable(); // Refresh table once vendors are loaded
+                }
+            } catch (error) {
+                console.error('Error fetching vendors:', error);
+            }
+        }
+
+        function getVendorName(vendorId) {
+            if (!vendorId) return '-';
+            const vendor = allVendors.find(v => v.ven_id == vendorId);
+            return vendor ? vendor.ven_company_name : vendorId;
+        }
+
         function init() {
+            fetchVendors();
             fetchApprovedRequisitions();
             setupEventListeners();
         }
@@ -358,7 +382,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${req.req_id || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
-                            ${req.req_chosen_vendor || '-'}
+                            ${getVendorName(req.req_chosen_vendor)}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
