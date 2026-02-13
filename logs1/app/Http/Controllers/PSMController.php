@@ -886,14 +886,42 @@ class PSMController extends Controller
             $filters = $request->only(['status', 'is_consolidated', 'page_size', 'search', 'dept']);
             $result = $this->psmService->getRequisitions($filters);
 
-            // If we are looking for consolidated view, we should probably fetch from psm_consolidated
-            // but the user wants to fetch from psm_requisition then sync status.
-            // Let's check if the user wants to see the psm_consolidated table content.
+            // If we are looking for consolidated view, we should merge already consolidated
+            // and those approved requisitions that are not yet consolidated.
             if ($request->has('view_consolidated')) {
+                // 1. Get already consolidated items
                 $consolidated = \App\Models\PSM\Consolidated::orderBy('created_at', 'desc')->get();
+                
+                // 2. Get approved requisitions not yet consolidated
+                $pending = \App\Models\PSM\Requisition::where('req_status', 'Approved')
+                    ->where('is_consolidated', 0)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                
+                // 3. Map pending to match consolidated structure for UI consistency
+                $mappedPending = $pending->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'con_req_id' => '-', // No consolidated ID yet
+                        'req_id' => $item->req_id,
+                        'con_items' => $item->req_items,
+                        'con_total_price' => $item->req_price,
+                        'con_requester' => $item->req_requester,
+                        'con_date' => $item->req_date,
+                        'con_note' => $item->req_note,
+                        'con_status' => $item->req_status,
+                        'con_budget_approval' => 'Pending', // Default for non-consolidated
+                        'req_dept' => $item->req_dept,
+                        'created_at' => $item->created_at,
+                    ];
+                });
+
+                // Merge them
+                $merged = $consolidated->concat($mappedPending)->sortByDesc('created_at')->values();
+
                 return response()->json([
                     'success' => true,
-                    'data' => $consolidated
+                    'data' => $merged
                 ]);
             }
 

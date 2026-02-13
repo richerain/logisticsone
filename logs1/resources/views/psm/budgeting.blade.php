@@ -410,7 +410,7 @@
             if (tbody) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <i class='bx bx-clipboard text-6xl mb-4 text-gray-300'></i>
                                 <p class="text-lg font-medium">${message}</p>
@@ -558,13 +558,16 @@
         }
 
         window.requestConsolidatedBudget = function() {
-            if (filteredRequisitions.length === 0) {
-                Swal.fire('Info', 'No approved requisitions to consolidate.', 'info');
+            // Only consolidate items that are NOT yet consolidated (con_req_id is '-')
+            const pendingItems = filteredRequisitions.filter(req => req.con_req_id === '-');
+
+            if (pendingItems.length === 0) {
+                Swal.fire('Info', 'No pending approved requisitions to consolidate. Items already consolidated are shown for reference.', 'info');
                 return;
             }
 
-            const totalAmount = calculateTotalAmount(filteredRequisitions);
-            const totalItems = filteredRequisitions.length;
+            const totalAmount = calculateTotalAmount(pendingItems);
+            const totalItems = pendingItems.length;
 
             document.getElementById('consolidatedConfirmAmount').textContent = formatCurrency(totalAmount);
             document.getElementById('consolidatedConfirmItems').textContent = totalItems;
@@ -573,10 +576,11 @@
 
         window.confirmConsolidatedBudget = function() {
             const token = localStorage.getItem('jwt');
-            const totalAmount = calculateTotalAmount(filteredRequisitions);
+            const pendingItems = filteredRequisitions.filter(req => req.con_req_id === '-');
+            const totalAmount = calculateTotalAmount(pendingItems);
             
-            // Collect purpose details and IDs to mark as consolidated
-            const reqIds = filteredRequisitions.map(r => r.req_id);
+            // Collect IDs to mark as consolidated
+            const reqIds = pendingItems.map(r => r.req_id);
             const reqIdsStr = reqIds.join(', ');
             const purpose = `Consolidated budget for: ${reqIdsStr}`;
 
