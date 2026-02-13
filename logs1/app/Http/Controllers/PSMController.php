@@ -480,6 +480,23 @@ class PSMController extends Controller
     public function createBudgetRequest(Request $request)
     {
         try {
+            // AUTO-FIX DATABASE SCHEMA ON THE FLY
+            try {
+                if (!\Illuminate\Support\Facades\Schema::connection('psm')->hasColumn('psm_consolidated', 'req_id')) {
+                    \Illuminate\Support\Facades\Schema::connection('psm')->table('psm_consolidated', function ($table) {
+                        $table->string('req_id')->nullable()->after('id');
+                    });
+                }
+                if (!\Illuminate\Support\Facades\Schema::connection('psm')->hasColumn('psm_consolidated', 'parent_budget_req_id')) {
+                    \Illuminate\Support\Facades\Schema::connection('psm')->table('psm_consolidated', function ($table) {
+                        $table->string('parent_budget_req_id')->nullable()->after('con_budget_approval');
+                    });
+                }
+            } catch (\Exception $dbEx) {
+                // Log but continue
+                \Illuminate\Support\Facades\Log::error("PSM DB Fix Error: " . $dbEx->getMessage());
+            }
+
             $data = $request->all();
             $result = $this->psmService->createBudgetRequest($data);
             return response()->json($result);
