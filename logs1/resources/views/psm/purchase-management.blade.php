@@ -172,14 +172,13 @@
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Amount</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Delivery Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Ordered By</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Approved By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="purchasesTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="10" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">
                             <div class="flex justify-center items-center py-4">
                                 <div class="loading loading-spinner mr-3"></div>
                                 Loading purchases...
@@ -386,6 +385,7 @@ var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
 var PSM_PURCHASES_API = API_BASE_URL + '/psm/purchase-management';
 var PSM_REQUISITIONS_API = API_BASE_URL + '/psm/requisitions';
 var PSM_ACTIVE_VENDORS_API = API_BASE_URL + '/psm/active-vendors';
+var PSM_REVIEW_TO_QUOTE_API = API_BASE_URL + '/psm/vendor-quote/review-from-purchase';
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 // JWT Token Handling with LocalStorage Sync
@@ -1127,7 +1127,7 @@ function displayPurchases(purchases) {
     if (!filtered || total === 0) {
         elements.purchasesTableBody.innerHTML = 
             '<tr>' +
-                '<td colspan="10" class="px-6 py-8 text-center text-gray-500">' +
+                '<td colspan="9" class="px-6 py-8 text-center text-gray-500">' +
                     '<i class=\'bx bxs-purchase-tag text-4xl text-gray-300 mb-3\'></i>' +
                     '<p class="text-lg">No purchase orders found</p>' +
                 '</td>' +
@@ -1148,7 +1148,6 @@ function displayPurchases(purchases) {
         
         // Determine which action buttons to show based on status
         const canCancel = purchase.pur_status === 'Pending';
-        const canApprove = purchase.pur_status === 'Pending';
         const isApproved = purchase.pur_status === 'Approved';
         const isCompleted = purchase.pur_status === 'Completed';
         const isInProgress = purchase.pur_status === 'In-Progress';
@@ -1156,10 +1155,6 @@ function displayPurchases(purchases) {
         const rowClass = isCompleted ? 'bg-gray-200' : 'hover:bg-gray-50 transition-colors';
         
         const orderedByHtml = formatUserLabelDisplay(purchase.pur_order_by, 'Not specified');
-        const approvedSource = purchase.pur_status === 'Cancel'
-            ? (purchase.pur_cancel_by || purchase.pur_approved_by || 'Unknown Approver')
-            : (purchase.pur_approved_by || 'Not approved');
-        const approvedByHtml = formatUserLabelDisplay(approvedSource, purchase.pur_status === 'Cancel' ? 'Unknown Approver' : 'Not approved');
         
         const companyTypeHtml = 
             '<div class="flex flex-col leading-tight">' +
@@ -1184,10 +1179,18 @@ function displayPurchases(purchases) {
                 '</button>';
         }
 
-        if (!isCompleted && canCancel) {
+        if (!isCompleted && purchase.pur_status === 'Pending') {
             actionButtons += 
                 '<button onclick="cancelPurchase(' + purchase.id + ')" class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn" title="Cancel Purchase">' +
                     '<i class=\'bx bx-x-circle text-xl\'></i>' +
+                '</button>';
+        }
+
+        // Integration: Send to Vendor Quote when Approved
+        if (isApproved) {
+            actionButtons += 
+                '<button onclick="reviewToQuote(' + purchase.id + ')" class="text-purple-700 hover:text-purple-900 transition-colors p-2 rounded-lg hover:bg-purple-50" title="Send to Vendor Quotes">' +
+                    '<i class="bx bx-transfer-alt text-xl"></i>' +
                 '</button>';
         }
 
@@ -1209,7 +1212,6 @@ function displayPurchases(purchases) {
             '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">' + currencyFormatted + '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + deliveryDateFormatted + '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + orderedByHtml + '</td>' +
-            '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + approvedByHtml + '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' +
                 '<span class="' + statusBadgeClass + '">' +
                     statusIcon + ' ' + purchase.pur_status +
@@ -1252,8 +1254,7 @@ function getPurchasesFiltered(list){
                 p.pur_id || '',
                 p.pur_company_name || '',
                 items,
-                p.pur_order_by || '',
-                p.pur_approved_by || ''
+                p.pur_order_by || ''
             ].join(' ').toLowerCase();
             return hay.includes(q);
         });
@@ -2093,6 +2094,47 @@ function cancelPurchase(id) {
     openCancelPurchaseModal(id);
 }
 
+async function reviewToQuote(id) {
+    const purchase = currentPurchases.find(p => p.id == id);
+    if (!purchase) return;
+    try {
+        showLoading();
+        const res = await fetch(PSM_REVIEW_TO_QUOTE_API + '/' + id, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
+            },
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + res.statusText);
+        const result = await res.json();
+        if (result && result.success) {
+            showNotification('Moved to Vendor Quotes', 'success');
+            await loadPurchases();
+            const ask = await Swal.fire({
+                title: 'Open Vendor Quotes?',
+                text: 'The purchase is now in Vendor Review. Open Vendor Quote Management?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Open',
+                cancelButtonText: 'Stay',
+            });
+            if (ask.isConfirmed) {
+                window.location.href = '?module=psm-vendor-quote';
+            }
+        } else {
+            throw new Error((result && result.message) || 'Failed to move to vendor quotes');
+        }
+    } catch (e) {
+        showNotification('Error: ' + e.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
 async function deletePurchase(id) {
     const purchase = currentPurchases.find(p => p.id == id);
     if (!purchase) return;
@@ -2249,17 +2291,13 @@ function viewPurchase(id) {
                     '</dl>' +
                 '</div>' +
 
-                '<!-- Approval & Tracking -->' +
+                '<!-- Tracking -->' +
                 '<div>' +
-                    '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tracking & Approval</h4>' +
+                    '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tracking</h4>' +
                     '<dl class="space-y-2">' +
                         '<div class="flex justify-between">' +
                             '<dt class="text-sm text-gray-600">Ordered By</dt>' +
                             '<dd class="text-sm font-medium text-gray-900">' + (purchase.pur_order_by || 'Not specified') + '</dd>' +
-                        '</div>' +
-                        '<div class="flex justify-between">' +
-                            '<dt class="text-sm text-gray-600">Approved By</dt>' +
-                            '<dd class="text-sm font-medium text-gray-900">' + (purchase.pur_approved_by || 'Not approved') + '</dd>' +
                         '</div>' +
                         '<div class="flex justify-between">' +
                             '<dt class="text-sm text-gray-600">Created Date</dt>' +

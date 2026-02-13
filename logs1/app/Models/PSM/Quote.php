@@ -22,8 +22,6 @@ class Quote extends Model
         'quo_total_amount',
         'quo_delivery_date',
         'quo_status',
-        'quo_item_drop_to',
-        'quo_payment',
         'quo_stored_from',
         'quo_department_from',
         'quo_module_from',

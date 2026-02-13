@@ -1901,12 +1901,6 @@ class PSMService
                 ];
             }
 
-            // Update cancel fields
-            if ($cancelBy) {
-                $purchase->pur_cancel_by = $cancelBy;
-                // Also reflect in approved_by column for display purposes
-                $purchase->pur_approved_by = $cancelBy;
-            }
             // Update purchase status to Cancel
             $purchase->pur_status = 'Cancel';
             $purchase->save();
@@ -1947,9 +1941,6 @@ class PSMService
                     'data' => null,
                 ];
             }
-
-            // Set the approver name regardless of action
-            $purchase->pur_approved_by = $approvedBy;
 
             if ($action === 'approve') {
                 // Update purchase status to Approved

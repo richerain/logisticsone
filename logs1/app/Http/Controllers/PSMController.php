@@ -235,10 +235,9 @@ class PSMController extends Controller
     public function cancelPurchase(Request $request, $id)
     {
         try {
-            $validated = $request->validate([
-                'cancel_by' => 'required|string|max:255',
-            ]);
-            $result = $this->psmService->cancelPurchase($id, $validated['cancel_by']);
+            // cancel_by no longer persisted; keep validation optional for backward compatibility
+            $cancelBy = $request->get('cancel_by');
+            $result = $this->psmService->cancelPurchase($id, $cancelBy);
 
             return response()->json($result);
         } catch (\Exception $e) {
