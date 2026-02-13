@@ -554,7 +554,7 @@
                     tr.innerHTML = 
                         '<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">' + (req.req_id || '-') + '</td>' +
                         '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">' + (req.req_by || '-') + '</td>' +
-                        '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">' + (req.req_dept || '-') + '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">' + 'Logistics 1' + '</td>' +
                         '<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">' + amountFormatted + '</td>' +
                         '<td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="' + (req.req_purpose || '') + '">' + (req.req_purpose || '-') + '</td>' +
                         '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">' + reqDate + '</td>' +
@@ -622,9 +622,7 @@
             const purpose = 'Consolidated budget for: ' + reqIdsStr;
 
             // Determine the department for the budget request
-            const departments = [...new Set(pendingItems.map(item => item.req_dept).filter(Boolean))];
-            const deptFilter = document.getElementById('consolidatedDeptFilter')?.value;
-            const consolidatedDept = deptFilter || (departments.length === 1 ? departments[0] : 'Logistics 1');
+            const consolidatedDept = 'Logistics 1';
 
             fetch('/api/v1/psm/budget-management/requests', {
                 method: 'POST',
@@ -730,7 +728,7 @@
                         '</div>' +
                         '<div>' +
                             '<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</p>' +
-                            '<p class="text-sm font-bold text-gray-700">' + (req.req_dept || '-') + '</p>' +
+                            '<p class="text-sm font-bold text-gray-700">Logistics 1</p>' +
                         '</div>' +
                     '</div>' +
 
