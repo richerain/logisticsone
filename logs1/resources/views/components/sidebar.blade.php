@@ -171,6 +171,9 @@
         <a href="#" data-module="alms-maintenance-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
           <i class='bx bxs-wrench'></i> Maintenance Management
         </a>
+        <a href="#" data-module="alms-maintenance-personnel" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
+          <i class='bx bxs-user-badge'></i> Maintenance Personnel
+        </a>
       </div>
     </div>
 
