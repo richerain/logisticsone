@@ -11,7 +11,7 @@
 <!-- Stats Section (Redesigned, theme-consistent) -->
 <div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <!-- Total Orders -->
-    <div onclick="filterPOStatus('')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+    <div onclick="filterPOStatus('')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-shopping-bag text-6xl text-blue-600'></i>
         </div>
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Approved -->
-    <div onclick="filterPOStatus('Approved')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+    <div onclick="filterPOStatus('Approved')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-check-double text-6xl text-emerald-600'></i>
         </div>
@@ -49,20 +49,20 @@
     </div>
 
     <!-- Pending -->
-    <div onclick="filterPOStatus('Pending')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-        <div id="pendingPulse" class="hidden absolute -top-2 -right-2 z-10">
-            <span class="relative flex h-5 w-5">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span id="pendingPulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-amber-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
-            </span>
-        </div>
+    <div onclick="filterPOStatus('Pending')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-amber-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-time-five text-6xl text-amber-600'></i>
         </div>
         <div class="relative z-10">
             <div class="flex items-center gap-3 mb-4">
-                <div class="p-3 bg-amber-50 rounded-xl text-amber-600">
+                <div class="relative p-3 bg-amber-50 rounded-xl text-amber-600">
                     <i class='bx bx-time-five text-2xl'></i>
+                    <div id="pendingPulse" class="hidden absolute -top-2 -right-2">
+                        <span class="relative flex h-5 w-5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span id="pendingPulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-amber-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
+                        </span>
+                    </div>
                 </div>
                 <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending</h4>
             </div>
@@ -74,7 +74,7 @@
     </div>
 
     <!-- Cancelled -->
-    <div onclick="filterPOStatus('Cancel')" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+    <div onclick="filterPOStatus('Cancel')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-rose-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-x-circle text-6xl text-rose-600'></i>
         </div>
@@ -2366,13 +2366,13 @@ function debounce(func, wait) {
     };
 }
 
-function filterPOStatus(status) {
+window.filterPOStatus = function(status) {
     if (elements.statusFilter) {
         elements.statusFilter.value = status || '';
         currentPurchasesPage = 1;
         displayPurchases(currentPurchases);
     }
-}
+};
 
 function showLoading() {
     document.body.style.cursor = 'wait';
