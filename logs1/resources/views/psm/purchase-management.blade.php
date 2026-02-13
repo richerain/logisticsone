@@ -329,15 +329,15 @@
         
         <div class="flex-1 overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-700">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Req ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Items</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Requester / Dept</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Vendor</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Total Amount</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Action</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Req ID</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Items</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Requester / Dept</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Vendor</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider text-right whitespace-nowrap">Total Amount</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider text-right whitespace-nowrap">Action</th>
                     </tr>
                 </thead>
                 <tbody id="requisitionsTableBody" class="bg-white divide-y divide-gray-200">
@@ -1310,13 +1310,13 @@ function displayApprovedRequisitions(consolidatedRequests) {
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap">' +
                     '<div class="text-sm font-bold text-gray-800">' + (req.con_requester || 'Unknown') + '</div>' +
-                    '<div class="text-xs text-gray-500">' + (req.req_dept || 'N/A') + '</div>' +
+                    '<div class="text-xs text-gray-500">' + (req.con_dept || 'N/A') + '</div>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap">' +
                     '<div class="text-sm font-semibold text-gray-700">' + (req.con_chosen_vendor || 'Not chosen') + '</div>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">' +
-                    formatCurrency(req.con_total_amount || 0) +
+                    formatCurrency(req.con_total_price || 0) +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">' +
                     formatDate(req.con_date || req.created_at) +
@@ -1387,7 +1387,7 @@ window.viewConsolidatedInModal = async function(id) {
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>' +
-                                '<p class="text-sm font-bold text-gray-700">' + (req.req_dept || 'N/A') + '</p>' +
+                                '<p class="text-sm font-bold text-gray-700">' + (req.con_dept || 'N/A') + '</p>' +
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chosen Vendor</p>' +
@@ -1395,7 +1395,7 @@ window.viewConsolidatedInModal = async function(id) {
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
-                                '<p class="text-sm font-bold text-green-600">' + formatCurrency(req.con_total_amount || 0) + '</p>' +
+                                '<p class="text-sm font-bold text-green-600">' + formatCurrency(req.con_total_price || 0) + '</p>' +
                             '</div>' +
                         '</div>' +
                         '<div>' +
@@ -1458,7 +1458,7 @@ window.convertConsolidatedToPOInModal = async function(id) {
                 const req = res.data.find(r => r.id == id);
                 if (req) {
                     if (elements.purDesc) {
-                       elements.purDesc.value = 'Converted from Consolidated Request: ' + (req.con_req_id || 'CON-' + req.id) + '. Original Department: ' + req.req_dept;
+                       elements.purDesc.value = 'Converted from Consolidated Request: ' + (req.con_req_id || 'CON-' + req.id) + '. Original Department: ' + (req.con_dept || 'N/A');
                     }
 
                     const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
