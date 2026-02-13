@@ -25,6 +25,7 @@ class Consolidated extends Model
         'con_note',
         'con_status',
         'con_budget_approval',
+        'con_purchase_order',
         'parent_budget_req_id',
     ];
 

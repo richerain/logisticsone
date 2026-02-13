@@ -510,6 +510,21 @@ class PSMService
 
             $purchase = $this->psmRepository->createPurchase($data);
 
+            // If this purchase was created from a consolidated request, mark it as completed
+            if (!empty($data['consolidated_id']) || !empty($data['con_req_id'])) {
+                $query = \App\Models\PSM\Consolidated::query();
+                if (!empty($data['consolidated_id'])) {
+                    $query->orWhere('id', $data['consolidated_id']);
+                }
+                if (!empty($data['con_req_id'])) {
+                    $query->orWhere('con_req_id', $data['con_req_id']);
+                }
+                $query->update([
+                    'con_purchase_order' => 'Completed',
+                    'updated_at' => now(),
+                ]);
+            }
+
             DB::commit();
 
             return [

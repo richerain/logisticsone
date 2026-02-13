@@ -138,6 +138,9 @@ class PSMController extends Controller
             'pur_ven_type' => 'required|in:equipment,supplies,furniture,automotive',
             'pur_order_by' => 'nullable|string|max:255',
             'pur_desc' => 'nullable|string',
+            // Optional link to consolidated request for post-processing
+            'consolidated_id' => 'nullable|integer',
+            'con_req_id' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -918,6 +921,10 @@ class PSMController extends Controller
             // NEW: Support fetching only approved consolidated budget requests
             if ($request->has('approved_consolidated')) {
                 $approved = \App\Models\PSM\Consolidated::where('con_budget_approval', 'Approved')
+                    ->where(function ($q) {
+                        $q->whereNull('con_purchase_order')
+                          ->orWhere('con_purchase_order', '');
+                    })
                     ->orderBy('created_at', 'desc')
                     ->get();
                 

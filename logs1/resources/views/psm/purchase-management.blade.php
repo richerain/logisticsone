@@ -1642,6 +1642,8 @@ window.convertConsolidatedToPOInModal = async function(id) {
             if (res.success && res.data) {
                 const req = res.data.find(r => r.id == id);
                 if (req) {
+                    // Remember consolidated context for save
+                    window.currentConsolidatedForPO = { id: id, con_req_id: (req.con_req_id || null) };
                     if (elements.purDesc) {
                         elements.purDesc.value = 'Converted from Consolidated Request: ' + (req.con_req_id || 'CON-' + req.id) + '. Original Department: ' + (req.con_dept || 'N/A');
                     }
@@ -1872,6 +1874,11 @@ async function handlePurchaseSubmit(e) {
             expiration: item.expiration
         }))
     };
+    // Attach consolidated context if conversion flow initiated
+    if (window.currentConsolidatedForPO) {
+        if (window.currentConsolidatedForPO.id) data.consolidated_id = window.currentConsolidatedForPO.id;
+        if (window.currentConsolidatedForPO.con_req_id) data.con_req_id = window.currentConsolidatedForPO.con_req_id;
+    }
     
     const purchaseId = elements.purchaseId ? elements.purchaseId.value : '';
     const url = purchaseId ? PSM_PURCHASES_API + '/' + purchaseId : PSM_PURCHASES_API;
@@ -1902,6 +1909,13 @@ async function handlePurchaseSubmit(e) {
         if (result.success) {
             showNotification(result.message, 'success');
             closePurchaseModal();
+            // Clear consolidated context and refresh requisitions badge/table if open
+            window.currentConsolidatedForPO = null;
+            if (typeof openRequisitionsModal === 'function') {
+                // Optionally refresh count badge
+                // Only fetch if the badge or modal is visible to avoid noise
+                // Here we simply rely on next open to re-fetch filtered list
+            }
             loadPurchases();
         } else {
             throw new Error(result.message || 'Failed to save purchase');
