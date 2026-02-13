@@ -52,17 +52,17 @@
     <div onclick="filterPOStatus('Pending')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-amber-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <i class='bx bx-time-five text-6xl text-amber-600'></i>
+            <div id="pendingPulse" class="hidden absolute -top-2 -right-2">
+                <span class="relative flex h-5 w-5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span id="pendingPulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-amber-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
+                </span>
+            </div>
         </div>
         <div class="relative z-10">
             <div class="flex items-center gap-3 mb-4">
                 <div class="relative p-3 bg-amber-50 rounded-xl text-amber-600">
                     <i class='bx bx-time-five text-2xl'></i>
-                    <div id="pendingPulse" class="hidden absolute -top-2 -right-2">
-                        <span class="relative flex h-5 w-5">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                            <span id="pendingPulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-amber-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
-                        </span>
-                    </div>
                 </div>
                 <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending</h4>
             </div>
