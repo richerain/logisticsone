@@ -492,6 +492,21 @@ class PSMController extends Controller
                         $table->string('parent_budget_req_id')->nullable()->after('con_budget_approval');
                     });
                 }
+                if (!\Illuminate\Support\Facades\Schema::connection('psm')->hasColumn('psm_consolidated', 'con_chosen_vendor')) {
+                    \Illuminate\Support\Facades\Schema::connection('psm')->table('psm_consolidated', function ($table) {
+                        $table->string('con_chosen_vendor')->nullable()->after('con_items');
+                    });
+                }
+                if (!\Illuminate\Support\Facades\Schema::connection('psm')->hasColumn('psm_consolidated', 'con_dept')) {
+                    \Illuminate\Support\Facades\Schema::connection('psm')->table('psm_consolidated', function ($table) {
+                        $table->string('con_dept')->nullable()->after('con_chosen_vendor');
+                    });
+                }
+                if (!\Illuminate\Support\Facades\Schema::connection('psm')->hasColumn('psm_requisition', 'req_chosen_vendor')) {
+                    \Illuminate\Support\Facades\Schema::connection('psm')->table('psm_requisition', function ($table) {
+                        $table->string('req_chosen_vendor')->nullable()->after('req_items');
+                    });
+                }
             } catch (\Exception $dbEx) {
                 // Log but continue
                 \Illuminate\Support\Facades\Log::error("PSM DB Fix Error: " . $dbEx->getMessage());
@@ -503,7 +518,7 @@ class PSMController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Failed to create budget request: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -1357,9 +1357,6 @@ function displayApprovedRequisitions(consolidatedRequests) {
 window.viewConsolidatedInModal = async function(id) {
     try {
         showLoading();
-        // Since we don't have a direct endpoint for single consolidated yet, 
-        // we can fetch from the list or implement a new endpoint.
-        // For now, let's try to find it in our current data or fetch it.
         const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
             method: 'GET',
             headers: {
@@ -1394,35 +1391,35 @@ window.viewConsolidatedInModal = async function(id) {
                         <div class="grid grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Consolidated ID</p>
-                                <p class="text-sm font-bold text-blue-600">${req.con_req_id || `CON-${req.id}`}</p>
+                                <p class="text-sm font-bold text-blue-600">${req.con_req_id || \`CON-\${req.id}\`}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Date</p>
-                                <p class="text-sm font-bold text-gray-700">${formatDate(req.con_date)}</p>
+                                <p class="text-sm font-bold text-gray-700">\${formatDate(req.con_date)}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requester</p>
-                                <p class="text-sm font-bold text-gray-700">${req.con_requester || 'Unknown'}</p>
+                                <p class="text-sm font-bold text-gray-700">\${req.con_requester || 'Unknown'}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>
-                                <p class="text-sm font-bold text-gray-700">${req.req_dept || 'N/A'}</p>
+                                <p class="text-sm font-bold text-gray-700">\${req.req_dept || 'N/A'}</p>
                             </div>
                         </div>
                         <div>
                             <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Items</p>
                             <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                                ${itemsHtml}
+                                \${itemsHtml}
                             </div>
                         </div>
-                        ${req.con_note ? `
+                        \${req.con_note ? \`
                         <div>
                             <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Notes</p>
-                            <p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">${req.con_note}</p>
+                            <p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">\${req.con_note}</p>
                         </div>
-                        ` : ''}
+                        \` : ''}
                     </div>
-                `,
+                \`,
                 width: '600px',
                 showCloseButton: true,
                 showConfirmButton: false,
