@@ -188,73 +188,89 @@
     </div>
 </div>
 
-<!-- Add/Edit Purchase Modal -->
+<!-- Add/Edit Purchase Modal (supports dual-panel mode) -->
 <div id="purchaseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 id="modalTitle" class="text-xl font-semibold">New Purchase Order</h3>
-            <button id="closeModal" class="text-gray-500 hover:text-gray-700">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
-        </div>
-        
-        <form id="purchaseForm">
-            <input type="hidden" id="purchaseId">
-            
-            <!-- Company Selection -->
-            <div class="mb-4">
-                <label for="pur_company_name" class="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
-                <select id="pur_company_name" name="pur_company_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Select Company</option>
-                </select>
-                <input type="hidden" id="pur_ven_type" name="pur_ven_type">
+    <div class="w-full max-w-6xl">
+        <div class="flex flex-col lg:flex-row gap-4">
+            <!-- Consolidated Details Side Panel (hidden by default) -->
+            <div id="consolidatedSidePanel" class="hidden bg-white rounded-lg p-6 w-full lg:w-1/2 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class='bx bx-file text-blue-600 text-2xl'></i>
+                    <h3 class="text-xl font-semibold">Consolidated Details</h3>
+                </div>
+                <div id="consolidatedDetailsContent" class="space-y-4">
+                    <!-- Filled dynamically -->
+                </div>
             </div>
-            
-            <input type="hidden" id="pur_order_by" name="pur_order_by">
-            
-            <!-- Items Selection Section -->
-            <div id="itemsSection" class="mb-4 hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Select Items *</label>
-                
-                <!-- Add Item Button -->
-                <button type="button" id="addItemBtn" class="mb-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
-                    <i class='bx bx-plus'></i>
-                    Add Item
-                </button>
-                
-                <!-- Selected Items Container -->
-                <div id="selectedItemsContainer" class="space-y-3 border border-gray-200 rounded-lg p-4 min-h-20">
-                    <p class="text-sm text-gray-500 text-center">No items selected yet</p>
+
+            <!-- Purchase Form Panel -->
+            <div id="purchaseFormPanel" class="bg-white rounded-lg p-6 w-full lg:w-1/2 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modalTitle" class="text-xl font-semibold">New Purchase Order</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                        <i class='bx bx-x text-2xl'></i>
+                    </button>
                 </div>
                 
-                <!-- Auto-calculated fields -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Units</label>
-                        <input type="text" id="pur_unit" name="pur_unit" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" value="0">
+                <form id="purchaseForm">
+                    <input type="hidden" id="purchaseId">
+                    
+                    <!-- Company Selection -->
+                    <div class="mb-4">
+                        <label for="pur_company_name" class="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+                        <select id="pur_company_name" name="pur_company_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Company</option>
+                        </select>
+                        <input type="hidden" id="pur_ven_type" name="pur_ven_type">
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount (₱)</label>
-                        <div class="flex items-center border border-gray-300 rounded-lg bg-gray-50">
-                            <span class="px-3 text-gray-700">₱</span>
-                            <input type="text" id="pur_total_amount" name="pur_total_amount" readonly class="w-full px-3 py-2 border-0 bg-transparent" value="0.00">
+                    <input type="hidden" id="pur_order_by" name="pur_order_by">
+                    
+                    <!-- Items Selection Section -->
+                    <div id="itemsSection" class="mb-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Items *</label>
+                        
+                        <!-- Add Item Button -->
+                        <button type="button" id="addItemBtn" class="mb-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                            <i class='bx bx-plus'></i>
+                            Add Item
+                        </button>
+                        
+                        <!-- Selected Items Container -->
+                        <div id="selectedItemsContainer" class="space-y-3 border border-gray-200 rounded-lg p-4 min-h-20">
+                            <p class="text-sm text-gray-500 text-center">No items selected yet</p>
+                        </div>
+                        
+                        <!-- Auto-calculated fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total Units</label>
+                                <input type="text" id="pur_unit" name="pur_unit" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" value="0">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount (₱)</label>
+                                <div class="flex items-center border border-gray-300 rounded-lg bg-gray-50">
+                                    <span class="px-3 text-gray-700">₱</span>
+                                    <input type="text" id="pur_total_amount" name="pur_total_amount" readonly class="w-full px-3 py-2 border-0 bg-transparent" value="0.00">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label for="pur_desc" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="pur_desc" name="pur_desc" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Optional purchase order description..."></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end gap-3">
+                        <button type="button" id="cancelModal" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+                        <button type="submit" id="savePurchaseBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Save Purchase Order</button>
+                    </div>
+                </form>
             </div>
-            
-            <!-- Description -->
-            <div class="mb-4">
-                <label for="pur_desc" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea id="pur_desc" name="pur_desc" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Optional purchase order description..."></textarea>
-            </div>
-            
-            <div class="flex justify-end gap-3">
-                <button type="button" id="cancelModal" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-                <button type="submit" id="savePurchaseBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Save Purchase Order</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -1426,6 +1442,69 @@ window.viewConsolidatedInModal = async function(id) {
     }
 }
 
+function showConsolidatedPanelData(req) {
+    var panel = document.getElementById('consolidatedSidePanel');
+    var content = document.getElementById('consolidatedDetailsContent');
+    if (!panel || !content) return;
+    
+    const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
+    const itemsHtml = items.map(item => 
+        '<div class="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-100 text-left">' +
+            '<i class="bx bx-check text-green-500"></i>' +
+            '<span class="text-sm">' + (typeof item === 'object' ? (item.name || '') : item) + '</span>' +
+        '</div>'
+    ).join('');
+    
+    content.innerHTML = 
+        '<div class="grid grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">' +
+            '<div>' +
+                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Consolidated ID</p>' +
+                '<p class="text-sm font-bold text-blue-600">' + (req.con_req_id || ('CON-' + req.id)) + '</p>' +
+            '</div>' +
+            '<div>' +
+                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Date</p>' +
+                '<p class="text-sm font-bold text-gray-700">' + formatDate(req.con_date || req.created_at) + '</p>' +
+            '</div>' +
+            '<div>' +
+                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requester</p>' +
+                '<p class="text-sm font-bold text-gray-700">' + (req.con_requester || 'Unknown') + '</p>' +
+            '</div>' +
+            '<div>' +
+                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>' +
+                '<p class="text-sm font-bold text-gray-700">' + (req.con_dept || 'N/A') + '</p>' +
+            '</div>' +
+            '<div>' +
+                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chosen Vendor</p>' +
+                '<p class="text-sm font-bold text-blue-600">' + (req.con_chosen_vendor || 'Not chosen') + '</p>' +
+            '</div>' +
+            '<div>' +
+                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
+                '<p class="text-sm font-bold text-green-600">' + formatCurrency(req.con_total_price || 0) + '</p>' +
+            '</div>' +
+        '</div>' +
+        '<div>' +
+            '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Items</p>' +
+            '<div class="space-y-2 max-h-48 overflow-y-auto pr-2">' +
+                itemsHtml +
+            '</div>' +
+        '</div>' +
+        (req.con_note ? (
+            '<div>' +
+                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Notes</p>' +
+                '<p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">' + req.con_note + '</p>' +
+            '</div>'
+        ) : '');
+    
+    panel.classList.remove('hidden');
+}
+
+function hideConsolidatedPanel() {
+    var panel = document.getElementById('consolidatedSidePanel');
+    var content = document.getElementById('consolidatedDetailsContent');
+    if (panel) panel.classList.add('hidden');
+    if (content) content.innerHTML = '';
+}
+
 window.convertConsolidatedToPOInModal = async function(id) {
     try {
         const result = await Swal.fire({
@@ -1441,7 +1520,6 @@ window.convertConsolidatedToPOInModal = async function(id) {
         if (result.isConfirmed) {
             closeRequisitionsModal();
             openAddModal();
-            
             const response = await fetch(PSM_REQUISITIONS_API + '?approved_consolidated=1', {
                 method: 'GET',
                 headers: {
@@ -1458,38 +1536,12 @@ window.convertConsolidatedToPOInModal = async function(id) {
                 const req = res.data.find(r => r.id == id);
                 if (req) {
                     if (elements.purDesc) {
-                       elements.purDesc.value = 'Converted from Consolidated Request: ' + (req.con_req_id || 'CON-' + req.id) + '. Original Department: ' + (req.con_dept || 'N/A');
+                        elements.purDesc.value = 'Converted from Consolidated Request: ' + (req.con_req_id || 'CON-' + req.id) + '. Original Department: ' + (req.con_dept || 'N/A');
                     }
-
-                    const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
-                    selectedItems = items.map(item => ({
-                        id: Date.now() + Math.random(),
-                        itemId: Date.now() + Math.random(),
-                        name: typeof item === 'object' ? item.name : item,
-                        price: typeof item === 'object' ? (item.price || 0) : 0,
-                        picture: null,
-                        warranty: null,
-                        expiration: null
-                    }));
-                    updateSelectedItemsDisplay();
-                    
-                    if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
-                    
-                    // Automatically select company based on con_chosen_vendor
-                    if (req.con_chosen_vendor && elements.companySelect) {
-                        const vendorName = req.con_chosen_vendor;
-                        const option = Array.from(elements.companySelect.options).find(opt => opt.value === vendorName);
-                        
-                        if (option) {
-                            elements.companySelect.value = vendorName;
-                            setSelectedVendor(option);
-                            showNotification('Consolidated items loaded and vendor automatically selected.', 'success');
-                        } else {
-                            showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
-                        }
-                    } else {
-                        showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
-                    }
+                    // Do not auto-populate items or vendor; show side panel for reference
+                    hideConsolidatedPanel();
+                    showConsolidatedPanelData(req);
+                    showNotification('Review consolidated details on the left and create the PO manually.', 'info');
                 }
             }
         }
@@ -1675,6 +1727,7 @@ function openEditModal(purchase) {
 
 function closePurchaseModal() {
     if (elements.purchaseModal) elements.purchaseModal.classList.add('hidden');
+    hideConsolidatedPanel();
 }
 
 // Form Handling
