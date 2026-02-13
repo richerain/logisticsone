@@ -181,6 +181,16 @@ class PSMController extends Controller
     }
 
     /**
+     * Sync all pending purchases to requests
+     */
+    public function syncPurchaseRequests()
+    {
+        $result = $this->psmService->syncPendingPurchaseRequests();
+        $status = $result['success'] ? 200 : 500;
+        return response()->json($result, $status);
+    }
+
+    /**
      * Update purchase
      */
     public function updatePurchase(Request $request, $id)

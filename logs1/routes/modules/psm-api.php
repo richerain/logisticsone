@@ -40,6 +40,7 @@ Route::prefix('purchase-management')->group(function () {
 // PSM Purchase Requests (mirror of Pending purchases)
 Route::prefix('purchase-requests')->group(function () {
     Route::get('/', [PSMController::class, 'getPurchaseRequests']);
+    Route::get('/sync', [PSMController::class, 'syncPurchaseRequests']);
 });
 
 // PSM Budget Management Routes

@@ -17,32 +17,22 @@
 <div class="bg-white rounded-lg shadow-lg p-6">
     <!-- quote purchase order section -->
     <div class="flex items-center justify-between mb-6">
-        <div class="flex items-center gap-3">
-            <div class="p-2 rounded-xl bg-blue-50 text-blue-700">
-                <i class='bx bx-transfer-alt text-2xl'></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-bold text-gray-800 leading-tight">Quote Purchase Order</h3>
-                <p class="text-xs text-gray-500">Manage vendor quotes sourced from purchase orders</p>
-            </div>
+        <div class="flex items-center gap-2">
+            <i class='bx bx-transfer-alt text-2xl text-blue-700'></i>
+            <h3 class="text-lg font-bold text-gray-800 leading-tight">Quote Purchase Order</h3>
         </div>
-    </div>
-    <!-- notification purchase order card start -->
-    <div class="flex justify-end mb-6">
         <div class="indicator">
-            <button class="bg-blue-50 px-4 py-3 rounded-xl text-left hover:bg-blue-100 transition-all shadow-sm border border-blue-100 group" type="button" onclick="my_modal_4.showModal()">
-                <div class="font-bold text-blue-800 flex items-center mb-0">
-                    New Purchases
-                </div>
+            <button class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow transition-colors flex items-center gap-2"
+                    type="button" onclick="my_modal_4.showModal()">
+                <i class='bx bx-cart-download text-lg'></i>
+                <span class="font-semibold">New Purchases</span>
             </button>
-            <!-- will hide if the notif modal had no new notif start -->
-            <span class="indicator-item badge badge-sm badge-error border-0 rounded-full w-5 h-5 flex items-center justify-center top-2 right-2">
+            <span class="indicator-item badge badge-sm badge-error border-0 rounded-full w-5 h-5 flex items-center justify-center top-0 right-0">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
                 <span class="relative text-white text-[10px] font-bold">0</span>
-            </span><!-- will hide if the notif modal had no new notif start -->
+            </span>
         </div>
     </div>
-    <!-- notification purchase order card end -->
     <!-- notification purchase order card modal start -->
     <dialog id="my_modal_4" class="modal backdrop-blur-sm">
         <div class="modal-box w-11/12 max-w-5xl bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
@@ -289,6 +279,21 @@ function setNotificationIndicator(count) {
 
 async function loadNotifications() {
     try {
+        // Ensure all current Pending purchases are mirrored into requests
+        try {
+            await fetch(`${PSM_PURCHASE_REQUESTS_API}/sync?t=${new Date().getTime()}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include'
+            });
+        } catch (e) {
+            // Non-blocking; proceed to fetch list even if sync fails
+        }
         const response = await fetch(`${PSM_PURCHASE_REQUESTS_API}?status=Pending&t=${new Date().getTime()}`, {
             method: 'GET',
             headers: {

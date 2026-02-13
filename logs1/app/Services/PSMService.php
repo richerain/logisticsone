@@ -47,6 +47,35 @@ class PSMService
         }
     }
 
+    /**
+     * Sync all pending purchases into purchase requests mirror
+     */
+    public function syncPendingPurchaseRequests()
+    {
+        DB::beginTransaction();
+        try {
+            $pending = $this->psmRepository->getPurchases(['status' => 'Pending']);
+            $count = 0;
+            foreach ($pending as $purchase) {
+                $this->psmRepository->upsertPurchaseRequestFromPurchase($purchase);
+                $count++;
+            }
+            DB::commit();
+            return [
+                'success' => true,
+                'message' => 'Synced pending purchases to purchase requests',
+                'data' => ['count' => $count],
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to sync purchase requests: ' . $e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
+
     public function markProductsAsReceivedByProdId($prodId)
     {
         try {
