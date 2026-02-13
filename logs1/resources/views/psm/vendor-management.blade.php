@@ -182,7 +182,7 @@
 // API Configuration
 var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
 var APP_URL = typeof APP_URL !== 'undefined' ? APP_URL : '<?php echo url('/'); ?>';
-var PSM_VENDORS_API = `${API_BASE_URL}/psm/vendor-management`;
+var PSM_VENDORS_API = API_BASE_URL + '/psm/vendor-management';
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 // JWT Token Handling with LocalStorage Sync
@@ -288,15 +288,14 @@ async function loadVendors() {
     // Show loading state in grid
     const grid = document.getElementById('vendorsGrid');
     if (grid) {
-        grid.innerHTML = `
-            <div class="col-span-full flex flex-col items-center justify-center py-20 min-h-[300px]">
-                <div class="relative mb-4">
-                    <div class="absolute inset-0 bg-gray-600 rounded-full animate-ping opacity-75"></div>
-                    <i class='bx bx-loader-alt bx-spin text-5xl text-gray-600 relative z-10'></i>
-                </div>
-                <p class="text-lg font-semibold text-gray-600 animate-pulse">Loading Vendors...</p>
-            </div>
-        `;
+        grid.innerHTML = 
+            '<div class="col-span-full flex flex-col items-center justify-center py-20 min-h-[300px]">' +
+                '<div class="relative mb-4">' +
+                    '<div class="absolute inset-0 bg-gray-600 rounded-full animate-ping opacity-75"></div>' +
+                    '<i class=\'bx bx-loader-alt bx-spin text-5xl text-gray-600 relative z-10\'></i>' +
+                '</div>' +
+                '<p class="text-lg font-semibold text-gray-600 animate-pulse">Loading Vendors...</p>' +
+            '</div>';
     }
     showLoading();
     
@@ -306,16 +305,16 @@ async function loadVendors() {
     if (elements.typeFilter.value) params.append('type', elements.typeFilter.value);
     
     try {
-        const vendorsUrl = `${PSM_VENDORS_API}`;
-        console.log('📡 Fetching vendors from:', `${vendorsUrl}?${params}`);
+        const vendorsUrl = PSM_VENDORS_API;
+        console.log('📡 Fetching vendors from:', vendorsUrl + '?' + params);
         
-        const response = await fetch(`${vendorsUrl}?${params}`, {
+        const response = await fetch(vendorsUrl + '?' + params, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
@@ -351,13 +350,12 @@ function displayVendors(vendors) {
     const filtered = getVendorsFiltered(vendors);
     const total = filtered.length;
     if (!filtered || total === 0) {
-        elements.vendorsGrid.innerHTML = `
-            <div class="col-span-full text-center py-12">
-                <i class='bx bx-package text-6xl text-gray-200 mb-4'></i>
-                <p class="text-xl text-gray-500 font-medium">No vendors found</p>
-                <p class="text-sm text-gray-400 mt-2">Try adjusting your search or filters</p>
-            </div>
-        `;
+        elements.vendorsGrid.innerHTML = 
+            '<div class="col-span-full text-center py-12">' +
+                '<i class=\'bx bx-package text-6xl text-gray-200 mb-4\'></i>' +
+                '<p class="text-xl text-gray-500 font-medium">No vendors found</p>' +
+                '<p class="text-sm text-gray-400 mt-2">Try adjusting your search or filters</p>' +
+            '</div>';
         if (elements.noVendorsMessage) elements.noVendorsMessage.classList.remove('hidden');
         renderVendorsPager(0, 1);
         return;
@@ -382,63 +380,54 @@ function displayVendors(vendors) {
 
     const vendorsHtml = pageItems.map((vendor, index) => {
         const bgColor = bgColors[index % bgColors.length];
-        return `
-        <div class="${bgColor} border border-gray-200 rounded-xl p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-3">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold capitalize shadow-sm ${
-                    vendor.ven_status === 'active' 
-                        ? 'bg-emerald-200 text-emerald-900 ring-1 ring-emerald-700/20' 
-                        : 'bg-rose-200 text-rose-900 ring-1 ring-rose-700/20'
-                }">
-                    <i class='bx bxs-circle text-[0.5rem] mr-1.5'></i>
-                    ${vendor.ven_status}
-                </span>
-            </div>
-            
-            <div class="flex flex-col items-center text-center mb-4 mt-2">
-                ${vendor.ven_picture 
-                    ? `<img src="${APP_URL}/${vendor.ven_picture}" alt="${vendor.ven_company_name}" class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-white group-hover:border-blue-200 transition-colors shadow-sm">`
-                    : `<div class="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm">
-                        <i class='bx bx-building-house text-3xl text-gray-400 group-hover:text-blue-500 transition-colors'></i>
-                       </div>`
-                }
-                <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1" title="${vendor.ven_company_name}">${vendor.ven_company_name}</h3>
-                <span class="text-xs font-medium text-gray-600 bg-white/60 px-2.5 py-1 rounded-md capitalize mb-2 border border-gray-200/50">
-                    ${vendor.ven_type}
-                </span>
-                <div class="flex items-center gap-1 mb-2">
-                    ${Array.from({length: 5}, (_, i) => `
-                        <i class='bx ${i < vendor.ven_rating ? 'bxs-star text-amber-400' : 'bx-star text-gray-300'} text-sm'></i>
-                    `).join('')}
-                    <span class="text-xs text-gray-500 ml-1">(${vendor.ven_rating})</span>
-                </div>
-            </div>
-
-            <div class="space-y-2 mb-4 text-sm text-left px-1">
-                <div class="flex items-center text-gray-700 group-hover:text-gray-900 transition-colors">
-                    <div class="w-8 flex justify-center"><i class='bx bx-user w-5 text-gray-500 group-hover:text-blue-600 transition-colors'></i></div>
-                    <span class="truncate font-medium" title="${vendor.ven_contact_person}">${vendor.ven_contact_person}</span>
-                </div>
-                <div class="flex items-center text-gray-700 group-hover:text-gray-900 transition-colors">
-                    <div class="w-8 flex justify-center"><i class='bx bx-envelope w-5 text-gray-500 group-hover:text-blue-600 transition-colors'></i></div>
-                    <span class="truncate font-medium" title="${vendor.ven_email}">${vendor.ven_email}</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 mt-auto pt-2">
-                <button onclick="viewVendor(${vendor.id})" 
-                        title="View details for ${vendor.ven_company_name}"
-                        class="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all duration-200 group/btn">
-                    <i class='bx bx-show-alt mr-2 text-lg group-hover/btn:scale-110 transition-transform'></i> Details
-                </button>
-                <button onclick="viewVendorProducts('${vendor.ven_id}')" 
-                        title="Manage products for ${vendor.ven_company_name}"
-                        class="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow-md transition-all duration-200 group/btn">
-                    <i class='bx bx-package mr-2 text-lg group-hover/btn:scale-110 transition-transform'></i> Products
-                </button>
-            </div>
-        </div>
-    `;
+        return '<div class="' + bgColor + ' border border-gray-200 rounded-xl p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">' +
+            '<div class="absolute top-0 right-0 p-3">' +
+                '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold capitalize shadow-sm ' + (vendor.ven_status === 'active' ? 'bg-emerald-200 text-emerald-900 ring-1 ring-emerald-700/20' : 'bg-rose-200 text-rose-900 ring-1 ring-rose-700/20') + '">' +
+                    '<i class=\'bx bxs-circle text-[0.5rem] mr-1.5\'></i>' +
+                    vendor.ven_status +
+                '</span>' +
+            '</div>' +
+            '<div class="flex flex-col items-center text-center mb-4 mt-2">' +
+                (vendor.ven_picture 
+                    ? '<img src="' + APP_URL + '/' + vendor.ven_picture + '" alt="' + vendor.ven_company_name + '" class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-white group-hover:border-blue-200 transition-colors shadow-sm">'
+                    : '<div class="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center mb-3 group-hover:bg-white transition-colors shadow-sm">' +
+                        '<i class=\'bx bx-building-house text-3xl text-gray-400 group-hover:text-blue-500 transition-colors\'></i>' +
+                       '</div>'
+                ) +
+                '<h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1" title="' + vendor.ven_company_name + '">' + vendor.ven_company_name + '</h3>' +
+                '<span class="text-xs font-medium text-gray-600 bg-white/60 px-2.5 py-1 rounded-md capitalize mb-2 border border-gray-200/50">' +
+                    vendor.ven_type +
+                '</span>' +
+                '<div class="flex items-center gap-1 mb-2">' +
+                    Array.from({length: 5}, (_, i) => 
+                        '<i class=\'bx ' + (i < vendor.ven_rating ? 'bxs-star text-amber-400' : 'bx-star text-gray-300') + ' text-sm\'></i>'
+                    ).join('') +
+                    '<span class="text-xs text-gray-500 ml-1">(' + vendor.ven_rating + ')</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="space-y-2 mb-4 text-sm text-left px-1">' +
+                '<div class="flex items-center text-gray-700 group-hover:text-gray-900 transition-colors">' +
+                    '<div class="w-8 flex justify-center"><i class=\'bx bx-user w-5 text-gray-500 group-hover:text-blue-600 transition-colors\'></i></div>' +
+                    '<span class="truncate font-medium" title="' + vendor.ven_contact_person + '">' + vendor.ven_contact_person + '</span>' +
+                '</div>' +
+                '<div class="flex items-center text-gray-700 group-hover:text-gray-900 transition-colors">' +
+                    '<div class="w-8 flex justify-center"><i class=\'bx bx-envelope w-5 text-gray-500 group-hover:text-blue-600 transition-colors\'></i></div>' +
+                    '<span class="truncate font-medium" title="' + vendor.ven_email + '">' + vendor.ven_email + '</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-3 mt-auto pt-2">' +
+                '<button onclick="viewVendor(' + vendor.id + ')" ' +
+                        'title="View details for ' + vendor.ven_company_name + '" ' +
+                        'class="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all duration-200 group/btn">' +
+                    '<i class=\'bx bx-show-alt mr-2 text-lg group-hover/btn:scale-110 transition-transform\'></i> Details' +
+                '</button>' +
+                '<button onclick="viewVendorProducts(\'' + vendor.ven_id + '\')" ' +
+                        'title="Manage products for ' + vendor.ven_company_name + '" ' +
+                        'class="flex items-center justify-center px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 shadow-sm hover:shadow-md transition-all duration-200 group/btn">' +
+                    '<i class=\'bx bx-package mr-2 text-lg group-hover/btn:scale-110 transition-transform\'></i> Products' +
+                '</button>' +
+            '</div>' +
+        '</div>';
     }).join('');
     
     elements.vendorsGrid.innerHTML = vendorsHtml;
@@ -450,8 +439,8 @@ function renderVendorsPager(total, totalPages){
     const display = document.getElementById('vendorsPageDisplay');
     const start = total === 0 ? 0 : ((currentVendorsPage - 1) * vendorsPageSize) + 1;
     const end = Math.min(currentVendorsPage * vendorsPageSize, total);
-    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
-    if (display) display.textContent = `${currentVendorsPage} / ${totalPages}`;
+    if (info) info.textContent = 'Showing ' + start + '-' + end + ' of ' + total;
+    if (display) display.textContent = currentVendorsPage + ' / ' + totalPages;
     const prev = document.getElementById('vendorsPrevBtn');
     const next = document.getElementById('vendorsNextBtn');
     if (prev) prev.disabled = currentVendorsPage <= 1;
@@ -493,82 +482,79 @@ function viewVendor(id) {
 
     // Update Modal Title
     const titleEl = document.getElementById('viewVendorTitle');
-    if (titleEl) titleEl.textContent = `Vendor Details: ${vendor.ven_company_name}`;
+    if (titleEl) titleEl.textContent = 'Vendor Details: ' + vendor.ven_company_name;
 
-    const content = `
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            <div class="col-span-full flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-                 ${vendor.ven_picture 
-                    ? `<img src="${APP_URL}/${vendor.ven_picture}" class="w-20 h-20 rounded-full border-4 border-gray-100 object-cover shadow-sm">`
-                    : `<div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center border-4 border-gray-100 shadow-sm"><i class='bx bxs-business text-4xl text-blue-500'></i></div>`
-                }
-                <div>
-                    <h4 class="text-2xl font-bold text-gray-900 tracking-tight">${vendor.ven_company_name}</h4>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold capitalize border border-blue-100">${vendor.ven_type}</span>
-                        <span class="text-sm text-gray-400">•</span>
-                        <span class="text-sm font-medium text-gray-600">${vendor.ven_email}</span>
-                    </div>
-                </div>
-            </div>
+    const content = 
+        '<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">' +
+            '<div class="col-span-full flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">' +
+                 (vendor.ven_picture 
+                    ? '<img src="' + APP_URL + '/' + vendor.ven_picture + '" class="w-20 h-20 rounded-full border-4 border-gray-100 object-cover shadow-sm">'
+                    : '<div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center border-4 border-gray-100 shadow-sm"><i class=\'bx bxs-business text-4xl text-blue-500\'></i></div>'
+                ) +
+                '<div>' +
+                    '<h4 class="text-2xl font-bold text-gray-900 tracking-tight">' + vendor.ven_company_name + '</h4>' +
+                    '<div class="flex items-center gap-2 mt-1">' +
+                        '<span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold capitalize border border-blue-100">' + vendor.ven_type + '</span>' +
+                        '<span class="text-sm text-gray-400">•</span>' +
+                        '<span class="text-sm font-medium text-gray-600">' + vendor.ven_email + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
 
-            <div class="space-y-5">
-                <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Contact Person</label>
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
-                        <div class="p-2 bg-white rounded-full text-blue-500 shadow-sm"><i class='bx bx-user'></i></div>
-                        <span class="font-semibold text-gray-700">${vendor.ven_contact_person}</span>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Phone Number</label>
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
-                        <div class="p-2 bg-white rounded-full text-blue-500 shadow-sm"><i class='bx bx-phone'></i></div>
-                        <span class="font-semibold text-gray-700">${vendor.ven_phone}</span>
-                    </div>
-                </div>
-                 <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Rating</label>
-                    <div class="flex items-center gap-1 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                        <div class="flex text-amber-400">
-                            ${Array.from({length: 5}, (_, i) => `
-                                <i class='bx ${i < vendor.ven_rating ? 'bxs-star' : 'bx-star text-gray-300'} text-lg'></i>
-                            `).join('')}
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2 font-medium">(${vendor.ven_rating} / 5)</span>
-                    </div>
-                </div>
-            </div>
+            '<div class="space-y-5">' +
+                '<div>' +
+                    '<label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Contact Person</label>' +
+                    '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">' +
+                        '<div class="p-2 bg-white rounded-full text-blue-500 shadow-sm"><i class=\'bx bx-user\'></i></div>' +
+                        '<span class="font-semibold text-gray-700">' + vendor.ven_contact_person + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div>' +
+                    '<label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Phone Number</label>' +
+                    '<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">' +
+                        '<div class="p-2 bg-white rounded-full text-blue-500 shadow-sm"><i class=\'bx bx-phone\'></i></div>' +
+                        '<span class="font-semibold text-gray-700">' + vendor.ven_phone + '</span>' +
+                    '</div>' +
+                '</div>' +
+                 '<div>' +
+                    '<label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Rating</label>' +
+                    '<div class="flex items-center gap-1 p-3 bg-gray-50 rounded-lg border border-gray-100">' +
+                        '<div class="flex text-amber-400">' +
+                            Array.from({length: 5}, (_, i) => 
+                                '<i class=\'bx ' + (i < vendor.ven_rating ? 'bxs-star' : 'bx-star text-gray-300') + ' text-lg\'></i>'
+                            ).join('') +
+                        '</div>' +
+                        '<span class="text-sm text-gray-500 ml-2 font-medium">(' + vendor.ven_rating + ' / 5)</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
             
-            <div class="space-y-5">
-                <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Address</label>
-                    <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 h-full hover:border-blue-200 transition-colors">
-                        <div class="p-2 bg-white rounded-full text-blue-500 shadow-sm shrink-0"><i class='bx bx-map'></i></div>
-                        <span class="font-medium text-gray-700 leading-relaxed">${vendor.ven_address}</span>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Status</label>
-                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold capitalize ${
-                            vendor.ven_status === 'active' ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20' : 'bg-red-100 text-red-700 ring-1 ring-red-600/20'
-                        }">
-                            <i class='bx bxs-circle text-xs mr-2'></i>
-                            ${vendor.ven_status}
-                        </span>
-                    </div>
-                </div>
-            </div>
+            '<div class="space-y-5">' +
+                '<div>' +
+                    '<label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Address</label>' +
+                    '<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100 h-full hover:border-blue-200 transition-colors">' +
+                        '<div class="p-2 bg-white rounded-full text-blue-500 shadow-sm shrink-0"><i class=\'bx bx-map\'></i></div>' +
+                        '<span class="font-medium text-gray-700 leading-relaxed">' + vendor.ven_address + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div>' +
+                    '<label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Status</label>' +
+                    '<div class="p-3 bg-gray-50 rounded-lg border border-gray-100">' +
+                         '<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold capitalize ' + (vendor.ven_status === 'active' ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20' : 'bg-red-100 text-red-700 ring-1 ring-red-600/20') + '">' +
+                            '<i class=\'bx bxs-circle text-xs mr-2\'></i>' +
+                            vendor.ven_status +
+                        '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
             
-            <div class="md:col-span-2 pt-4 border-t border-gray-100">
-                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Description</label>
-                 <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                    <p class="text-gray-600 text-sm leading-relaxed">${vendor.ven_desc || 'No description provided for this vendor.'}</p>
-                 </div>
-            </div>
-        </div>
-    `;
+            '<div class="md:col-span-2 pt-4 border-t border-gray-100">' +
+                 '<label class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2">Description</label>' +
+                 '<div class="bg-gray-50 rounded-lg p-4 border border-gray-100">' +
+                    '<p class="text-gray-600 text-sm leading-relaxed">' + (vendor.ven_desc || 'No description provided for this vendor.') + '</p>' +
+                 '</div>' +
+            '</div>' +
+        '</div>';
     const container = document.getElementById('viewVendorContent');
     if (container) container.innerHTML = content;
     const modal = document.getElementById('viewVendorModal');
@@ -585,42 +571,42 @@ async function viewVendorProducts(venId) {
     const container = document.getElementById('viewProductsContent');
     if (container) container.innerHTML = '';
     try {
-        const response = await fetch(`${API_BASE_URL}/psm/product-management/by-vendor/${venId}`, {
+        const response = await fetch(API_BASE_URL + '/psm/product-management/by-vendor/' + venId, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
         }
         const result = await response.json();
         const products = result.data || [];
         window.currentVendorProducts = products;
         const html = products.length === 0
-            ? `<div class="p-12 text-center">
-                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">
-                    <i class='bx bx-package text-5xl text-gray-300'></i>
-                 </div>
-                 <p class="text-gray-500 text-lg font-medium">No products found for this vendor.</p>
-               </div>`
-            : `<div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Product</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Price</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Stock</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Type</th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        ${products.map(p => {
+            ? '<div class="p-12 text-center">' +
+                 '<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">' +
+                    '<i class=\'bx bx-package text-5xl text-gray-300\'></i>' +
+                 '</div>' +
+                 '<p class="text-gray-500 text-lg font-medium">No products found for this vendor.</p>' +
+               '</div>'
+            : '<div class="overflow-x-auto">' +
+                '<table class="min-w-full divide-y divide-gray-200">' +
+                    '<thead class="bg-gray-900">' +
+                        '<tr>' +
+                            '<th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Product</th>' +
+                            '<th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Price</th>' +
+                            '<th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Stock</th>' +
+                            '<th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Type</th>' +
+                            '<th class="px-6 py-4 text-left text-xs font-medium text-white capitalize tracking-wider">Actions</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody class="bg-white divide-y divide-gray-200">' +
+                        products.map(p => {
                             let typeClass = 'bg-gray-100 text-gray-800';
                             let typeIcon = 'bx-box';
                             
@@ -652,45 +638,43 @@ async function viewVendorProducts(venId) {
                                     break;
                             }
                             
-                            const imgSrc = p.prod_picture ? `${APP_URL}/${p.prod_picture}` : null;
+                            const imgSrc = p.prod_picture ? APP_URL + '/' + p.prod_picture : null;
                             const imgHtml = imgSrc 
-                                ? `<img src="${imgSrc}" class="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm" alt="${p.prod_name}">`
-                                : `<div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center text-gray-300 border border-gray-200"><i class='bx bx-image text-2xl'></i></div>`;
+                                ? '<img src="' + imgSrc + '" class="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm" alt="' + p.prod_name + '">'
+                                : '<div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center text-gray-300 border border-gray-200"><i class=\'bx bx-image text-2xl\'></i></div>';
 
-                            return `
-                                <tr class="hover:bg-gray-50 transition-colors group">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-4">
-                                            ${imgHtml}
-                                            <div>
-                                                <div class="font-semibold text-gray-900">${p.prod_name}</div>
-                                                <div class="text-xs text-gray-500 mt-0.5">ID: #${p.id}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-green-600">${formatCurrency(p.prod_price)}</div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-700 font-medium">${p.prod_stock} <span class="text-gray-400 text-xs font-normal">units</span></div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${typeClass}">
-                                            <i class='bx ${typeIcon} mr-1.5'></i>
-                                            ${p.prod_type}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <button onclick="viewProduct(${p.id})" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors shadow-sm" title="View Product">
-                                            <i class='bx bx-show-alt text-xl'></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
-            </div>`;
+                            return '<tr class="hover:bg-gray-50 transition-colors group">' +
+                                    '<td class="px-6 py-4">' +
+                                        '<div class="flex items-center gap-4">' +
+                                            imgHtml +
+                                            '<div>' +
+                                                '<div class="font-semibold text-gray-900">' + p.prod_name + '</div>' +
+                                                '<div class="text-xs text-gray-500 mt-0.5">ID: #' + p.id + '</div>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</td>' +
+                                    '<td class="px-6 py-4">' +
+                                        '<div class="text-sm font-bold text-green-600">' + formatCurrency(p.prod_price) + '</div>' +
+                                    '</td>' +
+                                    '<td class="px-6 py-4">' +
+                                        '<div class="text-sm text-gray-700 font-medium">' + p.prod_stock + ' <span class="text-gray-400 text-xs font-normal">units</span></div>' +
+                                    '</td>' +
+                                    '<td class="px-6 py-4">' +
+                                        '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ' + typeClass + '">' +
+                                            '<i class=\'bx ' + typeIcon + ' mr-1.5\'></i>' +
+                                            p.prod_type +
+                                        '</span>' +
+                                    '</td>' +
+                                    '<td class="px-6 py-4">' +
+                                        '<button onclick="viewProduct(' + p.id + ')" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors shadow-sm" title="View Product">' +
+                                            '<i class=\'bx bx-show-alt text-xl\'></i>' +
+                                        '</button>' +
+                                    '</td>' +
+                                '</tr>';
+                        }).join('') +
+                    '</tbody>' +
+                '</table>' +
+            '</div>';
         if (container) container.innerHTML = html;
         if (modal) modal.classList.remove('hidden');
     } catch (error) {

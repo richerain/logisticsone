@@ -243,7 +243,7 @@
             try {
                 const token = localStorage.getItem('jwt');
                 const response = await fetch('/api/v1/psm/vendors', {
-                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+                    headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
                 });
                 const result = await response.json();
                 if (result.success) {
@@ -303,7 +303,7 @@
             fetch('/api/v1/psm/requisitions?view_consolidated=1', {
                 method: 'GET',
                 headers: {
-                    'Authorization': token ? `Bearer ${token}` : '',
+                    'Authorization': token ? 'Bearer ' + token : '',
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -378,30 +378,34 @@
 
                     const isBudgetApproved = req.con_budget_approval === 'Approved';
 
-                    tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">\${req.req_id || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="\${itemsList}">\${itemsList}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
-                            \${getVendorName(req.req_chosen_vendor || req.con_chosen_vendor)}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">\${window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-bold text-gray-800">\${req.con_requester || '-'}</div>
-                            <div class="text-[10px] text-gray-500 uppercase font-semibold">\${req.req_dept || req.con_dept || '-'}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">\${formatDate(req.con_date)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="\${req.con_note || ''}">\${req.con_note || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-4 py-1.5 text-xs font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1.5 w-fit shadow-sm">
-                                <i class='bx bxs-check-circle text-sm'></i> Approved
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-4 py-1.5 text-xs font-black rounded-full \${isBudgetApproved ? 'bg-green-600 border-green-700' : 'bg-yellow-500 border-yellow-600'} text-white border flex items-center gap-1.5 w-fit shadow-sm">
-                                <i class='bx \${isBudgetApproved ? 'bxs-check-circle' : 'bx-time-five'} text-sm'></i> \${req.con_budget_approval || 'Pending'}
-                            </span>
-                        </td>
-                    `;
+                    const currencyValue = window.formatCurrencyGlobal ? window.formatCurrencyGlobal(req.con_total_price || 0) : formatCurrency(req.con_total_price || 0);
+                    const vendorName = getVendorName(req.req_chosen_vendor || req.con_chosen_vendor);
+                    const deptName = req.req_dept || req.con_dept || '-';
+                    const budgetApprovalStatus = req.con_budget_approval || 'Pending';
+                    const statusIcon = isBudgetApproved ? 'bxs-check-circle' : 'bx-time-five';
+                    const statusClass = isBudgetApproved ? 'bg-green-600 border-green-700' : 'bg-yellow-500 border-yellow-600';
+
+                    tr.innerHTML = 
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">' + (req.req_id || '-') + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="' + itemsList + '">' + itemsList + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">' + vendorName + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">' + currencyValue + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<div class="text-sm font-bold text-gray-800">' + (req.con_requester || '-') + '</div>' +
+                            '<div class="text-[10px] text-gray-500 uppercase font-semibold">' + deptName + '</div>' +
+                        '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' + formatDate(req.con_date) + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 italic max-w-xs truncate" title="' + (req.con_note || '') + '">' + (req.con_note || '-') + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<span class="px-4 py-1.5 text-xs font-black rounded-full bg-green-600 text-white border border-green-700 flex items-center gap-1.5 w-fit shadow-sm">' +
+                                '<i class=\'bx bxs-check-circle text-sm\'></i> Approved' +
+                            '</span>' +
+                        '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap">' +
+                            '<span class="px-4 py-1.5 text-xs font-black rounded-full ' + statusClass + ' text-white border flex items-center gap-1.5 w-fit shadow-sm">' +
+                                '<i class=\'bx ' + statusIcon + ' text-sm\'></i> ' + budgetApprovalStatus +
+                            '</span>' +
+                        '</td>';
                     tbody.appendChild(tr);
                 });
 
@@ -424,8 +428,8 @@
             const start = total === 0 ? 0 : ((currentConsolidatedPage - 1) * consolidatedPageSize) + 1;
             const end = Math.min(currentConsolidatedPage * consolidatedPageSize, total);
             
-            if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
-            if (display) display.textContent = `${currentConsolidatedPage} / ${totalPages || 1}`;
+            if (info) info.textContent = 'Showing ' + start + '-' + end + ' of ' + total;
+            if (display) display.textContent = currentConsolidatedPage + ' / ' + (totalPages || 1);
             
             const prev = document.getElementById('consolidatedPrevBtn');
             const next = document.getElementById('consolidatedNextBtn');
@@ -437,16 +441,15 @@
         function renderEmptyConsolidatedTable(message) {
             const tbody = document.getElementById('consolidatedTableBody');
             if (tbody) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="px-6 py-12 text-center text-gray-500">
-                            <div class="flex flex-col items-center justify-center">
-                                <i class='bx bx-clipboard text-6xl mb-4 text-gray-300'></i>
-                                <p class="text-lg font-medium">${message}</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = 
+                    '<tr>' +
+                        '<td colspan="9" class="px-6 py-12 text-center text-gray-500">' +
+                            '<div class="flex flex-col items-center justify-center">' +
+                                '<i class=\'bx bx-clipboard text-6xl mb-4 text-gray-300\'></i>' +
+                                '<p class="text-lg font-medium">' + message + '</p>' +
+                            '</div>' +
+                        '</td>' +
+                    '</tr>';
             }
             updateConsolidatedTotal();
             updateConsolidatedPager(0, 1);
@@ -486,20 +489,19 @@
             const token = localStorage.getItem('jwt');
             const tbody = document.getElementById('budgetStatusTableBody');
             if (tbody) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                            <div class="flex justify-center items-center py-4">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-                                Loading budget requests...
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = 
+                    '<tr>' +
+                        '<td colspan="8" class="px-6 py-12 text-center text-gray-500">' +
+                            '<div class="flex justify-center items-center py-4">' +
+                                '<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>' +
+                                'Loading budget requests...' +
+                            '</div>' +
+                        '</td>' +
+                    '</tr>';
             }
 
             fetch('/api/v1/psm/budget-management/requests', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': 'Bearer ' + token }
             })
             .then(res => res.json())
             .then(data => {
@@ -532,31 +534,38 @@
                     
                     const isPending = req.req_status?.toLowerCase() === 'pending';
 
-                    tr.innerHTML = `
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">\${req.req_id || '-'}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">\${req.req_by || '-'}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">\${req.req_dept || '-'}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">\${formatCurrency(req.req_amount || 0)}</td>
-                        <td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="\${req.req_purpose || ''}">\${req.req_purpose || '-'}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">\${formatDate(req.req_date)}</td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <span class="px-3 py-1 text-[10px] font-black rounded-full \${getStatusClass(req.req_status)} border shadow-sm uppercase">
-                                \${req.req_status || 'Pending'}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm">
-                            <div class="flex gap-2">
-                                <button onclick="viewBudgetRequest('\${req.req_id}')" class="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50" title="View Details">
-                                    <i class='bx bx-show-alt text-lg'></i>
-                                </button>
-                                \${isPending ? `
-                                    <button onclick="cancelBudgetRequest('\${req.req_id}')" class="btn btn-ghost btn-xs text-red-600 hover:bg-red-50" title="Cancel Request">
-                                        <i class='bx bx-block text-lg'></i>
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </td>
-                    `;
+                    const statusClass = getStatusClass(req.req_status);
+                    const amountFormatted = formatCurrency(req.req_amount || 0);
+                    const reqStatus = req.req_status || 'Pending';
+                    const reqDate = formatDate(req.req_date);
+
+                    let actionButtons = 
+                        '<button onclick="viewBudgetRequest(\'' + req.req_id + '\')" class="btn btn-ghost btn-xs text-blue-600 hover:bg-blue-50" title="View Details">' +
+                            '<i class=\'bx bx-show-alt text-lg\'></i>' +
+                        '</button>';
+                    
+                    if (isPending) {
+                        actionButtons += 
+                            '<button onclick="cancelBudgetRequest(\'' + req.req_id + '\')" class="btn btn-ghost btn-xs text-red-600 hover:bg-red-50" title="Cancel Request">' +
+                                '<i class=\'bx bx-block text-lg\'></i>' +
+                            '</button>';
+                    }
+
+                    tr.innerHTML = 
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">' + (req.req_id || '-') + '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">' + (req.req_by || '-') + '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">' + (req.req_dept || '-') + '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">' + amountFormatted + '</td>' +
+                        '<td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="' + (req.req_purpose || '') + '">' + (req.req_purpose || '-') + '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">' + reqDate + '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap">' +
+                            '<span class="px-3 py-1 text-[10px] font-black rounded-full ' + statusClass + ' border shadow-sm uppercase">' +
+                                reqStatus +
+                            '</span>' +
+                        '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm">' +
+                            '<div class="flex gap-2">' + actionButtons + '</div>' +
+                        '</td>';
                     tbody.appendChild(tr);
                 });
         }
@@ -573,16 +582,15 @@
         function renderEmptyBudgetStatusTable(message) {
             const tbody = document.getElementById('budgetStatusTableBody');
             if (tbody) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                            <div class="flex flex-col items-center justify-center">
-                                <i class='bx bx-clipboard text-6xl mb-4 text-gray-300'></i>
-                                <p class="text-lg font-medium">${message}</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = 
+                    '<tr>' +
+                        '<td colspan="7" class="px-6 py-12 text-center text-gray-500">' +
+                            '<div class="flex flex-col items-center justify-center">' +
+                                '<i class=\'bx bx-clipboard text-6xl mb-4 text-gray-300\'></i>' +
+                                '<p class="text-lg font-medium">' + message + '</p>' +
+                            '</div>' +
+                        '</td>' +
+                    '</tr>';
             }
         }
 
@@ -611,7 +619,7 @@
             // Collect IDs to mark as consolidated
             const reqIds = pendingItems.map(r => r.req_id);
             const reqIdsStr = reqIds.join(', ');
-            const purpose = `Consolidated budget for: ${reqIdsStr}`;
+            const purpose = 'Consolidated budget for: ' + reqIdsStr;
 
             // Determine the department for the budget request
             const departments = [...new Set(pendingItems.map(item => item.req_dept).filter(Boolean))];
@@ -621,7 +629,7 @@
             fetch('/api/v1/psm/budget-management/requests', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': 'Bearer ' + token,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -667,17 +675,16 @@
             const detailsEl = document.getElementById('viewBudgetRequestDetails');
             
             if (detailsEl) {
-                detailsEl.innerHTML = `
-                    <div class="flex justify-center py-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                `;
+                detailsEl.innerHTML = 
+                    '<div class="flex justify-center py-8">' +
+                        '<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>' +
+                    '</div>';
             }
 
             document.getElementById('viewBudgetRequestModal').showModal();
 
             fetch('/api/v1/psm/budget-management/requests', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': 'Bearer ' + token }
             })
             .then(res => res.json())
             .then(data => {
@@ -700,45 +707,48 @@
             const detailsEl = document.getElementById('viewBudgetRequestDetails');
             if (!detailsEl) return;
 
-            detailsEl.innerHTML = `
-                <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">
-                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
-                        <div>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Request ID</p>
-                            <h4 class="text-lg font-black text-gray-800">\${req.req_id}</h4>
-                        </div>
-                        <span class="px-3 py-1 text-[10px] font-black rounded-full \${getStatusClass(req.req_status)} border shadow-sm uppercase">
-                            \${req.req_status}
-                        </span>
-                    </div>
+            const statusClass = getStatusClass(req.req_status);
+            const amountFormatted = formatCurrency(req.req_amount);
+            const reqDate = formatDate(req.req_date);
+
+            detailsEl.innerHTML = 
+                '<div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">' +
+                    '<div class="flex justify-between items-start border-b border-gray-100 pb-3">' +
+                        '<div>' +
+                            '<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Request ID</p>' +
+                            '<h4 class="text-lg font-black text-gray-800">' + req.req_id + '</h4>' +
+                        '</div>' +
+                        '<span class="px-3 py-1 text-[10px] font-black rounded-full ' + statusClass + ' border shadow-sm uppercase">' +
+                            (req.req_status || 'Pending') +
+                        '</span>' +
+                    '</div>' +
                     
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Requested By</p>
-                            <p class="text-sm font-bold text-gray-700">\${req.req_by || '-'}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</p>
-                            <p class="text-sm font-bold text-gray-700">\${req.req_dept || '-'}</p>
-                        </div>
-                    </div>
+                    '<div class="grid grid-cols-2 gap-4">' +
+                        '<div>' +
+                            '<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Requested By</p>' +
+                            '<p class="text-sm font-bold text-gray-700">' + (req.req_by || '-') + '</p>' +
+                        '</div>' +
+                        '<div>' +
+                            '<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</p>' +
+                            '<p class="text-sm font-bold text-gray-700">' + (req.req_dept || '-') + '</p>' +
+                        '</div>' +
+                    '</div>' +
 
-                    <div>
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</p>
-                        <p class="text-xl font-black text-blue-600">\${formatCurrency(req.req_amount)}</p>
-                    </div>
+                    '<div>' +
+                        '<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</p>' +
+                        '<p class="text-xl font-black text-blue-600">' + amountFormatted + '</p>' +
+                    '</div>' +
 
-                    <div>
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Purpose</p>
-                        <p class="text-sm text-gray-600 leading-relaxed">\${req.req_purpose || '-'}</p>
-                    </div>
+                    '<div>' +
+                        '<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Purpose</p>' +
+                        '<p class="text-sm text-gray-600 leading-relaxed">' + (req.req_purpose || '-') + '</p>' +
+                    '</div>' +
 
-                    <div>
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date Requested</p>
-                        <p class="text-sm font-bold text-gray-700">\${formatDate(req.req_date)}</p>
-                    </div>
-                </div>
-            `;
+                    '<div>' +
+                        '<p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date Requested</p>' +
+                        '<p class="text-sm font-bold text-gray-700">' + reqDate + '</p>' +
+                    '</div>' +
+                '</div>';
         }
 
         window.cancelBudgetRequest = function(requestId) {
@@ -754,10 +764,10 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     const token = localStorage.getItem('jwt');
-                    fetch(`/api/v1/psm/budget-management/requests/${requestId}/cancel`, {
+                    fetch('/api/v1/psm/budget-management/requests/' + requestId + '/cancel', {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
+                            'Authorization': 'Bearer ' + token,
                             'Content-Type': 'application/json'
                         }
                     })

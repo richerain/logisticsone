@@ -353,9 +353,9 @@
 <script>
 // API Configuration
 var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
-var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
-var PSM_REQUISITIONS_API = `${API_BASE_URL}/psm/requisitions`;
-var PSM_ACTIVE_VENDORS_API = `${API_BASE_URL}/psm/active-vendors`;
+var PSM_PURCHASES_API = API_BASE_URL + '/psm/purchase-management';
+var PSM_REQUISITIONS_API = API_BASE_URL + '/psm/requisitions';
+var PSM_ACTIVE_VENDORS_API = API_BASE_URL + '/psm/active-vendors';
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 // JWT Token Handling with LocalStorage Sync
@@ -493,7 +493,7 @@ async function ensureJwtToken() {
     
     console.log('JWT Token missing, attempting to fetch from server...');
     try {
-        const tokenUrl = API_BASE_URL.includes('://') ? `${API_BASE_URL.replace('/api/v1', '')}/auth/token` : '/auth/token';
+        const tokenUrl = API_BASE_URL.includes('://') ? API_BASE_URL.replace('/api/v1', '') + '/auth/token' : '/auth/token';
         const response = await fetch(tokenUrl, {
             headers: {
                 'Accept': 'application/json',
@@ -627,14 +627,14 @@ async function loadActiveVendors() {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
         
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(errorData.message || 'HTTP ' + response.status + ': ' + response.statusText);
         }
         
         const result = await response.json();
@@ -660,7 +660,7 @@ function populateCompanySelect() {
     activeVendors.forEach(vendor => {
         const option = document.createElement('option');
         option.value = vendor.company_name;
-        option.textContent = `${vendor.company_name} (${vendor.type})`;
+        option.textContent = vendor.company_name + ' (' + vendor.type + ')';
         option.dataset.vendorType = vendor.type;
         option.dataset.vendorId = vendor.id;
         elements.companySelect.appendChild(option);
@@ -690,7 +690,7 @@ function handleCompanyChange() {
 function showChangeCompanyConfirmation(selectedOption) {
     Swal.fire({
         title: 'Change Company?',
-        html: `Your current added items from <strong>${selectedVendor.company_name}</strong> will be cleared if you change the company.`,
+        html: 'Your current added items from <strong>' + selectedVendor.company_name + '</strong> will be cleared if you change the company.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes, clear items',
@@ -756,23 +756,22 @@ function populateAvailableItems() {
             ? getProductImageUrl(item.picture)
             : 'https://placehold.co/100x100?text=No+Image';
         
-        itemElement.innerHTML = `
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <img src="${imageUrl}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
-                    <div>
-                        <h4 class="font-medium text-gray-900">${item.name}</h4>
-                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock} | Warranty: ${item.warranty || 'N/A'} | Expiration: ${item.expiration ? formatDate(item.expiration) : 'N/A'}</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="addItemToPurchase(${item.id})" 
-                            class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
-                        Add
-                    </button>
-                </div>
-            </div>
-        `;
+        itemElement.innerHTML = 
+            '<div class="flex justify-between items-center">' +
+                '<div class="flex items-center gap-3">' +
+                    '<img src="' + imageUrl + '" alt="' + item.name + '" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src=\'https://placehold.co/100x100?text=No+Image\'">' +
+                    '<div>' +
+                        '<h4 class="font-medium text-gray-900">' + item.name + '</h4>' +
+                        '<p class="text-sm text-gray-600">Price: ' + formatCurrency(item.price) + ' | Stock: ' + item.stock + ' | Warranty: ' + (item.warranty || 'N/A') + ' | Expiration: ' + (item.expiration ? formatDate(item.expiration) : 'N/A') + '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="flex items-center gap-2">' +
+                    '<button type="button" onclick="addItemToPurchase(' + item.id + ')" ' +
+                            'class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">' +
+                        'Add' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
         elements.availableItemsList.appendChild(itemElement);
     });
 }
@@ -799,23 +798,22 @@ function filterAvailableItems() {
             ? getProductImageUrl(item.picture)
             : 'https://placehold.co/100x100?text=No+Image';
         
-        itemElement.innerHTML = `
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <img src="${imageUrl}" alt="${item.name}" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
-                    <div>
-                        <h4 class="font-medium text-gray-900">${item.name}</h4>
-                        <p class="text-sm text-gray-600">Price: ${formatCurrency(item.price)} | Stock: ${item.stock} | Warranty: ${item.warranty || 'N/A'} | Expiration: ${item.expiration ? formatDate(item.expiration) : 'N/A'}</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="addItemToPurchase(${item.id})" 
-                            class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
-                        Add
-                    </button>
-                </div>
-            </div>
-        `;
+        itemElement.innerHTML = 
+            '<div class="flex justify-between items-center">' +
+                '<div class="flex items-center gap-3">' +
+                    '<img src="' + imageUrl + '" alt="' + item.name + '" class="w-12 h-12 object-cover rounded-md bg-gray-100" onerror="this.src=\'https://placehold.co/100x100?text=No+Image\'">' +
+                    '<div>' +
+                        '<h4 class="font-medium text-gray-900">' + item.name + '</h4>' +
+                        '<p class="text-sm text-gray-600">Price: ' + formatCurrency(item.price) + ' | Stock: ' + item.stock + ' | Warranty: ' + (item.warranty || 'N/A') + ' | Expiration: ' + (item.expiration ? formatDate(item.expiration) : 'N/A') + '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="flex items-center gap-2">' +
+                    '<button type="button" onclick="addItemToPurchase(' + item.id + ')" ' +
+                            'class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">' +
+                        'Add' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
         elements.availableItemsList.appendChild(itemElement);
     });
 }
@@ -839,7 +837,7 @@ function addItemToPurchase(itemId) {
         expiration: item.expiration
     });
     
-    showNotification(`Added ${item.name} to purchase order`, 'success');
+    showNotification('Added ' + item.name + ' to purchase order', 'success');
     updateSelectedItemsDisplay();
     closeAddItemModal();
 }
@@ -876,30 +874,29 @@ function updateSelectedItemsDisplay() {
             const imageUrl = group.picture 
                 ? getProductImageUrl(group.picture)
                 : 'https://placehold.co/100x100?text=No+Image';
-            return `
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div class="flex items-center gap-3">
-                    <img src="${imageUrl}" alt="${group.name}" class="w-12 h-12 object-cover rounded-md bg-white border border-gray-200" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
-                    <div>
-                        <h4 class="font-medium text-gray-900">${group.name}</h4>
-                        <p class="text-sm text-gray-600">
-                            ${formatCurrency(group.price)} each × ${group.count} = ${formatCurrency(group.price * group.count)}
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-600 bg-white px-2 py-1 rounded border">Qty: ${group.count}</span>
-                    <button type="button" onclick="removeItemGroup([${group.instances.join(',')}])" 
-                            class="px-3 py-1 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors">
-                        Remove All
-                    </button>
-                    <button type="button" onclick="removeSingleItem(${group.instances[0]})" 
-                            class="px-3 py-1 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700 transition-colors">
-                        Remove One
-                    </button>
-                </div>
-            </div>
-        `}).join('');
+            return '<div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">' +
+                '<div class="flex items-center gap-3">' +
+                    '<img src="' + imageUrl + '" alt="' + group.name + '" class="w-12 h-12 object-cover rounded-md bg-white border border-gray-200" onerror="this.src=\'https://placehold.co/100x100?text=No+Image\'">' +
+                    '<div>' +
+                        '<h4 class="font-medium text-gray-900">' + group.name + '</h4>' +
+                        '<p class="text-sm text-gray-600">' +
+                            formatCurrency(group.price) + ' each × ' + group.count + ' = ' + formatCurrency(group.price * group.count) +
+                        '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="flex items-center gap-2">' +
+                    '<span class="text-sm text-gray-600 bg-white px-2 py-1 rounded border">Qty: ' + group.count + '</span>' +
+                    '<button type="button" onclick="removeItemGroup([' + group.instances.join(',') + '])" ' +
+                            'class="px-3 py-1 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors">' +
+                        'Remove All' +
+                    '</button>' +
+                    '<button type="button" onclick="removeSingleItem(' + group.instances[0] + ')" ' +
+                            'class="px-3 py-1 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700 transition-colors">' +
+                        'Remove One' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
     }
     
     // Update calculated fields
@@ -939,17 +936,17 @@ async function loadPurchases() {
     const params = new URLSearchParams();
     
     try {
-        const purchasesUrl = `${PSM_PURCHASES_API}`;
+        const purchasesUrl = PSM_PURCHASES_API;
         params.append('t', new Date().getTime());
-        console.log('📡 Fetching purchases from:', `${purchasesUrl}?${params}`);
+        console.log('📡 Fetching purchases from:', purchasesUrl + '?' + params);
         
-        const response = await fetch(`${purchasesUrl}?${params.toString()}`, {
+        const response = await fetch(purchasesUrl + '?' + params.toString(), {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
@@ -957,7 +954,7 @@ async function loadPurchases() {
         console.log('📨 Response status:', response.status);
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
         }
         
         const result = await response.json();
@@ -1007,14 +1004,13 @@ function displayPurchases(purchases) {
     const filtered = getPurchasesFiltered(purchases);
     const total = filtered.length;
     if (!filtered || total === 0) {
-        elements.purchasesTableBody.innerHTML = `
-            <tr>
-                <td colspan="10" class="px-6 py-8 text-center text-gray-500">
-                    <i class='bx bxs-purchase-tag text-4xl text-gray-300 mb-3'></i>
-                    <p class="text-lg">No purchase orders found</p>
-                </td>
-            </tr>
-        `;
+        elements.purchasesTableBody.innerHTML = 
+            '<tr>' +
+                '<td colspan="10" class="px-6 py-8 text-center text-gray-500">' +
+                    '<i class=\'bx bxs-purchase-tag text-4xl text-gray-300 mb-3\'></i>' +
+                    '<p class="text-lg">No purchase orders found</p>' +
+                '</td>' +
+            '</tr>';
         renderPurchasesPager(0, 1);
         return;
     }
@@ -1044,77 +1040,65 @@ function displayPurchases(purchases) {
             : (purchase.pur_approved_by || 'Not approved');
         const approvedByHtml = formatUserLabelDisplay(approvedSource, purchase.pur_status === 'Cancel' ? 'Unknown Approver' : 'Not approved');
         
-        const companyTypeHtml = `
-            <div class="flex flex-col leading-tight">
-                <span class="text-sm font-semibold text-gray-900">${purchase.pur_company_name}</span>
-                <span class="text-xs text-gray-500 capitalize">${purchase.pur_ven_type}</span>
-            </div>
-        `;
+        const companyTypeHtml = 
+            '<div class="flex flex-col leading-tight">' +
+                '<span class="text-sm font-semibold text-gray-900">' + (purchase.pur_company_name || 'N/A') + '</span>' +
+                '<span class="text-xs text-gray-500 capitalize">' + purchase.pur_ven_type + '</span>' +
+            '</div>';
         
-        return `
-        <tr class="${rowClass}" data-purchase-id="${purchase.id}">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                ${purchase.pur_id}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-900">
-                <div class="max-w-xs truncate" title="${items.map(item => typeof item === 'object' ? item.name : item).join(', ')}">
-                    ${itemsString}
-                </div>
-                <small class="text-xs text-gray-500">${items.length} item(s)</small>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${companyTypeHtml}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                ${purchase.pur_unit}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                ${formatCurrency(purchase.pur_total_amount)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${formatDate(purchase.pur_delivery_date)}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${orderedByHtml}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${approvedByHtml}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <span class="${getStatusBadgeClass(purchase.pur_status)}">
-                    ${getStatusIcon(purchase.pur_status)}
-                    ${purchase.pur_status}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div class="flex items-center space-x-2">
-                    <button onclick="viewPurchase(${purchase.id})" 
-                            class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50"
-                            title="View Purchase">
-                        <i class='bx bx-show-alt text-xl'></i>
-                    </button>
-                    ${isApproved || isCompleted || isCancelled || isInProgress ? '' : `
-                    <button onclick="editPurchase(${purchase.id})" 
-                            class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50"
-                            title="Edit Purchase">
-                        <i class='bx bx-edit-alt text-xl'></i>
-                    </button>`}
-                    
-                    ${isCompleted ? '' : (canCancel ? `
-                    <button onclick="cancelPurchase(${purchase.id})" 
-                            class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn"
-                            title="Cancel Purchase">
-                        <i class='bx bx-x-circle text-xl'></i>
-                    </button>` : '')}
-                    <button onclick="deletePurchase(${purchase.id})" 
-                            class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50"
-                            title="Delete Purchase">
-                        <i class='bx bx-trash text-xl'></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `}).join('');
+        const currencyFormatted = formatCurrency(purchase.pur_total_amount);
+        const deliveryDateFormatted = formatDate(purchase.pur_delivery_date);
+        const statusBadgeClass = getStatusBadgeClass(purchase.pur_status);
+        const statusIcon = getStatusIcon(purchase.pur_status);
+
+        let actionButtons = 
+            '<button onclick="viewPurchase(' + purchase.id + ')" class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" title="View Purchase">' +
+                '<i class=\'bx bx-show-alt text-xl\'></i>' +
+            '</button>';
+
+        if (!(isApproved || isCompleted || isCancelled || isInProgress)) {
+            actionButtons += 
+                '<button onclick="editPurchase(' + purchase.id + ')" class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50" title="Edit Purchase">' +
+                    '<i class=\'bx bx-edit-alt text-xl\'></i>' +
+                '</button>';
+        }
+
+        if (!isCompleted && canCancel) {
+            actionButtons += 
+                '<button onclick="cancelPurchase(' + purchase.id + ')" class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50 cancel-purchase-btn" title="Cancel Purchase">' +
+                    '<i class=\'bx bx-x-circle text-xl\'></i>' +
+                '</button>';
+        }
+
+        actionButtons += 
+            '<button onclick="deletePurchase(' + purchase.id + ')" class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" title="Delete Purchase">' +
+                '<i class=\'bx bx-trash text-xl\'></i>' +
+            '</button>';
+
+        return '<tr class="' + rowClass + '" data-purchase-id="' + purchase.id + '">' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">' + purchase.pur_id + '</td>' +
+            '<td class="px-6 py-4 text-sm text-gray-900">' +
+                '<div class="max-w-xs truncate" title="' + items.map(item => typeof item === 'object' ? item.name : item).join(', ') + '">' +
+                    itemsString +
+                '</div>' +
+                '<small class="text-xs text-gray-500">' + items.length + ' item(s)</small>' +
+            '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + companyTypeHtml + '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">' + purchase.pur_unit + '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">' + currencyFormatted + '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + deliveryDateFormatted + '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + orderedByHtml + '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + approvedByHtml + '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' +
+                '<span class="' + statusBadgeClass + '">' +
+                    statusIcon + ' ' + purchase.pur_status +
+                '</span>' +
+            '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">' +
+                '<div class="flex items-center space-x-2">' + actionButtons + '</div>' +
+            '</td>' +
+        '</tr>';
+    }).join('');
     
     elements.purchasesTableBody.innerHTML = purchasesHtml;
     renderPurchasesPager(total, totalPages);
@@ -1125,8 +1109,8 @@ function renderPurchasesPager(total, totalPages){
     const display = document.getElementById('purchasesPageDisplay');
     const start = total === 0 ? 0 : ((currentPurchasesPage - 1) * purchasesPageSize) + 1;
     const end = Math.min(currentPurchasesPage * purchasesPageSize, total);
-    if (info) info.textContent = `Showing ${start}-${end} of ${total}`;
-    if (display) display.textContent = `${currentPurchasesPage} / ${totalPages}`;
+    if (info) info.textContent = 'Showing ' + start + '-' + end + ' of ' + total;
+    if (display) display.textContent = currentPurchasesPage + ' / ' + totalPages;
     const prev = document.getElementById('purchasesPrevBtn');
     const next = document.getElementById('purchasesNextBtn');
     if (prev) prev.disabled = currentPurchasesPage <= 1;
@@ -1199,7 +1183,7 @@ function getStatusIcon(status) {
 function formatUserLabelDisplay(label, fallback) {
     const raw = (label || '').trim();
     if (!raw) {
-        return `<span class="text-sm text-gray-500">${fallback}</span>`;
+        return '<span class="text-sm text-gray-500">' + fallback + '</span>';
     }
     
     const parts = raw.split('-');
@@ -1207,17 +1191,15 @@ function formatUserLabelDisplay(label, fallback) {
     const roleRaw = parts.slice(1).join('-').trim();
     
     if (!roleRaw) {
-        return `<span class="text-sm font-semibold text-gray-900">${name}</span>`;
+        return '<span class="text-sm font-semibold text-gray-900">' + name + '</span>';
     }
     
     const role = roleRaw.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     
-    return `
-        <div class="flex flex-col leading-tight">
-            <span class="text-sm font-semibold text-gray-900">${name}</span>
-            <span class="text-xs text-gray-500">${role}</span>
-        </div>
-    `;
+    return '<div class="flex flex-col leading-tight">' +
+            '<span class="text-sm font-semibold text-gray-900">' + name + '</span>' +
+            '<span class="text-xs text-gray-500">' + role + '</span>' +
+        '</div>';
 }
 
 function openRequisitionsModal() {
@@ -1236,31 +1218,30 @@ function closeRequisitionsModal() {
 async function loadApprovedRequisitions() {
     if (!elements.requisitionsTableBody) return;
     
-    elements.requisitionsTableBody.innerHTML = `
-        <tr>
-            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                <div class="flex justify-center items-center py-4">
-                    <div class="loading loading-spinner mr-3"></div>
-                    Loading approved requisitions...
-                </div>
-            </td>
-        </tr>
-    `;
+    elements.requisitionsTableBody.innerHTML = 
+        '<tr>' +
+            '<td colspan="6" class="px-6 py-8 text-center text-gray-500">' +
+                '<div class="flex justify-center items-center py-4">' +
+                    '<div class="loading loading-spinner mr-3"></div>' +
+                    'Loading approved requisitions...' +
+                '</div>' +
+            '</td>' +
+        '</tr>';
     
     try {
         // Fetch approved consolidated requests instead of individual requisitions
-        const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
+        const response = await fetch(PSM_REQUISITIONS_API + '?approved_consolidated=1', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
         
         const result = await response.json();
         
@@ -1272,14 +1253,13 @@ async function loadApprovedRequisitions() {
         }
     } catch (error) {
         console.error('Error loading approved consolidated requests:', error);
-        elements.requisitionsTableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="px-6 py-8 text-center text-red-500">
-                    <i class='bx bx-error-circle text-4xl mb-2'></i>
-                    <p>Error loading budget approved requests: ${error.message}</p>
-                </td>
-            </tr>
-        `;
+        elements.requisitionsTableBody.innerHTML = 
+            '<tr>' +
+                '<td colspan="5" class="px-6 py-8 text-center text-red-500">' +
+                    '<i class=\'bx bx-error-circle text-4xl mb-2\'></i>' +
+                    '<p>Error loading budget approved requests: ' + error.message + '</p>' +
+                '</td>' +
+            '</tr>';
     }
 }
 
@@ -1300,14 +1280,13 @@ function displayApprovedRequisitions(consolidatedRequests) {
     if (!elements.requisitionsTableBody) return;
     
     if (consolidatedRequests.length === 0) {
-        elements.requisitionsTableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                    <i class='bx bx-list-check text-4xl text-gray-300 mb-2'></i>
-                    <p>No budget approved requests found</p>
-                </td>
-            </tr>
-        `;
+        elements.requisitionsTableBody.innerHTML = 
+            '<tr>' +
+                '<td colspan="5" class="px-6 py-8 text-center text-gray-500">' +
+                    '<i class=\'bx bx-list-check text-4xl text-gray-300 mb-2\'></i>' +
+                    '<p>No budget approved requests found</p>' +
+                '</td>' +
+            '</tr>';
         return;
     }
     
@@ -1317,58 +1296,56 @@ function displayApprovedRequisitions(consolidatedRequests) {
             typeof item === 'object' ? item.name : item
         ).join(', ') + (items.length > 2 ? '...' : '');
         
-        return `
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                    ${req.con_req_id || `CON-${req.id}`}
-                </td>
-                <td class="px-4 py-4 text-sm text-gray-700">
-                    <div class="max-w-xs truncate" title="${items.map(i => typeof i === 'object' ? i.name : i).join(', ')}">
-                        ${itemsString}
-                    </div>
-                    <small class="text-xs text-gray-500">${items.length} item(s)</small>
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap">
-                    <div class="text-sm font-bold text-gray-800">${req.con_requester || 'Unknown'}</div>
-                    <div class="text-xs text-gray-500">${req.req_dept || 'N/A'}</div>
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    ${formatDate(req.con_date || req.created_at)}
-                </td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-right">
-                    <div class="flex justify-end gap-2">
-                        <button onclick="viewConsolidatedInModal(${req.id})" 
-                                class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                title="View Details">
-                            <i class='bx bx-show-alt text-xl'></i>
-                        </button>
-                        <button onclick="convertConsolidatedToPOInModal('${req.id}')" 
-                                class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                title="Convert to PO">
-                            <i class='bx bx-transfer-alt text-xl'></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
+        return '<tr class="hover:bg-gray-50 transition-colors">' +
+                '<td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">' +
+                    (req.con_req_id || 'CON-' + req.id) +
+                '</td>' +
+                '<td class="px-4 py-4 text-sm text-gray-700">' +
+                    '<div class="max-w-xs truncate" title="' + items.map(i => typeof i === 'object' ? i.name : i).join(', ') + '">' +
+                        itemsString +
+                    '</div>' +
+                    '<small class="text-xs text-gray-500">' + items.length + ' item(s)</small>' +
+                '</td>' +
+                '<td class="px-4 py-4 whitespace-nowrap">' +
+                    '<div class="text-sm font-bold text-gray-800">' + (req.con_requester || 'Unknown') + '</div>' +
+                    '<div class="text-xs text-gray-500">' + (req.req_dept || 'N/A') + '</div>' +
+                '</td>' +
+                '<td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">' +
+                    formatDate(req.con_date || req.created_at) +
+                '</td>' +
+                '<td class="px-4 py-4 whitespace-nowrap text-sm text-right">' +
+                    '<div class="flex justify-end gap-2">' +
+                        '<button onclick="viewConsolidatedInModal(' + req.id + ')" ' +
+                                'class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" ' +
+                                'title="View Details">' +
+                            '<i class=\'bx bx-show-alt text-xl\'></i>' +
+                        '</button>' +
+                        '<button onclick="convertConsolidatedToPOInModal(\'' + req.id + '\')" ' +
+                                'class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" ' +
+                                'title="Convert to PO">' +
+                            '<i class=\'bx bx-transfer-alt text-xl\'></i>' +
+                        '</button>' +
+                    '</div>' +
+                '</td>' +
+            '</tr>';
     }).join('');
 }
 
 window.viewConsolidatedInModal = async function(id) {
     try {
         showLoading();
-        const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
+        const response = await fetch(PSM_REQUISITIONS_API + '?approved_consolidated=1', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
         
         const result = await response.json();
         if (result.success && result.data) {
@@ -1377,49 +1354,46 @@ window.viewConsolidatedInModal = async function(id) {
 
             const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
             
-            const itemsHtml = items.map(item => `
-                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-100 text-left">
-                    <i class='bx bx-check text-green-500'></i>
-                    <span class="text-sm">${typeof item === 'object' ? item.name : item}</span>
-                </div>
-            `).join('');
+            const itemsHtml = items.map(item => 
+                '<div class="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-100 text-left">' +
+                    '<i class=\'bx bx-check text-green-500\'></i>' +
+                    '<span class="text-sm">' + (typeof item === 'object' ? item.name : item) + '</span>' +
+                '</div>'
+            ).join('');
 
             Swal.fire({
-                title: `<div class="flex items-center gap-2 justify-center"><i class='bx bx-file text-blue-600'></i> Consolidated Details</div>`,
-                html: `
-                    <div class="space-y-4 text-left">
-                        <div class="grid grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">
-                            <div>
-                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Consolidated ID</p>
-                                <p class="text-sm font-bold text-blue-600">${req.con_req_id || \`CON-\${req.id}\`}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Date</p>
-                                <p class="text-sm font-bold text-gray-700">\${formatDate(req.con_date)}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requester</p>
-                                <p class="text-sm font-bold text-gray-700">\${req.con_requester || 'Unknown'}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>
-                                <p class="text-sm font-bold text-gray-700">\${req.req_dept || 'N/A'}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Items</p>
-                            <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                                \${itemsHtml}
-                            </div>
-                        </div>
-                        \${req.con_note ? \`
-                        <div>
-                            <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Notes</p>
-                            <p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">\${req.con_note}</p>
-                        </div>
-                        \` : ''}
-                    </div>
-                \`,
+                title: '<div class="flex items-center gap-2 justify-center"><i class=\'bx bx-file text-blue-600\'></i> Consolidated Details</div>',
+                html: '<div class="space-y-4 text-left">' +
+                        '<div class="grid grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">' +
+                            '<div>' +
+                                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Consolidated ID</p>' +
+                                '<p class="text-sm font-bold text-blue-600">' + (req.con_req_id || 'CON-' + req.id) + '</p>' +
+                            '</div>' +
+                            '<div>' +
+                                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Date</p>' +
+                                '<p class="text-sm font-bold text-gray-700">' + formatDate(req.con_date) + '</p>' +
+                            '</div>' +
+                            '<div>' +
+                                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requester</p>' +
+                                '<p class="text-sm font-bold text-gray-700">' + (req.con_requester || 'Unknown') + '</p>' +
+                            '</div>' +
+                            '<div>' +
+                                '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>' +
+                                '<p class="text-sm font-bold text-gray-700">' + (req.req_dept || 'N/A') + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Items</p>' +
+                            '<div class="space-y-2 max-h-48 overflow-y-auto pr-2">' +
+                                itemsHtml +
+                            '</div>' +
+                        '</div>' +
+                        (req.con_note ? 
+                        '<div>' +
+                            '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Notes</p>' +
+                            '<p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">' + req.con_note + '</p>' +
+                        '</div>' : '') +
+                    '</div>',
                 width: '600px',
                 showCloseButton: true,
                 showConfirmButton: false,
@@ -1452,13 +1426,13 @@ window.convertConsolidatedToPOInModal = async function(id) {
             closeRequisitionsModal();
             openAddModal();
             
-            const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
+            const response = await fetch(PSM_REQUISITIONS_API + '?approved_consolidated=1', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': CSRF_TOKEN,
-                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                    'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
                 },
                 credentials: 'include'
             });
@@ -1468,7 +1442,7 @@ window.convertConsolidatedToPOInModal = async function(id) {
                 const req = res.data.find(r => r.id == id);
                 if (req) {
                     if (elements.purDesc) {
-                       elements.purDesc.value = `Converted from Consolidated Request: ${req.con_req_id || `CON-${req.id}`}. Original Department: ${req.req_dept}`;
+                       elements.purDesc.value = 'Converted from Consolidated Request: ' + (req.con_req_id || 'CON-' + req.id) + '. Original Department: ' + req.req_dept;
                     }
 
                     const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
@@ -1501,18 +1475,18 @@ window.convertReqToPOInModal = async function(id) {
     // For now, let's fetch it to ensure we have the latest items
     try {
         showLoading();
-        const response = await fetch(`${PSM_REQUISITIONS_API}/${id}`, {
+        const response = await fetch(PSM_REQUISITIONS_API + '/' + id, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
         
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
         
         const result = await response.json();
         if (result.success && result.data) {
@@ -1520,7 +1494,7 @@ window.convertReqToPOInModal = async function(id) {
             
             const confirm = await Swal.fire({
                 title: 'Convert to PO?',
-                text: `Do you want to convert Requisition ${req.req_id || `REQ-${req.id}`} to a Purchase Order?`,
+                text: 'Do you want to convert Requisition ' + (req.req_id || 'REQ-' + req.id) + ' to a Purchase Order?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, convert',
@@ -1533,7 +1507,7 @@ window.convertReqToPOInModal = async function(id) {
                 
                 // Set description
                 if (elements.purDesc) {
-                    elements.purDesc.value = `Converted from Requisition: ${req.req_id || `REQ-${req.id}`}. Original Department: ${req.req_department}`;
+                    elements.purDesc.value = 'Converted from Requisition: ' + (req.req_id || 'REQ-' + req.id) + '. Original Department: ' + req.req_department;
                 }
                 
                 // Set items
@@ -1563,7 +1537,7 @@ window.convertReqToPOInModal = async function(id) {
 };
 
 function viewRequisition(id) {
-    window.location.href = `{{ url('/psm/purchase-requisition') }}?view=${id}`;
+    window.location.href = "{{ url('/psm/purchase-requisition') }}?view=" + id;
 }
 
 // Modal Functions
@@ -1710,7 +1684,7 @@ async function handlePurchaseSubmit(e) {
     };
     
     const purchaseId = elements.purchaseId ? elements.purchaseId.value : '';
-    const url = purchaseId ? `${PSM_PURCHASES_API}/${purchaseId}` : `${PSM_PURCHASES_API}`;
+    const url = purchaseId ? PSM_PURCHASES_API + '/' + purchaseId : PSM_PURCHASES_API;
     const method = purchaseId ? 'PUT' : 'POST';
     
     showLoading();
@@ -1723,14 +1697,14 @@ async function handlePurchaseSubmit(e) {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include',
             body: JSON.stringify(data)
         });
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
         }
         
         const result = await response.json();
@@ -1762,21 +1736,19 @@ function openCancelPurchaseModal(id) {
     const purchase = currentPurchases.find(p => p.id == id);
     if (!purchase || !elements.cancelPurchaseModal || !elements.cancelPurchaseContent) return;
     
-    elements.cancelPurchaseContent.innerHTML = `
-        <div class="space-y-3">
-            <div class="bg-blue-50 p-3 rounded-lg">
-                <h4 class="font-semibold text-blue-800">Purchase Details</h4>
-                <p><strong>PO Number:</strong> ${purchase.pur_id}</p>
-                <p><strong>Company:</strong> ${purchase.pur_company_name}</p>
-                <p><strong>Ordered By:</strong> ${purchase.pur_order_by || 'Not specified'}</p>
-                <p><strong>Total Amount:</strong> ${formatCurrency(purchase.pur_total_amount)}</p>
-            </div>
-            <div class="bg-red-50 p-3 rounded-lg">
-                <h4 class="font-semibold text-red-800">Warning</h4>
-                <p>Are you sure you want to cancel purchase order "${purchase.pur_id}"? This action cannot be undone.</p>
-            </div>
-        </div>
-    `;
+    elements.cancelPurchaseContent.innerHTML = '<div class="space-y-3">' +
+            '<div class="bg-blue-50 p-3 rounded-lg">' +
+                '<h4 class="font-semibold text-blue-800">Purchase Details</h4>' +
+                '<p><strong>PO Number:</strong> ' + purchase.pur_id + '</p>' +
+                '<p><strong>Company:</strong> ' + purchase.pur_company_name + '</p>' +
+                '<p><strong>Ordered By:</strong> ' + (purchase.pur_order_by || 'Not specified') + '</p>' +
+                '<p><strong>Total Amount:</strong> ' + formatCurrency(purchase.pur_total_amount) + '</p>' +
+            '</div>' +
+            '<div class="bg-red-50 p-3 rounded-lg">' +
+                '<h4 class="font-semibold text-red-800">Warning</h4>' +
+                '<p>Are you sure you want to cancel purchase order "' + purchase.pur_id + '"? This action cannot be undone.</p>' +
+            '</div>' +
+        '</div>';
     
     elements.cancelPurchaseModal.dataset.purchaseId = id;
     elements.cancelPurchaseModal.dataset.userLabel = CURRENT_USER_LABEL || '';
@@ -1814,21 +1786,21 @@ async function handleConfirmCancelPurchase() {
     showLoading();
     
     try {
-        const response = await fetch(`${PSM_PURCHASES_API}/${purchaseId}/cancel`, {
+        const response = await fetch(PSM_PURCHASES_API + '/' + purchaseId + '/cancel', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include',
             body: JSON.stringify({ cancel_by: cancelBy })
         });
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
         }
         
         const result = await response.json();
@@ -1837,7 +1809,7 @@ async function handleConfirmCancelPurchase() {
             showNotification(result.message, 'success');
             loadPurchases();
             
-            const cancelBtn = document.querySelector(`[onclick="cancelPurchase(${purchaseId})"]`);
+            const cancelBtn = document.querySelector('[onclick="cancelPurchase(' + purchaseId + ')"]');
             if (cancelBtn) {
                 cancelBtn.disabled = true;
                 cancelBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -1864,7 +1836,7 @@ async function deletePurchase(id) {
     
     const confirmResult = await Swal.fire({
         title: 'Delete Purchase Order?',
-        text: `Are you sure you want to delete purchase order "${purchase.pur_id}"? This action cannot be undone.`,
+        text: 'Are you sure you want to delete purchase order "' + purchase.pur_id + '"? This action cannot be undone.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Delete',
@@ -1877,19 +1849,19 @@ async function deletePurchase(id) {
     showLoading();
     
     try {
-        const response = await fetch(`${PSM_PURCHASES_API}/${id}`, {
+        const response = await fetch(PSM_PURCHASES_API + '/' + id, {
             method: 'DELETE',
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : ''
             },
             credentials: 'include'
         });
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
         }
         
         const result = await response.json();
@@ -1957,157 +1929,146 @@ function viewPurchase(id) {
             ? getProductImageUrl(itemPicture)
             : 'https://placehold.co/100x100?text=No+Image';
 
-        return `
-        <li class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors rounded-lg px-2">
-            <div class="flex-shrink-0 h-12 w-12">
-                <img src="${imageUrl}" alt="${itemName}" class="h-12 w-12 rounded-lg object-cover border border-gray-200 bg-white" onerror="this.src='https://placehold.co/100x100?text=No+Image'">
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">
-                    ${itemName}
-                </p>
-                <p class="text-xs text-gray-500 mt-1">
-                    Warranty: ${itemWarranty} | Expiration: ${itemExpiration}
-                </p>
-            </div>
-            <div class="inline-flex items-center text-sm font-semibold text-gray-900">
-                ${itemPrice}
-            </div>
-        </li>`;
+        return '<li class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors rounded-lg px-2">' +
+            '<div class="flex-shrink-0 h-12 w-12">' +
+                '<img src="' + imageUrl + '" alt="' + itemName + '" class="h-12 w-12 rounded-lg object-cover border border-gray-200 bg-white" onerror="this.src=\'https://placehold.co/100x100?text=No+Image\'">' +
+            '</div>' +
+            '<div class="flex-1 min-w-0">' +
+                '<p class="text-sm font-medium text-gray-900 truncate">' +
+                    itemName +
+                '</p>' +
+                '<p class="text-xs text-gray-500 mt-1">' +
+                    'Warranty: ' + itemWarranty + ' | Expiration: ' + itemExpiration +
+                '</p>' +
+            '</div>' +
+            '<div class="inline-flex items-center text-sm font-semibold text-gray-900">' +
+                itemPrice +
+            '</div>' +
+        '</li>';
     }).join('');
     
-    const content = `
-        <div class="space-y-6">
-            <!-- Header Status Banner -->
-            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <div>
-                    <span class="text-sm text-gray-500 block">Status</span>
-                    <span class="inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-sm font-medium ${getStatusBadgeClass(purchase.pur_status)}">
-                        ${purchase.pur_status}
-                    </span>
-                </div>
-                <div class="text-right">
-                    <span class="text-sm text-gray-500 block">Total Amount</span>
-                    <span class="text-xl font-bold text-green-600">${formatCurrency(purchase.pur_total_amount)}</span>
-                </div>
-            </div>
+    const content = '<div class="space-y-6">' +
+            '<!-- Header Status Banner -->' +
+            '<div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-100">' +
+                '<div>' +
+                    '<span class="text-sm text-gray-500 block">Status</span>' +
+                    '<span class="inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-sm font-medium ' + getStatusBadgeClass(purchase.pur_status) + '">' +
+                        purchase.pur_status +
+                    '</span>' +
+                '</div>' +
+                '<div class="text-right">' +
+                    '<span class="text-sm text-gray-500 block">Total Amount</span>' +
+                    '<span class="text-xl font-bold text-green-600">' + formatCurrency(purchase.pur_total_amount) + '</span>' +
+                '</div>' +
+            '</div>' +
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Order Information -->
-                <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Order Information</h4>
-                    <dl class="space-y-2">
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">PO Number</dt>
-                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_id}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">Company</dt>
-                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_company_name}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">Vendor Type</dt>
-                            <dd class="text-sm font-medium text-gray-900 capitalize">${purchase.pur_ven_type}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">Total Units</dt>
-                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_unit}</dd>
-                        </div>
-                    </dl>
-                </div>
+            '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' +
+                '<!-- Order Information -->' +
+                '<div>' +
+                    '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Order Information</h4>' +
+                    '<dl class="space-y-2">' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">PO Number</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900">' + purchase.pur_id + '</dd>' +
+                        '</div>' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">Company</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900">' + purchase.pur_company_name + '</dd>' +
+                        '</div>' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">Vendor Type</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900 capitalize">' + purchase.pur_ven_type + '</dd>' +
+                        '</div>' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">Total Units</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900">' + purchase.pur_unit + '</dd>' +
+                        '</div>' +
+                    '</dl>' +
+                '</div>' +
 
-                <!-- Approval & Tracking -->
-                <div>
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tracking & Approval</h4>
-                    <dl class="space-y-2">
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">Ordered By</dt>
-                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_order_by || 'Not specified'}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">Approved By</dt>
-                            <dd class="text-sm font-medium text-gray-900">${purchase.pur_approved_by || 'Not approved'}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">Created Date</dt>
-                            <dd class="text-sm font-medium text-gray-900">${new Date(purchase.created_at).toLocaleDateString()}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-sm text-gray-600">Last Updated</dt>
-                            <dd class="text-sm font-medium text-gray-900">${new Date(purchase.updated_at).toLocaleDateString()}</dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
+                '<!-- Approval & Tracking -->' +
+                '<div>' +
+                    '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tracking & Approval</h4>' +
+                    '<dl class="space-y-2">' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">Ordered By</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900">' + (purchase.pur_order_by || 'Not specified') + '</dd>' +
+                        '</div>' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">Approved By</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900">' + (purchase.pur_approved_by || 'Not approved') + '</dd>' +
+                        '</div>' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">Created Date</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900">' + new Date(purchase.created_at).toLocaleDateString() + '</dd>' +
+                        '</div>' +
+                        '<div class="flex justify-between">' +
+                            '<dt class="text-sm text-gray-600">Last Updated</dt>' +
+                            '<dd class="text-sm font-medium text-gray-900">' + new Date(purchase.updated_at).toLocaleDateString() + '</dd>' +
+                        '</div>' +
+                    '</dl>' +
+                '</div>' +
+            '</div>' +
 
-            <!-- Items Section -->
-            <div>
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Items (${items.length})</h4>
-                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                    <ul class="divide-y divide-gray-100">
-                        ${itemsHtml || '<li class="p-4 text-center text-gray-500">No items found</li>'}
-                    </ul>
-                </div>
-            </div>
+            '<!-- Items Section -->' +
+            '<div>' +
+                '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Items (' + items.length + ')</h4>' +
+                '<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">' +
+                    '<ul class="divide-y divide-gray-100">' +
+                        (itemsHtml || '<li class="p-4 text-center text-gray-500">No items found</li>') +
+                    '</ul>' +
+                '</div>' +
+            '</div>' +
 
-            <!-- Warranty Section -->
-            ${(() => {
+            '<!-- Warranty Section -->' +
+            (function() {
                 try {
                     const warranties = purchase.pur_warranty ? JSON.parse(purchase.pur_warranty) : [];
                     if (!warranties || !Array.isArray(warranties) || warranties.length === 0) return '';
-                    return `
-                    <div>
-                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Warranty Details</h4>
-                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            <ul class="divide-y divide-gray-100">
-                                ${warranties.map(w => `
-                                    <li class="p-3 text-sm">
-                                        <div class="flex justify-between">
-                                            <span class="font-medium text-gray-900">${w.item || 'Unknown Item'}</span>
-                                            <span class="text-gray-600">Ends: ${w.warranty_end ? formatDate(w.warranty_end) : 'N/A'}</span>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">Duration: ${w.original_warranty || 'N/A'}</div>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    </div>`;
+                    return '<div>' +
+                        '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Warranty Details</h4>' +
+                        '<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">' +
+                            '<ul class="divide-y divide-gray-100">' +
+                                warranties.map(w => '<li class="p-3 text-sm">' +
+                                        '<div class="flex justify-between">' +
+                                            '<span class="font-medium text-gray-900">' + (w.item || 'Unknown Item') + '</span>' +
+                                            '<span class="text-gray-600">Ends: ' + (w.warranty_end ? formatDate(w.warranty_end) : 'N/A') + '</span>' +
+                                        '</div>' +
+                                        '<div class="text-xs text-gray-500 mt-1">Duration: ' + (w.original_warranty || 'N/A') + '</div>' +
+                                    '</li>').join('') +
+                            '</ul>' +
+                        '</div>' +
+                    '</div>';
                 } catch (e) { console.error('Error parsing warranty:', e); return ''; }
-            })()}
+            })() +
 
-            <!-- Expiration Section -->
-            ${(() => {
+            '<!-- Expiration Section -->' +
+            (function() {
                 try {
                     const expirations = purchase.pur_expiration ? JSON.parse(purchase.pur_expiration) : [];
                     if (!expirations || !Array.isArray(expirations) || expirations.length === 0) return '';
-                    return `
-                    <div>
-                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Expiration Details</h4>
-                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            <ul class="divide-y divide-gray-100">
-                                ${expirations.map(e => `
-                                    <li class="p-3 text-sm flex justify-between">
-                                        <span class="font-medium text-gray-900">${e.item || 'Unknown Item'}</span>
-                                        <span class="text-gray-600">Expires: ${e.expiration_date ? formatDate(e.expiration_date) : 'N/A'}</span>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    </div>`;
+                    return '<div>' +
+                        '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Expiration Details</h4>' +
+                        '<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">' +
+                            '<ul class="divide-y divide-gray-100">' +
+                                expirations.map(e => '<li class="p-3 text-sm flex justify-between">' +
+                                        '<span class="font-medium text-gray-900">' + (e.item || 'Unknown Item') + '</span>' +
+                                        '<span class="text-gray-600">Expires: ' + (e.expiration_date ? formatDate(e.expiration_date) : 'N/A') + '</span>' +
+                                    '</li>').join('') +
+                            '</ul>' +
+                        '</div>' +
+                    '</div>';
                 } catch (e) { console.error('Error parsing expiration:', e); return ''; }
-            })()}
+            })() +
 
-            <!-- Description Section -->
-            ${purchase.pur_desc ? `
-            <div>
-                <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Description</h4>
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700">
-                    ${purchase.pur_desc}
-                </div>
-            </div>
-            ` : ''}
-        </div>
-    `;
+            '<!-- Description Section -->' +
+            (purchase.pur_desc ? '<div>' +
+                '<h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Description</h4>' +
+                '<div class="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700">' +
+                    purchase.pur_desc +
+                '</div>' +
+            '</div>' : '') +
+        '</div>';
     const container = document.getElementById('viewPurchaseContent');
     if (container) container.innerHTML = content;
     const modal = document.getElementById('viewPurchaseModal');
@@ -2161,14 +2122,14 @@ function formatDate(d) {
     const mm = String(dt.getMonth() + 1).padStart(2, '0');
     const dd = String(dt.getDate()).padStart(2, '0');
     const yyyy = dt.getFullYear();
-    return `${mm}-${dd}-${yyyy}`;
+    return mm + '-' + dd + '-' + yyyy;
 }
 
 function formatDateRange(a, b) {
     const A = formatDate(a);
     const B = formatDate(b);
     if (!A && !B) return '';
-    if (A && B) return `${A} to ${B}`;
+    if (A && B) return A + ' to ' + B;
     return A || B;
 }
 

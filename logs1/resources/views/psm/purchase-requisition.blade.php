@@ -509,7 +509,7 @@
     async function fetchVendors() {
         try {
             const response = await fetch('/api/v1/psm/vendors', {
-                headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+                headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
             });
             const result = await response.json();
             if (result.success) {
@@ -526,7 +526,7 @@
         vendors.forEach(vendor => {
             const option = document.createElement('option');
             option.value = vendor.ven_id; // Changed from vendor.id to vendor.ven_id
-            option.textContent = `${vendor.ven_company_name} (${vendor.ven_type})`;
+            option.textContent = vendor.ven_company_name + ' (' + vendor.ven_type + ')';
             vendorSelect.appendChild(option);
         });
     }
@@ -534,8 +534,8 @@
     // Fetch products for selected vendor
     async function fetchVendorProducts(vendorId) {
         try {
-            const response = await fetch(`/api/v1/psm/product-management/by-vendor/${vendorId}`, {
-                headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+            const response = await fetch('/api/v1/psm/product-management/by-vendor/' + vendorId, {
+                headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
             });
             const result = await response.json();
             if (result.success) {
@@ -556,36 +556,35 @@
         );
 
         if (filtered.length === 0) {
-            vendorProductsTableBody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm">
-                        No products found matching "${searchTerm}"
-                    </td>
-                </tr>
-            `;
+            vendorProductsTableBody.innerHTML = 
+                '<tr>' +
+                    '<td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm">' +
+                        'No products found matching "' + searchTerm + '"' +
+                    '</td>' +
+                '</tr>';
             return;
         }
 
-        vendorProductsTableBody.innerHTML = filtered.map(p => `
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 whitespace-nowrap">
-                    <div class="text-xs font-bold text-gray-900">${p.prod_name}</div>
-                    <div class="text-[10px] text-gray-500">${p.prod_id}</div>
-                </td>
-                <td class="px-4 py-3 text-[11px] text-gray-600 max-w-[150px] truncate" title="${p.prod_desc || ''}">
-                    ${p.prod_desc || '-'}
-                </td>
-                <td class="px-4 py-3 text-[11px] font-bold text-blue-600 whitespace-nowrap">
-                    ₱${parseFloat(p.prod_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                </td>
-                <td class="px-4 py-3 text-right">
-                    <button type="button" onclick="window.addItemToRequisition('${p.prod_name.replace(/'/g, "\\'")}', ${p.prod_price || 0})" 
-                        class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all active:scale-90">
-                        <i class='bx bx-plus text-lg'></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        vendorProductsTableBody.innerHTML = filtered.map(p => 
+            '<tr class="hover:bg-gray-50 transition-colors">' +
+                '<td class="px-4 py-3 whitespace-nowrap">' +
+                    '<div class="text-xs font-bold text-gray-900">' + p.prod_name + '</div>' +
+                    '<div class="text-[10px] text-gray-500">' + p.prod_id + '</div>' +
+                '</td>' +
+                '<td class="px-4 py-3 text-[11px] text-gray-600 max-w-[150px] truncate" title="' + (p.prod_desc || '') + '">' +
+                    (p.prod_desc || '-') +
+                '</td>' +
+                '<td class="px-4 py-3 text-[11px] font-bold text-blue-600 whitespace-nowrap">' +
+                    '₱' + parseFloat(p.prod_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) +
+                '</td>' +
+                '<td class="px-4 py-3 text-right">' +
+                    '<button type="button" onclick="window.addItemToRequisition(\'' + p.prod_name.replace(/'/g, "\\'") + '\', ' + (p.prod_price || 0) + ')" ' +
+                        'class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all active:scale-90">' +
+                        '<i class=\'bx bx-plus text-lg\'></i>' +
+                    '</button>' +
+                '</td>' +
+            '</tr>'
+        ).join('');
     }
 
     window.addItemToRequisition = (itemName, price) => {
@@ -596,7 +595,7 @@
             selectedItemPrices.set(itemName, price);
         }
         updateSideItemsContainer();
-        Toast.fire({ icon: 'success', title: `Added ${itemName} to list` });
+        Toast.fire({ icon: 'success', title: 'Added ' + itemName + ' to list' });
     };
 
     function updateSideItemsContainer() {
@@ -608,7 +607,7 @@
 
         selectedItems.forEach((count, name) => {
             const price = selectedItemPrices.get(name) || 0;
-            const displayValue = count > 1 ? `${name} (x${count})` : name;
+            const displayValue = count > 1 ? name + ' (x' + count + ')' : name;
             addSideItemRow(displayValue, false, name, count, price);
         });
     }
@@ -620,28 +619,26 @@
         
         const totalPrice = count * price;
         
-        div.innerHTML = `
-            <div class="flex gap-2 items-center">
-                <input type="text" name="items[]" required value="${value}" ${disabled ? 'disabled' : ''} 
-                    placeholder="Enter item name/description" class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                ${!disabled ? `
-                <button type="button" class="remove-side-item p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors">
-                    <i class='bx bx-trash text-lg'></i>
-                </button>` : ''}
-            </div>
-            ${originalName ? `
-            <div class="flex items-center justify-between text-[11px] text-gray-500 px-1">
-                <div class="flex items-center gap-2">
-                    <span>Price: ₱${parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
-                    <span>×</span>
-                    <span>Qty: ${count}</span>
-                </div>
-                <div class="font-bold text-blue-600">
-                    Total: ₱${parseFloat(totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2})}
-                </div>
-            </div>
-            ` : ''}
-        `;
+        div.innerHTML = 
+            '<div class="flex gap-2 items-center">' +
+                '<input type="text" name="items[]" required value="' + value + '" ' + (disabled ? 'disabled' : '') + ' ' +
+                    'placeholder="Enter item name/description" class="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">' +
+                (!disabled ? 
+                '<button type="button" class="remove-side-item p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition-colors">' +
+                    '<i class=\'bx bx-trash text-lg\'></i>' +
+                '</button>' : '') +
+            '</div>' +
+            (originalName ? 
+            '<div class="flex items-center justify-between text-[11px] text-gray-500 px-1">' +
+                '<div class="flex items-center gap-2">' +
+                    '<span>Price: ₱' + parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
+                    '<span>×</span>' +
+                    '<span>Qty: ' + count + '</span>' +
+                </div>' +
+                '<div class="font-bold text-blue-600">' +
+                    'Total: ₱' + parseFloat(totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2}) +
+                '</div>' +
+            '</div>' : '');
         sideItemsContainer.appendChild(div);
     }
 
@@ -654,7 +651,7 @@
         const venId = e.target.value;
         if (venId) {
                 const vendor = allVendors.find(v => v.ven_id == venId);
-                sideModalVendorName.textContent = `${vendor.ven_company_name} Products`;
+                sideModalVendorName.textContent = vendor.ven_company_name + ' Products';
                 
                 // Populate Chosen Vendor fields
                 // Display names
@@ -673,13 +670,12 @@
 
                 fetchVendorProducts(venId);
             } else {
-                vendorProductsTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="px-4 py-8 text-center text-gray-500 text-sm">
-                            Please select a vendor to see products
-                        </td>
-                    </tr>
-                `;
+                vendorProductsTableBody.innerHTML = 
+                    '<tr>' +
+                        '<td colspan="3" class="px-4 py-8 text-center text-gray-500 text-sm">' +
+                            'Please select a vendor to see products' +
+                        '</td>' +
+                    '</tr>';
                 sideModalVendorName.textContent = 'Vendor Products';
 
                 // Clear fields
@@ -764,7 +760,7 @@
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${JWT_TOKEN}`,
+                    'Authorization': 'Bearer ' + JWT_TOKEN,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
@@ -811,7 +807,7 @@
                        (now.getMonth() + 1).toString().padStart(2, '0') + 
                        now.getDate().toString().padStart(2, '0');
         const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-        return `REQN${dateStr}${random}`;
+        return 'REQN' + dateStr + random;
     }
 
     // Modal Display
@@ -834,7 +830,7 @@
             document.getElementById('req_date').value = new Date().toISOString().split('T')[0];
             addEmptyItemRow();
         } else if (mode === 'view') {
-            modalTitle.textContent = `Requisition Details`;
+            modalTitle.textContent = 'Requisition Details';
             submitBtn.classList.add('hidden');
             createContent.classList.add('hidden');
             viewContent.classList.remove('hidden');
@@ -847,28 +843,27 @@
             document.getElementById('view_req_chosen_vendor').textContent = getVendorName(data.req_chosen_vendor);
             
             const overallPrice = parseFloat(data.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('view_req_overall_price').textContent = `₱${overallPrice}`;
+            document.getElementById('view_req_overall_price').textContent = '₱' + overallPrice;
             
             document.getElementById('view_req_note').textContent = data.req_note || 'No additional notes.';
             
             // Status Badge in View
             const statusBadge = document.getElementById('view_req_status');
-            statusBadge.innerHTML = `
-                <span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 ${getStatusBadgeClass(data.req_status)}">
-                    ${getStatusIcon(data.req_status)}
-                    ${data.req_status}
-                </span>
-            `;
+            statusBadge.innerHTML = 
+                '<span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 ' + getStatusBadgeClass(data.req_status) + '">' +
+                    getStatusIcon(data.req_status) + ' ' +
+                    data.req_status +
+                '</span>';
 
             // Items List in View
             const items = Array.isArray(data.req_items) ? data.req_items : JSON.parse(data.req_items || '[]');
             const itemsList = document.getElementById('view_items_list');
-            itemsList.innerHTML = items.map(item => `
-                <div class="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
-                    <i class='bx bx-check text-green-500 font-bold'></i>
-                    <span class="text-sm text-gray-700 font-medium">${item}</span>
-                </div>
-            `).join('');
+            itemsList.innerHTML = items.map(item => 
+                '<div class="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">' +
+                    '<i class=\'bx bx-check text-green-500 font-bold\'></i>' +
+                    '<span class="text-sm text-gray-700 font-medium">' + item + '</span>' +
+                '</div>'
+            ).join('');
         }
         
         modal.classList.remove('hidden');
@@ -882,14 +877,13 @@
     function addItemRow(value = '', disabled = false) {
         const div = document.createElement('div');
         div.className = 'flex gap-2 item-row';
-        div.innerHTML = `
-            <input type="text" name="items[]" required value="${value}" ${disabled ? 'disabled' : ''} 
-                placeholder="Enter item name/description" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            ${!disabled ? `
-            <button type="button" class="remove-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                <i class='bx bx-trash text-xl'></i>
-            </button>` : ''}
-        `;
+        div.innerHTML = 
+            '<input type="text" name="items[]" required value="' + value + '" ' + (disabled ? 'disabled' : '') + ' ' +
+                'placeholder="Enter item name/description" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">' +
+            (!disabled ? 
+            '<button type="button" class="remove-item px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">' +
+                '<i class=\'bx bx-trash text-xl\'></i>' +
+            '</button>' : '');
         itemsContainer.appendChild(div);
     }
 
@@ -909,8 +903,8 @@
             const params = new URLSearchParams({ page, ...currentFilters });
             
             // Fetch internal requisitions
-            const response = await fetch(`${API_URL}?${params}`, {
-                headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+            const response = await fetch(API_URL + '?' + params, {
+                headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
             });
             const result = await response.json();
             
@@ -927,20 +921,20 @@
                 try {
                     // Use internal proxy to avoid CORS issues
                     const externalResponse = await fetch('/api/v1/psm/purchase-management/external-requisitions', {
-                        headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+                        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
                     });
                     const externalResult = await externalResponse.json();
                     
                     if (externalResult && externalResult.status === 'success' && Array.isArray(externalResult.data)) {
                         const externalData = externalResult.data.map(item => ({
-                            id: `ext_${item.req_id}`,
+                            id: 'ext_' + item.req_id,
                             req_id: item.req_id,
                             req_items: [item.requisition_item], // Wrap single item in array
                             req_price: 0, // Not provided by external API
                             req_requester: item.requester || 'External User',
                             req_dept: item.department || 'External Dept',
                             req_date: item.date || item.created_at || new Date().toISOString(),
-                            req_note: `Qty: ${item.quantity || 1} - Integrated from Log2 API`,
+                            req_note: 'Qty: ' + (item.quantity || 1) + ' - Integrated from Log2 API',
                             req_status: item.status || 'Pending',
                             is_external: true
                         }));
@@ -992,58 +986,54 @@
         if (!tbody) return;
 
         if (requisitions.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="px-6 py-12 text-center text-gray-500"><i class='bx bx-clipboard text-4xl mb-2 block text-gray-300'></i>No records found</td></tr>`;
+            tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-12 text-center text-gray-500"><i class=\'bx bx-clipboard text-4xl mb-2 block text-gray-300\'></i>No records found</td></tr>';
             return;
         }
 
         tbody.innerHTML = requisitions.map(req => {
             const items = Array.isArray(req.req_items) ? req.req_items : JSON.parse(req.req_items || '[]');
-            return `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${req.req_id}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="${items.join(', ')}">
-                        ${items.length > 0 ? items[0] : 'No items'} 
-                        ${items.length > 1 ? `<span class="text-blue-600 font-semibold">(+${items.length - 1})</span>` : ''}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
-                        ${getVendorName(req.req_chosen_vendor)}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
-                        ₱${parseFloat(req.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-bold text-gray-800">${req.req_requester}</div>
-                        <div class="text-xs text-gray-500">${req.req_dept}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${new Date(req.req_date).toLocaleDateString()}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="${req.req_note || ''}">${req.req_note || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 w-fit ${getStatusBadgeClass(req.req_status)}">
-                            ${getStatusIcon(req.req_status)}
-                            ${req.req_status}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div class="flex justify-end gap-2">
-                            <button onclick="viewRequisition('${req.id}')" title="View Details" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90">
-                                <i class='bx bx-show-alt text-xl'></i>
-                            </button>
-                            ${!req.is_external ? `
-                            <button onclick="openStatusUpdate(${req.id}, '${req.req_id}', '${req.req_status}')" title="Update Status" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90">
-                                <i class='bx bx-edit text-xl'></i>
-                            </button>
-                            <button onclick="confirmDelete(${req.id}, '${req.req_id}')" title="Delete Requisition" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90">
-                                <i class='bx bx-trash text-xl'></i>
-                            </button>
-                            ` : `
-                            <button disabled title="External Record (Read Only)" class="p-2 text-gray-400 cursor-not-allowed opacity-50">
-                                <i class='bx bx-lock-alt text-xl'></i>
-                            </button>
-                            `}
-                        </div>
-                    </td>
-                </tr>
-            `;
+            return '<tr class="hover:bg-gray-50 transition-colors">' +
+                    '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">' + req.req_id + '</td>' +
+                    '<td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="' + items.join(', ') + '">' +
+                        (items.length > 0 ? items[0] : 'No items') + ' ' +
+                        (items.length > 1 ? '<span class="text-blue-600 font-semibold">(+' + (items.length - 1) + ')</span>' : '') +
+                    '</td>' +
+                    '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">' +
+                        getVendorName(req.req_chosen_vendor) +
+                    '</td>' +
+                    '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">' +
+                        '₱' + parseFloat(req.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2}) +
+                    '</td>' +
+                    '<td class="px-6 py-4 whitespace-nowrap">' +
+                        '<div class="text-sm font-bold text-gray-800">' + req.req_requester + '</div>' +
+                        '<div class="text-xs text-gray-500">' + req.req_dept + '</div>' +
+                    '</td>' +
+                    '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">' + new Date(req.req_date).toLocaleDateString() + '</td>' +
+                    '<td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="' + (req.req_note || '') + '">' + (req.req_note || '-') + '</td>' +
+                    '<td class="px-6 py-4 whitespace-nowrap">' +
+                        '<span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 w-fit ' + getStatusBadgeClass(req.req_status) + '">' +
+                            getStatusIcon(req.req_status) +
+                            req.req_status +
+                        '</span>' +
+                    '</td>' +
+                    '<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">' +
+                        '<div class="flex justify-end gap-2">' +
+                            '<button onclick="viewRequisition(\'' + req.id + '\')" title="View Details" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90">' +
+                                '<i class=\'bx bx-show-alt text-xl\'></i>' +
+                            '</button>' +
+                            (!req.is_external ? 
+                            '<button onclick="openStatusUpdate(' + req.id + ', \'' + req.req_id + '\', \'' + req.req_status + '\')" title="Update Status" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90">' +
+                                '<i class=\'bx bx-edit text-xl\'></i>' +
+                            '</button>' +
+                            '<button onclick="confirmDelete(' + req.id + ', \'' + req.req_id + '\')" title="Delete Requisition" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90">' +
+                                '<i class=\'bx bx-trash text-xl\'></i>' +
+                            '</button>' : 
+                            '<button disabled title="External Record (Read Only)" class="p-2 text-gray-400 cursor-not-allowed opacity-50">' +
+                                '<i class=\'bx bx-lock-alt text-xl\'></i>' +
+                            '</button>') +
+                        '</div>' +
+                    '</td>' +
+                '</tr>';
         }).join('');
     }
 
@@ -1110,8 +1100,8 @@
         currentPage = meta.current_page;
         totalPages = meta.last_page;
         
-        pageDisplay.textContent = `${currentPage} / ${totalPages}`;
-         pagerInfo.textContent = `Showing ${meta.from || 0}-${meta.to || 0} of ${meta.total}`;
+        pageDisplay.textContent = currentPage + ' / ' + totalPages;
+        pagerInfo.textContent = 'Showing ' + (meta.from || 0) + '-' + (meta.to || 0) + ' of ' + meta.total;
          
          prevBtn.disabled = currentPage === 1;
         nextBtn.disabled = currentPage === totalPages;
@@ -1145,10 +1135,10 @@
     updateStatusBtn.addEventListener('click', async () => {
         const status = newStatusSelect.value;
         try {
-            const response = await fetch(`${API_URL}/${activeStatusId}/status`, {
+            const response = await fetch(API_URL + '/' + activeStatusId + '/status', {
                 method: 'PATCH',
                 headers: { 
-                    'Authorization': `Bearer ${JWT_TOKEN}`, 
+                    'Authorization': 'Bearer ' + JWT_TOKEN, 
                     'Content-Type': 'application/json',
                     'Accept': 'application/json' 
                 },
@@ -1168,7 +1158,7 @@
     window.confirmDelete = (id, reqId) => {
         Swal.fire({
             title: 'Delete Requisition?',
-            text: `Are you sure you want to delete ${reqId}? This action cannot be undone.`,
+            text: 'Are you sure you want to delete ' + reqId + '? This action cannot be undone.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
@@ -1178,9 +1168,9 @@
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`${API_URL}/${id}`, {
+                    const response = await fetch(API_URL + '/' + id, {
                         method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${JWT_TOKEN}`, 'Accept': 'application/json' }
+                        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
                     });
                     const res = await response.json();
                     if (res.success) {
@@ -1235,7 +1225,7 @@
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 
-                    'Authorization': `Bearer ${JWT_TOKEN}`, 
+                    'Authorization': 'Bearer ' + JWT_TOKEN, 
                     'Content-Type': 'application/json',
                     'Accept': 'application/json' 
                 },
