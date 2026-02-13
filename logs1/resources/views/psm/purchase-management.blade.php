@@ -510,19 +510,85 @@ function resolveChosenVendorName(v) {
     if (v === null || v === undefined || v === '') return 'Not chosen';
     if (typeof v === 'object') {
         if (v.company_name) return v.company_name;
+        if (v.ven_company_name) return v.ven_company_name;
         if (v.name) return v.name;
+        if (v.ven_id) {
+            var byVenId = (activeVendors || []).find(function(av){ return String(av.ven_id) === String(v.ven_id); });
+            if (byVenId) return byVenId.company_name || byVenId.ven_company_name || byVenId.name || String(v.ven_id);
+        }
         if (v.id !== undefined && v.id !== null) {
-            var foundObj = (activeVendors || []).find(function(av){ return av.id == v.id; });
-            return foundObj ? foundObj.company_name : String(v.id);
+            var foundObj = (activeVendors || []).find(function(av){ return String(av.id) === String(v.id); });
+            if (foundObj) return foundObj.company_name || foundObj.ven_company_name || foundObj.name || String(v.id);
         }
         return JSON.stringify(v);
     }
     var s = String(v).trim();
+    // Try match by vendor public ID (ven_id / vendorid) first
+    var foundByVenId = (activeVendors || []).find(function(av){ return String(av.ven_id) === s; });
+    if (foundByVenId) return foundByVenId.company_name || foundByVenId.ven_company_name || foundByVenId.name || s;
+    // If numeric-like, try internal numeric id
     if (/^\d+$/.test(s)) {
-        var found = (activeVendors || []).find(function(av){ return av.id == s; });
-        return found ? found.company_name : s;
+        var found = (activeVendors || []).find(function(av){ return String(av.id) === s; });
+        if (found) return found.company_name || found.ven_company_name || found.name || s;
     }
-    return s;
+    return s; // Fallback to raw
+}
+
+// Cache for vendor lookups by vendor public id (ven_id / vendorid)
+var vendorByVenIdCache = {};
+
+async function getVendorCompanyNameByVenId(venId) {
+    if (!venId) return null;
+    // Try active vendors cache first
+    var found = (activeVendors || []).find(function(av){ return String(av.ven_id) === String(venId); });
+    if (found) {
+        var nm = found.company_name || found.ven_company_name || found.name || null;
+        if (nm) return nm;
+    }
+    // Try local cache
+    if (vendorByVenIdCache[venId]) return vendorByVenIdCache[venId];
+    // Hit API to resolve by vendor public id (works regardless of status)
+    try {
+        const resp = await fetch(API_BASE_URL + '/psm/vendor-management/by-ven-id/' + encodeURIComponent(venId), {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Authorization': JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : ''
+            },
+            credentials: 'include'
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const json = await resp.json();
+        if (json && json.success && json.data) {
+            const nm = json.data.ven_company_name || json.data.company_name || null;
+            if (nm) {
+                vendorByVenIdCache[venId] = nm;
+                return nm;
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to resolve vendor by venId', venId, e);
+    }
+    return null;
+}
+
+function hydrateChosenVendorNamesInTable() {
+    var nodes = document.querySelectorAll('.chosen-vendor[data-venid]');
+    if (!nodes || nodes.length === 0) return;
+    nodes.forEach(function(node){
+        var current = (node.textContent || '').trim();
+        var venId = node.getAttribute('data-venid');
+        if (!venId) return;
+        // If the current text looks like an unresolved ID, try async resolve
+        var looksLikeId = /^[A-Za-z]*\d+/.test(current) || current === venId;
+        if (looksLikeId) {
+            getVendorCompanyNameByVenId(venId).then(function(name){
+                if (name && node.isConnected) {
+                    node.textContent = name;
+                }
+            });
+        }
+    });
 }
 
 async function ensureJwtToken() {
@@ -1335,6 +1401,8 @@ function displayApprovedRequisitions(consolidatedRequests) {
         const itemsString = items.slice(0, 2).map(item => 
             typeof item === 'object' ? item.name : item
         ).join(', ') + (items.length > 2 ? '...' : '');
+        const venRaw = (req.con_chosen_vendor ?? '').toString();
+        const venResolved = resolveChosenVendorName(venRaw);
         
         return '<tr class="hover:bg-gray-50 transition-colors">' +
                 '<td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">' +
@@ -1351,7 +1419,9 @@ function displayApprovedRequisitions(consolidatedRequests) {
                     '<div class="text-xs text-gray-500">' + (req.con_dept || 'N/A') + '</div>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap">' +
-                    '<div class="text-sm font-semibold text-gray-700">' + resolveChosenVendorName(req.con_chosen_vendor) + '</div>' +
+                    '<div class="text-sm font-semibold text-gray-700">' +
+                        '<span class="chosen-vendor" data-venid="' + venRaw.replace(/"/g, '&quot;') + '">' + venResolved + '</span>' +
+                    '</div>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">' +
                     formatCurrency(req.con_total_price || 0) +
@@ -1375,6 +1445,9 @@ function displayApprovedRequisitions(consolidatedRequests) {
                 '</td>' +
             '</tr>';
     }).join('');
+    
+    // Post-render hydration for vendor names if unresolved
+    hydrateChosenVendorNamesInTable();
 }
 
 window.viewConsolidatedInModal = async function(id) {
@@ -1432,7 +1505,7 @@ window.viewConsolidatedInModal = async function(id) {
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chosen Vendor</p>' +
-                                '<p class="text-sm font-bold text-blue-600">' + resolveChosenVendorName(req.con_chosen_vendor) + '</p>' +
+                                '<p class="text-sm font-bold text-blue-600"><span class="chosen-vendor" data-venid="' + String(req.con_chosen_vendor || '').replace(/"/g, '&quot;') + '">' + resolveChosenVendorName(req.con_chosen_vendor) + '</span></p>' +
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
@@ -1457,6 +1530,9 @@ window.viewConsolidatedInModal = async function(id) {
                 customClass: {
                     container: 'z-[70]'
                 }
+            }).then(function(){
+                // Hydrate vendor name inside SweetAlert content
+                hydrateChosenVendorNamesInTable();
             });
         }
     } catch (error) {
@@ -1500,7 +1576,7 @@ function showConsolidatedPanelData(req) {
             '</div>' +
             '<div>' +
                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Chosen Vendor</p>' +
-                '<p class="text-sm font-bold text-blue-600">' + resolveChosenVendorName(req.con_chosen_vendor) + '</p>' +
+                '<p class="text-sm font-bold text-blue-600"><span class="chosen-vendor" data-venid="' + String(req.con_chosen_vendor || '').replace(/"/g, '&quot;') + '">' + resolveChosenVendorName(req.con_chosen_vendor) + '</span></p>' +
             '</div>' +
             '<div>' +
                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
@@ -1521,6 +1597,8 @@ function showConsolidatedPanelData(req) {
         ) : '');
     
     panel.classList.remove('hidden');
+    // Hydrate vendor name inside side panel
+    hydrateChosenVendorNamesInTable();
 }
 
 function hideConsolidatedPanel() {
