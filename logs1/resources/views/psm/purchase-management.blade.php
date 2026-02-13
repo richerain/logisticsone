@@ -1431,82 +1431,70 @@ window.viewConsolidatedInModal = async function(id) {
                 }
             });
         }
-         console.error('Error viewing details:', error);
-         Swal.fire('Error', 'Failed to load details: ' + error.message, 'error');
-     } finally {
-         hideLoading();
-     }
- }
- 
- window.convertConsolidatedToPOInModal = async function(id) {
-     try {
-         const result = await Swal.fire({
-             title: 'Convert to PO?',
-             text: 'This will start creating a new Purchase Order from this consolidated request.',
-             icon: 'question',
-             showCancelButton: true,
-             confirmButtonColor: '#10b981',
-             cancelButtonColor: '#6b7280',
-             confirmButtonText: 'Yes, convert it!'
-         });
- 
-         if (result.isConfirmed) {
-             closeRequisitionsModal();
-             // Implement PO conversion logic here
-             // This would likely pre-fill the New Purchase Order modal
-             openAddModal();
-             
-             // Fetch the consolidated request to fill the form
-             const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
-                 method: 'GET',
-                 headers: {
-                     'Accept': 'application/json',
-                     'X-Requested-With': 'XMLHttpRequest',
-                     'X-CSRF-TOKEN': CSRF_TOKEN,
-                     'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-                 },
-                 credentials: 'include'
-             });
-             
-             const res = await response.json();
-             if (res.success && res.data) {
-                 const req = res.data.find(r => r.id == id);
-                 if (req) {
-                     // Pre-fill description
-                     if (elements.purDesc) {
-                        elements.purDesc.value = `Converted from Consolidated Request: ${req.con_req_id || `CON-${req.id}`}. Original Department: ${req.req_dept}`;
-                     }
-
-                     // Pre-fill items
-                     const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
-                     selectedItems = items.map(item => ({
-                         id: Date.now() + Math.random(),
-                         itemId: Date.now() + Math.random(),
-                         name: typeof item === 'object' ? item.name : item,
-                         price: typeof item === 'object' ? (item.price || 0) : 0,
-                         picture: null,
-                         warranty: null,
-                         expiration: null
-                     }));
-                     updateSelectedItemsDisplay();
-                     
-                     // Show items section
-                     if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
-                     
-                     showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
-                 }
-             }
-         }
-     } catch (error) {
-         console.error('Error converting to PO:', error);
-         Swal.fire('Error', 'Failed to convert to PO', 'error');
-     }
- }
-
-        console.error('Error viewing requisition:', error);
-        showNotification('Error: ' + error.message, 'error');
+    } catch (error) {
+        console.error('Error viewing details:', error);
+        Swal.fire('Error', 'Failed to load details: ' + error.message, 'error');
     } finally {
         hideLoading();
+    }
+}
+
+window.convertConsolidatedToPOInModal = async function(id) {
+    try {
+        const result = await Swal.fire({
+            title: 'Convert to PO?',
+            text: 'This will start creating a new Purchase Order from this consolidated request.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, convert it!'
+        });
+
+        if (result.isConfirmed) {
+            closeRequisitionsModal();
+            openAddModal();
+            
+            const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include'
+            });
+            
+            const res = await response.json();
+            if (res.success && res.data) {
+                const req = res.data.find(r => r.id == id);
+                if (req) {
+                    if (elements.purDesc) {
+                       elements.purDesc.value = `Converted from Consolidated Request: ${req.con_req_id || `CON-${req.id}`}. Original Department: ${req.req_dept}`;
+                    }
+
+                    const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
+                    selectedItems = items.map(item => ({
+                        id: Date.now() + Math.random(),
+                        itemId: Date.now() + Math.random(),
+                        name: typeof item === 'object' ? item.name : item,
+                        price: typeof item === 'object' ? (item.price || 0) : 0,
+                        picture: null,
+                        warranty: null,
+                        expiration: null
+                    }));
+                    updateSelectedItemsDisplay();
+                    
+                    if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
+                    
+                    showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error converting to PO:', error);
+        Swal.fire('Error', 'Failed to convert to PO', 'error');
     }
 }
 
