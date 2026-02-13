@@ -195,10 +195,10 @@
                 </div>
 
                 <!-- Open Vendor Opportunities Button -->
-                <div class="w-full max-w-md mt-6 opacity-0 animate-entrance-up delay-[1200ms]">
+                <div class="w-full max-w-md mt-4 opacity-0 animate-entrance-up delay-[1200ms]">
                     <button type="button" id="opportunitiesBtn" 
-                        class="w-full bg-white/10 border-2 border-white/30 text-white font-bold py-3 px-4 rounded-lg
-                                transition-all duration-300 shadow-lg hover:bg-white/20
+                        class="w-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold py-3 px-4 rounded-lg
+                                transition-all duration-300 shadow-lg hover:shadow-amber-400/20
                                 transform active:translate-y-0 active:scale-[0.99] flex items-center justify-center gap-2">
                         <i class='bx bx-briefcase-alt-2 text-xl'></i>
                         <span>Open Vendor Opportunities</span>
@@ -209,7 +209,7 @@
     </main>
 
     <!-- Vendor Opportunities Section -->
-    <section id="opportunitiesSection" class="min-h-screen bg-white/50 backdrop-blur-md py-16 px-6 relative overflow-hidden">
+    <section id="opportunitiesSection" class="min-h-screen bg-gray-100 py-16 px-6 relative overflow-hidden">
         <!-- Background Elements -->
         <div class="absolute inset-0 z-0 pointer-events-none opacity-20">
             <div class="absolute w-64 h-64 top-10 right-10 bg-brand-primary/20 rounded-full blur-3xl"></div>
@@ -280,7 +280,8 @@
             </div>
 
             <div class="mt-12 text-center">
-                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="text-gray-500 hover:text-brand-primary transition-colors flex items-center justify-center gap-2 mx-auto">
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-600 font-semibold rounded-full hover:bg-gray-50 hover:text-brand-primary hover:border-brand-primary/30 transition-all duration-300 shadow-sm hover:shadow-md active:scale-95">
                     <i class='bx bx-up-arrow-alt text-xl'></i>
                     Back to Login
                 </button>
