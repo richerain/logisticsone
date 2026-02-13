@@ -1068,6 +1068,10 @@ if (confirmReviewBtn) {
     });
 }
 
+// Expose modal handlers for delegated calls
+window.viewPurchaseOrder = viewPurchaseOrder;
+window.openReviewPurchaseOrder = openReviewPurchaseOrder;
+
 // delegate clicks in quotes table
 if (elements.quotesTableBody) {
     elements.quotesTableBody.addEventListener('click', function(e) {
