@@ -15,6 +15,18 @@
 </div>
 
 <div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- quote purchase order section -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-blue-50 text-blue-700">
+                <i class='bx bx-transfer-alt text-2xl'></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-800 leading-tight">Quote Purchase Order</h3>
+                <p class="text-xs text-gray-500">Manage vendor quotes sourced from purchase orders</p>
+            </div>
+        </div>
+    </div>
     <!-- notification purchase order card start -->
     <div class="flex justify-end mb-6">
         <div class="indicator">
@@ -35,8 +47,9 @@
     <dialog id="my_modal_4" class="modal backdrop-blur-sm">
         <div class="modal-box w-11/12 max-w-5xl bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
             <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center">
-                <div class="text-xl font-bold text-white flex items-center mb-0">
-                    New Purchases
+                <div class="text-xl font-bold text-white flex items-center gap-2 mb-0">
+                    <i class='bx bx-cart-download'></i>
+                    New Purchase Requests
                 </div>
                 <form method="dialog"><button class="text-white/80 hover:text-white transition-colors"><i class='bx bx-x text-2xl'></i></button></form>
             </div>
@@ -45,17 +58,21 @@
                     <table id="notifTable" class="table table-sm table-zebra w-full">
                         <thead>
                             <tr class="bg-gray-900 font-bold text-white">
-                                <th class="whitespace-nowrap py-3">Purchase Order No.</th>
+                                <th class="whitespace-nowrap py-3">Request ID</th>
                                 <th class="whitespace-nowrap py-3">Items</th>
                                 <th class="whitespace-nowrap py-3">Units</th>
                                 <th class="whitespace-nowrap py-3">Total Amount</th>
-                                <th class="whitespace-nowrap py-3">Received Date</th>
+                                <th class="whitespace-nowrap py-3">Vendor</th>
+                                <th class="whitespace-nowrap py-3">Vendor Type</th>
+                                <th class="whitespace-nowrap py-3">Status</th>
+                                <th class="whitespace-nowrap py-3">Ordered By</th>
+                                <th class="whitespace-nowrap py-3">Description</th>
                                 <th class="whitespace-nowrap py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="notifTableBody">
                             <tr>
-                                <!--   -->
+                                <!-- data rows -->
                             </tr>
                         </tbody>
                     </table>
@@ -208,6 +225,7 @@
 var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
 var PSM_QUOTES_API = `${API_BASE_URL}/psm/vendor-quote`;
 var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
+var PSM_PURCHASE_REQUESTS_API = `${API_BASE_URL}/psm/purchase-requests`;
 
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
@@ -271,7 +289,7 @@ function setNotificationIndicator(count) {
 
 async function loadNotifications() {
     try {
-        const response = await fetch(`${PSM_QUOTES_API}/notifications?t=${new Date().getTime()}`, {
+        const response = await fetch(`${PSM_PURCHASE_REQUESTS_API}?status=Pending&t=${new Date().getTime()}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -305,33 +323,35 @@ function displayNotifications(list) {
         elements.notifTableBody.innerHTML = `
             <tr>
                 <td colspan="10" class="px-6 py-8 text-center text-gray-500">
-                    <i class='bx bxs-purchase-tag text-4xl text-gray-300 mb-3'></i>
-                    <p class="text-lg">No approved purchases</p>
+                    <i class='bx bxs-bell-off text-4xl text-gray-300 mb-3'></i>
+                    <p class="text-lg">No pending purchase requests</p>
                 </td>
             </tr>`;
         return;
     }
-        elements.notifTableBody.innerHTML = list.map((p, i) => {
-            const itemsFull = Array.isArray(p.pur_name_items) ? p.pur_name_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
-            return `
-        <tr>
-            <td class="px-3 py-2 font-mono whitespace-nowrap font-medium text-blue-600">${p.pur_id}</td>
-            <td class="px-3 py-2 whitespace-nowrap" title="${itemsFull}">${truncateItems(p.pur_name_items, 40)}</td>
-            <td class="px-3 py-2 whitespace-nowrap">${p.pur_unit} units</td>
-            <td class="px-3 py-2 whitespace-nowrap text-green-600 font-bold">${formatCurrency(p.pur_total_amount)}</td>
-            <td class="px-3 py-2 whitespace-nowrap">${formatDate(p.created_at)}</td>
-            <td class="px-3 py-2 whitespace-nowrap">
-                <div class="flex items-center space-x-2">
-                    <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${p.id}" title="View">
-                        <i class='bx bx-show-alt text-xl'></i>
-                    </button>
-                    <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="review" data-id="${p.id}" title="Review Purchase">
-                        <i class='bx bx-check-circle text-xl'></i>
-                    </button>
-                </div>
-            </td>
-        </tr>`;
-        }).join('');
+    elements.notifTableBody.innerHTML = list.map((r) => {
+        const itemsText = Array.isArray(r.preq_name_items) ? r.preq_name_items.map(i => typeof i === 'object' ? (i.name || '') : (i || '')).join(', ') : '';
+        return `
+            <tr>
+                <td class="px-3 py-2 font-mono whitespace-nowrap font-medium text-blue-600">${r.preq_id}</td>
+                <td class="px-3 py-2 whitespace-nowrap" title="${itemsText}">${truncateItems(r.preq_name_items, 40)}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${r.preq_unit} units</td>
+                <td class="px-3 py-2 whitespace-nowrap text-green-600 font-bold">${formatCurrency(r.preq_total_amount)}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${r.preq_ven_company_name || ''}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${r.preq_ven_type || ''}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${r.preq_status}</td>
+                <td class="px-3 py-2 whitespace-nowrap">${r.preq_order_by || ''}</td>
+                <td class="px-3 py-2 whitespace-nowrap" title="${r.preq_desc || ''}">${(r.preq_desc || '').substring(0, 32)}${(r.preq_desc||'').length>32?'…':''}</td>
+                <td class="px-3 py-2 whitespace-nowrap">
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view-req" data-id="${r.preq_id}" title="View Request">
+                            <i class='bx bx-show-alt text-xl'></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 window.viewApprovedPurchase = function(id) {

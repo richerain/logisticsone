@@ -15,6 +15,7 @@ use App\Models\PSM\PurchaseItem;
 use App\Models\PSM\Budget;
 use App\Models\PSM\BudgetLog;
 use App\Models\PSM\Consolidated;
+use App\Models\PSM\PurchaseRequest;
 use Illuminate\Support\Str;
 
 class PSMRepository
@@ -429,6 +430,47 @@ class PSMRepository
             'inactive_vendors' => Vendor::where('ven_status', 'inactive')->count(),
             'total_products' => Product::count(),
         ];
+    }
+
+    /**
+     * Purchase Request methods
+     */
+    public function getPurchaseRequests($filters = [])
+    {
+        $query = PurchaseRequest::orderBy('created_at', 'desc');
+        if (!empty($filters['status'])) {
+            $query->where('preq_status', $filters['status']);
+        }
+        return $query->get();
+    }
+
+    public function createPurchaseRequest($data)
+    {
+        return PurchaseRequest::create($data);
+    }
+
+    public function upsertPurchaseRequestFromPurchase(Purchase $purchase)
+    {
+        return PurchaseRequest::updateOrCreate(
+            ['preq_id' => $purchase->pur_id],
+            [
+                'preq_name_items' => $purchase->pur_name_items,
+                'preq_unit' => $purchase->pur_unit,
+                'preq_total_amount' => $purchase->pur_total_amount,
+                'preq_ven_id' => null,
+                'preq_ven_company_name' => $purchase->pur_company_name,
+                'preq_ven_type' => $purchase->pur_ven_type,
+                'preq_status' => 'Pending',
+                'preq_process' => null,
+                'preq_order_by' => $purchase->pur_order_by,
+                'preq_desc' => $purchase->pur_desc,
+            ]
+        );
+    }
+
+    public function deletePurchaseRequestByPreqId($preqId)
+    {
+        return PurchaseRequest::where('preq_id', $preqId)->delete();
     }
 
     /**

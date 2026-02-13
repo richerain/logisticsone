@@ -37,6 +37,11 @@ Route::prefix('purchase-management')->group(function () {
     Route::get('/external-requisitions', [PSMController::class, 'getExternalRequisitions']);
 });
 
+// PSM Purchase Requests (mirror of Pending purchases)
+Route::prefix('purchase-requests')->group(function () {
+    Route::get('/', [PSMController::class, 'getPurchaseRequests']);
+});
+
 // PSM Budget Management Routes
 Route::prefix('budget-management')->group(function () {
     Route::get('/', [PSMController::class, 'getBudgets']);

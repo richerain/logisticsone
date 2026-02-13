@@ -34,6 +34,18 @@ class PSMService
             throw new Exception('Error fetching purchase products: ' . $e->getMessage());
         }
     }
+    
+    /**
+     * Get purchase requests
+     */
+    public function getPurchaseRequests($filters = [])
+    {
+        try {
+            return $this->psmRepository->getPurchaseRequests($filters);
+        } catch (Exception $e) {
+            throw new Exception('Error fetching purchase requests: ' . $e->getMessage());
+        }
+    }
 
     public function markProductsAsReceivedByProdId($prodId)
     {
@@ -509,6 +521,11 @@ class PSMService
             $data['pur_total_amount'] = $totalAmount;
 
             $purchase = $this->psmRepository->createPurchase($data);
+
+            // Mirror Pending purchases into psm_purcahse_request
+            if ($purchase && $purchase->pur_status === 'Pending') {
+                $this->psmRepository->upsertPurchaseRequestFromPurchase($purchase);
+            }
 
             // If this purchase was created from a consolidated request, mark it as completed
             if (!empty($data['consolidated_id']) || !empty($data['con_req_id'])) {
@@ -1745,10 +1762,7 @@ class PSMService
                 ];
             }
 
-            // Set approved by if provided (for both approval and rejection)
-            if ($approvedBy) {
-                $purchase->pur_approved_by = $approvedBy;
-            }
+            // approved_by column removed; keep parameter for compatibility but do not persist
 
             // Calculate warranty and expiration if status is Completed
             if ($status === 'Completed') {
@@ -1852,6 +1866,13 @@ class PSMService
             // Update purchase status
             $purchase->pur_status = $status;
             $purchase->save();
+
+            // Sync purchase request mirror
+            if ($status === 'Pending') {
+                $this->psmRepository->upsertPurchaseRequestFromPurchase($purchase);
+            } else {
+                $this->psmRepository->deletePurchaseRequestByPreqId($purchase->pur_id);
+            }
 
             DB::commit();
 

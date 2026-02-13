@@ -157,6 +157,30 @@ class PSMController extends Controller
     }
 
     /**
+     * Get purchase requests (mirror of Pending purchases)
+     */
+    public function getPurchaseRequests(Request $request)
+    {
+        try {
+            $filters = [
+                'status' => $request->get('status'),
+            ];
+            $data = $this->psmService->getPurchaseRequests($filters);
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'message' => 'Purchase requests retrieved successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch purchase requests: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
      * Update purchase
      */
     public function updatePurchase(Request $request, $id)
