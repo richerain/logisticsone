@@ -304,6 +304,9 @@
             const deptFilter = document.getElementById('consolidatedDeptFilter')?.value || '';
 
             filteredRequisitions = allApprovedRequisitions.filter(req => {
+                // EXCLUDE: items that are already "Approved" in budget approval
+                if (req.con_budget_approval === 'Approved') return false;
+
                 const matchesSearch = 
                     (req.con_req_id && req.con_req_id.toLowerCase().includes(searchTerm)) ||
                     (req.req_id && req.req_id.toLowerCase().includes(searchTerm)) ||

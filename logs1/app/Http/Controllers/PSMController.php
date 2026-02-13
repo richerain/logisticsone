@@ -900,6 +900,18 @@ class PSMController extends Controller
     public function getRequisitions(Request $request)
     {
         try {
+            // NEW: Support fetching only approved consolidated budget requests
+            if ($request->has('approved_consolidated')) {
+                $approved = \App\Models\PSM\Consolidated::where('con_budget_approval', 'Approved')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+                
+                return response()->json([
+                    'success' => true,
+                    'data' => $approved
+                ]);
+            }
+
             $filters = $request->only(['status', 'is_consolidated', 'page_size', 'search', 'dept']);
             $result = $this->psmService->getRequisitions($filters);
 

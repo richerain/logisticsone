@@ -93,7 +93,7 @@
                 <div class="relative">
                     <button id="openRequisitionsBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-emerald-100 active:scale-95">
                         <i class='bx bx-list-check text-lg'></i>
-                        New Purchase Requisition
+                        Budget Approved Requisitions
                     </button>
                     <!-- Pulse Notification Badge for Approved Requisitions -->
                     <div id="approvedReqBadgePulse" class="hidden absolute -top-2 -right-2 z-20">
@@ -1248,7 +1248,8 @@ async function loadApprovedRequisitions() {
     `;
     
     try {
-        const response = await fetch(`${PSM_REQUISITIONS_API}?status=Approved`, {
+        // Fetch approved consolidated requests instead of individual requisitions
+        const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -1267,15 +1268,15 @@ async function loadApprovedRequisitions() {
             displayApprovedRequisitions(result.data || []);
             updateRequisitionBadge(result.data ? result.data.length : 0);
         } else {
-            throw new Error(result.message || 'Failed to load requisitions');
+            throw new Error(result.message || 'Failed to load approved consolidated requests');
         }
     } catch (error) {
-        console.error('Error loading requisitions:', error);
+        console.error('Error loading approved consolidated requests:', error);
         elements.requisitionsTableBody.innerHTML = `
             <tr>
                 <td colspan="5" class="px-6 py-8 text-center text-red-500">
                     <i class='bx bx-error-circle text-4xl mb-2'></i>
-                    <p>Error loading requisitions: ${error.message}</p>
+                    <p>Error loading budget approved requests: ${error.message}</p>
                 </td>
             </tr>
         `;
@@ -1295,23 +1296,23 @@ function updateRequisitionBadge(count) {
     }
 }
 
-function displayApprovedRequisitions(requisitions) {
+function displayApprovedRequisitions(consolidatedRequests) {
     if (!elements.requisitionsTableBody) return;
     
-    if (requisitions.length === 0) {
+    if (consolidatedRequests.length === 0) {
         elements.requisitionsTableBody.innerHTML = `
             <tr>
                 <td colspan="5" class="px-6 py-8 text-center text-gray-500">
                     <i class='bx bx-list-check text-4xl text-gray-300 mb-2'></i>
-                    <p>No approved requisitions found</p>
+                    <p>No budget approved requests found</p>
                 </td>
             </tr>
         `;
         return;
     }
     
-    elements.requisitionsTableBody.innerHTML = requisitions.map(req => {
-        const items = Array.isArray(req.req_items) ? req.req_items : (typeof req.req_items === 'string' ? JSON.parse(req.req_items) : []);
+    elements.requisitionsTableBody.innerHTML = consolidatedRequests.map(req => {
+        const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
         const itemsString = items.slice(0, 2).map(item => 
             typeof item === 'object' ? item.name : item
         ).join(', ') + (items.length > 2 ? '...' : '');
@@ -1319,7 +1320,7 @@ function displayApprovedRequisitions(requisitions) {
         return `
             <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                    ${req.req_id || `REQ-${req.id}`}
+                    ${req.con_req_id || `CON-${req.id}`}
                 </td>
                 <td class="px-4 py-4 text-sm text-gray-700">
                     <div class="max-w-xs truncate" title="${items.map(i => typeof i === 'object' ? i.name : i).join(', ')}">
@@ -1328,20 +1329,20 @@ function displayApprovedRequisitions(requisitions) {
                     <small class="text-xs text-gray-500">${items.length} item(s)</small>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap">
-                    <div class="text-sm font-bold text-gray-800">${req.req_requester || 'Unknown'}</div>
+                    <div class="text-sm font-bold text-gray-800">${req.con_requester || 'Unknown'}</div>
                     <div class="text-xs text-gray-500">${req.req_dept || 'N/A'}</div>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    ${formatDate(req.req_date || req.created_at)}
+                    ${formatDate(req.con_date || req.created_at)}
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-right">
                     <div class="flex justify-end gap-2">
-                        <button onclick="viewRequisitionInModal(${req.id})" 
+                        <button onclick="viewConsolidatedInModal(${req.id})" 
                                 class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                 title="View Details">
                             <i class='bx bx-show-alt text-xl'></i>
                         </button>
-                        <button onclick="convertReqToPOInModal('${req.id}')" 
+                        <button onclick="convertConsolidatedToPOInModal('${req.id}')" 
                                 class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                                 title="Convert to PO">
                             <i class='bx bx-transfer-alt text-xl'></i>
@@ -1353,10 +1354,13 @@ function displayApprovedRequisitions(requisitions) {
     }).join('');
 }
 
-window.viewRequisitionInModal = async function(id) {
+window.viewConsolidatedInModal = async function(id) {
     try {
         showLoading();
-        const response = await fetch(`${PSM_REQUISITIONS_API}/${id}`, {
+        // Since we don't have a direct endpoint for single consolidated yet, 
+        // we can fetch from the list or implement a new endpoint.
+        // For now, let's try to find it in our current data or fetch it.
+        const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -1371,10 +1375,11 @@ window.viewRequisitionInModal = async function(id) {
         
         const result = await response.json();
         if (result.success && result.data) {
-            const req = result.data;
-            const items = Array.isArray(req.req_items) ? req.req_items : (typeof req.req_items === 'string' ? JSON.parse(req.req_items) : []);
+            const req = result.data.find(r => r.id == id);
+            if (!req) throw new Error('Request not found');
+
+            const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
             
-            // Format items list for Swal
             const itemsHtml = items.map(item => `
                 <div class="flex items-center gap-2 p-2 bg-gray-50 rounded border border-gray-100 text-left">
                     <i class='bx bx-check text-green-500'></i>
@@ -1383,21 +1388,21 @@ window.viewRequisitionInModal = async function(id) {
             `).join('');
 
             Swal.fire({
-                title: `<div class="flex items-center gap-2 justify-center"><i class='bx bx-file text-blue-600'></i> Requisition Details</div>`,
+                title: `<div class="flex items-center gap-2 justify-center"><i class='bx bx-file text-blue-600'></i> Consolidated Details</div>`,
                 html: `
                     <div class="space-y-4 text-left">
                         <div class="grid grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">
                             <div>
-                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requisition ID</p>
-                                <p class="text-sm font-bold text-blue-600">${req.req_id || `REQ-${req.id}`}</p>
+                                <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Consolidated ID</p>
+                                <p class="text-sm font-bold text-blue-600">${req.con_req_id || `CON-${req.id}`}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Date</p>
-                                <p class="text-sm font-bold text-gray-700">${formatDate(req.req_date)}</p>
+                                <p class="text-sm font-bold text-gray-700">${formatDate(req.con_date)}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Requester</p>
-                                <p class="text-sm font-bold text-gray-700">${req.req_requester || 'Unknown'}</p>
+                                <p class="text-sm font-bold text-gray-700">${req.con_requester || 'Unknown'}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Department</p>
@@ -1405,15 +1410,15 @@ window.viewRequisitionInModal = async function(id) {
                             </div>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Requested Items</p>
+                            <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Items</p>
                             <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
                                 ${itemsHtml}
                             </div>
                         </div>
-                        ${req.req_note ? `
+                        ${req.con_note ? `
                         <div>
                             <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Notes</p>
-                            <p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">${req.req_note}</p>
+                            <p class="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg border-l-4 border-gray-200">${req.con_note}</p>
                         </div>
                         ` : ''}
                     </div>
@@ -1426,7 +1431,78 @@ window.viewRequisitionInModal = async function(id) {
                 }
             });
         }
-    } catch (error) {
+         console.error('Error viewing details:', error);
+         Swal.fire('Error', 'Failed to load details: ' + error.message, 'error');
+     } finally {
+         hideLoading();
+     }
+ }
+ 
+ window.convertConsolidatedToPOInModal = async function(id) {
+     try {
+         const result = await Swal.fire({
+             title: 'Convert to PO?',
+             text: 'This will start creating a new Purchase Order from this consolidated request.',
+             icon: 'question',
+             showCancelButton: true,
+             confirmButtonColor: '#10b981',
+             cancelButtonColor: '#6b7280',
+             confirmButtonText: 'Yes, convert it!'
+         });
+ 
+         if (result.isConfirmed) {
+             closeRequisitionsModal();
+             // Implement PO conversion logic here
+             // This would likely pre-fill the New Purchase Order modal
+             openAddModal();
+             
+             // Fetch the consolidated request to fill the form
+             const response = await fetch(`${PSM_REQUISITIONS_API}?approved_consolidated=1`, {
+                 method: 'GET',
+                 headers: {
+                     'Accept': 'application/json',
+                     'X-Requested-With': 'XMLHttpRequest',
+                     'X-CSRF-TOKEN': CSRF_TOKEN,
+                     'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                 },
+                 credentials: 'include'
+             });
+             
+             const res = await response.json();
+             if (res.success && res.data) {
+                 const req = res.data.find(r => r.id == id);
+                 if (req) {
+                     // Pre-fill description
+                     if (elements.purDesc) {
+                        elements.purDesc.value = `Converted from Consolidated Request: ${req.con_req_id || `CON-${req.id}`}. Original Department: ${req.req_dept}`;
+                     }
+
+                     // Pre-fill items
+                     const items = Array.isArray(req.con_items) ? req.con_items : (typeof req.con_items === 'string' ? JSON.parse(req.con_items) : []);
+                     selectedItems = items.map(item => ({
+                         id: Date.now() + Math.random(),
+                         itemId: Date.now() + Math.random(),
+                         name: typeof item === 'object' ? item.name : item,
+                         price: typeof item === 'object' ? (item.price || 0) : 0,
+                         picture: null,
+                         warranty: null,
+                         expiration: null
+                     }));
+                     updateSelectedItemsDisplay();
+                     
+                     // Show items section
+                     if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
+                     
+                     showNotification('Consolidated items loaded. Please select a vendor to proceed.', 'info');
+                 }
+             }
+         }
+     } catch (error) {
+         console.error('Error converting to PO:', error);
+         Swal.fire('Error', 'Failed to convert to PO', 'error');
+     }
+ }
+
         console.error('Error viewing requisition:', error);
         showNotification('Error: ' + error.message, 'error');
     } finally {
