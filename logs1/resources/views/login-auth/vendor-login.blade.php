@@ -197,7 +197,7 @@
                 <!-- Open Vendor Opportunities Button -->
                 <div class="w-full max-w-md mt-4 opacity-0 animate-entrance-up delay-[1200ms]">
                     <button type="button" id="opportunitiesBtn" 
-                        class="w-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold py-3 px-4 rounded-lg
+                        class="w-full bg-white hover:bg-white/80 text-green-200 font-bold py-3 px-4 rounded-lg
                                 transition-all duration-300 shadow-lg hover:shadow-amber-400/20
                                 transform active:translate-y-0 active:scale-[0.99] flex items-center justify-center gap-2">
                         <i class='bx bx-briefcase-alt-2 text-xl'></i>
