@@ -1172,12 +1172,7 @@ function displayPurchases(purchases) {
                 '<i class=\'bx bx-show-alt text-xl\'></i>' +
             '</button>';
 
-        if (!(isApproved || isCompleted || isCancelled || isInProgress)) {
-            actionButtons += 
-                '<button onclick="editPurchase(' + purchase.id + ')" class="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded-lg hover:bg-blue-50" title="Edit Purchase">' +
-                    '<i class=\'bx bx-edit-alt text-xl\'></i>' +
-                '</button>';
-        }
+        /* Edit purchase removed */
 
         if (!isCompleted && purchase.pur_status === 'Pending') {
             actionButtons += 
@@ -1806,85 +1801,7 @@ function openAddModal() {
     elements.purchaseModal.classList.remove('hidden');
 }
 
-function openEditModal(purchase) {
-    if (!elements.modalTitle || !elements.purchaseId || !elements.purchaseModal) return;
-    
-    elements.modalTitle.textContent = 'Edit Purchase Order';
-    elements.purchaseId.value = purchase.id;
-    if (elements.purDesc) elements.purDesc.value = purchase.pur_desc || '';
-    if (elements.purOrderBy) elements.purOrderBy.value = purchase.pur_order_by || '';
-    
-    // Set company
-    if (elements.companySelect) {
-        elements.companySelect.value = purchase.pur_company_name;
-        
-        // Manually set the selected vendor so adding items works
-        const selectedOption = Array.from(elements.companySelect.options).find(opt => opt.value === purchase.pur_company_name);
-        if (selectedOption) {
-            setSelectedVendor(selectedOption);
-        }
-
-        // Hide company selection in edit mode
-        const container = elements.companySelect.closest('.mb-4');
-        if (container) container.classList.add('hidden');
-    }
-    
-    // Set vendor type
-    if (elements.vendorType) elements.vendorType.value = purchase.pur_ven_type;
-    
-    // Set items
-    const items = Array.isArray(purchase.pur_name_items) ? purchase.pur_name_items : [];
-    selectedItems = items.map(item => {
-        const itemName = typeof item === 'object' ? item.name : item;
-        const itemPrice = typeof item === 'object' ? item.price : 0;
-        let itemPicture = typeof item === 'object' ? item.picture : null;
-        let itemWarranty = typeof item === 'object' ? item.warranty : null;
-        let itemExpiration = typeof item === 'object' ? item.expiration : null;
-        
-        // Try to find picture and details
-        if (!itemPicture || !itemWarranty || !itemExpiration) {
-            // Check availableItems first
-            if (typeof availableItems !== 'undefined' && availableItems.length > 0) {
-                 const foundItem = availableItems.find(i => i.name === itemName);
-                 if (foundItem) {
-                    if (!itemPicture) itemPicture = foundItem.picture;
-                    if (!itemWarranty) itemWarranty = foundItem.warranty;
-                    if (!itemExpiration) itemExpiration = foundItem.expiration;
-                 }
-            }
-            
-            // If still missing, check activeVendors
-            if ((!itemPicture || !itemWarranty || !itemExpiration) && typeof activeVendors !== 'undefined') {
-                for (const vendor of activeVendors) {
-                    if (vendor.products) {
-                        const product = vendor.products.find(p => p.name === itemName);
-                        if (product) {
-                            if (!itemPicture) itemPicture = product.picture;
-                            if (!itemWarranty) itemWarranty = product.warranty;
-                            if (!itemExpiration) itemExpiration = product.expiration;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        
-        return {
-            id: Date.now() + Math.random(), 
-            itemId: Date.now() + Math.random(), 
-            name: itemName,
-            price: itemPrice,
-            picture: itemPicture,
-            warranty: itemWarranty,
-            expiration: itemExpiration
-        };
-    });
-    
-    updateSelectedItemsDisplay();
-    if (elements.itemsSection) elements.itemsSection.classList.remove('hidden');
-    
-    elements.purchaseModal.classList.remove('hidden');
-}
+/* Edit purchase modal removed */
 
 function closePurchaseModal() {
     if (elements.purchaseModal) elements.purchaseModal.classList.add('hidden');
@@ -1989,12 +1906,7 @@ async function handlePurchaseSubmit(e) {
     }
 }
 
-function editPurchase(id) {
-    const purchase = currentPurchases.find(p => p.id == id);
-    if (purchase) {
-        openEditModal(purchase);
-    }
-}
+/* Edit purchase function removed */
 
 function openCancelPurchaseModal(id) {
     const purchase = currentPurchases.find(p => p.id == id);
@@ -2383,7 +2295,6 @@ function closeViewPurchaseModal() {
 
 // Global functions for HTML onclick
 window.viewPurchase = viewPurchase;
-window.editPurchase = editPurchase;
 window.deletePurchase = deletePurchase;
 window.cancelPurchase = cancelPurchase;
 window.addItemToPurchase = addItemToPurchase;
