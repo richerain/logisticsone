@@ -238,7 +238,6 @@
 
         // Variables for Budget Requests
         let allBudgetRequests = [];
-        let allVendors = [];
 
         async function fetchVendors() {
             try {
