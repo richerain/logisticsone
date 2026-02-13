@@ -76,6 +76,68 @@ class PSMService
         }
     }
 
+    /**
+     * Review purchase request: mark as Reviewed, create a Quote, and refresh purchase status
+     */
+    public function reviewPurchaseRequest($preqId)
+    {
+        DB::beginTransaction();
+        try {
+            $req = $this->psmRepository->getPurchaseRequestByPreqId($preqId);
+            if (!$req) {
+                DB::rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Purchase request not found',
+                    'data' => null,
+                ];
+            }
+            // Update request process marker
+            $this->psmRepository->updatePurchaseRequestByPreqId($preqId, [
+                'preq_process' => 'Reviewed',
+                'updated_at' => now(),
+            ]);
+
+            // Create quote from the underlying purchase if available
+            $purchase = $this->psmRepository->getPurchaseByPurchaseId($preqId);
+            if ($purchase) {
+                $quoteData = [
+                    'quo_items' => $purchase->pur_name_items,
+                    'quo_units' => $purchase->pur_unit,
+                    'quo_total_amount' => $purchase->pur_total_amount,
+                    'quo_status' => 'Vendor-Review',
+                    'quo_stored_from' => 'Main Warehouse A',
+                    'quo_department_from' => 'Logistics 1',
+                    'quo_module_from' => 'Procurement & Sourcing Management',
+                    'quo_submodule_from' => 'Vendor Quote',
+                    'quo_purchase_id' => $purchase->id,
+                ];
+                $quoteResult = $this->createQuote($quoteData);
+                // Optionally sync purchase status for consistency
+                $this->updatePurchaseStatus($purchase->id, 'Vendor-Review', null);
+            } else {
+                $quoteResult = ['success' => false, 'data' => null];
+            }
+
+            DB::commit();
+            return [
+                'success' => true,
+                'message' => 'Purchase request reviewed',
+                'data' => [
+                    'request' => $req,
+                    'quote' => $quoteResult['data'] ?? null
+                ],
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to review purchase request: ' . $e->getMessage(),
+                'data' => null,
+            ];
+        }
+    }
+
     public function markProductsAsReceivedByProdId($prodId)
     {
         try {

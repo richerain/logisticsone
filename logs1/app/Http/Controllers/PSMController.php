@@ -191,6 +191,24 @@ class PSMController extends Controller
     }
 
     /**
+     * Review purchase request and create quote
+     */
+    public function reviewPurchaseRequest($preqId)
+    {
+        try {
+            $result = $this->psmService->reviewPurchaseRequest($preqId);
+            $status = $result['success'] ? 200 : 500;
+            return response()->json($result, $status);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to review purchase request: '.$e->getMessage(),
+                'data' => null,
+            ], 500);
+        }
+    }
+
+    /**
      * Update purchase
      */
     public function updatePurchase(Request $request, $id)

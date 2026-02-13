@@ -441,12 +441,27 @@ class PSMRepository
         if (!empty($filters['status'])) {
             $query->where('preq_status', $filters['status']);
         }
+        if (empty($filters['include_reviewed'])) {
+            $query->where(function($q) {
+                $q->whereNull('preq_process')->orWhere('preq_process', '!=', 'Reviewed');
+            });
+        }
         return $query->get();
     }
 
     public function createPurchaseRequest($data)
     {
         return PurchaseRequest::create($data);
+    }
+
+    public function getPurchaseRequestByPreqId($preqId)
+    {
+        return PurchaseRequest::where('preq_id', $preqId)->first();
+    }
+
+    public function updatePurchaseRequestByPreqId($preqId, $data)
+    {
+        return PurchaseRequest::where('preq_id', $preqId)->update($data);
     }
 
     public function upsertPurchaseRequestFromPurchase(Purchase $purchase)

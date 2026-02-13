@@ -12,6 +12,38 @@
     <div class="text-right">
         <span class="text-md text-gray-600">Procurement & Sourcing Management</span>
     </div>
+    <dialog id="viewPurchaseOrderModal" class="modal backdrop-blur-sm">
+        <div class="modal-box w-11/12 max-w-3xl bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class='bx bxs-detail'></i> Purchase Order Detail
+                </h3>
+                <form method="dialog"><button class="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"><i class='bx bx-x text-2xl'></i></button></form>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[70vh] bg-gray-50">
+                <div id="viewPurchaseOrderContent" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden p-6"></div>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+    <dialog id="reviewRequestConfirmModal" class="modal backdrop-blur-sm">
+        <div class="modal-box w-11/12 max-w-md bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
+            <div class="px-6 py-4 flex justify-between items-center border-b">
+                <h3 class="text-lg font-bold text-gray-800">Review Purchase Order</h3>
+                <form method="dialog"><button class="text-gray-500 hover:text-gray-800 transition-colors p-1 rounded-full"><i class='bx bx-x text-2xl'></i></button></form>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-gray-600">Proceed to review this purchase order?</p>
+                <div class="flex justify-end gap-3">
+                    <button id="cancelReviewRequestBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button id="confirmReviewRequestBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+                        <i class='bx bx-check-circle'></i> review purchase order
+                    </button>
+                </div>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
 </div>
 
 <div class="bg-white rounded-lg shadow-lg p-6">
@@ -21,16 +53,18 @@
             <i class='bx bx-transfer-alt text-2xl text-blue-700'></i>
             <h3 class="text-lg font-bold text-gray-800 leading-tight">Quote Purchase Order</h3>
         </div>
-        <div class="indicator">
-            <button class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow transition-colors flex items-center gap-2"
+        <div class="relative">
+            <button id="openNewPurchaseOrderBtn" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow transition-colors flex items-center gap-2"
                     type="button" onclick="my_modal_4.showModal()">
                 <i class='bx bx-cart-download text-lg'></i>
-                <span class="font-semibold">New Purchases</span>
+                <span class="font-semibold">New Purchase Order</span>
             </button>
-            <span class="indicator-item badge badge-sm badge-error border-0 rounded-full w-5 h-5 flex items-center justify-center top-0 right-0">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
-                <span class="relative text-white text-[10px] font-bold">0</span>
-            </span>
+            <div id="newPurchaseBadgePulse" class="hidden absolute -top-2 -right-2 z-20">
+                <span class="relative flex h-5 w-5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span id="newPurchasePulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-blue-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
+                </span>
+            </div>
         </div>
     </div>
     <!-- notification purchase order card modal start -->
@@ -39,7 +73,7 @@
             <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 flex justify-between items-center">
                 <div class="text-xl font-bold text-white flex items-center gap-2 mb-0">
                     <i class='bx bx-cart-download'></i>
-                    New Purchase Requests
+                    New Purchase Order
                 </div>
                 <form method="dialog"><button class="text-white/80 hover:text-white transition-colors"><i class='bx bx-x text-2xl'></i></button></form>
             </div>
@@ -221,8 +255,8 @@ var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.query
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
 var elements = {
-    notificationBadge: document.querySelector('.indicator .indicator-item'),
-    notificationCountSpan: document.querySelector('.indicator .indicator-item .relative'),
+    newPurchaseBadge: document.getElementById('newPurchaseBadgePulse'),
+    newPurchaseCountSpan: document.getElementById('newPurchasePulseCount'),
     notifModal: document.getElementById('my_modal_4'),
     notifTableBody: document.getElementById('notifTableBody'),
     quotesTableBody: document.getElementById('quotesTableBody'),
@@ -258,6 +292,7 @@ function safeHideLoading() {
 
 var selectedQuoteId = null;
 var selectedPurchaseId = null;
+var selectedRequestPreqId = null;
 
 initVendorQuote();
 
@@ -267,13 +302,13 @@ async function initVendorQuote() {
 }
 
 function setNotificationIndicator(count) {
-    if (!elements.notificationBadge) return;
+    if (!elements.newPurchaseBadge || !elements.newPurchaseCountSpan) return;
     if (count > 0) {
-        elements.notificationBadge.classList.remove('hidden');
-        var display = count > 99 ? '+99' : `+${count}`;
-        if (elements.notificationCountSpan) elements.notificationCountSpan.textContent = display;
+        elements.newPurchaseBadge.classList.remove('hidden');
+        var display = count > 99 ? '99' : String(count);
+        elements.newPurchaseCountSpan.textContent = display;
     } else {
-        elements.notificationBadge.classList.add('hidden');
+        elements.newPurchaseBadge.classList.add('hidden');
     }
 }
 
@@ -349,8 +384,11 @@ function displayNotifications(list) {
                 <td class="px-3 py-2 whitespace-nowrap" title="${r.preq_desc || ''}">${(r.preq_desc || '').substring(0, 32)}${(r.preq_desc||'').length>32?'…':''}</td>
                 <td class="px-3 py-2 whitespace-nowrap">
                     <div class="flex items-center space-x-2">
-                        <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view-req" data-id="${r.preq_id}" title="View Request">
+                        <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view-po" data-id="${r.preq_id}" title="View Purchase Order">
                             <i class='bx bx-show-alt text-xl'></i>
+                        </button>
+                        <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="review-po" data-id="${r.preq_id}" title="Review Purchase Order">
+                            <i class='bx bx-check-circle text-xl'></i>
                         </button>
                     </div>
                 </td>
@@ -939,10 +977,93 @@ if (elements.notifTableBody) {
         const action = btn.dataset.action;
         const id = btn.dataset.id;
         if (!id) return;
-        if (action === 'view') {
-            window.viewApprovedPurchase(Number(id));
-        } else if (action === 'review') {
-            window.openReviewConfirm(Number(id));
+        if (action === 'view-po') {
+            window.viewPurchaseOrder(String(id));
+        } else if (action === 'review-po') {
+            window.openReviewPurchaseOrder(String(id));
+        }
+    });
+}
+
+function viewPurchaseOrder(preqId) {
+    const r = (currentNotifications || []).find(x => String(x.preq_id) === String(preqId));
+    const modal = document.getElementById('viewPurchaseOrderModal');
+    const content = document.getElementById('viewPurchaseOrderContent');
+    if (!r || !modal || !content) return;
+    const itemsHtml = Array.isArray(r.preq_name_items) ? r.preq_name_items.map(item => {
+        const name = typeof item === 'object' ? (item.name || '') : String(item || '');
+        const price = typeof item === 'object' ? (item.price || 0) : 0;
+        return `<div class="flex justify-between py-2 border-b border-gray-100 last:border-0"><span class="font-medium text-gray-800">${name}</span><span class="text-gray-600 font-mono">${formatCurrency(price)}</span></div>`;
+    }).join('') : '';
+    content.innerHTML = `
+        <div class="grid grid-cols-2 gap-y-4 gap-x-6 mb-6">
+            <div><span class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Request ID</span><p class="font-mono font-bold text-gray-900 text-lg">${r.preq_id}</p></div>
+            <div><span class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Status</span><p class="text-sm font-medium text-gray-700">${r.preq_status || ''}</p></div>
+            <div><span class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Vendor</span><p class="text-sm font-medium text-gray-700">${r.preq_ven_company_name || ''}</p></div>
+            <div><span class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Vendor Type</span><p class="text-sm font-medium text-gray-700">${r.preq_ven_type || ''}</p></div>
+            <div class="col-span-2"><span class="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">Description</span><p class="text-sm text-gray-700">${r.preq_desc || ''}</p></div>
+        </div>
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-bold text-gray-700">Items</h4>
+                <span class="text-xs font-semibold text-gray-500">Total: <span class="text-gray-800 font-bold">${formatCurrency(r.preq_total_amount)}</span></span>
+            </div>
+            ${itemsHtml || '<p class="text-sm text-gray-500">No items found</p>'}
+        </div>
+    `;
+    modal.showModal();
+}
+
+function openReviewPurchaseOrder(preqId) {
+    selectedRequestPreqId = preqId;
+    const modal = document.getElementById('reviewRequestConfirmModal');
+    if (modal) modal.showModal();
+}
+
+const confirmReviewBtn = document.getElementById('confirmReviewRequestBtn');
+const cancelReviewBtn = document.getElementById('cancelReviewRequestBtn');
+if (cancelReviewBtn) {
+    cancelReviewBtn.addEventListener('click', function(ev) {
+        ev.preventDefault();
+        const modal = document.getElementById('reviewRequestConfirmModal');
+        if (modal) modal.close();
+    });
+}
+if (confirmReviewBtn) {
+    confirmReviewBtn.addEventListener('click', async function(ev) {
+        ev.preventDefault();
+        if (!selectedRequestPreqId) return;
+        try {
+            const response = await fetch(`${PSM_PURCHASE_REQUESTS_API}/${encodeURIComponent(selectedRequestPreqId)}/review`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('reviewRequestConfirmModal')?.close();
+                document.getElementById('viewPurchaseOrderModal')?.close();
+                document.getElementById('my_modal_4')?.close();
+                if (typeof showNotification === 'function') {
+                    showNotification('Successfully reviewed purchase order', 'success');
+                } else {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Successfully reviewed purchase order', showConfirmButton: false, timer: 3000 });
+                }
+                await loadNotifications();
+                await loadQuotes();
+            } else {
+                throw new Error(result.message || 'Failed to review');
+            }
+        } catch (e) {
+            if (typeof showNotification === 'function') showNotification('Error reviewing purchase order: ' + (e && e.message ? e.message : 'Unknown error'), 'error');
+        } finally {
+            selectedRequestPreqId = null;
         }
     });
 }

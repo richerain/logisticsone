@@ -41,6 +41,7 @@ Route::prefix('purchase-management')->group(function () {
 Route::prefix('purchase-requests')->group(function () {
     Route::get('/', [PSMController::class, 'getPurchaseRequests']);
     Route::get('/sync', [PSMController::class, 'syncPurchaseRequests']);
+    Route::post('/{preqId}/review', [PSMController::class, 'reviewPurchaseRequest']);
 });
 
 // PSM Budget Management Routes
