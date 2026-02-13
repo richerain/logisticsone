@@ -59,7 +59,7 @@
                     <i class='bx bx-time-five text-2xl'></i>
                 </div>
                 <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending</h4>
-                <div id="pendingPulse" class="hidden absolute top-1 right-1">
+                <div id="pendingPulse" class="hidden absolute -top-2 -right-2">
                     <span class="relative flex h-5 w-5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                         <span id="pendingPulseCount" class="relative inline-flex rounded-full h-5 w-5 bg-amber-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white shadow-sm">0</span>
