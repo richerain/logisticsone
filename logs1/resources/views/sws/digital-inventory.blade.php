@@ -8,7 +8,7 @@
     </div>
 </div>
 <!-- Inventory Metrics section start -->
-<div class="mt-4">
+<div class="mt-4 mb-4">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div id="di_card_total" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
             <div class="flex items-center justify-between mb-3">
