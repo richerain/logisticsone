@@ -961,7 +961,7 @@
                     '</td>' +
                     '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">' +
                         '<span class="price-mask" data-masked="1" data-price="' + priceFormatted + '">*****</span>' +
-                        '<button type="button" class="ml-2 align-middle text-gray-500 hover:text-gray-700" title="Show Total Price" onclick="togglePriceVisibility(this)"><i class="bx bx-show-alt"></i></button>' +
+                        '<button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Price" onclick="togglePriceVisibility(this)"><i class="bx bx-show-alt text-2xl"></i></button>' +
                     '</td>' +
                     '<td class="px-6 py-4 whitespace-nowrap">' +
                         '<div class="text-sm font-bold text-gray-800">' + req.req_requester + '</div>' +
@@ -996,7 +996,7 @@
         }).join('');
     }
 
-    function togglePriceVisibility(btn) {
+    window.togglePriceVisibility = function(btn) {
         try {
             const cell = btn.closest('td');
             if (!cell) return;
@@ -1007,10 +1007,14 @@
                 span.textContent = span.getAttribute('data-price') || '';
                 span.setAttribute('data-masked', '0');
                 btn.title = 'Hide Total Price';
+                const icon = btn.querySelector('i');
+                if (icon) { icon.classList.remove('bx-show-alt'); icon.classList.add('bx-hide'); }
             } else {
                 span.textContent = '*****';
                 span.setAttribute('data-masked', '1');
                 btn.title = 'Show Total Price';
+                const icon = btn.querySelector('i');
+                if (icon) { icon.classList.remove('bx-hide'); icon.classList.add('bx-show-alt'); }
             }
         } catch (e) {
             console.warn('togglePriceVisibility error:', e);
