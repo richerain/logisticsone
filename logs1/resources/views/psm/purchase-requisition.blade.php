@@ -949,6 +949,7 @@
 
         tbody.innerHTML = requisitions.map(req => {
             const items = Array.isArray(req.req_items) ? req.req_items : JSON.parse(req.req_items || '[]');
+            const priceFormatted = '₱' + parseFloat(req.req_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
             return '<tr class="hover:bg-gray-50 transition-colors">' +
                     '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">' + req.req_id + '</td>' +
                     '<td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="' + items.join(', ') + '">' +
@@ -959,11 +960,8 @@
                         getVendorName(req.req_chosen_vendor) +
                     '</td>' +
                     '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">' +
-                        (function(){' +
-                            'var price = \"₱\" + parseFloat(req.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2});' +
-                            'return \"<span class=\\\"price-mask\\\" data-masked=\\\"1\\\" data-price=\\\"\" + price + \"\\\">*****</span>\" + ' +
-                                   '\"<button type=\\\"button\\\" class=\\\"ml-2 align-middle text-gray-500 hover:text-gray-700\\\" title=\\\"Show Total Price\\\" onclick=\\\"togglePriceVisibility(this)\\\"><i class=\\\"bx bx-show-alt\\\"></i></button>\";' +
-                        '})()' +
+                        '<span class="price-mask" data-masked="1" data-price="' + priceFormatted + '">*****</span>' +
+                        '<button type="button" class="ml-2 align-middle text-gray-500 hover:text-gray-700" title="Show Total Price" onclick="togglePriceVisibility(this)"><i class="bx bx-show-alt"></i></button>' +
                     '</td>' +
                     '<td class="px-6 py-4 whitespace-nowrap">' +
                         '<div class="text-sm font-bold text-gray-800">' + req.req_requester + '</div>' +
