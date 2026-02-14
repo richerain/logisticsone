@@ -100,7 +100,7 @@
 <!-- Quick Management section start -->
 <div class="mt-4 mb-4">
     <div class="rounded-2xl overflow-hidden">
-        <div class="p-4">
+        <div class="p-2">
             <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
                 <button id="transferBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
@@ -162,7 +162,6 @@
             <i class='bx bx-line-chart text-brand-primary text-xl'></i>
             <h3 class="text-lg font-bold text-gray-800 tracking-tight">Inventory Overview</h3>
         </div>
-        
     </div>
     
     <div class="p-5">
