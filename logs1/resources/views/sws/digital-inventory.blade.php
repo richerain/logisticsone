@@ -109,7 +109,7 @@
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Transfer</span>
                 </button>
 
-                <button id="viewLocationsBtn" class=" h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+                <button id="viewLocationsBtn" class="hidden h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600">
                         <i class='bx bx-map text-lg'></i>
                     </span>
