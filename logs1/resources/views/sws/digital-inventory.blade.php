@@ -137,18 +137,11 @@
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Purchase</span>
                 </button>
 
-                <button id="inventoryNewItemBtn" class="h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                <button id="inventoryNewItemBtn" class="relative h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                         <i class='bx bxs-down-arrow-square text-lg'></i>
                     </span>
-                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Inventory</span>
-                </button>
-
-                <button id="incomingAssetsBtn" class="relative h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
-                    <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                        <i class='bx bx-import text-lg'></i>
-                    </span>
-                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Incoming</span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Inventory New Item</span>
                     <span id="incomingBadge" class="hidden absolute -top-1 -right-1">
                         <span class="relative flex h-5 w-5">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -156,6 +149,7 @@
                         </span>
                     </span>
                 </button>
+                <!-- Incoming button merged into Inventory New Item -->
             </div>
         </div>
     </div>
@@ -2217,42 +2211,27 @@ function openIncomingAssetsModal() {
 }
 
 function closeIncomingAssetsModal() {
-    els.incomingAssetsModal.classList.add('hidden');
+    if (window.isDualInventoryOpen) {
+        closeInventoryDualModal();
+    } else {
+        els.incomingAssetsModal.classList.add('hidden');
+    }
 }
 
 async function openAddItemModal() {
+    if (window.isDualInventoryOpen) {
+        return; // handled by dual modal opener
+    }
+    await prepareAddItemPane();
     els.addItemModal.classList.remove('hidden');
-    els.addItemForm.reset();
-    document.getElementById('item_max_stock').value = 100;
-    document.getElementById('item_is_fixed').checked = false;
-    document.getElementById('item_is_collateral').checked = false;
-    
-    updateItemCodePreview();
-    
-    // fetchCompletedPurchases();
-    await loadIncomingAssets();
-    populateItemNameDropdown();
-    
-    const itemNameSelect = document.getElementById('item_name');
-    const skuInput = document.getElementById('item_stock_keeping_unit');
-    
-    itemNameSelect.onchange = onPurchaseItemSelected;
-    
-    const categorySelect = document.getElementById('item_category_id');
-    categorySelect.onchange = function() {
-        if (!skuInput.value && itemNameSelect.value) {
-             const selectedOption = itemNameSelect.options[itemNameSelect.selectedIndex];
-             const itemName = selectedOption ? (selectedOption.dataset.itemName || selectedOption.text) : '';
-             const categoryName = this.options[this.selectedIndex]?.text || '';
-             if (itemName) {
-                skuInput.value = generateSKU(itemName, categoryName);
-             }
-        }
-    };
 }
 
 function closeAddItemModal() {
-    els.addItemModal.classList.add('hidden');
+    if (window.isDualInventoryOpen) {
+        closeInventoryDualModal();
+    } else {
+        els.addItemModal.classList.add('hidden');
+    }
 }
 
 function openViewItemModal() {
@@ -2269,6 +2248,57 @@ function openEditItemModal() {
 
 function closeEditItemModal() {
     els.editItemModal.classList.add('hidden');
+}
+
+async function prepareAddItemPane() {
+    els.addItemForm.reset();
+    document.getElementById('item_max_stock').value = 100;
+    document.getElementById('item_is_fixed').checked = false;
+    document.getElementById('item_is_collateral').checked = false;
+    updateItemCodePreview();
+    await loadIncomingAssets();
+    populateItemNameDropdown();
+    const itemNameSelect = document.getElementById('item_name');
+    const skuInput = document.getElementById('item_stock_keeping_unit');
+    itemNameSelect.onchange = onPurchaseItemSelected;
+    const categorySelect = document.getElementById('item_category_id');
+    categorySelect.onchange = function() {
+        if (!skuInput.value && itemNameSelect.value) {
+            const selectedOption = itemNameSelect.options[itemNameSelect.selectedIndex];
+            const itemName = selectedOption ? (selectedOption.dataset.itemName || selectedOption.text) : '';
+            const categoryName = this.options[this.selectedIndex]?.text || '';
+            if (itemName) {
+                skuInput.value = generateSKU(itemName, categoryName);
+            }
+        }
+    };
+}
+
+window.isDualInventoryOpen = false;
+
+async function openInventoryDualModal() {
+    window.isDualInventoryOpen = true;
+    await prepareAddItemPane();
+    els.incomingAssetsModal.className = "fixed inset-y-0 left-0 right-1/2 bg-transparent flex items-stretch p-4 z-[60]";
+    els.addItemModal.className = "fixed inset-y-0 left-1/2 right-0 bg-transparent flex items-stretch p-4 z-[60]";
+    const inInner = els.incomingAssetsModal.querySelector('.bg-white');
+    const addInner = els.addItemModal.querySelector('.bg-white');
+    if (inInner) {
+        inInner.classList.add('w-full','h-full','max-w-none','rounded-xl','shadow-lg','overflow-hidden');
+    }
+    if (addInner) {
+        addInner.classList.add('w-full','h-full','max-w-none','rounded-xl','shadow-lg','overflow-hidden');
+    }
+    els.incomingAssetsModal.classList.remove('hidden');
+    els.addItemModal.classList.remove('hidden');
+    currentIncomingAssetsPage = 1;
+    renderIncomingAssets();
+}
+
+function closeInventoryDualModal() {
+    window.isDualInventoryOpen = false;
+    els.incomingAssetsModal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50";
+    els.addItemModal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50";
 }
 
 // Item CRUD Functions
@@ -2735,7 +2765,7 @@ function initDigitalInventory() {
     if (els.closeViewLocationsModalBtn) els.closeViewLocationsModalBtn.addEventListener('click', closeViewLocationsModalFunc);
 
     // Incoming Assets Event Listeners
-    if (els.incomingAssetsBtn) els.incomingAssetsBtn.addEventListener('click', openIncomingAssetsModal);
+    // Incoming button merged into Inventory New Item
     if (els.closeIncomingAssetsModal) els.closeIncomingAssetsModal.addEventListener('click', closeIncomingAssetsModal);
     if (els.incomingAssetsModal) {
         els.incomingAssetsModal.addEventListener('click', (e) => {
@@ -2806,7 +2836,7 @@ function initDigitalInventory() {
 
     if (els.generateReportBtn) els.generateReportBtn.addEventListener('click', openDigitalInventoryReportModal);
     if (els.purchaseNewItemBtn) els.purchaseNewItemBtn.addEventListener('click', openUnderDevelopmentModal);
-    if (els.inventoryNewItemBtn) els.inventoryNewItemBtn.addEventListener('click', openAddItemModal);
+    if (els.inventoryNewItemBtn) els.inventoryNewItemBtn.addEventListener('click', openInventoryDualModal);
     
     // Modal Event Listeners
     if (els.closeUnderDevelopmentModal) els.closeUnderDevelopmentModal.addEventListener('click', closeUnderDevelopmentModal);
