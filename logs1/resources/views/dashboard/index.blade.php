@@ -375,6 +375,18 @@
 
 <script>
 // Module Charts Data Initialization start
+// Ensure JWT token available for API calls (jwt.auth middleware)
+var JWT_TOKEN = (typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN) ? JWT_TOKEN : '';
+if (!JWT_TOKEN && typeof window !== 'undefined' && typeof window.SERVER_JWT_TOKEN !== 'undefined' && window.SERVER_JWT_TOKEN) {
+    JWT_TOKEN = window.SERVER_JWT_TOKEN;
+    try { localStorage.setItem('jwt', JWT_TOKEN); } catch(e){}
+}
+if (!JWT_TOKEN) {
+    try { JWT_TOKEN = localStorage.getItem('jwt') || ''; } catch(e){ JWT_TOKEN = ''; }
+}
+// CSRF fallback
+var CSRF_TOKEN = (typeof CSRF_TOKEN !== 'undefined' && CSRF_TOKEN) ? CSRF_TOKEN : (document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '');
+
 document.addEventListener('DOMContentLoaded', function () {
     initializeModuleCharts();
     wireDashboardMetricLinks();
