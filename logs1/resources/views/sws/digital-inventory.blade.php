@@ -2376,6 +2376,7 @@ async function saveItem(e) {
     const sku = (document.getElementById('item_stock_keeping_unit').value || '').trim();
     const deltaUnits = parseInt(document.getElementById('item_current_stock').value);
     const incomingId = (document.getElementById('psm_purcprod_id').value || '').trim();
+    const prodIdVal = (document.getElementById('psm_prod_id')?.value || '').trim();
     const itemNameVal = (document.getElementById('item_name').value || '').trim();
 
     if (!itemNameVal) {
@@ -2428,35 +2429,8 @@ async function saveItem(e) {
             const result = await response.json();
             if (!result.success) throw new Error(result.message || 'Failed to create inventory item');
 
-            // Mark incoming asset as inventoried = "yes"
-            if (incomingId) {
-                try {
-                    const upd = await fetch(`/api/v1/sws/incoming-assets/${incomingId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': CSRF_TOKEN,
-                            'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-                        },
-                        body: JSON.stringify({ sws_purcprod_inventory: 'yes' }),
-                        credentials: 'include'
-                    });
-                    if (upd && upd.ok) {
-                        incomingAssetsData = (incomingAssetsData || []).map(x => {
-                            if (String(x.sws_purcprod_id) === String(incomingId)) {
-                                return { ...x, sws_purcprod_inventory: 'yes' };
-                            }
-                            return x;
-                        });
-                        renderIncomingAssets();
-                        updateIncomingBadge();
-                    }
-                } catch (e) {
-                    console.warn('Failed to mark incoming as inventoried:', e);
-                }
-            }
+            // Mark all related incoming assets as inventoried = "yes"
+            await markIncomingAssetsInventoried(prodIdVal, incomingId);
 
             notify('New inventory item created from incoming asset', 'success');
             closeAddItemModal();
@@ -2529,36 +2503,8 @@ async function saveItem(e) {
         const result = await response.json();
         if (!result.success) throw new Error(result.message || 'Failed to update stock');
 
-        // Mark incoming asset as inventoried = "yes"
-        if (incomingId) {
-            try {
-                const upd = await fetch(`/api/v1/sws/incoming-assets/${incomingId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': CSRF_TOKEN,
-                        'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-                    },
-                    body: JSON.stringify({ sws_purcprod_inventory: 'yes' }),
-                    credentials: 'include'
-                });
-                // Optimistically update local dataset to remove immediately
-                if (upd && upd.ok) {
-                    incomingAssetsData = (incomingAssetsData || []).map(x => {
-                        if (String(x.sws_purcprod_id) === String(incomingId)) {
-                            return { ...x, sws_purcprod_inventory: 'yes' };
-                        }
-                        return x;
-                    });
-                    renderIncomingAssets();
-                    updateIncomingBadge();
-                }
-            } catch (e) {
-                console.warn('Failed to mark incoming as inventoried:', e);
-            }
-        }
+        // Mark all related incoming assets as inventoried = "yes"
+        await markIncomingAssetsInventoried(prodIdVal, incomingId);
 
         notify('Stock added and incoming marked as inventoried', 'success');
         closeAddItemModal();
@@ -2572,6 +2518,64 @@ async function saveItem(e) {
     } catch (e) {
         console.error('Error updating stock:', e);
         notify(e.message || 'Error updating stock', 'error');
+    }
+}
+
+// Mark all incoming assets for a product (or a single record) as inventoried on the server,
+// then refresh local list and UI
+async function markIncomingAssetsInventoried(prodId, incomingId) {
+    try {
+        // Fetch raw list to get individual IDs
+        const resp = await fetch('/api/v1/sws/incoming-assets', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const json = await resp.json();
+        const list = (json && json.success && Array.isArray(json.data)) ? json.data : [];
+        const targets = list.filter(it => {
+            if (prodId) {
+                return String(it.sws_purcprod_prod_id || '').trim() === String(prodId).trim();
+            }
+            return String(it.sws_purcprod_id) === String(incomingId);
+        }).map(it => it.sws_purcprod_id);
+        if (targets.length === 0 && incomingId) targets.push(incomingId);
+        // Patch all targets to inventoried=yes
+        await Promise.all(targets.map(async id => {
+            try {
+                await fetch(`/api/v1/sws/incoming-assets/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                    },
+                    body: JSON.stringify({ sws_purcprod_inventory: 'yes' }),
+                    credentials: 'include'
+                });
+            } catch (_) {}
+        }));
+        // Update local grouped data immediately for better UX
+        incomingAssetsData = (incomingAssetsData || []).map(x => {
+            const idMatch = incomingId && String(x.sws_purcprod_id) === String(incomingId);
+            const prodMatch = prodId && String(x.sws_purcprod_prod_id || '').trim() === String(prodId).trim();
+            if (idMatch || prodMatch) return { ...x, sws_purcprod_inventory: 'yes' };
+            return x;
+        });
+        renderIncomingAssets();
+        updateIncomingBadge();
+        // Ensure server is the source of truth
+        await loadIncomingAssets();
+    } catch (e) {
+        console.warn('markIncomingAssetsInventoried failed:', e);
     }
 }
 
