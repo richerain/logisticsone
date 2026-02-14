@@ -115,7 +115,7 @@
                         </span>
                     </div>
                 </div>
-                <button id="addPurchaseBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-blue-100 active:scale-95">
+                <button id="addPurchaseBtn" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-blue-100 active:scale-95">
                     <i class='bx bx-plus-circle text-lg'></i>
                     New Purchase Order
                 </button>
@@ -1191,10 +1191,7 @@ function displayPurchases(purchases) {
                 '</button>';
         }
 
-        actionButtons += 
-            '<button onclick="deletePurchase(' + purchase.id + ')" class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" title="Delete Purchase">' +
-                '<i class=\'bx bx-trash text-xl\'></i>' +
-            '</button>';
+        // Delete Purchase button intentionally hidden per request
 
         return '<tr class="' + rowClass + '" data-purchase-id="' + purchase.id + '">' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">' + purchase.pur_id + '</td>' +
@@ -1572,7 +1569,12 @@ window.viewConsolidatedInModal = async function(id) {
                             '</div>' +
                             '<div>' +
                                 '<p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Amount</p>' +
-                                '<p class="text-sm font-bold text-green-600">' + formatCurrency(req.con_total_price || 0) + '</p>' +
+                                '<p class="text-sm font-bold text-green-600">' +
+                                    '<span class="price-mask" data-masked="1" data-price="' + formatCurrency(req.con_total_price || 0) + '">*****</span>' +
+                                    '<button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Amount" onclick="togglePurchasePriceVisibility(this)">' +
+                                        '<i class="bx bx-show-alt text-2xl"></i>' +
+                                    '</button>' +
+                                '</p>' +
                             '</div>' +
                         '</div>' +
                         '<div>' +
