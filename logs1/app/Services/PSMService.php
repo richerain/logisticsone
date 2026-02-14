@@ -1534,23 +1534,66 @@ class PSMService
     private function mapExternalRequisition(array $ext): array
     {
         $defaultVendorId = 'VEN202601235JMKX';
-        $items = $ext['req_items'] ?? $ext['items'] ?? $ext['item_list'] ?? null;
-        if (is_string($items)) {
-            $split = array_map('trim', preg_split('/[,;]+/', $items));
-            $items = array_values(array_filter($split, fn($s) => $s !== ''));
-        }
-        if (!is_array($items)) {
-            $items = [];
-        }
-        $total = $ext['req_price'] ?? $ext['total'] ?? $ext['amount'] ?? null;
-        if ($total === null) {
-            $total = 0;
-            foreach ($items as $it) {
-                if (is_array($it) && isset($it['price'])) {
-                    $total += floatval($it['price']);
+        $rawItems = $ext['req_items'] ?? $ext['items'] ?? $ext['item_list'] ?? null;
+        // Normalize items into an array of display strings with product and pricing info when available
+        $itemsStrings = [];
+        $computedTotal = 0.0;
+
+        // Case 1: Items provided as array of objects
+        if (is_array($rawItems)) {
+            foreach ($rawItems as $it) {
+                if (!is_array($it)) {
+                    // If scalar values are present, just cast to string
+                    $label = (string)$it;
+                    if (strlen(trim($label)) > 0) {
+                        $itemsStrings[] = $label;
+                    }
+                    continue;
+                }
+                $pid = $it['product_id'] ?? $it['prod_id'] ?? $it['id'] ?? null;
+                $pname = $it['product_name'] ?? $it['name'] ?? $it['prod_name'] ?? null;
+                $qty = isset($it['quantity']) ? (float)$it['quantity'] : (isset($it['qty']) ? (float)$it['qty'] : 1.0);
+                $unitPrice = isset($it['unit_price']) ? (float)$it['unit_price'] : (isset($it['price']) ? (float)$it['price'] : 0.0);
+                $subtotal = $qty * $unitPrice;
+                $computedTotal += $subtotal;
+
+                // Build a user-friendly item string
+                if ($pname && $pid) {
+                    $itemsStrings[] = sprintf('%s (%s) x%s @ ₱%0.2f', $pname, $pid, rtrim(rtrim(number_format($qty, 2, '.', ''), '0'), '.'), $unitPrice);
+                } elseif ($pname) {
+                    $itemsStrings[] = sprintf('%s x%s @ ₱%0.2f', $pname, rtrim(rtrim(number_format($qty, 2, '.', ''), '0'), '.'), $unitPrice);
+                } elseif ($pid) {
+                    $itemsStrings[] = sprintf('%s x%s @ ₱%0.2f', $pid, rtrim(rtrim(number_format($qty, 2, '.', ''), '0'), '.'), $unitPrice);
                 }
             }
         }
+        // Case 2: Single-item fields at the top level
+        elseif (is_array($ext) && (isset($ext['product_id']) || isset($ext['product_name']))) {
+            $pid = $ext['product_id'] ?? $ext['prod_id'] ?? $ext['id'] ?? null;
+            $pname = $ext['product_name'] ?? $ext['name'] ?? $ext['prod_name'] ?? null;
+            $qty = isset($ext['quantity']) ? (float)$ext['quantity'] : (isset($ext['qty']) ? (float)$ext['qty'] : 1.0);
+            $unitPrice = isset($ext['unit_price']) ? (float)$ext['unit_price'] : (isset($ext['price']) ? (float)$ext['price'] : 0.0);
+            $computedTotal += ($qty * $unitPrice);
+            if ($pname && $pid) {
+                $itemsStrings[] = sprintf('%s (%s) x%s @ ₱%0.2f', $pname, $pid, rtrim(rtrim(number_format($qty, 2, '.', ''), '0'), '.'), $unitPrice);
+            } elseif ($pname) {
+                $itemsStrings[] = sprintf('%s x%s @ ₱%0.2f', $pname, rtrim(rtrim(number_format($qty, 2, '.', ''), '0'), '.'), $unitPrice);
+            } elseif ($pid) {
+                $itemsStrings[] = sprintf('%s x%s @ ₱%0.2f', $pid, rtrim(rtrim(number_format($qty, 2, '.', ''), '0'), '.'), $unitPrice);
+            }
+        }
+        // Case 3: Items provided as delimited string
+        elseif (is_string($rawItems)) {
+            $split = array_map('trim', preg_split('/[,;]+/', $rawItems));
+            $itemsStrings = array_values(array_filter($split, fn($s) => $s !== ''));
+        }
+
+        // Determine total price:
+        // Prefer computed total from quantity * unit_price if available, otherwise use external fields or 0
+        $total = $computedTotal > 0
+            ? $computedTotal
+            : (float) ($ext['req_price'] ?? $ext['total'] ?? $ext['amount'] ?? 0);
+
         $statusRaw = $ext['req_status'] ?? $ext['status'] ?? 'Pending';
         $status = $this->normalizeExternalStatus($statusRaw);
         $date = $ext['req_date'] ?? $ext['date'] ?? $ext['created_at'] ?? null;
@@ -1563,7 +1606,7 @@ class PSMService
         $vendorField = $ext['req_chosen_vendor'] ?? $ext['vendor'] ?? null;
         $vendorId = is_string($vendorField) && preg_match('/^VEN[0-9A-Z]+$/', $vendorField) ? $vendorField : $defaultVendorId;
         return [
-            'req_items' => $items,
+            'req_items' => $itemsStrings,
             'req_chosen_vendor' => $vendorId,
             'req_price' => $total,
             'req_requester' => $ext['req_requester'] ?? $ext['requester'] ?? $ext['requested_by'] ?? 'External',
