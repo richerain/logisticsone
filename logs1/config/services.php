@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'huggingface' => [
+        'api_token' => env('HUGGINGFACE_API_TOKEN'),
+        'forecast_endpoint' => env('HF_FORECAST_ENDPOINT'),
+        'timeout' => env('HF_TIMEOUT', 12),
+    ],
+
 ];

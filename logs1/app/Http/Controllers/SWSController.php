@@ -11,6 +11,7 @@ use App\Models\SWS\Warehouse;
 use App\Services\SWSService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -22,6 +23,106 @@ class SWSController extends Controller
     public function __construct(SWSService $swsService)
     {
         $this->swsService = $swsService;
+    }
+
+    public function forecastDemand(Request $request)
+    {
+        $validated = $request->validate([
+            'item_id' => ['nullable', 'integer'],
+            'sku' => ['nullable', 'string', 'max:255'],
+            'series' => ['nullable', 'array'],
+            'series.*.timestamp' => ['required_with:series', 'date'],
+            'series.*.value' => ['required_with:series', 'numeric'],
+            'horizon' => ['nullable', 'integer', 'min:1', 'max:365'],
+            'cadence' => ['nullable', Rule::in(['D', 'W', 'M'])],
+        ]);
+        $horizon = $validated['horizon'] ?? 30;
+        $cadence = $validated['cadence'] ?? 'D';
+        $itemId = $validated['item_id'] ?? null;
+        $sku = $validated['sku'] ?? null;
+
+        $series = $validated['series'] ?? [];
+        try {
+            if (empty($series) && $itemId) {
+                // Build a naive daily demand series from transactions (outgoing quantities)
+                $rows = DB::connection('sws')->table('sws_transactions')
+                    ->selectRaw('DATE(tran_created_at) as d, SUM(CASE WHEN tran_type IN ("out","issued","dispatch") THEN tran_qty ELSE 0 END) as qty')
+                    ->where('tran_item_id', $itemId)
+                    ->groupBy('d')
+                    ->orderBy('d', 'asc')
+                    ->get();
+                foreach ($rows as $r) {
+                    $series[] = ['timestamp' => $r->d, 'value' => (float) ($r->qty ?? 0)];
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to build local series for demand forecast: '.$e->getMessage());
+        }
+
+        if (empty($series)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No time series data available. Provide "series" or ensure transactions exist for this item.',
+            ], 422);
+        }
+
+        $endpoint = config('services.huggingface.forecast_endpoint');
+        $token = config('services.huggingface.api_token');
+        if (! $endpoint || ! $token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forecasting service not configured. Set HUGGINGFACE_API_TOKEN and HF_FORECAST_ENDPOINT.',
+            ], 500);
+        }
+
+        try {
+            $payload = [
+                'series' => $series,
+                'horizon' => $horizon,
+                'cadence' => $cadence,
+                'metadata' => array_filter([
+                    'item_id' => $itemId,
+                    'sku' => $sku,
+                ]),
+            ];
+            $timeout = (int) config('services.huggingface.timeout', 12);
+            $resp = Http::withToken($token)->timeout($timeout)->post($endpoint, $payload);
+            $ok = $resp->ok();
+            $body = $resp->json();
+
+            if (! $ok) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Forecasting request failed',
+                    'status' => $resp->status(),
+                    'error' => $body,
+                ], 502);
+            }
+
+            $preds = [];
+            if (isset($body['predictions']) && is_array($body['predictions'])) {
+                $preds = $body['predictions'];
+            } elseif (isset($body['forecast']) && is_array($body['forecast'])) {
+                $preds = $body['forecast'];
+            } elseif (is_array($body)) {
+                $preds = $body;
+            }
+
+            return response()->json([
+                'success' => true,
+                'item_id' => $itemId,
+                'sku' => $sku,
+                'horizon' => $horizon,
+                'cadence' => $cadence,
+                'predictions' => $preds,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Demand forecast error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Forecasting service error',
+            ], 500);
+        }
     }
 
     public function getInventoryFlow()

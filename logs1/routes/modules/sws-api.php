@@ -39,6 +39,8 @@ Route::post('/items', [SWSController::class, 'createItem']);
 Route::put('/items/{id}', [SWSController::class, 'updateItem']);
 Route::delete('/items/{id}', [SWSController::class, 'deleteItem']);
 Route::post('/items/transfer', [SWSController::class, 'transferItem']);
+// Demand forecasting (Hugging Face integration)
+Route::post('/demand-forecast', [SWSController::class, 'forecastDemand']);
 Route::get('/categories', [SWSController::class, 'getCategories']);
 Route::post('/categories', [SWSController::class, 'createCategory']);
 Route::put('/categories/{id}', [SWSController::class, 'updateCategory']);
