@@ -97,34 +97,6 @@
     </div>
 </div>
 <!-- Inventory Metrics section end -->
-<!-- Demand Forecast panel -->
-<div id="diForecastPanel" class="hidden mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-    <div class="flex items-center justify-between mb-3">
-        <h3 class="font-bold text-gray-800 flex items-center">
-            <i class='bx bx-line-chart mr-2 text-emerald-600'></i>
-            Demand Forecast
-        </h3>
-        <button id="closeForecastPanel" class="text-xs px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50">Close</button>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-            <label class="text-xs font-semibold text-gray-600">Item ID</label>
-            <input id="diForecastItemId" type="text" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" placeholder="e.g., 12345" />
-        </div>
-        <div>
-            <label class="text-xs font-semibold text-gray-600">Horizon (days)</label>
-            <input id="diForecastHorizon" type="number" value="30" min="1" max="365" class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
-        </div>
-    </div>
-    <div class="mt-4 flex items-center gap-3">
-        <button id="runForecastBtn" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 active:scale-95">Run Forecast</button>
-        <span id="diForecastStatus" class="text-xs text-gray-500"></span>
-    </div>
-    <div class="mt-4">
-        <canvas id="diForecastChart" style="width:100%;height:280px;"></canvas>
-        <pre id="diForecastTable" class="hidden mt-3 text-xs bg-gray-50 border border-gray-200 rounded-lg p-3 overflow-auto"></pre>
-    </div>
-</div>
 <!-- Quick Management section start -->
 <div class="mt-4 mb-4">
     <div class="rounded-2xl overflow-visible">
@@ -156,13 +128,6 @@
                         <i class='bx bxs-report text-lg'></i>
                     </span>
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Reports</span>
-                </button>
-
-                <button id="forecastDemandBtn" class="h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-emerald-500 hover:text-emerald-600 hover:shadow-md transition-all duration-200">
-                    <span class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                        <i class='bx bx-line-chart text-lg'></i>
-                    </span>
-                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Forecast</span>
                 </button>
 
                 <button id="purchaseNewItemBtn" class="h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200">
@@ -1136,7 +1101,6 @@ var SWS_INVENTORY_STATS_API = `${API_BASE_URL}/sws/inventory-stats`;
 var SWS_STOCK_LEVELS_API = `${API_BASE_URL}/sws/stock-levels`;
 var SWS_LOCATIONS_API = `${API_BASE_URL}/sws/locations`;
 var SWS_DIGITAL_INVENTORY_REPORT_API = `${API_BASE_URL}/sws/digital-inventory/report`;
-var SWS_DEMAND_FORECAST_API = `${API_BASE_URL}/sws/demand-forecast`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 // Prioritize server-injected token, then global window token, then localStorage
 var JWT_TOKEN = '{{ $jwtToken ?? "" }}';
@@ -1168,22 +1132,12 @@ const categoriesPageSize = 10;
     generateReportBtn: document.getElementById('generateReportBtn'),
     purchaseNewItemBtn: document.getElementById('purchaseNewItemBtn'),
     inventoryNewItemBtn: document.getElementById('inventoryNewItemBtn'),
-    forecastDemandBtn: document.getElementById('forecastDemandBtn'),
     
     // Stats Cards
     totalItems: document.getElementById('totalItems'),
     totalValue: document.getElementById('totalValue'),
     lowStockItems: document.getElementById('lowStockItems'),
     outOfStockItems: document.getElementById('outOfStockItems'),
-    // Forecast panel elements
-    forecastPanel: document.getElementById('diForecastPanel'),
-    closeForecastPanel: document.getElementById('closeForecastPanel'),
-    diForecastItemId: document.getElementById('diForecastItemId'),
-    diForecastHorizon: document.getElementById('diForecastHorizon'),
-    runForecastBtn: document.getElementById('runForecastBtn'),
-    forecastStatus: document.getElementById('diForecastStatus'),
-    forecastChartCanvas: document.getElementById('diForecastChart'),
-    forecastTable: document.getElementById('diForecastTable'),
         diSearch: document.getElementById('di_search'),
         diStatusSelect: document.getElementById('di_status'),
         diCategorySelect: document.getElementById('di_category'),
@@ -3916,95 +3870,4 @@ document.getElementById('di_report_print').addEventListener('click', () => {
     w.print();
 });
 </script>
-// Forecast UI wiring
-(function(){
-    if (els.forecastDemandBtn && els.forecastPanel){
-        els.forecastDemandBtn.addEventListener('click', function(){
-            els.forecastPanel.classList.remove('hidden');
-        });
-    }
-    if (els.closeForecastPanel && els.forecastPanel){
-        els.closeForecastPanel.addEventListener('click', function(){
-            els.forecastPanel.classList.add('hidden');
-        });
-    }
-    if (els.runForecastBtn){
-        els.runForecastBtn.addEventListener('click', swsRunForecast);
-    }
-})();
-
-async function swsRunForecast(){
-    try{
-        var itemId = (els.diForecastItemId && els.diForecastItemId.value) ? parseInt(els.diForecastItemId.value, 10) : null;
-        var horizon = (els.diForecastHorizon && els.diForecastHorizon.value) ? parseInt(els.diForecastHorizon.value, 10) : 30;
-        if (!itemId || isNaN(itemId)){
-            els.forecastStatus.textContent = 'Enter a valid Item ID.';
-            return;
-        }
-        els.forecastStatus.textContent = 'Requesting forecast...';
-        var headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : ''
-        };
-        var res = await fetch(SWS_DEMAND_FORECAST_API, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({ item_id: itemId, horizon: horizon })
-        });
-        var json = await res.json().catch(function(){ return {}; });
-        if (!res.ok || !json.success){
-            els.forecastStatus.textContent = (json.message || 'Forecast failed') + ' (' + res.status + ')';
-            return;
-        }
-        els.forecastStatus.textContent = 'Forecast ready';
-        var preds = Array.isArray(json.predictions) ? json.predictions : [];
-        renderForecast(preds);
-    }catch(e){
-        els.forecastStatus.textContent = 'Forecast error';
-    }
-}
-
-function renderForecast(preds){
-    if (!preds || preds.length === 0){
-        els.forecastTable.classList.remove('hidden');
-        els.forecastTable.textContent = 'No predictions';
-        return;
-    }
-    var labels = [];
-    var values = [];
-    preds.forEach(function(p, idx){
-        var t = p.timestamp || p.date || ('T+' + (idx+1));
-        var v = typeof p.value !== 'undefined' ? p.value : (p.prediction || p[1] || 0);
-        labels.push(t);
-        values.push(v);
-    });
-    if (window.Chart && els.forecastChartCanvas){
-        window.__diCharts = window.__diCharts || {};
-        var ex = window.__diCharts['diForecastChart'];
-        if (ex){ ex.destroy(); }
-        window.__diCharts['diForecastChart'] = new Chart(els.forecastChartCanvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Predicted Demand',
-                    data: values,
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16,185,129,.15)',
-                    tension: 0.35,
-                    fill: true,
-                    pointRadius: 2
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-        els.forecastTable.classList.add('hidden');
-    }else{
-        // Fallback simple table
-        els.forecastTable.classList.remove('hidden');
-        els.forecastTable.textContent = JSON.stringify(preds, null, 2);
-    }
-}
-
 </script>
