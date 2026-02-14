@@ -46,6 +46,78 @@
     </dialog>
 </div>
 
+<!-- Stats Section (moved above Quote Purchase Order section) -->
+<div id="quoteStatsSection" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+    <div onclick="filterQuoteStatus('')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bxs-quote-right text-6xl text-blue-600'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                    <i class='bx bxs-quote-right text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Quotes</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="totalQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">All statuses</span>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterQuoteStatus('PO Received')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-purple-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-user-voice text-6xl text-purple-700'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-purple-50 rounded-xl text-purple-700">
+                    <i class='bx bx-user-voice text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">PO Received</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="poReceivedQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">Awaiting processing</span>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterQuoteStatus('Processing Order')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-indigo-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-cog text-6xl text-indigo-700'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-indigo-50 rounded-xl text-indigo-700">
+                    <i class='bx bx-cog text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Processing</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="processingQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">Orders in progress</span>
+            </div>
+        </div>
+    </div>
+    <div onclick="filterQuoteStatus('Delivered')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+            <i class='bx bx-check-circle text-6xl text-emerald-700'></i>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-emerald-50 rounded-xl text-emerald-700">
+                    <i class='bx bx-check-circle text-2xl'></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Delivered</h4>
+            </div>
+            <div class="flex items-end gap-2">
+                <span id="deliveredQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                <span class="text-xs text-gray-500 mb-1">Completed orders</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="bg-white rounded-lg shadow-lg p-6">
     <!-- quote purchase order section -->
     <div class="flex items-center justify-between mb-6">
@@ -108,81 +180,7 @@
         </form>
     </dialog>
     <!-- notification purchase order card modal end -->
-    <!-- Stats Section (similar to Purchase Management) -->
-    <div id="quoteStatsSection" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <!-- Total Quotes -->
-        <div onclick="filterQuoteStatus('')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bxs-quote-right text-6xl text-blue-600'></i>
-            </div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
-                        <i class='bx bxs-quote-right text-2xl'></i>
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Quotes</h4>
-                </div>
-                <div class="flex items-end gap-2">
-                    <span id="totalQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
-                    <span class="text-xs text-gray-500 mb-1">All statuses</span>
-                </div>
-            </div>
-        </div>
-        <!-- PO Received -->
-        <div onclick="filterQuoteStatus('PO Received')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-purple-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bx-user-voice text-6xl text-purple-700'></i>
-            </div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-purple-50 rounded-xl text-purple-700">
-                        <i class='bx bx-user-voice text-2xl'></i>
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">PO Received</h4>
-                </div>
-                <div class="flex items-end gap-2">
-                    <span id="poReceivedQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
-                    <span class="text-xs text-gray-500 mb-1">Awaiting processing</span>
-                </div>
-            </div>
-        </div>
-        <!-- Processing -->
-        <div onclick="filterQuoteStatus('Processing Order')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-indigo-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bx-cog text-6xl text-indigo-700'></i>
-            </div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-indigo-50 rounded-xl text-indigo-700">
-                        <i class='bx bx-cog text-2xl'></i>
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Processing</h4>
-                </div>
-                <div class="flex items-end gap-2">
-                    <span id="processingQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
-                    <span class="text-xs text-gray-500 mb-1">Orders in progress</span>
-                </div>
-            </div>
-        </div>
-        <!-- Delivered -->
-        <div onclick="filterQuoteStatus('Delivered')" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bx-check-circle text-6xl text-emerald-700'></i>
-            </div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-3 bg-emerald-50 rounded-xl text-emerald-700">
-                        <i class='bx bx-check-circle text-2xl'></i>
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Delivered</h4>
-                </div>
-                <div class="flex items-end gap-2">
-                    <span id="deliveredQuotes" class="text-4xl font-black text-gray-800 leading-none">0</span>
-                    <span class="text-xs text-gray-500 mb-1">Completed orders</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Stats Section removed from inside; now positioned above -->
 
     <!-- table start -->
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">

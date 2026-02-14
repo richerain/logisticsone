@@ -116,6 +116,8 @@ class PSMService
                 $quoteResult = $this->createQuote($quoteData);
                 // Optionally sync purchase status for consistency
                 $this->updatePurchaseStatus($purchase->id, 'PO Received', null);
+                // Ensure the mirrored request is removed from New Purchase Order list
+                $this->psmRepository->deletePurchaseRequestByPreqId($purchase->pur_id);
             } else {
                 $quoteResult = ['success' => false, 'data' => null];
             }

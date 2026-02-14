@@ -465,9 +465,13 @@ class PSMRepository
 
     public function upsertPurchaseRequestFromPurchase(Purchase $purchase)
     {
-        return PurchaseRequest::updateOrCreate(
-            ['preq_id' => $purchase->pur_id],
-            [
+        $existing = PurchaseRequest::where('preq_id', $purchase->pur_id)->first();
+        if ($existing) {
+            // Do not override processed requests
+            if (!empty($existing->preq_process)) {
+                return $existing;
+            }
+            $existing->update([
                 'preq_name_items' => $purchase->pur_name_items,
                 'preq_unit' => $purchase->pur_unit,
                 'preq_total_amount' => $purchase->pur_total_amount,
@@ -478,8 +482,22 @@ class PSMRepository
                 'preq_process' => null,
                 'preq_order_by' => $purchase->pur_order_by,
                 'preq_desc' => $purchase->pur_desc,
-            ]
-        );
+            ]);
+            return $existing;
+        }
+        return PurchaseRequest::create([
+            'preq_id' => $purchase->pur_id,
+            'preq_name_items' => $purchase->pur_name_items,
+            'preq_unit' => $purchase->pur_unit,
+            'preq_total_amount' => $purchase->pur_total_amount,
+            'preq_ven_id' => null,
+            'preq_ven_company_name' => $purchase->pur_company_name,
+            'preq_ven_type' => $purchase->pur_ven_type,
+            'preq_status' => 'Pending',
+            'preq_process' => null,
+            'preq_order_by' => $purchase->pur_order_by,
+            'preq_desc' => $purchase->pur_desc,
+        ]);
     }
 
     public function deletePurchaseRequestByPreqId($preqId)
