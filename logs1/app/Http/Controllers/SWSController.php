@@ -514,7 +514,7 @@ class SWSController extends Controller
 
     public function getRoomRequests(Request $request)
     {
-        $list = RoomRequest::orderBy('rmreq_date', 'desc')->get();
+        $list = RoomRequest::orderBy('rmreq_date', 'desc')->orderBy('rmreq_id', 'desc')->get();
 
         return response()->json(['success' => true, 'data' => $list]);
     }

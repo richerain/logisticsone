@@ -555,6 +555,14 @@ async function loadRoomRequests(){
         if(!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         const rows = result.data || [];
+        rows.sort((a,b)=> {
+            const da = new Date(a.rmreq_date || 0).getTime();
+            const db = new Date(b.rmreq_date || 0).getTime();
+            if (db !== da) return db - da;
+            const ia = Number(a.rmreq_id || 0);
+            const ib = Number(b.rmreq_id || 0);
+            return ib - ia;
+        });
         if(rows.length === 0){
             tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No requests</td></tr>`;
             return;
