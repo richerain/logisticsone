@@ -734,9 +734,11 @@ class PSMController extends Controller
      */
     public function externalGetRequisitions(Request $request)
     {
-        $key = $request->query('key');
-        $expected = env('PSM_EXTERNAL_API_KEY', '63cfb7730dcc34299fa38cb1a620f701');
-        if (!$key || $key !== $expected) {
+        $key = $request->query('key') ?? $request->query('api_key');
+        $expectedEnv = env('PSM_EXTERNAL_API_KEY');
+        $defaultKey = '63cfb7730dcc34299fa38cb1a620f701';
+        $validKeys = array_values(array_filter([$expectedEnv, $defaultKey]));
+        if (!$key || !in_array($key, $validKeys, true)) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
         }
         $requester = $request->query('requester', 'Via Jeves');
@@ -751,9 +753,11 @@ class PSMController extends Controller
      */
     public function externalUpdateRequisitionStatus(Request $request, $reqId)
     {
-        $key = $request->query('key');
-        $expected = env('PSM_EXTERNAL_API_KEY', '63cfb7730dcc34299fa38cb1a620f701');
-        if (!$key || $key !== $expected) {
+        $key = $request->query('key') ?? $request->query('api_key');
+        $expectedEnv = env('PSM_EXTERNAL_API_KEY');
+        $defaultKey = '63cfb7730dcc34299fa38cb1a620f701';
+        $validKeys = array_values(array_filter([$expectedEnv, $defaultKey]));
+        if (!$key || !in_array($key, $validKeys, true)) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
         }
         $status = $request->query('status') ?? $request->input('status');
