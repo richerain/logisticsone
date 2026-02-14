@@ -244,24 +244,34 @@
 
                 <!-- Relocated Search and Filter section -->
                 <div class="mt-6 pt-4 border-t border-gray-100">
-                    <div class="flex flex-col gap-4">
-                        <div class="relative w-full">
+                    <div class="flex gap-3 items-center overflow-x-auto">
+                        <!-- Search -->
+                        <div class="relative flex-1 min-w-[260px]">
                             <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
                             <input id="di_search" type="text" placeholder="Search item, code, category, stored from..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all duration-200 outline-none text-sm" />
                         </div>
-                        <div class="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-200">
-                            <button class="flex-1 btn btn-xs border-none bg-brand-primary text-white shadow-sm font-bold px-3 py-1.5 rounded-lg transition-all duration-200 whitespace-nowrap active-status-filter" data-di-status="">All</button>
-                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="In Stock">In Stock</button>
-                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Low Stock">Low Stock</button>
-                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-status="Out of Stock">Out of Stock</button>
+                        <!-- Stock Status Dropdown -->
+                        <div class="relative w-56">
+                            <i class='bx bx-toggle-left absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none'></i>
+                            <select id="di_status" class="w-full pl-10 pr-8 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary appearance-none text-sm">
+                                <option value="">All Status</option>
+                                <option value="In Stock">In Stock</option>
+                                <option value="Low Stock">Low Stock</option>
+                                <option value="Out of Stock">Out of Stock</option>
+                            </select>
+                            <i class='bx bx-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl pointer-events-none'></i>
                         </div>
-
-                        <div class="flex items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-200">
-                            <button class="flex-1 btn btn-xs border-none bg-brand-primary text-white shadow-sm font-bold px-3 py-1.5 rounded-lg transition-all duration-200 whitespace-nowrap active-category-filter" data-di-category="">All Categories</button>
-                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-category="Equipment">Equipment</button>
-                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-category="Supplies">Supplies</button>
-                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-category="Furniture">Furniture</button>
-                            <button class="flex-1 btn btn-xs border-none bg-transparent text-gray-500 font-medium px-3 py-1.5 rounded-lg hover:bg-white hover:text-brand-primary transition-all duration-200 whitespace-nowrap" data-di-category="Automotive">Automotive</button>
+                        <!-- Category Dropdown -->
+                        <div class="relative w-56">
+                            <i class='bx bx-category-alt absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none'></i>
+                            <select id="di_category" class="w-full pl-10 pr-8 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary appearance-none text-sm">
+                                <option value="">All Categories</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Supplies">Supplies</option>
+                                <option value="Furniture">Furniture</option>
+                                <option value="Automotive">Automotive</option>
+                            </select>
+                            <i class='bx bx-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl pointer-events-none'></i>
                         </div>
                     </div>
                 </div>
@@ -1145,6 +1155,8 @@ const categoriesPageSize = 10;
     lowStockItems: document.getElementById('lowStockItems'),
     outOfStockItems: document.getElementById('outOfStockItems'),
         diSearch: document.getElementById('di_search'),
+        diStatusSelect: document.getElementById('di_status'),
+        diCategorySelect: document.getElementById('di_category'),
     
     // Table
     inventoryTableBody: document.getElementById('inventoryTableBody'),
@@ -2817,48 +2829,30 @@ function initDigitalInventory() {
 
     // Filters
     if (els.diSearch) els.diSearch.addEventListener('input', () => { currentDiPage = 1; renderInventoryItems(); });
-    
-    document.querySelectorAll('[data-di-status]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const val = btn.getAttribute('data-di-status');
-            window.diActiveStatus = val;
-            
-            // Handle visual active state for status filters
-            document.querySelectorAll('[data-di-status]').forEach(b => {
-                b.classList.remove('bg-brand-primary', 'text-white', 'shadow-sm', 'font-bold');
-                b.classList.add('bg-transparent', 'text-gray-500', 'font-medium');
-            });
-            btn.classList.remove('bg-transparent', 'text-gray-500', 'font-medium');
-            btn.classList.add('bg-brand-primary', 'text-white', 'shadow-sm', 'font-bold');
-            
+    if (els.diStatusSelect) {
+        els.diStatusSelect.addEventListener('change', () => {
+            window.diActiveStatus = els.diStatusSelect.value || '';
             currentDiPage = 1; renderInventoryItems();
         });
-    });
-
-    document.querySelectorAll('[data-di-category]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const val = btn.getAttribute('data-di-category');
-            window.diActiveCategory = val;
-            
-            // Handle visual active state for category filters
-            document.querySelectorAll('[data-di-category]').forEach(b => {
-                b.classList.remove('bg-brand-primary', 'text-white', 'shadow-sm', 'font-bold');
-                b.classList.add('bg-transparent', 'text-gray-500', 'font-medium');
-            });
-            btn.classList.remove('bg-transparent', 'text-gray-500', 'font-medium');
-            btn.classList.add('bg-brand-primary', 'text-white', 'shadow-sm', 'font-bold');
-            
+    }
+    if (els.diCategorySelect) {
+        els.diCategorySelect.addEventListener('change', () => {
+            window.diActiveCategory = els.diCategorySelect.value || '';
             currentDiPage = 1; renderInventoryItems();
         });
-    });
+    }
     
     // Stat cards toggle filter
     const diCardLow = document.getElementById('di_card_low');
     if (diCardLow) {
         diCardLow.addEventListener('click', () => {
             window.diActiveStatus = 'Low Stock';
-            const target = document.querySelector('[data-di-status="Low Stock"]');
-            if (target) target.click();
+            if (els.diStatusSelect) {
+                els.diStatusSelect.value = 'Low Stock';
+                els.diStatusSelect.dispatchEvent(new Event('change'));
+            } else {
+                currentDiPage = 1; renderInventoryItems();
+            }
         });
     }
 
@@ -2866,8 +2860,12 @@ function initDigitalInventory() {
     if (diCardOut) {
         diCardOut.addEventListener('click', () => {
             window.diActiveStatus = 'Out of Stock';
-            const target = document.querySelector('[data-di-status="Out of Stock"]');
-            if (target) target.click();
+            if (els.diStatusSelect) {
+                els.diStatusSelect.value = 'Out of Stock';
+                els.diStatusSelect.dispatchEvent(new Event('change'));
+            } else {
+                currentDiPage = 1; renderInventoryItems();
+            }
         });
     }
 
@@ -2875,8 +2873,12 @@ function initDigitalInventory() {
     if (diCardTotal) {
         diCardTotal.addEventListener('click', () => {
             window.diActiveStatus = '';
-            const target = document.querySelector('[data-di-status=""]');
-            if (target) target.click();
+            if (els.diStatusSelect) {
+                els.diStatusSelect.value = '';
+                els.diStatusSelect.dispatchEvent(new Event('change'));
+            } else {
+                currentDiPage = 1; renderInventoryItems();
+            }
         });
     }
 }
