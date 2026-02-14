@@ -888,29 +888,29 @@ function displayQuotes(list) {
         const viewBtn = `<button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${idStr}" title="View"><i class='bx bx-show-alt text-xl'></i></button>`;
         const updateBtn = `<button class="text-green-600 hover:text-green-900 transition-colors p-2 rounded-lg hover:bg-green-50" data-action="update" data-id="${idStr}" data-status="${statusStr}" title="Update Status"><i class='bx bx-edit text-xl'></i></button>`;
         const deliveryBtn = `<button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="delivery" data-id="${idStr}" data-date="${dateStr}" title="Set Date Delivery"><i class='bx bx-calendar text-xl'></i></button>`;
-        const deleteBtn = `<button class="text-red-600 hover:text-red-900 transition-colors p-2 rounded-lg hover:bg-red-50" data-action="delete" data-id="${idStr}" title="Delete"><i class='bx bx-trash text-xl'></i></button>`;
+        // Delete button intentionally hidden per requirement
         
         if (isDelivered) {
-            actions = viewBtn + deleteBtn;
+            actions = viewBtn;
         } else if (isProcessing || isDispatched) {
-            actions = viewBtn + updateBtn + deliveryBtn + deleteBtn;
+            actions = viewBtn + updateBtn + deliveryBtn;
         } else if (isReceived) {
-            actions = viewBtn + updateBtn + deleteBtn;
+            actions = viewBtn + updateBtn;
         } else {
-            actions = viewBtn + updateBtn + deleteBtn;
+            actions = viewBtn + updateBtn;
         }
         
         const itemsList = Array.isArray(q.quo_items) ? q.quo_items.map(i => typeof i === 'object' ? i.name : i).join(', ') : '';
         
         return `
             <tr class="${rowClass}">
-                <td class="px-3 py-2 whitespace-nowrap font-mono font-medium text-blue-600">${quoId}</td>
+                <td class="px-3 py-2 whitespace-nowrap font-mono font-bold text-black">${quoId}</td>
                 <td class="px-3 py-2 whitespace-nowrap" title="${itemsList}">${truncateItems(q.quo_items, 40)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${q.quo_units} units</td>
                 <td class="px-3 py-2 whitespace-nowrap font-bold text-gray-700">${formatCurrency(q.quo_total_amount)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">${formatDate(q.quo_delivery_date)}</td>
                 <td class="px-3 py-2 whitespace-nowrap">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(normalizedStatus)}">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-semibold ${getStatusBadgeClass(normalizedStatus)}">
                         <i class='bx ${getStatusIcon(normalizedStatus)} mr-1'></i>${normalizedStatus}
                     </span>
                 </td>
@@ -1157,16 +1157,16 @@ function normalizeQuoteStatus(status) {
 function getStatusBadgeClass(status) {
     const s = normalizeQuoteStatus(status);
     const statusClasses = {
-        'Pending': 'bg-yellow-100 text-yellow-800',
-        'Approved': 'bg-blue-100 text-blue-800',
-        'Rejected': 'bg-red-100 text-red-800',
-        'Cancel': 'bg-red-100 text-red-800',
-        'PO Received': 'bg-purple-100 text-purple-800',
-        'Processing Order': 'bg-indigo-100 text-indigo-800',
-        'Dispatched': 'bg-amber-100 text-amber-800',
-        'Delivered': 'bg-green-100 text-green-800'
+        'Pending': 'bg-yellow-600 text-white',
+        'Approved': 'bg-blue-600 text-white',
+        'Rejected': 'bg-red-600 text-white',
+        'Cancel': 'bg-red-600 text-white',
+        'PO Received': 'bg-purple-600 text-white',
+        'Processing Order': 'bg-indigo-600 text-white',
+        'Dispatched': 'bg-amber-600 text-white',
+        'Delivered': 'bg-green-600 text-white'
     };
-    return statusClasses[s] || 'bg-gray-100 text-gray-800';
+    return statusClasses[s] || 'bg-gray-600 text-white';
 }
 
 function getStatusIcon(status) {
