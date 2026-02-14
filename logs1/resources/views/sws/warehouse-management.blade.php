@@ -1,47 +1,77 @@
-<div class="mb-6 flex items-center justify-between gap-4">
-    <div class="flex items-center">
-        <h2 class="text-2xl font-bold text-gray-700"><i class='bx bx-fw bxs-store'></i>Warehouse Management</h2>
+<div class="mb-6">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex w-11 h-11 rounded-xl bg-emerald-50 items-center justify-center text-emerald-600">
+        <i class='bx bxs-store text-2xl'></i>
+      </span>
+      <div>
+        <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">Warehouse Management</h2>
+        <p class="text-sm text-gray-500">Smart Warehousing System</p>
+      </div>
     </div>
-    <div class="text-right">
-        <span class="text-md text-gray-600">Smart Warehousing System</span>
+    <div class="flex gap-2">
+      <button id="requestRoomStatusBtn" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
+        <i class='bx bx-list-ul text-lg'></i><span>Room Requests Status</span>
+      </button>
+      <button id="addWarehouseBtn" class="hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+        <i class='bx bx-plus text-lg'></i><span>Add Warehouse</span>
+      </button>
     </div>
+  </div>
 </div>
 
 <div class="bg-white rounded-lg shadow-lg p-6">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-blue-100 border border-blue-200 rounded-lg p-4">
+        <div class="rounded-2xl p-5 bg-gradient-to-br from-blue-50 to-white border border-blue-100 shadow-sm">
             <div class="flex items-center">
-                <div class="p-3 bg-blue-500 rounded-lg"><i class='bx bx-store text-white text-2xl'></i></div>
-                <div class="ml-4"><p class="text-sm font-medium text-blue-700">Warehouses</p><p id="statWarehouses" class="text-2xl font-bold text-blue-900">0</p></div>
+                <div class="p-3 bg-blue-500 rounded-xl text-white"><i class='bx bx-store text-2xl'></i></div>
+                <div class="ml-4"><p class="text-xs font-semibold uppercase text-blue-700/80">Warehouses</p><p id="statWarehouses" class="text-3xl font-extrabold text-blue-900">0</p></div>
             </div>
         </div>
-        <div class="bg-green-100 border border-green-200 rounded-lg p-4">
+        <div class="rounded-2xl p-5 bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 shadow-sm">
             <div class="flex items-center">
-                <div class="p-3 bg-green-500 rounded-lg"><i class='bx bx-box text-white text-2xl'></i></div>
-                <div class="ml-4"><p class="text-sm font-medium text-green-700">Capacity</p><p id="statCapacity" class="text-2xl font-bold text-green-900">0</p></div>
+                <div class="p-3 bg-emerald-500 rounded-xl text-white"><i class='bx bx-box text-2xl'></i></div>
+                <div class="ml-4"><p class="text-xs font-semibold uppercase text-emerald-700/80">Capacity</p><p id="statCapacity" class="text-3xl font-extrabold text-emerald-900">0</p></div>
             </div>
         </div>
-        <div class="bg-yellow-100 border border-yellow-200 rounded-lg p-4">
+        <div class="rounded-2xl p-5 bg-gradient-to-br from-yellow-50 to-white border border-yellow-100 shadow-sm">
             <div class="flex items-center">
-                <div class="p-3 bg-yellow-500 rounded-lg"><i class='bx bx-data text-white text-2xl'></i></div>
-                <div class="ml-4"><p class="text-sm font-medium text-yellow-700">Used</p><p id="statUsed" class="text-2xl font-bold text-yellow-900">0</p></div>
+                <div class="p-3 bg-yellow-500 rounded-xl text-white"><i class='bx bx-data text-2xl'></i></div>
+                <div class="ml-4"><p class="text-xs font-semibold uppercase text-yellow-700/80">Used</p><p id="statUsed" class="text-3xl font-extrabold text-yellow-900">0</p></div>
             </div>
         </div>
-        <div class="bg-indigo-100 border border-indigo-200 rounded-lg p-4">
+        <div class="rounded-2xl p-5 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 shadow-sm">
             <div class="flex items-center">
-                <div class="p-3 bg-indigo-500 rounded-lg"><i class='bx bx-bar-chart-alt text-white text-2xl'></i></div>
-                <div class="ml-4"><p class="text-sm font-medium text-indigo-700">Free</p><p id="statFree" class="text-2xl font-bold text-indigo-900">0</p></div>
+                <div class="p-3 bg-indigo-500 rounded-xl text-white"><i class='bx bx-bar-chart-alt text-2xl'></i></div>
+                <div class="ml-4"><p class="text-xs font-semibold uppercase text-indigo-700/80">Free</p><p id="statFree" class="text-3xl font-extrabold text-indigo-900">0</p></div>
             </div>
         </div>
     </div>
 
-    <div class="flex justify-end mb-4 gap-2">
-        <button id="requestRoomStatusBtn" title="Request Room Status" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
-            <i class='bx bx-list-ul'></i> Request Room Status
-        </button>
-        <button id="addWarehouseBtn" title="Add New Warehouse" class="hidden bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
-            <i class='bx bx-plus'></i> Add Warehouse
-        </button>
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-4 p-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="relative">
+                <input id="wareSearch" type="text" placeholder="Search by name or location..." class="w-full px-4 py-2.5 pl-10 rounded-xl border border-gray-200 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none" />
+                <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'></i>
+            </div>
+            <div>
+                <select id="wareStatusFilter" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+            </div>
+            <div>
+                <select id="wareZoneFilter" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none">
+                    <option value="">All Zones</option>
+                    <option value="general">General</option>
+                    <option value="liquid">Liquid</option>
+                    <option value="illiquid">Illiquid</option>
+                    <option value="climate_controlled">Climate Controlled</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -205,6 +235,9 @@ var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getI
 var warehouses = [];
 let currentWarePage = 1;
 const warePageSize = 10;
+let wareSearch = '';
+let wareStatus = '';
+let wareZone = '';
 
 const els = {
     statWarehouses: document.getElementById('statWarehouses'),
@@ -224,7 +257,10 @@ const els = {
     wareCapacity: document.getElementById('ware_capacity'),
     wareSupportsFixed: document.getElementById('ware_supports_fixed_items'),
     wareStatus: document.getElementById('ware_status'),
-    wareZoneType: document.getElementById('ware_zone_type')
+    wareZoneType: document.getElementById('ware_zone_type'),
+    searchInput: document.getElementById('wareSearch'),
+    statusFilter: document.getElementById('wareStatusFilter'),
+    zoneFilter: document.getElementById('wareZoneFilter')
 };
 
 const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true, didOpen: (toast) => { toast.onmouseenter = Swal.stopTimer; toast.onmouseleave = Swal.resumeTimer; } });
@@ -263,12 +299,20 @@ function renderStats() {
 }
 
 function renderWarehouses() {
-    const total = warehouses.length;
+    const filtered = (warehouses || []).filter(w => {
+        const q = wareSearch.trim().toLowerCase();
+        const okQ = !q || (String(w.ware_name||'').toLowerCase().includes(q) || String(w.ware_location||'').toLowerCase().includes(q));
+        const okStatus = !wareStatus || String(w.ware_status||'') === wareStatus;
+        const okZoneVal = String(w.ware_zone_type||'');
+        const okZone = !wareZone || okZoneVal === wareZone;
+        return okQ && okStatus && okZone;
+    });
+    const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / warePageSize));
     if (currentWarePage > totalPages) currentWarePage = totalPages;
     if (currentWarePage < 1) currentWarePage = 1;
     const startIdx = (currentWarePage - 1) * warePageSize;
-    const pageItems = warehouses.slice(startIdx, startIdx + warePageSize);
+    const pageItems = filtered.slice(startIdx, startIdx + warePageSize);
 
     if (pageItems.length === 0) {
         els.tableBody.innerHTML = `
@@ -412,6 +456,9 @@ function handleTableClick(e) {
 
 function initWarehouseManagement() {
     els.addBtn && els.addBtn.addEventListener('click', () => openModal(false));
+    els.searchInput && els.searchInput.addEventListener('input', function(){ wareSearch = this.value; currentWarePage = 1; renderWarehouses(); });
+    els.statusFilter && els.statusFilter.addEventListener('change', function(){ wareStatus = this.value; currentWarePage = 1; renderWarehouses(); });
+    els.zoneFilter && els.zoneFilter.addEventListener('change', function(){ wareZone = this.value; currentWarePage = 1; renderWarehouses(); });
     els.modalClose && els.modalClose.addEventListener('click', closeModal);
     els.modalCancel && els.modalCancel.addEventListener('click', closeModal);
     els.form && els.form.addEventListener('submit', saveWarehouse);
