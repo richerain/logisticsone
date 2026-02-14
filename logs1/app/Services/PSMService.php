@@ -1533,6 +1533,7 @@ class PSMService
 
     private function mapExternalRequisition(array $ext): array
     {
+        $defaultVendorId = 'VEN202601235JMKX';
         $items = $ext['req_items'] ?? $ext['items'] ?? $ext['item_list'] ?? null;
         if (is_string($items)) {
             $split = array_map('trim', preg_split('/[,;]+/', $items));
@@ -1558,9 +1559,12 @@ class PSMService
         } catch (\Throwable $t) {
             $date = now()->format('Y-m-d');
         }
+        // Determine vendor id: prefer provided vendor id, else default
+        $vendorField = $ext['req_chosen_vendor'] ?? $ext['vendor'] ?? null;
+        $vendorId = is_string($vendorField) && preg_match('/^VEN[0-9A-Z]+$/', $vendorField) ? $vendorField : $defaultVendorId;
         return [
             'req_items' => $items,
-            'req_chosen_vendor' => $ext['req_chosen_vendor'] ?? $ext['vendor'] ?? null,
+            'req_chosen_vendor' => $vendorId,
             'req_price' => $total,
             'req_requester' => $ext['req_requester'] ?? $ext['requester'] ?? $ext['requested_by'] ?? 'External',
             'req_dept' => $ext['req_dept'] ?? $ext['department'] ?? $ext['dept'] ?? 'External',
