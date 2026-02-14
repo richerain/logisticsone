@@ -283,7 +283,12 @@
                     <!-- Overall Total Price Display -->
                     <div class="flex justify-between items-center p-4 bg-blue-50 border border-blue-100 rounded-xl">
                         <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">Overall Total Price</span>
-                        <span id="view_req_overall_price" class="text-lg font-black text-blue-600">₱0.00</span>
+                        <div class="flex items-center">
+                            <span id="view_req_overall_price" class="price-mask text-lg font-black text-blue-600" data-masked="1" data-price="">*****</span>
+                            <button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Price" onclick="togglePriceVisibility(this)">
+                                <i class="bx bx-show-alt text-2xl"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -316,14 +321,10 @@
         </div>
         <div class="space-y-4">
             <p class="text-sm text-gray-600">Change status for <span id="statusTargetId" class="font-bold text-blue-600"></span></p>
-            <select id="newStatus" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-            <div class="flex justify-end gap-3 pt-4">
+            <div class="flex justify-end gap-3 pt-2">
                 <button id="cancelStatusBtn" class="px-4 py-2 text-gray-700 font-semibold hover:bg-gray-50 rounded-lg">Cancel</button>
-                <button id="updateStatusBtn" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-md transition-all">Update Status</button>
+                <button id="approveStatusBtn" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-md transition-all">Approve</button>
+                <button id="rejectStatusBtn" class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-md transition-all">Reject</button>
             </div>
         </div>
     </div>
@@ -794,8 +795,8 @@
     // Elements
     const statusModal = document.getElementById('statusModal');
     const cancelStatusBtn = document.getElementById('cancelStatusBtn');
-    const updateStatusBtn = document.getElementById('updateStatusBtn');
-    const newStatusSelect = document.getElementById('newStatus');
+    const approveStatusBtn = document.getElementById('approveStatusBtn');
+    const rejectStatusBtn = document.getElementById('rejectStatusBtn');
     const hideModal = () => modal.classList.add('hidden');
     cancelBtn.addEventListener('click', hideModal);
     let activeStatusId = null;
@@ -843,7 +844,12 @@
             document.getElementById('view_req_chosen_vendor').textContent = getVendorName(data.req_chosen_vendor);
             
             const overallPrice = parseFloat(data.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('view_req_overall_price').textContent = '₱' + overallPrice;
+            const overallEl = document.getElementById('view_req_overall_price');
+            if (overallEl) {
+                overallEl.setAttribute('data-price', '₱' + overallPrice);
+                overallEl.setAttribute('data-masked', '1');
+                overallEl.textContent = '*****';
+            }
             
             document.getElementById('view_req_note').textContent = data.req_note || 'No additional notes.';
             
@@ -980,14 +986,11 @@
                             '<button onclick="viewRequisition(\'' + req.id + '\')" title="View Details" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90">' +
                                 '<i class=\'bx bx-show-alt text-xl\'></i>' +
                             '</button>' +
-                            (!req.is_external ? 
+                            (!req.is_external && String(req.req_status || \'\').toLowerCase() === \'pending\' ? 
                             '<button onclick="openStatusUpdate(' + req.id + ', \'' + req.req_id + '\', \'' + req.req_status + '\')" title="Update Status" class="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90">' +
                                 '<i class=\'bx bx-edit text-xl\'></i>' +
-                            '</button>' +
-                            '<button onclick="confirmDelete(' + req.id + ', \'' + req.req_id + '\')" title="Delete Requisition" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90">' +
-                                '<i class=\'bx bx-trash text-xl\'></i>' +
                             '</button>' : 
-                            '<button disabled title="External Record (Read Only)" class="p-2 text-gray-400 cursor-not-allowed opacity-50">' +
+                            '<button disabled title="External or Finalized" class="p-2 text-gray-400 cursor-not-allowed opacity-50">' +
                                 '<i class=\'bx bx-lock-alt text-xl\'></i>' +
                             '</button>') +
                         '</div>' +
@@ -1106,7 +1109,6 @@
     window.openStatusUpdate = (id, reqId, currentStatus) => {
         activeStatusId = id;
         document.getElementById('statusTargetId').textContent = reqId;
-        newStatusSelect.value = currentStatus;
         statusModal.classList.remove('hidden');
     };
 
@@ -1116,8 +1118,7 @@
     };
     cancelStatusBtn.addEventListener('click', hideStatusModal);
 
-    updateStatusBtn.addEventListener('click', async () => {
-        const status = newStatusSelect.value;
+    async function sendStatusUpdate(newStatus) {
         try {
             const response = await fetch(API_URL + '/' + activeStatusId + '/status', {
                 method: 'PATCH',
@@ -1126,18 +1127,22 @@
                     'Content-Type': 'application/json',
                     'Accept': 'application/json' 
                 },
-                body: JSON.stringify({ status })
+                body: JSON.stringify({ status: newStatus })
             });
             const result = await response.json();
             if (result.success) {
                 hideStatusModal();
                 Toast.fire({ icon: 'success', title: 'Status updated successfully' });
                 fetchRequisitions(currentPage);
+            } else {
+                Toast.fire({ icon: 'error', title: result.message || 'Failed to update status' });
             }
         } catch (error) {
             Toast.fire({ icon: 'error', title: 'Failed to update status' });
         }
-    });
+    }
+    approveStatusBtn.addEventListener('click', () => sendStatusUpdate('Approved'));
+    rejectStatusBtn.addEventListener('click', () => sendStatusUpdate('Rejected'));
 
     window.confirmDelete = (id, reqId) => {
         Swal.fire({
