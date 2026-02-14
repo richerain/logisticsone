@@ -1620,7 +1620,16 @@ function renderInventoryItems() {
         const maxStock = item.max_stock || 100;
         const unitPrice = item.unit_price || 0;
         const totalValue = item.total_value || 0;
-        const status = item.status || 'Unknown';
+        const computeStockStatus = (cur, max) => {
+            const c = Number(cur) || 0;
+            const m = Number(max) || 0;
+            if (c <= 0) return 'Out of Stock';
+            if (m <= 0) return 'In Stock';
+            const ratio = c / m;
+            if (ratio <= 0.2) return 'Low Stock';
+            return 'In Stock';
+        };
+        const status = computeStockStatus(currentStock, maxStock);
         
         // Status & Category Badge Helper Functions
         const getStatusBadgeClass = (status) => {
