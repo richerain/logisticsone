@@ -218,15 +218,16 @@
         const CURRENT_USER_MIDDLENAME = "{{ Auth::user()->middlename ?? '' }}";
         const CURRENT_USER_LASTNAME = "{{ Auth::user()->lastname ?? '' }}";
         const CURRENT_USER_NAME_FALLBACK = "{{ Auth::user()->name ?? '' }}";
-        var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? strtoupper(auth()->user()->roles ?? "" ) : ""); ?>';
+        var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? (auth()->user()->roles ?? "" ) : ""); ?>';
         function getCurrentUserDisplay() {
             var parts = [CURRENT_USER_FIRSTNAME, CURRENT_USER_MIDDLENAME, CURRENT_USER_LASTNAME].map(function(s){ return (s || '').trim(); }).filter(Boolean);
             var full = parts.join(' ').trim();
             if (!full) full = (CURRENT_USER_NAME_FALLBACK || '').trim();
             var role = (CURRENT_USER_ROLE || '').trim();
-            if (full && role) return full + ' - ' + role.toUpperCase();
+            function capFirst(str){ str = (str||'').trim(); return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : ''; }
+            if (full && role) return full + ' - ' + capFirst(role);
             if (full) return full;
-            if (role) return role.toUpperCase();
+            if (role) return capFirst(role);
             return 'Unknown';
         }
         let allVendors = [];
