@@ -493,12 +493,17 @@ class SWSController extends Controller
             'rmreq_requester' => ['sometimes', 'string', 'max:100'],
         ]);
 
-        $requester = $validated['rmreq_requester'] ?? (auth()->user()->email ?? (string) auth()->id());
+        $u = auth()->user();
+        $name = trim(($u->firstname ?? '').' '.($u->lastname ?? ''));
+        $role = trim((string) ($u->roles ?? ''));
+        $label = trim($name.($role ? ' - '.$role : ''));
+        $fallback = $u->email ?? (string) auth()->id();
+        $requester = $validated['rmreq_requester'] ?? ($label !== '' ? $label : $fallback);
         $data = [
             'rmreq_requester' => $requester,
             'rmreq_room_type' => $validated['rmreq_room_type'],
             'rmreq_note' => $validated['rmreq_note'] ?? null,
-            'rmreq_date' => now(),
+            'rmreq_date' => now()->startOfDay(),
             'rmreq_status' => 'pending',
         ];
 

@@ -36,9 +36,6 @@
     </div>
 
     <div class="flex justify-end mb-4 gap-2">
-        <button id="requestRoomBtn" title="Request Room for Warehouse" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
-            <i class='bx bx-door-open'></i> Request Room for Warehouse
-        </button>
         <button id="requestRoomStatusBtn" title="Request Room Status" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
             <i class='bx bx-list-ul'></i> Request Room Status
         </button>
@@ -135,7 +132,7 @@
     </div>
 </div>
 
-<div id="requestRoomModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+<div id="requestRoomModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden" style="z-index: 60;">
     <div class="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-semibold">Request Room for Warehouse</h3>
@@ -166,20 +163,25 @@
 
 <div id="roomStatusModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center mb-4 gap-3">
             <h3 class="text-xl font-semibold">Room Requests Status</h3>
-            <button id="closeRoomStatusModal" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
+            <div class="flex items-center gap-2">
+                <button id="openRequestRoomFromStatusBtn" class="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 whitespace-nowrap flex items-center gap-2">
+                    <i class='bx bx-door-open'></i> Request Room for Warehouse
+                </button>
+                <button id="closeRoomStatusModal" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-800 text-gray-100">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">ID</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Requester</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Room Type</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Note</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Requester</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Room Type</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Note</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Status</th>
                     </tr>
                 </thead>
                 <tbody id="roomStatusTableBody" class="bg-white divide-y divide-gray-200">
@@ -195,6 +197,8 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var SWS_WAREHOUSE_API = `${API_BASE_URL}/sws/warehouse`;
 var SWS_ROOM_REQ_PRIMARY = `${API_BASE_URL}/sws/warehouse/room-requests`;
 var SWS_ROOM_REQ_FALLBACK = `${API_BASE_URL}/sws/room-requests`;
+var ROOM_REQ_ENDPOINT = SWS_ROOM_REQ_PRIMARY;
+var ROOM_REQ_ENDPOINT_LOCKED = false;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
@@ -420,7 +424,6 @@ function initWarehouseManagement() {
     viewModal && viewModal.addEventListener('click', function(e) { if (e.target === viewModal) { viewModal.classList.add('hidden'); } });
     loadWarehouses();
 
-    const reqBtn = document.getElementById('requestRoomBtn');
     const reqStatusBtn = document.getElementById('requestRoomStatusBtn');
     const reqModal = document.getElementById('requestRoomModal');
     const reqClose = document.getElementById('closeRequestRoomModal');
@@ -428,8 +431,9 @@ function initWarehouseManagement() {
     const reqForm = document.getElementById('requestRoomForm');
     const statusModal = document.getElementById('roomStatusModal');
     const statusClose = document.getElementById('closeRoomStatusModal');
+    const openReqInside = document.getElementById('openRequestRoomFromStatusBtn');
 
-    reqBtn && reqBtn.addEventListener('click', () => { reqModal.classList.remove('hidden'); });
+    openReqInside && openReqInside.addEventListener('click', () => { reqModal.classList.remove('hidden'); });
     reqClose && reqClose.addEventListener('click', () => { reqModal.classList.add('hidden'); });
     reqCancel && reqCancel.addEventListener('click', () => { reqModal.classList.add('hidden'); });
     reqModal && reqModal.addEventListener('click', function(e){ if(e.target === reqModal){ reqModal.classList.add('hidden'); } });
@@ -477,7 +481,7 @@ async function submitRoomRequest(e){
     const note = document.getElementById('rmreq_note').value.trim() || null;
     const payload = { rmreq_room_type: type, rmreq_note: note };
     try {
-        let response = await fetch(SWS_ROOM_REQ_PRIMARY, {
+        let response = await fetch(ROOM_REQ_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -489,8 +493,10 @@ async function submitRoomRequest(e){
             credentials: 'include',
             body: JSON.stringify(payload)
         });
-        if (response.status === 404) {
-            response = await fetch(SWS_ROOM_REQ_FALLBACK, {
+        if (response.status === 404 && !ROOM_REQ_ENDPOINT_LOCKED) {
+            ROOM_REQ_ENDPOINT = SWS_ROOM_REQ_FALLBACK;
+            ROOM_REQ_ENDPOINT_LOCKED = true;
+            response = await fetch(ROOM_REQ_ENDPOINT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -510,6 +516,7 @@ async function submitRoomRequest(e){
         notify('Room request submitted', 'success');
         document.getElementById('requestRoomModal').classList.add('hidden');
         document.getElementById('rmreq_note').value = '';
+        loadRoomRequests();
     } catch (e) {
         notify('Failed to submit room request', 'error');
     }
@@ -521,7 +528,7 @@ async function loadRoomRequests(){
     tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><div class="flex justify-center items-center py-4"><div class="loading loading-spinner mr-3"></div>Loading...</div></td></tr>`;
     modal.classList.remove('hidden');
     try{
-        let response = await fetch(SWS_ROOM_REQ_PRIMARY, {
+        let response = await fetch(ROOM_REQ_ENDPOINT, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -531,8 +538,10 @@ async function loadRoomRequests(){
             },
             credentials: 'include'
         });
-        if (response.status === 404) {
-            response = await fetch(SWS_ROOM_REQ_FALLBACK, {
+        if (response.status === 404 && !ROOM_REQ_ENDPOINT_LOCKED) {
+            ROOM_REQ_ENDPOINT = SWS_ROOM_REQ_FALLBACK;
+            ROOM_REQ_ENDPOINT_LOCKED = true;
+            response = await fetch(ROOM_REQ_ENDPOINT, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -558,8 +567,8 @@ async function loadRoomRequests(){
                 <td class="px-4 py-2 whitespace-nowrap">${r.rmreq_id}</td>
                 <td class="px-4 py-2 whitespace-nowrap">${r.rmreq_requester || ''}</td>
                 <td class="px-4 py-2 whitespace-nowrap capitalize">${r.rmreq_room_type || ''}</td>
-                <td class="px-4 py-2">${r.rmreq_note || ''}</td>
-                <td class="px-4 py-2 whitespace-nowrap">${r.rmreq_date ? new Date(r.rmreq_date).toLocaleString() : ''}</td>
+                <td class="px-4 py-2 whitespace-nowrap"><span class="inline-block max-w-[28rem] truncate" title="${(r.rmreq_note || '').replace(/\"/g, '&quot;')}">${r.rmreq_note || ''}</span></td>
+                <td class="px-4 py-2 whitespace-nowrap">${r.rmreq_date ? new Date(r.rmreq_date).toLocaleDateString('en-US') : ''}</td>
                 <td class="px-4 py-2 whitespace-nowrap"><span class="badge ${badge}">${r.rmreq_status}</span></td>
             `;
             tbody.appendChild(tr);

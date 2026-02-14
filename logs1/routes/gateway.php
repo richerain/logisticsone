@@ -61,6 +61,7 @@ Route::prefix('psm')->group(function () {
 // External Integration Routes (API Key Protected)
 Route::middleware(['api.key'])->prefix('alms/external')->group(function () {
     Route::get('/maintenance', [App\Http\Controllers\ALMSController::class, 'getMaintenance']);
+    Route::put('/maintenance', [App\Http\Controllers\ALMSController::class, 'storeMaintenance']);
 });
 
 Route::middleware(['api.key'])->prefix('psm/external')->group(function () {
