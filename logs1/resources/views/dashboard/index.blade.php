@@ -157,7 +157,7 @@
         </div>
         <div onclick="window.location.href='?module=psm-purchase-requisition'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
             <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
-                <i class='bx bxs-clipboard text-6xl text-green-700 leading-none'></i>
+                <i class='bx bx-clipboard text-6xl text-green-700 leading-none'></i>
             </div>
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
