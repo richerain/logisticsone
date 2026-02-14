@@ -147,95 +147,80 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
             <!-- Stats 01: Total Purchase Orders -->
-            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700">
+            <div id="metricPurchaseOrders" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700 cursor-pointer">
                 <div class="stat-title flex items-center justify-between">
                     <span class="font-semibold text-blue-900">Purchase Orders</span>
                     <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-blue-900 shadow-sm">
                         <i class="bx bxs-purchase-tag text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-blue-900">47</div>
-                <div class="stat-desc text-blue-700">12 Pending Approval</div>
+                <div id="poTotalValue" class="stat-value text-blue-900">0</div>
+                <div id="poPendingValue" class="stat-desc text-blue-700">0 Pending Approval</div>
             </div>
 
             <!-- Stats 02: Active Vendors -->
-            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-green-700">
+            <div id="metricActiveVendors" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-green-700 cursor-pointer">
                 <div class="stat-title flex items-center justify-between">
                     <span class="font-semibold text-green-900">Active Vendors</span>
                     <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-green-900 shadow-sm">
                         <i class="bx bxs-user-detail text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-green-900">28</div>
-                <div class="stat-desc text-green-700">5 New This Month</div>
+                <div id="vendorActiveValue" class="stat-value text-green-900">0</div>
+                <div id="vendorProductsValue" class="stat-desc text-green-700">0 Products</div>
             </div>
 
             <!-- Stats 03: Warehouse Inventory -->
-            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-purple-700">
+            <div id="metricTotalInventory" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-purple-700 cursor-pointer">
                 <div class="stat-title flex items-center justify-between">
                     <span class="font-semibold text-purple-900">Total Inventory</span>
                     <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-purple-900 shadow-sm">
                         <i class="bx bxs-archive-in text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-purple-900">1,247</div>
-                <div class="stat-desc text-purple-700">45 Low Stock Items</div>
+                <div id="invTotalValue" class="stat-value text-purple-900">0</div>
+                <div id="invLowValue" class="stat-desc text-purple-700">0 Low Stock Items</div>
             </div>
 
             <!-- Stats 04: Active Projects -->
-            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-orange-700">
+            <div id="metricActiveProjects" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-orange-700 cursor-pointer">
                 <div class="stat-title flex items-center justify-between">
                     <span class="font-semibold text-orange-900">Active Projects</span>
                     <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-orange-900 shadow-sm">
                         <i class="bx bxs-package text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-orange-900">15</div>
-                <div class="stat-desc text-orange-700">5 Behind Schedule</div>
+                <div id="projActiveValue" class="stat-value text-orange-900">0</div>
+                <div id="projDelayedValue" class="stat-desc text-orange-700">0 Delayed</div>
             </div>
 
             <!-- Stats 05: Total Assets -->
-            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-cyan-700">
+            <div id="metricManagedAssets" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-cyan-700 cursor-pointer">
                 <div class="stat-title flex items-center justify-between">
                     <span class="font-semibold text-cyan-900">Managed Assets</span>
                     <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-cyan-900 shadow-sm">
                         <i class="bx bxs-archive text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-cyan-900">284</div>
-                <div class="stat-desc text-cyan-700">18 Under Maintenance</div>
+                <div id="assetsTotalValue" class="stat-value text-cyan-900">0</div>
+                <div id="assetsMaintValue" class="stat-desc text-cyan-700">0 Under Maintenance</div>
             </div>
 
             <!-- Stats 06: Pending Documents -->
-            <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-red-700">
+            <div id="metricPendingDocs" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-red-700 cursor-pointer">
                 <div class="stat-title flex items-center justify-between">
                     <span class="font-semibold text-red-900">Pending Docs</span>
                     <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-red-900 shadow-sm">
                         <i class="bx bxs-file text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-red-900">387</div>
+                <div id="docsPendingValue" class="stat-value text-red-900">0</div>
                 <div class="stat-desc text-red-700">Require Attention</div>
             </div>
         </div>
 
         <!-- Quick Module Status Overview -->
         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- PSM Status -->
-            <div class="bg-white rounded-lg p-3 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-semibold text-gray-700">PSM</span>
-                    <span class="flex items-center text-xs px-2 py-1 rounded-full bg-white text-green-800">
-                        <i class='bx bxs-circle text-xs mr-1'></i>Active
-                    </span>
-                </div>
-                <p class="text-xs text-gray-600 mt-1">Procurement & Sourcing</p>
-                <div class="mt-2 flex justify-between text-xs">
-                    <span>23 Active PO</span>
-                    <span class="text-orange-600">5 Pending</span>
-                </div>
-            </div>
-
             <!-- SWS Status -->
             <div class="bg-white rounded-lg p-3 shadow-sm">
                 <div class="flex items-center justify-between">
@@ -246,8 +231,23 @@
                 </div>
                 <p class="text-xs text-gray-600 mt-1">Smart Warehousing</p>
                 <div class="mt-2 flex justify-between text-xs">
-                    <span>1.2K Items</span>
-                    <span class="text-red-600">45 Low</span>
+                    <span id="swsItemsCount">0 Items</span>
+                    <span id="swsLowCount" class="text-red-600">0 Low</span>
+                </div>
+            </div>
+
+            <!-- PSM Status -->
+            <div class="bg-white rounded-lg p-3 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">PSM</span>
+                    <span class="flex items-center text-xs px-2 py-1 rounded-full bg-white text-green-800">
+                        <i class='bx bxs-circle text-xs mr-1'></i>Active
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">Procurement & Sourcing</p>
+                <div class="mt-2 flex justify-between text-xs">
+                    <span id="psmActivePO">0 Active PO</span>
+                    <span id="psmPendingPO" class="text-orange-600">0 Pending</span>
                 </div>
             </div>
 
@@ -261,8 +261,8 @@
                 </div>
                 <p class="text-xs text-gray-600 mt-1">Project Logistics</p>
                 <div class="mt-2 flex justify-between text-xs">
-                    <span>15 Projects</span>
-                    <span class="text-yellow-600">5 Ongoing</span>
+                    <span id="pltProjectsCount">0 Projects</span>
+                    <span id="pltOngoingCount" class="text-yellow-600">0 Ongoing</span>
                 </div>
             </div>
 
@@ -276,8 +276,8 @@
                 </div>
                 <p class="text-xs text-gray-600 mt-1">Asset Management</p>
                 <div class="mt-2 flex justify-between text-xs">
-                    <span>284 Assets</span>
-                    <span class="text-blue-600">18 Maintenance</span>
+                    <span id="almsAssetsCount">0 Assets</span>
+                    <span id="almsMaintCount" class="text-blue-600">0 Maintenance</span>
                 </div>
             </div>
 
@@ -291,8 +291,8 @@
                 </div>
                 <p class="text-xs text-gray-600 mt-1">Document Tracking</p>
                 <div class="mt-2 flex justify-between text-xs">
-                    <span>1.8K Docs</span>
-                    <span class="text-red-600">387 Pending</span>
+                    <span id="dtlrDocsCount">0 Docs</span>
+                    <span id="dtlrPendingCount" class="text-red-600">0 Pending</span>
                 </div>
             </div>
         </div>
@@ -377,6 +377,8 @@
 // Module Charts Data Initialization start
 document.addEventListener('DOMContentLoaded', function () {
     initializeModuleCharts();
+    wireDashboardMetricLinks();
+    loadDashboardStats();
 });
 
 function initializeModuleCharts() {
@@ -552,4 +554,99 @@ function initializeModuleCharts() {
         });
     }
 }// Module Charts Data Initialization end
+
+function wireDashboardMetricLinks(){
+    var go = function(path){ window.location.href = '/module/' + path; };
+    var a = document.getElementById('metricPurchaseOrders'); if(a) a.addEventListener('click', function(){ go('psm-purchase'); });
+    var b = document.getElementById('metricActiveVendors'); if(b) b.addEventListener('click', function(){ go('psm-vendor-management'); });
+    var c = document.getElementById('metricTotalInventory'); if(c) c.addEventListener('click', function(){ go('sws-digital-inventory'); });
+    var d = document.getElementById('metricActiveProjects'); if(d) d.addEventListener('click', function(){ go('plt-logistics-projects'); });
+    var e = document.getElementById('metricManagedAssets'); if(e) e.addEventListener('click', function(){ go('alms-asset-management'); });
+    var f = document.getElementById('metricPendingDocs'); if(f) f.addEventListener('click', function(){ go('dtlr-document-tracker'); });
+}
+
+async function loadDashboardStats(){
+    var headers = {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '',
+        'Authorization': typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : ''
+    };
+    try{
+        var [poRes, vendorRes, invRes, projRes, assetsRes, docsRes] = await Promise.all([
+            fetch('/api/v1/psm/purchase-management', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/psm/vendor-management/stats', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/sws/inventory-stats', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/plt/projects/stats', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/alms/assets', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' })
+        ]);
+        var poJson = await poRes.json().catch(function(){ return {}; });
+        var vendorJson = await vendorRes.json().catch(function(){ return {}; });
+        var invJson = await invRes.json().catch(function(){ return {}; });
+        var projJson = await projRes.json().catch(function(){ return {}; });
+        var assetsJson = await assetsRes.json().catch(function(){ return {}; });
+        var docsJson = await docsRes.json().catch(function(){ return {}; });
+
+        var purchases = Array.isArray(poJson.data) ? poJson.data : (Array.isArray(poJson) ? poJson : []);
+        var poTotal = purchases.length || 0;
+        var poPending = purchases.filter(function(p){
+            var s = String((p.pur_status || '')).toLowerCase();
+            return s.indexOf('pending') !== -1;
+        }).length;
+        var poActive = purchases.filter(function(p){
+            var s = String((p.pur_status || '')).toLowerCase();
+            return s !== 'cancel' && s !== 'delivered';
+        }).length;
+
+        var vStats = vendorJson && vendorJson.data ? vendorJson.data : {};
+        var activeVendors = parseInt(vStats.active_vendors || vStats.total_vendors || 0);
+        var totalProducts = parseInt(vStats.total_products || 0);
+
+        var invStats = invJson && invJson.data ? invJson.data : {};
+        var totalItems = parseInt(invStats.total_items || 0);
+        var lowItems = parseInt(invStats.low_stock_items || 0);
+
+        var projStats = projJson && projJson.data ? projJson.data : {};
+        var activeProjects = parseInt(projStats.active || 0);
+        var delayedProjects = parseInt(projStats.delayed || 0);
+        var totalProjects = parseInt(projStats.total || (activeProjects + delayedProjects) || 0);
+
+        var assets = Array.isArray(assetsJson.data) ? assetsJson.data : (Array.isArray(assetsJson) ? assetsJson : []);
+        var assetsTotal = assets.length || 0;
+        var assetsMaint = assets.filter(function(x){
+            return String((x.asset_status || '')).toLowerCase() === 'under_maintenance';
+        }).length;
+
+        var docs = Array.isArray(docsJson.data) ? docsJson.data : (Array.isArray(docsJson) ? docsJson : []);
+        var docsPending = docs.filter(function(d){
+            return String((d.doc_status || '')).toLowerCase() === 'pending_review';
+        }).length;
+        var docsTotal = docs.length || 0;
+
+        var el;
+        el = document.getElementById('poTotalValue'); if(el) el.textContent = poTotal.toLocaleString();
+        el = document.getElementById('poPendingValue'); if(el) el.textContent = (poPending.toLocaleString()) + ' Pending Approval';
+        el = document.getElementById('vendorActiveValue'); if(el) el.textContent = activeVendors.toLocaleString();
+        el = document.getElementById('vendorProductsValue'); if(el) el.textContent = (totalProducts.toLocaleString()) + ' Products';
+        el = document.getElementById('invTotalValue'); if(el) el.textContent = totalItems.toLocaleString();
+        el = document.getElementById('invLowValue'); if(el) el.textContent = (lowItems.toLocaleString()) + ' Low Stock Items';
+        el = document.getElementById('projActiveValue'); if(el) el.textContent = activeProjects.toLocaleString();
+        el = document.getElementById('projDelayedValue'); if(el) el.textContent = (delayedProjects.toLocaleString()) + ' Delayed';
+        el = document.getElementById('assetsTotalValue'); if(el) el.textContent = assetsTotal.toLocaleString();
+        el = document.getElementById('assetsMaintValue'); if(el) el.textContent = (assetsMaint.toLocaleString()) + ' Under Maintenance';
+        el = document.getElementById('docsPendingValue'); if(el) el.textContent = docsPending.toLocaleString();
+
+        el = document.getElementById('swsItemsCount'); if(el) el.textContent = (totalItems.toLocaleString()) + ' Items';
+        el = document.getElementById('swsLowCount'); if(el) el.textContent = (lowItems.toLocaleString()) + ' Low';
+        el = document.getElementById('psmActivePO'); if(el) el.textContent = (poActive.toLocaleString()) + ' Active PO';
+        el = document.getElementById('psmPendingPO'); if(el) el.textContent = (poPending.toLocaleString()) + ' Pending';
+        el = document.getElementById('pltProjectsCount'); if(el) el.textContent = (totalProjects.toLocaleString()) + ' Projects';
+        el = document.getElementById('pltOngoingCount'); if(el) el.textContent = (activeProjects.toLocaleString()) + ' Ongoing';
+        el = document.getElementById('almsAssetsCount'); if(el) el.textContent = (assetsTotal.toLocaleString()) + ' Assets';
+        el = document.getElementById('almsMaintCount'); if(el) el.textContent = (assetsMaint.toLocaleString()) + ' Maintenance';
+        el = document.getElementById('dtlrDocsCount'); if(el) el.textContent = (docsTotal.toLocaleString()) + ' Docs';
+        el = document.getElementById('dtlrPendingCount'); if(el) el.textContent = (docsPending.toLocaleString()) + ' Pending';
+    }catch(e){}
+}
 </script>
