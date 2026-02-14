@@ -1499,7 +1499,13 @@ class PSMService
                 // Upsert by req_id to ensure idempotency
                 $existing = \App\Models\PSM\Requisition::where('req_id', $reqId)->first();
                 if ($existing) {
-                    $existing->update($mapped);
+                    // Preserve locally-updated status; do not override req_status from external feed
+                    $updateData = $mapped;
+                    unset($updateData['req_status']);
+                    // Only update other fields
+                    if (!empty($updateData)) {
+                        $existing->update($updateData);
+                    }
                     $updated++;
                 } else {
                     $this->psmRepository->upsertRequisitionByReqId($reqId, $mapped);
