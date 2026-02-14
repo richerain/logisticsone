@@ -68,11 +68,65 @@ class SWSController extends Controller
 
         $endpoint = config('services.huggingface.forecast_endpoint');
         $token = config('services.huggingface.api_token');
-        if (! $endpoint || ! $token) {
+        $usePhp = $request->boolean('use_php', false);
+        if (! $endpoint || ! $token || $usePhp) {
+            $points = collect($series)
+                ->filter(function ($x) { return isset($x['timestamp']) && isset($x['value']); })
+                ->sortBy('timestamp')
+                ->values()
+                ->all();
+            $values = array_map(function ($x) { return (float) $x['value']; }, $points);
+            $lastTs = end($points)['timestamp'] ?? date('Y-m-d');
+            if (count($values) === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No time series data available.',
+                ], 422);
+            }
+            if (count($values) === 1) {
+                $preds = [];
+                for ($m = 1; $m <= $horizon; $m++) {
+                    $preds[] = [
+                        'timestamp' => date('Y-m-d', strtotime($lastTs.' +'.$m.' day')),
+                        'value' => $values[0],
+                    ];
+                }
+                return response()->json([
+                    'success' => true,
+                    'item_id' => $itemId,
+                    'sku' => $sku,
+                    'horizon' => $horizon,
+                    'cadence' => $cadence,
+                    'predictions' => $preds,
+                    'engine' => 'php_holt_linear',
+                ]);
+            }
+            $alpha = 0.3;
+            $beta = 0.1;
+            $l = $values[0];
+            $b = $values[1] - $values[0];
+            for ($i = 1; $i < count($values); $i++) {
+                $y = $values[$i];
+                $l_new = $alpha * $y + (1 - $alpha) * ($l + $b);
+                $b = $beta * ($l_new - $l) + (1 - $beta) * $b;
+                $l = $l_new;
+            }
+            $preds = [];
+            for ($m = 1; $m <= $horizon; $m++) {
+                $preds[] = [
+                    'timestamp' => date('Y-m-d', strtotime($lastTs.' +'.$m.' day')),
+                    'value' => max(0, $l + $m * $b),
+                ];
+            }
             return response()->json([
-                'success' => false,
-                'message' => 'Forecasting service not configured. Set HUGGINGFACE_API_TOKEN and HF_FORECAST_ENDPOINT.',
-            ], 500);
+                'success' => true,
+                'item_id' => $itemId,
+                'sku' => $sku,
+                'horizon' => $horizon,
+                'cadence' => $cadence,
+                'predictions' => $preds,
+                'engine' => 'php_holt_linear',
+            ]);
         }
 
         try {
