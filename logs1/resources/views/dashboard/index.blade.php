@@ -147,75 +147,117 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
             <!-- Stats 01: Total Purchase Orders -->
-            <div id="metricPurchaseOrders" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700 cursor-pointer">
-                <div class="stat-title flex items-center justify-between">
-                    <span class="font-semibold text-blue-900">Purchase Orders</span>
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-blue-900 shadow-sm">
-                        <i class="bx bxs-purchase-tag text-xl" aria-hidden="true"></i>
-                    </span>
+            <div onclick="window.location.href='?module=psm-purchase'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class='bx bxs-purchase-tag text-6xl text-blue-700'></i>
                 </div>
-                <div id="poTotalValue" class="stat-value text-blue-900">0</div>
-                <div id="poPendingValue" class="stat-desc text-blue-700">0 Pending Approval</div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-blue-50 rounded-xl text-blue-700">
+                            <i class='bx bxs-purchase-tag text-2xl'></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Purchase Orders</h4>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="poTotalValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                        <span id="poPendingValue" class="text-xs text-blue-700 mb-1">0 Pending Approval</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats 02: Active Vendors -->
-            <div id="metricActiveVendors" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-green-700 cursor-pointer">
-                <div class="stat-title flex items-center justify-between">
-                    <span class="font-semibold text-green-900">Active Vendors</span>
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-green-900 shadow-sm">
-                        <i class="bx bxs-user-detail text-xl" aria-hidden="true"></i>
-                    </span>
+            <div onclick="window.location.href='?module=psm-vendor-management'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class='bx bxs-user-detail text-6xl text-green-700'></i>
                 </div>
-                <div id="vendorActiveValue" class="stat-value text-green-900">0</div>
-                <div id="vendorProductsValue" class="stat-desc text-green-700">0 Products</div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-green-50 rounded-xl text-green-700">
+                            <i class='bx bxs-user-detail text-2xl'></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Active Vendors</h4>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="vendorActiveValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                        <span id="vendorProductsValue" class="text-xs text-green-700 mb-1">0 Products</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats 03: Warehouse Inventory -->
-            <div id="metricTotalInventory" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-purple-700 cursor-pointer">
-                <div class="stat-title flex items-center justify-between">
-                    <span class="font-semibold text-purple-900">Total Inventory</span>
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-purple-900 shadow-sm">
-                        <i class="bx bxs-archive-in text-xl" aria-hidden="true"></i>
-                    </span>
+            <div onclick="window.location.href='?module=sws-digital-inventory'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-purple-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class='bx bxs-archive-in text-6xl text-purple-700'></i>
                 </div>
-                <div id="invTotalValue" class="stat-value text-purple-900">0</div>
-                <div id="invLowValue" class="stat-desc text-purple-700">0 Low Stock Items</div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-purple-50 rounded-xl text-purple-700">
+                            <i class='bx bxs-archive-in text-2xl'></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Inventory</h4>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="invTotalValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                        <span id="invLowValue" class="text-xs text-purple-700 mb-1">0 Low Stock Items</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats 04: Active Projects -->
-            <div id="metricActiveProjects" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-orange-700 cursor-pointer">
-                <div class="stat-title flex items-center justify-between">
-                    <span class="font-semibold text-orange-900">Active Projects</span>
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-orange-900 shadow-sm">
-                        <i class="bx bxs-package text-xl" aria-hidden="true"></i>
-                    </span>
+            <div onclick="window.location.href='?module=plt-logistics-projects'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-orange-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class='bx bxs-package text-6xl text-orange-700'></i>
                 </div>
-                <div id="projActiveValue" class="stat-value text-orange-900">0</div>
-                <div id="projDelayedValue" class="stat-desc text-orange-700">0 Delayed</div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-orange-50 rounded-xl text-orange-700">
+                            <i class='bx bxs-package text-2xl'></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Active Projects</h4>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="projActiveValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                        <span id="projDelayedValue" class="text-xs text-orange-700 mb-1">0 Delayed</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats 05: Total Assets -->
-            <div id="metricManagedAssets" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-cyan-700 cursor-pointer">
-                <div class="stat-title flex items-center justify-between">
-                    <span class="font-semibold text-cyan-900">Managed Assets</span>
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-cyan-900 shadow-sm">
-                        <i class="bx bxs-archive text-xl" aria-hidden="true"></i>
-                    </span>
+            <div onclick="window.location.href='?module=alms-asset-management'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-cyan-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class='bx bxs-archive text-6xl text-cyan-700'></i>
                 </div>
-                <div id="assetsTotalValue" class="stat-value text-cyan-900">0</div>
-                <div id="assetsMaintValue" class="stat-desc text-cyan-700">0 Under Maintenance</div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-cyan-50 rounded-xl text-cyan-700">
+                            <i class='bx bxs-archive text-2xl'></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Managed Assets</h4>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="assetsTotalValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                        <span id="assetsMaintValue" class="text-xs text-cyan-700 mb-1">0 Under Maintenance</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats 06: Pending Documents -->
-            <div id="metricPendingDocs" class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-red-700 cursor-pointer">
-                <div class="stat-title flex items-center justify-between">
-                    <span class="font-semibold text-red-900">Pending Docs</span>
-                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-red-900 shadow-sm">
-                        <i class="bx bxs-file text-xl" aria-hidden="true"></i>
-                    </span>
+            <div onclick="window.location.href='?module=dtlr-document-tracker'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                    <i class='bx bxs-file text-6xl text-red-700'></i>
                 </div>
-                <div id="docsPendingValue" class="stat-value text-red-900">0</div>
-                <div class="stat-desc text-red-700">Require Attention</div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-red-50 rounded-xl text-red-700">
+                            <i class='bx bxs-file text-2xl'></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending Docs</h4>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="docsPendingValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                        <span class="text-xs text-red-700 mb-1">Require Attention</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -568,7 +610,7 @@ function initializeModuleCharts() {
 }// Module Charts Data Initialization end
 
 function wireDashboardMetricLinks(){
-    var go = function(path){ window.location.href = '/module/' + path; };
+    var go = function(path){ window.location.href = '?module=' + path; };
     var a = document.getElementById('metricPurchaseOrders'); if(a) a.addEventListener('click', function(){ go('psm-purchase'); });
     var b = document.getElementById('metricActiveVendors'); if(b) b.addEventListener('click', function(){ go('psm-vendor-management'); });
     var c = document.getElementById('metricTotalInventory'); if(c) c.addEventListener('click', function(){ go('sws-digital-inventory'); });
