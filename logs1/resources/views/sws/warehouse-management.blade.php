@@ -39,7 +39,7 @@
         <button id="requestRoomStatusBtn" title="Request Room Status" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
             <i class='bx bx-list-ul'></i> Request Room Status
         </button>
-        <button id="addWarehouseBtn" title="Add New Warehouse" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+        <button id="addWarehouseBtn" title="Add New Warehouse" class="hidden bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
             <i class='bx bx-plus'></i> Add Warehouse
         </button>
     </div>
@@ -313,8 +313,6 @@ function renderWarehouses() {
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex gap-2">
                         <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="View Detail" data-action="view" data-id="${w.ware_id}"><i class='bx bx-show-alt text-xl'></i></button>
-                        <button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Edit Detail" data-action="edit" data-id="${w.ware_id}"><i class='bx bx-edit text-xl'></i></button>
-                        <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50 budget-approval-btn" title="Delete Warehouse" data-action="delete" data-id="${w.ware_id}"><i class='bx bx-trash text-xl'></i></button>
                     </div>
                 </td>`;
             els.tableBody.appendChild(tr);
