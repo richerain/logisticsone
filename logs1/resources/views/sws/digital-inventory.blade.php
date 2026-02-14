@@ -11,7 +11,7 @@
 <div class="mt-4 mb-1">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Items -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+        <div id="di_card_total" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Show all items">
             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
                 <i class='bx bx-package text-6xl text-blue-600'></i>
             </div>
@@ -28,26 +28,8 @@
                 </div>
             </div>
         </div>
-        <!-- Total Value -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bx-money text-6xl text-emerald-600'></i>
-            </div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
-                        <i class='bx bx-money text-2xl'></i>
-                    </div>
-                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Value</h4>
-                </div>
-                <div class="flex items-end gap-2">
-                    <span id="totalValue" class="text-4xl font-black text-gray-800 leading-none">₱0.00</span>
-                    <span class="text-xs text-gray-500 mb-1">Current valuation</span>
-                </div>
-            </div>
-        </div>
         <!-- Low Stock -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+        <div id="di_card_low" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter to Low Stock">
             <div id="lowStockBadgePulse" class="hidden absolute top-4 right-4 z-20">
                 <span class="relative flex h-6 w-6">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
@@ -71,7 +53,7 @@
             </div>
         </div>
         <!-- Out of Stock -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+        <div id="di_card_out" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter to Out of Stock">
             <div id="outOfStockBadgePulse" class="hidden absolute top-4 right-4 z-20">
                 <span class="relative flex h-6 w-6">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -91,6 +73,24 @@
                 <div class="flex items-end gap-2">
                     <span id="outOfStockItems" class="text-4xl font-black text-gray-800 leading-none">0</span>
                     <span class="text-xs text-gray-500 mb-1">Replenish needed</span>
+                </div>
+            </div>
+        </div>
+        <!-- Total Value (moved to 4th position) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-money text-6xl text-emerald-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+                        <i class='bx bx-money text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Value</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="totalValue" class="text-4xl font-black text-gray-800 leading-none">₱0.00</span>
+                    <span class="text-xs text-gray-500 mb-1">Current valuation</span>
                 </div>
             </div>
         </div>
