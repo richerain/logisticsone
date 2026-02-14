@@ -108,7 +108,7 @@
         </h3>
         <button id="addRequisitionBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95">
             <i class='bx bx-plus text-xl'></i>
-            New Requisition 123
+            New Requisition
         </button>
     </div>
 
