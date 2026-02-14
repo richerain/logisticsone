@@ -576,7 +576,7 @@
                     (p.prod_desc || '-') +
                 '</td>' +
                 '<td class="px-4 py-3 text-[11px] font-bold text-blue-600 whitespace-nowrap">' +
-                    '₱' + parseFloat(p.prod_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) +
+                    'PHP ' + parseFloat(p.prod_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) +
                 '</td>' +
                 '<td class="px-4 py-3 text-right">' +
                     '<button type="button" onclick="window.addItemToRequisition(\'' + p.prod_name.replace(/'/g, "\\'") + '\', ' + (p.prod_price || 0) + ')" ' +
@@ -632,12 +632,12 @@
             (originalName ? 
             '<div class="flex items-center justify-between text-[11px] text-gray-500 px-1">' +
                 '<div class="flex items-center gap-2">' +
-                    '<span>Price: ₱' + parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
+                    '<span>Price: PHP ' + parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
                     '<span>×</span>' +
                     '<span>Qty: ' + count + '</span>' +
                 '</div>' +
                 '<div class="font-bold text-blue-600">' +
-                    'Total: ₱' + parseFloat(totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2}) +
+                    'Total: PHP ' + parseFloat(totalPrice).toLocaleString(undefined, {minimumFractionDigits: 2}) +
                 '</div>' +
             '</div>' : '');
         sideItemsContainer.appendChild(div);
