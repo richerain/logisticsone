@@ -99,10 +99,10 @@
 <!-- Inventory Metrics section end -->
 <!-- Quick Management section start -->
 <div class="mt-4 mb-4">
-    <div class="rounded-2xl overflow-hidden">
+    <div class="rounded-2xl overflow-visible">
         <div class="p-4">
-            <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
-                <button id="transferBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+            <div class="flex flex-wrap items-stretch gap-3 pb-1">
+                <button id="transferBtn" class="h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                         <i class='bx bx-transfer text-lg'></i>
                     </span>
@@ -116,35 +116,35 @@
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Location</span>
                 </button>
 
-                <button id="viewCategoriesBtn" class="hidden h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+                <button id="viewCategoriesBtn" class="hidden h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
                         <i class='bx bx-category-alt text-lg'></i>
                     </span>
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Category</span>
                 </button>
 
-                <button id="generateReportBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+                <button id="generateReportBtn" class="h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
                         <i class='bx bxs-report text-lg'></i>
                     </span>
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Reports</span>
                 </button>
 
-                <button id="purchaseNewItemBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200">
+                <button id="purchaseNewItemBtn" class="h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-emerald-400/30 flex items-center justify-center">
                         <i class='bx bxs-purchase-tag text-lg'></i>
                     </span>
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Purchase</span>
                 </button>
 
-                <button id="inventoryNewItemBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                <button id="inventoryNewItemBtn" class="h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                         <i class='bx bxs-down-arrow-square text-lg'></i>
                     </span>
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Inventory</span>
                 </button>
 
-                <button id="incomingAssetsBtn" class="relative h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                <button id="incomingAssetsBtn" class="relative h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                         <i class='bx bx-import text-lg'></i>
                     </span>
