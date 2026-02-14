@@ -155,20 +155,20 @@
                 </div>
             </div>
         </div>
-        <div onclick="window.location.href='?module=psm-vendor-management'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
+        <div onclick="window.location.href='?module=psm-purchase-requisition'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
             <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
-                <i class='bx bxs-user-detail text-6xl text-green-700 leading-none'></i>
+                <i class='bx bxs-clipboard text-6xl text-green-700 leading-none'></i>
             </div>
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="p-3 bg-green-50 rounded-xl text-green-700">
-                        <i class='bx bxs-user-detail text-2xl'></i>
+                        <i class='bx bxs-clipboard text-2xl'></i>
                     </div>
-                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Active Vendors</h4>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Purchase Requisitions</h4>
                 </div>
                 <div class="flex items-end gap-2">
-                    <span id="vendorActiveValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
-                    <span id="vendorProductsValue" class="text-xs text-green-700 mb-1">0 Products</span>
+                    <span id="prTotalValue" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span id="prPendingValue" class="text-xs text-green-700 mb-1">0 Pending</span>
                 </div>
             </div>
         </div>
@@ -368,11 +368,11 @@
                 </div>
             </div>
 
-            <!-- Chart 6: Vendor Performance (PSM) -->
+            <!-- Chart 6: Purchase Requisitions (PSM) -->
             <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-green-600">
-                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-user-detail mr-2 text-green-600'></i>Vendor Performance</h3>
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-clipboard mr-2 text-green-600'></i>Purchase Requisitions</h3>
                 <div class="bg-white rounded-lg">
-                    <canvas id="vendorPerformanceChart" style="width:100%;height:320px;"></canvas>
+                    <canvas id="purchaseRequisitionChart" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
         </div>
@@ -438,7 +438,7 @@ function upsertChart(canvasId, chartType, labels, dataset, options){
 function wireDashboardMetricLinks(){
     var go = function(path){ window.location.href = '?module=' + path; };
     var a = document.getElementById('metricPurchaseOrders'); if(a) a.addEventListener('click', function(){ go('psm-purchase'); });
-    var b = document.getElementById('metricActiveVendors'); if(b) b.addEventListener('click', function(){ go('psm-vendor-management'); });
+    var b = document.getElementById('metricPurchaseRequisitions'); if(b) b.addEventListener('click', function(){ go('psm-purchase-requisition'); });
     var c = document.getElementById('metricTotalInventory'); if(c) c.addEventListener('click', function(){ go('sws-digital-inventory'); });
     var d = document.getElementById('metricActiveProjects'); if(d) d.addEventListener('click', function(){ go('plt-logistics-projects'); });
     var e = document.getElementById('metricManagedAssets'); if(e) e.addEventListener('click', function(){ go('alms-asset-management'); });
@@ -500,7 +500,7 @@ async function loadDashboardStats(){
         async function doFetchSet(){
             var reqs = [
                 ['po','/api/v1/psm/purchase-management'],
-                ['vendor','/api/v1/psm/vendor-management/stats'],
+                ['preq','/api/v1/psm/requisitions'],
                 ['inv','/api/v1/sws/inventory-stats'],
                 ['proj','/api/v1/plt/projects/stats'],
                 ['assets','/api/v1/alms/assets'],
@@ -535,7 +535,7 @@ async function loadDashboardStats(){
             return def || {};
         }
         var poJson = await safeJson(r1.map.po, {});
-        var vendorJson = await safeJson(r1.map.vendor, {});
+        var prJson = await safeJson(r1.map.preq, {});
         var invJson = await safeJson(r1.map.inv, {});
         var projJson = await safeJson(r1.map.proj, {});
         var assetsJson = await safeJson(r1.map.assets, {});
@@ -553,9 +553,12 @@ async function loadDashboardStats(){
             return s.indexOf('cancel') === -1 && s.indexOf('deliver') === -1 && s.indexOf('closed') === -1;
         }).length;
 
-        var vStats = vendorJson && (vendorJson.data || vendorJson.stats) ? (vendorJson.data || vendorJson.stats) : {};
-        var activeVendors = parseInt(vStats.active_vendors || vStats.vendors_active || vStats.total_vendors || 0);
-        var totalProducts = parseInt(vStats.total_products || vStats.products_total || 0);
+        var preqs = Array.isArray(prJson.data) ? prJson.data : (Array.isArray(prJson) ? prJson : []);
+        var prTotal = preqs.length || 0;
+        var prPending = preqs.filter(function(p){
+            var s = String((p.status || p.requisition_status || '')).toLowerCase();
+            return s.indexOf('pending') !== -1 || s.indexOf('review') !== -1 || s.indexOf('approval') !== -1;
+        }).length;
 
         var invStats = invJson && (invJson.data || invJson.stats) ? (invJson.data || invJson.stats) : {};
         var totalItems = parseInt(invStats.total_items || invStats.items_total || 0);
@@ -655,11 +658,28 @@ async function loadDashboardStats(){
             backgroundColor: ['#F59E0B','#10B981','#6B7280','#EF4444','#3B82F6','#A78BFA']
         }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } });
 
+        // CHARTS: Purchase Requisitions by Status
+        var prMap = {};
+        preqs.forEach(function(p){
+            var s = String((p.status || p.requisition_status || '')).trim().toLowerCase();
+            if (!s) s = 'other';
+            s = s.replace(/_/g,' ');
+            prMap[s] = (prMap[s] || 0) + 1;
+        });
+        var prLabels = Object.keys(prMap).map(function(k){ return k.replace(/\b\w/g, c => c.toUpperCase()); });
+        var prValues = prLabels.map(function(lbl){ var k = lbl.toLowerCase(); return prMap[k]; });
+        upsertChart('purchaseRequisitionChart', 'bar', prLabels, {
+            label: 'Requisitions',
+            data: prValues,
+            backgroundColor: '#10B981',
+            borderRadius: 8
+        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.2)' } } } });
+
         var el;
         el = document.getElementById('poTotalValue'); if(el) el.textContent = poTotal.toLocaleString();
         el = document.getElementById('poPendingValue'); if(el) el.textContent = (poPending.toLocaleString()) + ' Pending Approval';
-        el = document.getElementById('vendorActiveValue'); if(el) el.textContent = activeVendors.toLocaleString();
-        el = document.getElementById('vendorProductsValue'); if(el) el.textContent = (totalProducts.toLocaleString()) + ' Products';
+        el = document.getElementById('prTotalValue'); if(el) el.textContent = prTotal.toLocaleString();
+        el = document.getElementById('prPendingValue'); if(el) el.textContent = (prPending.toLocaleString()) + ' Pending';
         el = document.getElementById('invTotalValue'); if(el) el.textContent = totalItems.toLocaleString();
         el = document.getElementById('invLowValue'); if(el) el.textContent = (lowItems.toLocaleString()) + ' Low Stock Items';
         el = document.getElementById('projActiveValue'); if(el) el.textContent = activeProjects.toLocaleString();
