@@ -2330,75 +2330,72 @@ function closeInventoryDualModal() {
 // Item CRUD Functions
 async function saveItem(e) {
     e.preventDefault();
-    
-    const itemNameInput = document.getElementById('item_name');
-    if (!itemNameInput.value) {
+    const sku = (document.getElementById('item_stock_keeping_unit').value || '').trim();
+    const deltaUnits = parseInt(document.getElementById('item_current_stock').value);
+    const incomingId = (document.getElementById('psm_purcprod_id').value || '').trim();
+    const itemNameVal = (document.getElementById('item_name').value || '').trim();
+
+    if (!itemNameVal) {
         notify('Please choose an incoming asset via the Add button', 'error');
         return;
     }
-    const itemName = itemNameInput.value;
+    if (!sku) {
+        notify('Missing Product ID from the selected incoming asset', 'error');
+        return;
+    }
+    if (isNaN(deltaUnits) || deltaUnits <= 0) {
+        notify('Incoming Units must be a positive number', 'error');
+        return;
+    }
 
-    const categoryVal = document.getElementById('item_category_id').value;
-    // console.log('Category Value in saveItem:', categoryVal);
-    
-    const formData = {
-        item_name: itemName,
-        psm_purchase_id: document.getElementById('psm_purchase_id').value || null,
-        psm_item_index: document.getElementById('psm_item_index').value ? parseInt(document.getElementById('psm_item_index').value) : null,
-        psm_prod_id: document.getElementById('psm_prod_id').value || null,
-        psm_purcprod_id: document.getElementById('psm_purcprod_id').value || null,
-        item_description: document.getElementById('item_description').value.trim() || null,
-        item_stock_keeping_unit: document.getElementById('item_stock_keeping_unit').value.trim() || null,
-        item_category_id: categoryVal || null,
-        item_stored_from: document.getElementById('item_stored_from').value.trim() || null,
-        item_item_type: document.getElementById('item_item_type').value,
-        item_is_fixed: document.getElementById('item_is_fixed').checked,
-        item_expiration_date: document.getElementById('item_expiration_date').value || null,
-        item_warranty_end: document.getElementById('item_warranty_end').value || null,
-        item_unit_price: document.getElementById('item_unit_price').value ? parseFloat(document.getElementById('item_unit_price').value) : null,
-        item_current_stock: parseInt(document.getElementById('item_current_stock').value),
-        item_max_stock: document.getElementById('item_max_stock').value ? parseInt(document.getElementById('item_max_stock').value) : null,
-        item_liquidity_risk_level: document.getElementById('item_liquidity_risk_level').value,
-        item_is_collateral: document.getElementById('item_is_collateral').checked,
-        item_code: generateItemCode()
-    };
-    
-    if (!formData.item_name) {
-        notify('Please enter item name', 'error');
+    // Find existing inventory item by Product ID (SKU)
+    const existing = (inventoryItems || []).find(i => String(i.item_stock_keeping_unit || '').trim() === sku);
+    if (!existing) {
+        notify(`No existing inventory item found with Product ID ${sku}`, 'error');
         return;
     }
-    if (!formData.item_category_id) {
-        notify('Please select category', 'error');
-        return;
-    }
-    if (!formData.item_stored_from) {
-        notify('Please select stored from', 'error');
-        return;
-    }
-    
-    if (isNaN(formData.item_current_stock) || formData.item_current_stock < 0) {
-        notify('Please enter a valid current stock', 'error');
-        return;
-    }
-    if (isNaN(formData.item_max_stock) || formData.item_max_stock < 1) {
-        notify('Please enter a valid max stock (minimum 1)', 'error');
-        return;
-    }
-    if (formData.item_unit_price === null || isNaN(formData.item_unit_price) || formData.item_unit_price < 0) {
-        notify('Please enter a valid unit price', 'error');
-        return;
-    }
-    
-    // Auto-generate SKU if empty
-    if (!formData.item_stock_keeping_unit) {
-        const categorySelect = document.getElementById('item_category_id');
-        const categoryName = categorySelect.options[categorySelect.selectedIndex]?.text || '';
-        formData.item_stock_keeping_unit = generateSKU(itemName, categoryName);
-    }
-    
+
+    // Fetch latest item details to avoid overwriting other fields
+    let itemDetail = existing;
     try {
-        const response = await fetch(SWS_ITEMS_API, {
-            method: 'POST',
+        const r = await fetch(`${SWS_ITEMS_API}/${existing.item_id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (r.ok) {
+            const j = await r.json();
+            if (j.success && j.data) itemDetail = j.data;
+        }
+    } catch (_) {}
+
+    const currentStock = parseInt(itemDetail.item_current_stock ?? itemDetail.current_stock ?? 0) || 0;
+    const newStock = currentStock + deltaUnits;
+
+    const payload = {
+        item_name: itemDetail.item_name || '',
+        item_description: itemDetail.item_description || null,
+        item_category_id: itemDetail.item_category_id || null,
+        item_stored_from: itemDetail.item_stored_from || null,
+        item_item_type: itemDetail.item_item_type || 'illiquid',
+        item_is_fixed: !!itemDetail.item_is_fixed,
+        item_expiration_date: itemDetail.item_expiration_date || null,
+        item_warranty_end: itemDetail.item_warranty_end || null,
+        item_unit_price: itemDetail.item_unit_price ?? null, // keep unchanged
+        item_current_stock: newStock, // increment only
+        item_max_stock: itemDetail.item_max_stock || 100,
+        item_liquidity_risk_level: itemDetail.item_liquidity_risk_level || 'medium',
+        item_is_collateral: !!itemDetail.item_is_collateral
+    };
+
+    try {
+        const response = await fetch(`${SWS_ITEMS_API}/${itemDetail.item_id}`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -2406,42 +2403,45 @@ async function saveItem(e) {
                 'X-CSRF-TOKEN': CSRF_TOKEN,
                 'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(payload),
             credentials: 'include'
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Validation errors:', errorData);
-            
-            // Notify specific validation errors if available
-            if (errorData.errors) {
-                const errorMessages = Object.values(errorData.errors).flat().join('\n');
-                notify(errorMessages, 'error');
-            } else {
-                notify(errorData.message || `HTTP ${response.status}`, 'error');
-            }
-            
-            throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
-        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
-        
-        if (result.success) {
-            notify(result.message || 'Item created successfully', 'success');
-            closeAddItemModal();
-            // Reload all data
-            await Promise.all([
-                loadInventoryItems(),
-                loadInventoryStats(),
-                loadStockLevels()
-            ]);
-        } else {
-            notify(result.message || 'Error creating item', 'error');
+        if (!result.success) throw new Error(result.message || 'Failed to update stock');
+
+        // Mark incoming asset as inventoried = "yes"
+        if (incomingId) {
+            try {
+                await fetch(`/api/v1/sws/incoming-assets/${incomingId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                    },
+                    body: JSON.stringify({ sws_purcprod_inventory: 'yes' }),
+                    credentials: 'include'
+                });
+            } catch (e) {
+                console.warn('Failed to mark incoming as inventoried:', e);
+            }
         }
+
+        notify('Stock added and incoming marked as inventoried', 'success');
+        closeAddItemModal();
+        // Refresh UI: inventory, stats, and incoming list/badge
+        await Promise.all([
+            loadInventoryItems(),
+            loadInventoryStats(),
+            loadStockLevels(),
+            loadIncomingAssets()
+        ]);
     } catch (e) {
-        console.error('Error creating item:', e);
-        notify(e.message || 'Error creating item', 'error');
+        console.error('Error updating stock:', e);
+        notify(e.message || 'Error updating stock', 'error');
     }
 }
 
