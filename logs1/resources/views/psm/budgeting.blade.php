@@ -86,7 +86,12 @@
                 </div>
                 <div>
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Consolidated Amount</p>
-                    <h4 class="text-2xl font-black text-blue-600 leading-none" id="consolidatedTotalAmount">₱0.00</h4>
+                    <div class="flex items-center">
+                        <span id="consolidatedTotalAmount" class="price-mask text-2xl font-black text-blue-600 leading-none" data-masked="1" data-price="">*****</span>
+                        <button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Amount" onclick="toggleBudgetPriceVisibility(this)">
+                            <i class="bx bx-show-alt text-2xl"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <button onclick="requestConsolidatedBudget()" class="btn btn-primary btn-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
@@ -408,6 +413,7 @@
                     const vendorName = getVendorName(req.req_chosen_vendor || req.con_chosen_vendor);
                     const deptName = req.req_dept || req.con_dept || '-';
                     const budgetApprovalStatus = req.con_budget_approval || 'Pending';
+                    const budgetApprovalStatusCap = (budgetApprovalStatus ? (budgetApprovalStatus.charAt(0).toUpperCase() + budgetApprovalStatus.slice(1).toLowerCase()) : 'Pending');
                     const statusIcon = isBudgetApproved ? 'bxs-check-circle' : 'bx-time-five';
                     const statusClass = isBudgetApproved ? 'bg-green-600 border-green-700' : 'bg-yellow-500 border-yellow-600';
 
@@ -415,7 +421,10 @@
                         '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">' + (req.req_id || '-') + '</td>' +
                         '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="' + itemsList + '">' + itemsList + '</td>' +
                         '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">' + vendorName + '</td>' +
-                        '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">' + currencyValue + '</td>' +
+                        '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">' +
+                            '<span class="price-mask" data-masked="1" data-price="' + currencyValue + '">*****</span>' +
+                            '<button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Price" onclick="toggleBudgetPriceVisibility(this)"><i class="bx bx-show-alt text-2xl"></i></button>' +
+                        '</td>' +
                         '<td class="px-6 py-4 whitespace-nowrap">' +
                             '<div class="text-sm font-bold text-gray-800">' + (req.con_requester || '-') + '</div>' +
                             '<div class="text-[10px] text-gray-500 uppercase font-semibold">' + deptName + '</div>' +
@@ -429,7 +438,7 @@
                         '</td>' +
                         '<td class="px-6 py-4 whitespace-nowrap">' +
                             '<span class="px-4 py-1.5 text-xs font-black rounded-full ' + statusClass + ' text-white border flex items-center gap-1.5 w-fit shadow-sm">' +
-                                '<i class=\'bx ' + statusIcon + ' text-sm\'></i> ' + budgetApprovalStatus +
+                                '<i class=\'bx ' + statusIcon + ' text-sm\'></i> ' + budgetApprovalStatusCap +
                             '</span>' +
                         '</td>';
                     tbody.appendChild(tr);
@@ -441,7 +450,12 @@
         function updateConsolidatedTotal() {
             const total = calculateTotalAmount(filteredRequisitions);
             const totalEl = document.getElementById('consolidatedTotalAmount');
-            if (totalEl) totalEl.textContent = window.formatCurrencyGlobal ? window.formatCurrencyGlobal(total) : formatCurrency(total);
+            if (totalEl) {
+                const formatted = window.formatCurrencyGlobal ? window.formatCurrencyGlobal(total) : formatCurrency(total);
+                totalEl.setAttribute('data-price', formatted);
+                const masked = totalEl.getAttribute('data-masked') === '1';
+                totalEl.textContent = masked ? '*****' : formatted;
+            }
         }
 
         function calculateTotalAmount(requisitions) {
@@ -485,6 +499,39 @@
             const val = parseFloat(amount || 0);
             return 'PHP ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
+
+        // Toggle for masking/revealing amounts in budgeting page
+        window.toggleBudgetPriceVisibility = function(btn) {
+            try {
+                var container = btn.closest('td') || btn.closest('.flex') || btn.parentElement;
+                var span = null;
+                if (container) span = container.querySelector('.price-mask');
+                if (!span) {
+                    var node = btn.previousElementSibling;
+                    while (node && !(node.classList && node.classList.contains('price-mask'))) {
+                        node = node.previousElementSibling;
+                    }
+                    span = node || null;
+                }
+                if (!span) return;
+                var masked = span.getAttribute('data-masked') === '1';
+                if (masked) {
+                    span.textContent = span.getAttribute('data-price') || '';
+                    span.setAttribute('data-masked', '0');
+                    btn.title = 'Hide Amount';
+                    var icon = btn.querySelector('i');
+                    if (icon) { icon.classList.remove('bx-show-alt'); icon.classList.add('bx-hide'); }
+                } else {
+                    span.textContent = '*****';
+                    span.setAttribute('data-masked', '1');
+                    btn.title = 'Show Amount';
+                    var icon2 = btn.querySelector('i');
+                    if (icon2) { icon2.classList.remove('bx-hide'); icon2.classList.add('bx-show-alt'); }
+                }
+            } catch (e) {
+                console.warn('toggleBudgetPriceVisibility error:', e);
+            }
+        };
 
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
@@ -582,7 +629,10 @@
                         '<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">' + (req.req_id || '-') + '</td>' +
                         '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">' + (req.req_by || '-') + '</td>' +
                         '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 font-semibold">' + 'Logistics 1' + '</td>' +
-                        '<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">' + amountFormatted + '</td>' +
+                        '<td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-blue-600">' +
+                            '<span class="price-mask" data-masked="1" data-price="' + amountFormatted + '">*****</span>' +
+                            '<button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Amount" onclick="toggleBudgetPriceVisibility(this)"><i class="bx bx-show-alt text-2xl"></i></button>' +
+                        '</td>' +
                         '<td class="px-4 py-3 text-sm text-gray-500 truncate max-w-xs" title="' + (req.req_purpose || '') + '">' + (req.req_purpose || '-') + '</td>' +
                         '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">' + reqDate + '</td>' +
                         '<td class="px-4 py-3 whitespace-nowrap">' +
