@@ -33,6 +33,9 @@ Route::delete('/warehouse/{id}', [SWSController::class, 'deleteWarehouse']);
 // Warehouse Room Requests
 Route::get('/warehouse/room-requests', [SWSController::class, 'getRoomRequests']);
 Route::post('/warehouse/room-requests', [SWSController::class, 'createRoomRequest']);
+// Compatibility fallback path
+Route::get('/room-requests', [SWSController::class, 'getRoomRequests']);
+Route::post('/room-requests', [SWSController::class, 'createRoomRequest']);
 
 // Digital Inventory routes
 Route::get('/inventory-stats', [SWSController::class, 'getInventoryStats']);

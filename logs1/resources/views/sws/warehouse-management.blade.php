@@ -193,7 +193,8 @@
 <script>
 var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php echo url('/api/v1'); ?>';
 var SWS_WAREHOUSE_API = `${API_BASE_URL}/sws/warehouse`;
-var SWS_ROOM_REQ_API = `${API_BASE_URL}/sws/warehouse/room-requests`;
+var SWS_ROOM_REQ_PRIMARY = `${API_BASE_URL}/sws/warehouse/room-requests`;
+var SWS_ROOM_REQ_FALLBACK = `${API_BASE_URL}/sws/room-requests`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
@@ -476,7 +477,7 @@ async function submitRoomRequest(e){
     const note = document.getElementById('rmreq_note').value.trim() || null;
     const payload = { rmreq_room_type: type, rmreq_note: note };
     try {
-        const response = await fetch(SWS_ROOM_REQ_API, {
+        let response = await fetch(SWS_ROOM_REQ_PRIMARY, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -488,6 +489,20 @@ async function submitRoomRequest(e){
             credentials: 'include',
             body: JSON.stringify(payload)
         });
+        if (response.status === 404) {
+            response = await fetch(SWS_ROOM_REQ_FALLBACK, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+        }
         if (!response.ok) {
             const t = await response.text();
             throw new Error(`HTTP ${response.status} ${t}`);
@@ -506,7 +521,7 @@ async function loadRoomRequests(){
     tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><div class="flex justify-center items-center py-4"><div class="loading loading-spinner mr-3"></div>Loading...</div></td></tr>`;
     modal.classList.remove('hidden');
     try{
-        const response = await fetch(SWS_ROOM_REQ_API, {
+        let response = await fetch(SWS_ROOM_REQ_PRIMARY, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -516,6 +531,18 @@ async function loadRoomRequests(){
             },
             credentials: 'include'
         });
+        if (response.status === 404) {
+            response = await fetch(SWS_ROOM_REQ_FALLBACK, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                credentials: 'include'
+            });
+        }
         if(!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         const rows = result.data || [];
