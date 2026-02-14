@@ -14,7 +14,7 @@
       <img src="{{ asset('images/micrologo.png') }}" alt="Logo" class="w-10 h-10 object-contain">
       <div class="leading-tight">
         <div class="font-bold text-gray-800 group-hover:text-brand-primary transition-colors">
-          Microfiance Logistics
+          Microfinance Logistics
         </div>
         <div class="text-[11px] text-gray-500 font-semibold uppercase group-hover:text-brand-primary transition-colors">
           Logistics I
