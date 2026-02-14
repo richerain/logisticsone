@@ -162,7 +162,7 @@
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="p-3 bg-green-50 rounded-xl text-green-700">
-                        <i class='bx bxs-clipboard text-2xl'></i>
+                        <i class='bx bx-clipboard text-2xl'></i>
                     </div>
                     <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Purchase Requisitions</h4>
                 </div>
@@ -370,7 +370,7 @@
 
             <!-- Chart 6: Purchase Requisitions (PSM) -->
             <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-green-600">
-                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-clipboard mr-2 text-green-600'></i>Purchase Requisitions</h3>
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bx-clipboard mr-2 text-green-600'></i>Purchase Requisitions</h3>
                 <div class="bg-white rounded-lg">
                     <canvas id="purchaseRequisitionChart" style="width:100%;height:320px;"></canvas>
                 </div>
