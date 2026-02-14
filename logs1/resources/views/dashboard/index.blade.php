@@ -732,6 +732,7 @@ async function loadDashboardStats(){
 var IS_VENDOR = <?php echo $isVendor ? 'true' : 'false'; ?>;
 async function loadVendorDashboardStats(){
     if (!IS_VENDOR) return;
+    await loadChartLibraryIfMissing();
     var headers = {
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
@@ -739,19 +740,11 @@ async function loadVendorDashboardStats(){
         'Authorization': typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : ''
     };
     try{
-        // Identify current vendor
-        var meRes = await fetch('/api/v1/vendor/auth/me', { headers: headers, credentials: 'include' });
-        if (!meRes || meRes.status === 401) return;
-        var meJson = await meRes.json();
-        if (!meJson || !meJson.success || !meJson.user) return;
-        var vendorId = meJson.user.vendorid || null;
-        var vendorCompany = meJson.user.company_name || meJson.user.company || null;
-
-        // Fetch quotes, products, and new purchase requests for this vendor
+        // Fetch vendor-scoped quotes, products, and purchase requests via vendor session endpoints
         var reqs = await Promise.allSettled([
-            fetch('/api/v1/psm/vendor-quote', { headers: headers, credentials: 'include' }),
-            fetch(vendorId ? ('/api/v1/psm/product-management/by-vendor/' + encodeURIComponent(vendorId)) : '/api/v1/psm/product-management', { headers: headers, credentials: 'include' }),
-            fetch(vendorId ? ('/api/v1/psm/purchase-requests?status=Pending&vendor_id=' + encodeURIComponent(vendorId)) : '/api/v1/psm/purchase-requests?status=Pending', { headers: headers, credentials: 'include' })
+            fetch('/api/v1/vendor/psm/quotes', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/vendor/psm/products', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/vendor/psm/purchase-requests?status=Pending', { headers: headers, credentials: 'include' })
         ]);
         async function sjson(res){ try{ if (res && res.value && res.value.ok) { return await res.value.json(); } }catch(e){} return {}; }
         var quotesJson = await sjson(reqs[0]);
@@ -791,10 +784,25 @@ async function loadVendorDashboardStats(){
         });
         var labels = Object.keys(qMap).map(function(k){ return k.replace(/\b\w/g, c => c.toUpperCase()); });
         var values = labels.map(function(lbl){ var k = lbl.toLowerCase(); return qMap[k]; });
+        // Fallback if no labels: provide single "No Data" slice to render chart skeleton
+        if (labels.length === 0) { labels = ['No Data']; values = [1]; }
         upsertChart('vendorQuoteStatusChart', 'doughnut', labels, {
             data: values,
             backgroundColor: ['#3B82F6','#10B981','#F59E0B','#8B5CF6','#06B6D4','#F97316','#EF4444','#84CC16','#A78BFA','#6B7280']
         }, { responsive: true, maintainAspectRatio: false, cutout: '58%', plugins: { legend: { display: true, position: 'bottom' } } });
+    }catch(e){}
+}
+
+async function loadChartLibraryIfMissing(){
+    try{
+        if (typeof Chart !== 'undefined') return;
+        await new Promise(function(resolve){
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            s.async = true;
+            s.onload = resolve;
+            document.head.appendChild(s);
+        });
     }catch(e){}
 }
 </script>

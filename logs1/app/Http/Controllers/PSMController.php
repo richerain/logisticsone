@@ -941,6 +941,67 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * Vendor session: get products for current vendor (no JWT required)
+     */
+    public function getVendorProductsSession()
+    {
+        try {
+            $user = \Auth::guard('vendor')->user();
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                    'data' => [],
+                ], 401);
+            }
+            $venId = $user->vendorid;
+            $result = $this->psmService->getVendorProducts($venId);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch vendor products: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
+    /**
+     * Vendor session: get purchase requests for current vendor (no JWT required)
+     */
+    public function getVendorPurchaseRequestsSession(Request $request)
+    {
+        try {
+            $user = \Auth::guard('vendor')->user();
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                    'data' => [],
+                ], 401);
+            }
+            $filters = [
+                'status' => $request->get('status'),
+                'vendor_id' => $user->vendorid,
+            ];
+            $data = $this->psmService->getPurchaseRequests($filters);
+
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'message' => 'Vendor purchase requests retrieved successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch vendor purchase requests: '.$e->getMessage(),
+                'data' => [],
+            ], 500);
+        }
+    }
+
     public function getProducts(Request $request)
     {
         try {

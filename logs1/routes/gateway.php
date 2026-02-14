@@ -46,6 +46,13 @@ Route::prefix('vendor/auth')->group(function () {
     Route::get('/csrf-token', [App\Http\Controllers\VendorAuthController::class, 'getCsrfToken']);
 });
 
+// Vendor PSM endpoints (vendor session auth; no JWT required)
+Route::prefix('vendor/psm')->group(function () {
+    Route::get('/quotes', [App\Http\Controllers\PSMController::class, 'getVendorQuotes']);
+    Route::get('/products', [App\Http\Controllers\PSMController::class, 'getVendorProductsSession']);
+    Route::get('/purchase-requests', [App\Http\Controllers\PSMController::class, 'getVendorPurchaseRequestsSession']);
+});
+
 // Public vendor info routes (for other modules)
 Route::prefix('vendor-info')->group(function () {
     Route::get('/data', [App\Http\Controllers\PSMController::class, 'getVendorInfo']);
