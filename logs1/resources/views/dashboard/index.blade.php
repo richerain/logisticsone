@@ -76,7 +76,9 @@
 
     <!-- Vendor Charts Section start -->
     <div class="bg-white rounded-lg p-6 shadow-xl overflow-visible mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Quote Status Distribution</h3>
+        <div class="flex items-center mb-2 space-x-2 text-gray-700">
+            <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>Quote Status Distribution</h2>
+        </div>
         <div class="bg-white rounded-lg">
             <canvas id="vendorQuoteStatusChart" style="width:100%;height:320px;"></canvas>
         </div>
