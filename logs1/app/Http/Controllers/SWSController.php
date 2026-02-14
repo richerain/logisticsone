@@ -10,6 +10,7 @@ use App\Models\SWS\Transaction;
 use App\Models\SWS\Warehouse;
 use App\Models\PLT\Project;
 use App\Models\PLT\TrackingLog;
+use App\Models\SWS\RoomRequest;
 use App\Services\SWSService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -482,6 +483,35 @@ class SWSController extends Controller
 
             return response()->json(['success' => false, 'message' => 'Transfer failed', 'data' => null], 500);
         }
+    }
+
+    public function createRoomRequest(Request $request)
+    {
+        $validated = $request->validate([
+            'rmreq_room_type' => ['required', Rule::in(['office', 'department', 'facility', 'room', 'storage'])],
+            'rmreq_note' => ['nullable', 'string'],
+            'rmreq_requester' => ['sometimes', 'string', 'max:100'],
+        ]);
+
+        $requester = $validated['rmreq_requester'] ?? (auth()->user()->email ?? (string) auth()->id());
+        $data = [
+            'rmreq_requester' => $requester,
+            'rmreq_room_type' => $validated['rmreq_room_type'],
+            'rmreq_note' => $validated['rmreq_note'] ?? null,
+            'rmreq_date' => now(),
+            'rmreq_status' => 'pending',
+        ];
+
+        $record = RoomRequest::create($data);
+
+        return response()->json(['success' => true, 'data' => $record], 201);
+    }
+
+    public function getRoomRequests(Request $request)
+    {
+        $list = RoomRequest::orderBy('rmreq_date', 'desc')->get();
+
+        return response()->json(['success' => true, 'data' => $list]);
     }
 
     public function generateInventoryFlowReport()

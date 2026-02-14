@@ -35,7 +35,13 @@
         </div>
     </div>
 
-    <div class="flex justify-end mb-4">
+    <div class="flex justify-end mb-4 gap-2">
+        <button id="requestRoomBtn" title="Request Room for Warehouse" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+            <i class='bx bx-door-open'></i> Request Room for Warehouse
+        </button>
+        <button id="requestRoomStatusBtn" title="Request Room Status" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
+            <i class='bx bx-list-ul'></i> Request Room Status
+        </button>
         <button id="addWarehouseBtn" title="Add New Warehouse" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
             <i class='bx bx-plus'></i> Add Warehouse
         </button>
@@ -129,9 +135,65 @@
     </div>
 </div>
 
+<div id="requestRoomModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Request Room for Warehouse</h3>
+            <button id="closeRequestRoomModal" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
+        </div>
+        <form id="requestRoomForm">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                <select id="rmreq_room_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="office">Office</option>
+                    <option value="department">Department</option>
+                    <option value="facility">Facility</option>
+                    <option value="room">Room</option>
+                    <option value="storage">Storage</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                <textarea id="rmreq_note" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="cancelRequestRoomModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Submit Request</button>
+            </div>
+        </form>
+    </div>
+    </div>
+
+<div id="roomStatusModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Room Requests Status</h3>
+            <button id="closeRoomStatusModal" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-800 text-gray-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Requester</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Room Type</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Note</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="roomStatusTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No data</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
 var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php echo url('/api/v1'); ?>';
 var SWS_WAREHOUSE_API = `${API_BASE_URL}/sws/warehouse`;
+var SWS_ROOM_REQ_API = `${API_BASE_URL}/sws/warehouse/room-requests`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
 
@@ -356,6 +418,24 @@ function initWarehouseManagement() {
     closeViewBtn && closeViewBtn.addEventListener('click', function() { viewModal.classList.add('hidden'); });
     viewModal && viewModal.addEventListener('click', function(e) { if (e.target === viewModal) { viewModal.classList.add('hidden'); } });
     loadWarehouses();
+
+    const reqBtn = document.getElementById('requestRoomBtn');
+    const reqStatusBtn = document.getElementById('requestRoomStatusBtn');
+    const reqModal = document.getElementById('requestRoomModal');
+    const reqClose = document.getElementById('closeRequestRoomModal');
+    const reqCancel = document.getElementById('cancelRequestRoomModal');
+    const reqForm = document.getElementById('requestRoomForm');
+    const statusModal = document.getElementById('roomStatusModal');
+    const statusClose = document.getElementById('closeRoomStatusModal');
+
+    reqBtn && reqBtn.addEventListener('click', () => { reqModal.classList.remove('hidden'); });
+    reqClose && reqClose.addEventListener('click', () => { reqModal.classList.add('hidden'); });
+    reqCancel && reqCancel.addEventListener('click', () => { reqModal.classList.add('hidden'); });
+    reqModal && reqModal.addEventListener('click', function(e){ if(e.target === reqModal){ reqModal.classList.add('hidden'); } });
+    statusClose && statusClose.addEventListener('click', () => { statusModal.classList.add('hidden'); });
+    statusModal && statusModal.addEventListener('click', function(e){ if(e.target === statusModal){ statusModal.classList.add('hidden'); } });
+    reqForm && reqForm.addEventListener('submit', submitRoomRequest);
+    reqStatusBtn && reqStatusBtn.addEventListener('click', loadRoomRequests);
 }
 
 if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initWarehouseManagement); } else { initWarehouseManagement(); }
@@ -387,6 +467,79 @@ async function viewWarehouse(id) {
     } catch (e) {
         if (container) container.innerHTML = '<div class="text-red-600">Failed to load warehouse</div>';
         notify('Error loading warehouse', 'error');
+    }
+}
+
+async function submitRoomRequest(e){
+    e.preventDefault();
+    const type = document.getElementById('rmreq_room_type').value;
+    const note = document.getElementById('rmreq_note').value.trim() || null;
+    const payload = { rmreq_room_type: type, rmreq_note: note };
+    try {
+        const response = await fetch(SWS_ROOM_REQ_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+            const t = await response.text();
+            throw new Error(`HTTP ${response.status} ${t}`);
+        }
+        notify('Room request submitted', 'success');
+        document.getElementById('requestRoomModal').classList.add('hidden');
+        document.getElementById('rmreq_note').value = '';
+    } catch (e) {
+        notify('Failed to submit room request', 'error');
+    }
+}
+
+async function loadRoomRequests(){
+    const modal = document.getElementById('roomStatusModal');
+    const tbody = document.getElementById('roomStatusTableBody');
+    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500"><div class="flex justify-center items-center py-4"><div class="loading loading-spinner mr-3"></div>Loading...</div></td></tr>`;
+    modal.classList.remove('hidden');
+    try{
+        const response = await fetch(SWS_ROOM_REQ_API, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if(!response.ok) throw new Error(`HTTP ${response.status}`);
+        const result = await response.json();
+        const rows = result.data || [];
+        if(rows.length === 0){
+            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No requests</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = '';
+        rows.forEach(r => {
+            const tr = document.createElement('tr');
+            const badge = r.rmreq_status === 'approved' ? 'badge-success' : (r.rmreq_status === 'rejected' ? 'badge-error' : 'badge-warning');
+            tr.innerHTML = `
+                <td class="px-4 py-2 whitespace-nowrap">${r.rmreq_id}</td>
+                <td class="px-4 py-2 whitespace-nowrap">${r.rmreq_requester || ''}</td>
+                <td class="px-4 py-2 whitespace-nowrap capitalize">${r.rmreq_room_type || ''}</td>
+                <td class="px-4 py-2">${r.rmreq_note || ''}</td>
+                <td class="px-4 py-2 whitespace-nowrap">${r.rmreq_date ? new Date(r.rmreq_date).toLocaleString() : ''}</td>
+                <td class="px-4 py-2 whitespace-nowrap"><span class="badge ${badge}">${r.rmreq_status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch(e){
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-600">Failed to load room requests</td></tr>`;
+        notify('Error loading room requests', 'error');
     }
 }
 </script>

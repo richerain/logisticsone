@@ -30,6 +30,10 @@ Route::post('/warehouse', [SWSController::class, 'createWarehouse']);
 Route::put('/warehouse/{id}', [SWSController::class, 'updateWarehouse']);
 Route::delete('/warehouse/{id}', [SWSController::class, 'deleteWarehouse']);
 
+// Warehouse Room Requests
+Route::get('/warehouse/room-requests', [SWSController::class, 'getRoomRequests']);
+Route::post('/warehouse/room-requests', [SWSController::class, 'createRoomRequest']);
+
 // Digital Inventory routes
 Route::get('/inventory-stats', [SWSController::class, 'getInventoryStats']);
 Route::get('/stock-levels', [SWSController::class, 'getStockLevelsByCategory']);
