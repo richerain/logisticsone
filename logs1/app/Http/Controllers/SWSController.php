@@ -8,6 +8,8 @@ use App\Models\PSM\PurchaseProduct;
 use App\Models\SWS\Location;
 use App\Models\SWS\Transaction;
 use App\Models\SWS\Warehouse;
+use App\Models\PLT\Project;
+use App\Models\PLT\TrackingLog;
 use App\Services\SWSService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -405,17 +407,19 @@ class SWSController extends Controller
     {
         $validated = $request->validate([
             'item_id' => ['required', 'integer', 'exists:sws.sws_items,item_id'],
-            'location_to_id' => ['required', 'integer', 'exists:sws.sws_locations,loc_id'],
+            'location_to_id' => ['required', 'string', 'exists:sws.sws_locations,loc_id'],
             'transfer_units' => ['required', 'integer', 'min:1'],
         ]);
 
         DB::connection('sws')->beginTransaction();
+        DB::connection('plt')->beginTransaction();
         try {
             $item = Item::find($validated['item_id']);
             $units = (int) $validated['transfer_units'];
             $current = (int) ($item->item_current_stock ?? 0);
             if ($units > $current) {
                 DB::connection('sws')->rollBack();
+                DB::connection('plt')->rollBack();
 
                 return response()->json(['success' => false, 'message' => 'Transfer units exceed current stock', 'data' => null], 422);
             }
@@ -429,6 +433,24 @@ class SWSController extends Controller
             $randomTail = sprintf('%d%s%d%s%d', random_int(0, 9), chr(random_int(65, 90)), random_int(0, 9), chr(random_int(65, 90)), random_int(0, 9));
             $referenceId = 'RF'.date('Ymd').$randomTail;
 
+            $project = Project::create([
+                'pro_project_name' => 'Logistics Transfer '.$referenceId,
+                'pro_description' => 'Transfer '.$units.' units of '.$item->item_name.' from '.($fromLocation ? $fromLocation->loc_name : 'unknown').' to '.($toLocation ? $toLocation->loc_name : 'unknown'),
+                'pro_start_date' => now(),
+                'pro_end_date' => null,
+                'pro_status' => 'planning',
+                'pro_budget_allocated' => 0,
+                'pro_assigned_manager_id' => null,
+            ]);
+
+            TrackingLog::create([
+                'track_project_id' => $project->pro_id,
+                'track_log_type' => 'init',
+                'track_description' => 'Created from SWS transfer '.$referenceId,
+                'track_logged_by' => auth()->id() ?? null,
+                'track_reference_id' => $referenceId,
+            ]);
+
             $transaction = Transaction::create([
                 'tra_item_id' => $item->item_id,
                 'tra_type' => 'transfer',
@@ -438,18 +460,24 @@ class SWSController extends Controller
                 'tra_warehouse_id' => null,
                 'tra_transaction_date' => now(),
                 'tra_reference_id' => $referenceId,
-                'tra_status' => 'completed',
-                'tra_notes' => null,
+                'tra_status' => 'pending',
+                'tra_notes' => 'Managed by PLT project '.$project->pro_id,
             ]);
 
-            $item->item_current_stock = $current - $units;
-            $item->save();
-
             DB::connection('sws')->commit();
+            DB::connection('plt')->commit();
 
-            return response()->json(['success' => true, 'data' => $transaction, 'message' => 'Item transferred successfully'], 201);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'transaction' => $transaction,
+                    'project' => $project,
+                ],
+                'message' => 'Transfer created and queued under Logistics Projects',
+            ], 201);
         } catch (\Exception $e) {
             DB::connection('sws')->rollBack();
+            DB::connection('plt')->rollBack();
             Log::error('SWS transfer failed: '.$e->getMessage());
 
             return response()->json(['success' => false, 'message' => 'Transfer failed', 'data' => null], 500);
