@@ -7,65 +7,92 @@
         <span class="text-md text-gray-600">Smart Warehousing System</span>
     </div>
 </div>
-<!-- Inventory Metrics section start -->
+<!-- Inventory Metrics section start (PM style) -->
 <div class="mt-4 mb-4">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div id="di_card_total" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group">
-            <div class="flex items-center justify-between mb-3">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                    <i class='bx bx-package text-2xl'></i>
-                </div>
-                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">Items</span>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Total Items -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-package text-6xl text-blue-600'></i>
             </div>
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Total Items</h3>
-            <p id="totalItems" class="text-2xl font-black text-gray-800">0</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group">
-            <div class="flex items-center justify-between mb-3">
-                <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
-                    <i class='bx bx-money text-2xl'></i>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                        <i class='bx bx-package text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Items</h4>
                 </div>
-                <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">Value</span>
+                <div class="flex items-end gap-2">
+                    <span id="totalItems" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">All inventory</span>
+                </div>
             </div>
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Total Value</h3>
-            <p id="totalValue" class="text-2xl font-black text-gray-800">₱0.00</p>
         </div>
-
-        <div id="di_card_low" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group relative">
-            <!-- Pulse Notification Badge -->
+        <!-- Total Value -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-money text-6xl text-emerald-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+                        <i class='bx bx-money text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Value</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="totalValue" class="text-4xl font-black text-gray-800 leading-none">₱0.00</span>
+                    <span class="text-xs text-gray-500 mb-1">Current valuation</span>
+                </div>
+            </div>
+        </div>
+        <!-- Low Stock -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
             <div id="lowStockBadgePulse" class="hidden absolute top-4 right-4 z-20">
                 <span class="relative flex h-6 w-6">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                     <span id="lowStockPulseCount" class="relative inline-flex rounded-full h-6 w-6 bg-yellow-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
                 </span>
             </div>
-            <div class="flex items-center justify-between mb-3">
-                <div class="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-yellow-600 group-hover:text-white transition-all duration-300">
-                    <i class='bx bx-error text-2xl'></i>
-                </div>
-                <span class="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-lg">Alert</span>
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-error text-6xl text-yellow-600'></i>
             </div>
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Low Stock</h3>
-            <p id="lowStockItems" class="text-2xl font-black text-gray-800">0</p>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
+                        <i class='bx bx-error text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Low Stock</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="lowStockItems" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Warning threshold</span>
+                </div>
+            </div>
         </div>
-
-        <div id="di_card_out" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer group relative">
-            <!-- Pulse Notification Badge -->
+        <!-- Out of Stock -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
             <div id="outOfStockBadgePulse" class="hidden absolute top-4 right-4 z-20">
                 <span class="relative flex h-6 w-6">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span id="outOfStockPulseCount" class="relative inline-flex rounded-full h-6 w-6 bg-red-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
                 </span>
             </div>
-            <div class="flex items-center justify-between mb-3">
-                <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all duration-300">
-                    <i class='bx bx-error-circle text-2xl'></i>
-                </div>
-                <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg">Critical</span>
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-error-circle text-6xl text-red-600'></i>
             </div>
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Out of Stock</h3>
-            <p id="outOfStockItems" class="text-2xl font-black text-gray-800">0</p>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-red-50 rounded-xl text-red-600">
+                        <i class='bx bx-error-circle text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Out of Stock</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="outOfStockItems" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Replenish needed</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -79,53 +106,53 @@
         </div>
         <div class="p-4">
             <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
-                <button id="transferBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                        <i class='bx bx-transfer text-xl'></i>
-                    </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Transfer</span>
+                <button id="transferBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+                    <span class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class='bx bx-transfer text-lg'></i>
+                    </span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Transfer</span>
                 </button>
 
-                <button id="viewLocationsBtn" class="hidden w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                        <i class='bx bx-map text-xl'></i>
-                    </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Location</span>
+                <button id="viewLocationsBtn" class="hidden h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+                    <span class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600">
+                        <i class='bx bx-map text-lg'></i>
+                    </span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Location</span>
                 </button>
 
-                <button id="viewCategoriesBtn" class="hidden w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                        <i class='bx bx-category-alt text-xl'></i>
-                    </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Category</span>
+                <button id="viewCategoriesBtn" class="hidden h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+                    <span class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
+                        <i class='bx bx-category-alt text-lg'></i>
+                    </span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Category</span>
                 </button>
 
-                <button id="generateReportBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                        <i class='bx bxs-report text-xl'></i>
-                    </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Reports</span>
+                <button id="generateReportBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
+                    <span class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                        <i class='bx bxs-report text-lg'></i>
+                    </span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Reports</span>
                 </button>
 
-                <button id="purchaseNewItemBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-400/30 flex items-center justify-center">
-                        <i class='bx bxs-purchase-tag text-xl'></i>
-                    </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Purchase</span>
+                <button id="purchaseNewItemBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200">
+                    <span class="w-8 h-8 rounded-lg bg-emerald-400/30 flex items-center justify-center">
+                        <i class='bx bxs-purchase-tag text-lg'></i>
+                    </span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Purchase</span>
                 </button>
 
-                <button id="inventoryNewItemBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
-                    <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                        <i class='bx bxs-down-arrow-square text-xl'></i>
-                    </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Inventory</span>
+                <button id="inventoryNewItemBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                    <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                        <i class='bx bxs-down-arrow-square text-lg'></i>
+                    </span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Inventory</span>
                 </button>
 
-                <button id="incomingAssetsBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
-                    <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                        <i class='bx bx-import text-xl'></i>
-                    </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Incoming</span>
+                <button id="incomingAssetsBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                    <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                        <i class='bx bx-import text-lg'></i>
+                    </span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Incoming</span>
                 </button>
             </div>
         </div>
@@ -153,7 +180,7 @@
                     </h4>
                 </div>
                 
-                <div id="stockLevelsContainer" class="grid grid-cols-1 gap-3">
+                <div id="stockLevelsContainer" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- Equipment -->
                     <div class="group">
                         <div class="flex items-center justify-between mb-2">
@@ -1355,18 +1382,42 @@ function renderStockLevels(stockLevels) {
     
     let html = '';
     categoriesToRender.forEach(category => {
-        const utilization = Number(category.utilization) || 0;
-        const progressClass = utilization >= 80 ? 'progress-error' : 
-                            utilization >= 60 ? 'progress-warning' : 
-                            utilization >= 40 ? 'progress-success' : 'progress-primary';
+        const name = String(category.name || '').trim();
+        const utilization = Math.max(0, Math.min(100, Number(category.utilization) || 0));
+        const key = name.toLowerCase();
+        
+        let icon = 'bx-box';
+        let color = 'gray';
+        let bg = 'bg-gray-100';
+        let text = 'text-gray-700';
+        let fill = 'bg-gray-400';
+        let badgeBg = 'bg-gray-100';
+        let badgeText = 'text-gray-700';
+        
+        if (key.includes('equip')) {
+            icon = 'bx-wrench'; color = 'blue'; bg = 'bg-blue-50'; text = 'text-blue-500'; fill = 'bg-blue-500'; badgeBg = 'bg-blue-50'; badgeText = 'text-blue-600';
+        } else if (key.includes('suppl')) {
+            icon = 'bx-package'; color = 'yellow'; bg = 'bg-yellow-50'; text = 'text-yellow-500'; fill = 'bg-yellow-500'; badgeBg = 'bg-yellow-50'; badgeText = 'text-yellow-600';
+        } else if (key.includes('furn')) {
+            icon = 'bx-chair'; color = 'green'; bg = 'bg-green-50'; text = 'text-green-500'; fill = 'bg-green-500'; badgeBg = 'bg-green-50'; badgeText = 'text-green-600';
+        } else if (key.includes('auto')) {
+            icon = 'bx-car'; color = 'purple'; bg = 'bg-purple-50'; text = 'text-purple-500'; fill = 'bg-purple-500'; badgeBg = 'bg-purple-50'; badgeText = 'text-purple-600';
+        }
         
         html += `
-            <div>
-                <div class="flex justify-between mb-1">
-                    <span>${category.name}</span>
-                    <span>${utilization}%</span>
+            <div class="group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg ${bg} flex items-center justify-center ${text} group-hover:${fill} group-hover:text-white transition-all duration-300">
+                            <i class='bx ${icon} text-base'></i>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">${name}</span>
+                    </div>
+                    <span class="text-xs font-bold ${badgeText} ${badgeBg} px-2 py-1 rounded whitespace-nowrap">${utilization}%</span>
                 </div>
-                <progress class="progress ${progressClass} w-full" value="${utilization}" max="100"></progress>
+                <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div class="${fill} h-full rounded-full transition-all duration-500" style="width: ${utilization}%"></div>
+                </div>
             </div>
         `;
     });
