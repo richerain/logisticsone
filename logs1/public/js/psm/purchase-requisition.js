@@ -533,9 +533,23 @@
 
     window.togglePriceVisibility = function(btn) {
         try {
-            const cell = btn.closest('td');
-            if (!cell) return;
-            const span = cell.querySelector('.price-mask');
+            let container = btn.closest('td') || btn.closest('.flex') || btn.parentElement;
+            let span = null;
+            if (container) {
+                span = container.querySelector('.price-mask');
+            }
+            if (!span) {
+                // Try previous siblings (modal layout places span before button)
+                let node = btn.previousElementSibling;
+                while (node && !node.classList.contains('price-mask')) {
+                    node = node.previousElementSibling;
+                }
+                span = node || null;
+            }
+            if (!span) {
+                // Last resort: specific modal overall price element
+                span = document.getElementById('view_req_overall_price');
+            }
             if (!span) return;
             const masked = span.getAttribute('data-masked') === '1';
             if (masked) {
@@ -711,4 +725,3 @@
     fetchVendors();
     fetchRequisitions();
 })();
-
