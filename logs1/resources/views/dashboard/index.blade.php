@@ -137,16 +137,13 @@
     <!-- announcement board section removed -->
 
     <!-- Modals removed -->
-
-
-    
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div onclick="window.location.href='?module=psm-purchase'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bxs-purchase-tag text-6xl text-blue-700'></i>
+            <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
+                <i class='bx bxs-purchase-tag text-6xl text-blue-700 leading-none'></i>
             </div>
             <div class="relative z-10">
-                <div class class="flex items-center gap-3 mb-4">
+                <div class="flex items-center gap-3 mb-4">
                     <div class="p-3 bg-blue-50 rounded-xl text-blue-700">
                         <i class='bx bxs-purchase-tag text-2xl'></i>
                     </div>
@@ -159,8 +156,8 @@
             </div>
         </div>
         <div onclick="window.location.href='?module=psm-vendor-management'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bxs-user-detail text-6xl text-green-700'></i>
+            <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
+                <i class='bx bxs-user-detail text-6xl text-green-700 leading-none'></i>
             </div>
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
@@ -176,8 +173,8 @@
             </div>
         </div>
         <div onclick="window.location.href='?module=sws-digital-inventory'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-purple-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bxs-archive-in text-6xl text-purple-700'></i>
+            <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
+                <i class='bx bxs-archive-in text-6xl text-purple-700 leading-none'></i>
             </div>
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
@@ -193,8 +190,8 @@
             </div>
         </div>
         <div onclick="window.location.href='?module=plt-logistics-projects'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-orange-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bxs-package text-6xl text-orange-700'></i>
+            <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
+                <i class='bx bxs-package text-6xl text-orange-700 leading-none'></i>
             </div>
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
@@ -210,8 +207,8 @@
             </div>
         </div>
         <div onclick="window.location.href='?module=alms-asset-management'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-cyan-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bxs-archive text-6xl text-cyan-700'></i>
+            <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
+                <i class='bx bxs-archive text-6xl text-cyan-700 leading-none'></i>
             </div>
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
@@ -227,8 +224,8 @@
             </div>
         </div>
         <div onclick="window.location.href='?module=dtlr-document-tracker'" class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-600 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
-                <i class='bx bxs-file text-6xl text-red-700'></i>
+            <div class="absolute top-2 right-2 opacity-10 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none z-0 w-20 h-20 flex items-center justify-center">
+                <i class='bx bxs-file text-6xl text-red-700 leading-none'></i>
             </div>
             <div class="relative z-10">
                 <div class="flex items-center gap-3 mb-4">
@@ -255,7 +252,7 @@
         <!-- Quick Module Status Overview -->
         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <!-- SWS Status -->
-            <div class="bg-white rounded-lg p-3 shadow-sm">
+            <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 border-b-4 border-purple-600 hover:shadow-md transition">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-gray-700">SWS</span>
                     <span class="flex items-center text-xs px-2 py-1 rounded-full bg-white text-green-800">
@@ -270,7 +267,7 @@
             </div>
 
             <!-- PSM Status -->
-            <div class="bg-white rounded-lg p-3 shadow-sm">
+            <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 border-b-4 border-blue-600 hover:shadow-md transition">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-gray-700">PSM</span>
                     <span class="flex items-center text-xs px-2 py-1 rounded-full bg-white text-green-800">
@@ -285,7 +282,7 @@
             </div>
 
             <!-- PLT Status -->
-            <div class="bg-white rounded-lg p-3 shadow-sm">
+            <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 border-b-4 border-orange-600 hover:shadow-md transition">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-gray-700">PLT</span>
                     <span class="flex items-center text-xs px-2 py-1 rounded-full bg-white text-green-800">
@@ -300,7 +297,7 @@
             </div>
 
             <!-- ALMS Status -->
-            <div class="bg-white rounded-lg p-3 shadow-sm">
+            <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 border-b-4 border-cyan-600 hover:shadow-md transition">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-gray-700">ALMS</span>
                     <span class="flex items-center text-xs px-2 py-1 rounded-full bg-white text-green-800">
@@ -315,7 +312,7 @@
             </div>
 
             <!-- DTLR Status -->
-            <div class="bg-white rounded-lg p-3 shadow-sm">
+            <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 border-b-4 border-red-600 hover:shadow-md transition">
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-semibold text-gray-700">DTLR</span>
                     <span class="flex items-center text-xs px-2 py-1 rounded-full bg-white text-green-800">
@@ -423,7 +420,7 @@ var CSRF_TOKEN = (typeof CSRF_TOKEN !== 'undefined' && CSRF_TOKEN) ? CSRF_TOKEN 
 document.addEventListener('DOMContentLoaded', function () {
     initializeModuleCharts();
     wireDashboardMetricLinks();
-    loadDashboardStats();
+    ensureAuth().then(loadDashboardStats);
 });
 
 function initializeModuleCharts() {
@@ -610,6 +607,20 @@ function wireDashboardMetricLinks(){
     var f = document.getElementById('metricPendingDocs'); if(f) f.addEventListener('click', function(){ go('dtlr-document-tracker'); });
 }
 
+async function ensureAuth(){
+    if (typeof JWT_TOKEN === 'string' && JWT_TOKEN) return;
+    try{
+        var resp = await fetch('/auth/token', { credentials: 'include' });
+        if (resp.ok){
+            var j = await resp.json();
+            if (j && j.token){
+                JWT_TOKEN = j.token;
+                try { localStorage.setItem('jwt', JWT_TOKEN); } catch(e){}
+            }
+        }
+    }catch(e){}
+}
+
 async function loadDashboardStats(){
     var headers = {
         'Accept': 'application/json',
@@ -626,6 +637,19 @@ async function loadDashboardStats(){
             fetch('/api/v1/alms/assets', { headers: headers, credentials: 'include' }),
             fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' })
         ]);
+        // Retry once if unauthorized
+        if ([poRes, vendorRes, invRes, projRes, assetsRes, docsRes].some(function(r){ return r && r.status === 401; })){
+            await ensureAuth();
+            headers['Authorization'] = typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : '';
+            [poRes, vendorRes, invRes, projRes, assetsRes, docsRes] = await Promise.all([
+                fetch('/api/v1/psm/purchase-management', { headers: headers, credentials: 'include' }),
+                fetch('/api/v1/psm/vendor-management/stats', { headers: headers, credentials: 'include' }),
+                fetch('/api/v1/sws/inventory-stats', { headers: headers, credentials: 'include' }),
+                fetch('/api/v1/plt/projects/stats', { headers: headers, credentials: 'include' }),
+                fetch('/api/v1/alms/assets', { headers: headers, credentials: 'include' }),
+                fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' })
+            ]);
+        }
         var poJson = await poRes.json().catch(function(){ return {}; });
         var vendorJson = await vendorRes.json().catch(function(){ return {}; });
         var invJson = await invRes.json().catch(function(){ return {}; });
