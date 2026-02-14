@@ -34,7 +34,7 @@
         <div class="flex items-center mb-2 space-x-2 text-gray-700">
             <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>Overview Metrics</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5 hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
             <!-- Stats 01: Active Quotes -->
             <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700">
                 <div class="stat-title flex items-center justify-between">
@@ -43,8 +43,8 @@
                         <i class="bx bxs-file-find text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-blue-900">12</div>
-                <div class="stat-desc text-blue-700">3 Pending Review</div>
+                <div class="stat-value text-blue-900" id="venActiveQuotesValue">0</div>
+                <div class="stat-desc text-blue-700" id="venPendingQuotesDesc">0 Pending Review</div>
             </div>
 
             <!-- Stats 02: My Products -->
@@ -55,8 +55,8 @@
                         <i class="bx bxs-package text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-green-900">45</div>
-                <div class="stat-desc text-green-700">Updated Recently</div>
+                <div class="stat-value text-green-900" id="venProductsValue">0</div>
+                <div class="stat-desc text-green-700" id="venProductsDesc">Updated Recently</div>
             </div>
 
             <!-- Stats 03: Purchase Orders -->
@@ -67,12 +67,21 @@
                         <i class="bx bxs-purchase-tag text-xl" aria-hidden="true"></i>
                     </span>
                 </div>
-                <div class="stat-value text-purple-900">8</div>
-                <div class="stat-desc text-purple-700">2 New Orders</div>
+                <div class="stat-value text-purple-900" id="venNewPOValue">0</div>
+                <div class="stat-desc text-purple-700" id="venNewPODesc">New Orders</div>
             </div>
         </div>
     </div>
     <!-- Vendor Statistics Section end -->
+
+    <!-- Vendor Charts Section start -->
+    <div class="bg-white rounded-lg p-6 shadow-xl overflow-visible mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Quote Status Distribution</h3>
+        <div class="bg-white rounded-lg">
+            <canvas id="vendorQuoteStatusChart" style="width:100%;height:320px;"></canvas>
+        </div>
+    </div>
+    <!-- Vendor Charts Section end -->
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Recent RFQs -->
@@ -398,7 +407,12 @@ document.addEventListener('DOMContentLoaded', function () {
     configureChartsTheme();
     initializeModuleCharts();
     wireDashboardMetricLinks();
-    ensureAuth().then(loadDashboardStats);
+    ensureAuth().then(function(){
+        loadDashboardStats();
+        if (typeof IS_VENDOR !== 'undefined' && IS_VENDOR) {
+            loadVendorDashboardStats();
+        }
+    });
     initRouteAwareMetrics();
 });
 
@@ -476,7 +490,10 @@ function isDashboardRoute(){
 
 function initRouteAwareMetrics(){
     if (isDashboardRoute()){
-        try { ensureAuth().then(loadDashboardStats); } catch(e){}
+        try { ensureAuth().then(function(){ 
+            loadDashboardStats(); 
+            if (typeof IS_VENDOR !== 'undefined' && IS_VENDOR) { loadVendorDashboardStats(); }
+        }); } catch(e){}
     }
     (function(){
         var origPush = history.pushState;
@@ -487,7 +504,10 @@ function initRouteAwareMetrics(){
     })();
     var reinit = function(){
         if (isDashboardRoute()){
-            ensureAuth().then(loadDashboardStats);
+            ensureAuth().then(function(){ 
+                loadDashboardStats(); 
+                if (typeof IS_VENDOR !== 'undefined' && IS_VENDOR) { loadVendorDashboardStats(); }
+            });
         }
     };
     window.addEventListener('locationchange', reinit);
@@ -705,6 +725,76 @@ async function loadDashboardStats(){
         el = document.getElementById('almsMaintCount'); if(el) el.textContent = (assetsMaint.toLocaleString()) + ' Maintenance';
         el = document.getElementById('dtlrDocsCount'); if(el) el.textContent = (docsTotal.toLocaleString()) + ' Docs';
         el = document.getElementById('dtlrPendingCount'); if(el) el.textContent = (docsPending.toLocaleString()) + ' Pending';
+    }catch(e){}
+}
+
+// Vendor Dashboard logic
+var IS_VENDOR = <?php echo $isVendor ? 'true' : 'false'; ?>;
+async function loadVendorDashboardStats(){
+    if (!IS_VENDOR) return;
+    var headers = {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '',
+        'Authorization': typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : ''
+    };
+    try{
+        // Identify current vendor
+        var meRes = await fetch('/api/v1/vendor/auth/me', { headers: headers, credentials: 'include' });
+        if (!meRes || meRes.status === 401) return;
+        var meJson = await meRes.json();
+        if (!meJson || !meJson.success || !meJson.user) return;
+        var vendorId = meJson.user.vendorid || null;
+        var vendorCompany = meJson.user.company_name || meJson.user.company || null;
+
+        // Fetch quotes, products, and new purchase requests for this vendor
+        var reqs = await Promise.allSettled([
+            fetch('/api/v1/psm/vendor-quote', { headers: headers, credentials: 'include' }),
+            fetch(vendorId ? ('/api/v1/psm/product-management/by-vendor/' + encodeURIComponent(vendorId)) : '/api/v1/psm/product-management', { headers: headers, credentials: 'include' }),
+            fetch(vendorId ? ('/api/v1/psm/purchase-requests?status=Pending&vendor_id=' + encodeURIComponent(vendorId)) : '/api/v1/psm/purchase-requests?status=Pending', { headers: headers, credentials: 'include' })
+        ]);
+        async function sjson(res){ try{ if (res && res.value && res.value.ok) { return await res.value.json(); } }catch(e){} return {}; }
+        var quotesJson = await sjson(reqs[0]);
+        var productsJson = await sjson(reqs[1]);
+        var preqJson = await sjson(reqs[2]);
+
+        var quotes = Array.isArray(quotesJson.data) ? quotesJson.data : (Array.isArray(quotesJson) ? quotesJson : []);
+        var products = Array.isArray(productsJson.data) ? productsJson.data : (Array.isArray(productsJson) ? productsJson : []);
+        var purchaseReqs = Array.isArray(preqJson.data) ? preqJson.data : (Array.isArray(preqJson) ? preqJson : []);
+
+        // Derive stats
+        var activeQuotes = quotes.filter(function(q){
+            var s = String((q.quo_status || q.status || '')).toLowerCase();
+            return s && s.indexOf('complete') === -1 && s.indexOf('reject') === -1 && s.indexOf('cancel') === -1 && s.indexOf('closed') === -1;
+        }).length;
+        var pendingQuotes = quotes.filter(function(q){
+            var s = String((q.quo_status || q.status || '')).toLowerCase();
+            return s.indexOf('review') !== -1 || s.indexOf('pending') !== -1;
+        }).length;
+        var productsCount = products.length || 0;
+        var newPOCount = purchaseReqs.length || 0;
+
+        var el;
+        el = document.getElementById('venActiveQuotesValue'); if (el) el.textContent = activeQuotes.toLocaleString();
+        el = document.getElementById('venPendingQuotesDesc'); if (el) el.textContent = (pendingQuotes.toLocaleString()) + ' Pending Review';
+        el = document.getElementById('venProductsValue'); if (el) el.textContent = productsCount.toLocaleString();
+        el = document.getElementById('venNewPOValue'); if (el) el.textContent = newPOCount.toLocaleString();
+        el = document.getElementById('venNewPODesc'); if (el) el.textContent = (newPOCount.toLocaleString()) + ' New Orders';
+
+        // Build quote status chart
+        var qMap = {};
+        quotes.forEach(function(q){
+            var raw = String((q.quo_status || q.status || '')).trim().toLowerCase();
+            if (!raw) raw = 'other';
+            raw = raw.replace(/_/g,' ');
+            qMap[raw] = (qMap[raw] || 0) + 1;
+        });
+        var labels = Object.keys(qMap).map(function(k){ return k.replace(/\b\w/g, c => c.toUpperCase()); });
+        var values = labels.map(function(lbl){ var k = lbl.toLowerCase(); return qMap[k]; });
+        upsertChart('vendorQuoteStatusChart', 'doughnut', labels, {
+            data: values,
+            backgroundColor: ['#3B82F6','#10B981','#F59E0B','#8B5CF6','#06B6D4','#F97316','#EF4444','#84CC16','#A78BFA','#6B7280']
+        }, { responsive: true, maintainAspectRatio: false, cutout: '58%', plugins: { legend: { display: true, position: 'bottom' } } });
     }catch(e){}
 }
 </script>
