@@ -325,72 +325,54 @@
     <!-- Statistics Section end -->
 
     <!-- statistics charts section start -->
-    <div class="bg-white rounded-lg p-5 shadow-xl overflow-visible mb-3">
+    <div class="bg-white rounded-lg p-6 shadow-xl overflow-visible mb-4">
         <h2 class="text-gray-700 text-lg font-semibold mb-4"><i class='bx bx-fw bxs-pie-chart-alt-2'></i>Module Performance Charts</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Chart 1: Purchase Order Status (PSM) -->
-            <div class="chart-card bg-white p-4 rounded-lg shadow">
-                <h3 class="font-bold text-gray-800 flex items-center">
-                    <i class='bx bxs-purchase-tag mr-2 text-blue-600'></i>
-                    PO Status Distribution
-                </h3>
-                <div class="chart-placeholder h-32 bg-white rounded-lg p-1">
-                    <canvas id="poStatusChart" style="width:100%;height:160px;"></canvas>
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-blue-600">
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-purchase-tag mr-2 text-blue-600'></i>PO Status Distribution</h3>
+                <div class="bg-white rounded-lg">
+                    <canvas id="poStatusChart" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
 
             <!-- Chart 2: Inventory Categories (SWS) -->
-            <div class="chart-card bg-white p-4 rounded-lg shadow">
-                <h3 class="font-bold text-gray-800 flex items-center">
-                    <i class='bx bxs-archive-in mr-2 text-purple-600'></i>
-                    Inventory by Category
-                </h3>
-                <div class="chart-placeholder h-32 bg-white rounded-lg p-1">
-                    <canvas id="inventoryChart" style="width:100%;height:160px;"></canvas>
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-purple-600">
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-archive-in mr-2 text-purple-600'></i>Inventory by Category</h3>
+                <div class="bg-white rounded-lg">
+                    <canvas id="inventoryChart" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
 
             <!-- Chart 3: Project Progress (PLT) -->
-            <div class="chart-card bg-white p-4 rounded-lg shadow">
-                <h3 class="font-bold text-gray-800 flex items-center">
-                    <i class='bx bxs-package mr-2 text-orange-600'></i>
-                    Project Progress
-                </h3>
-                <div class="chart-placeholder h-32 bg-white rounded-lg p-1">
-                    <canvas id="projectProgressChart" style="width:100%;height:160px;"></canvas>
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-orange-600">
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-package mr-2 text-orange-600'></i>Project Progress</h3>
+                <div class="bg-white rounded-lg">
+                    <canvas id="projectProgressChart" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
 
             <!-- Chart 4: Asset Status (ALMS) -->
-            <div class="chart-card bg-white p-4 rounded-lg shadow">
-                <h3 class="font-bold text-gray-800 flex items-center">
-                    <i class='bx bxs-archive mr-2 text-cyan-600'></i>
-                    Asset Status Overview
-                </h3>
-                <div class="chart-placeholder h-32 bg-white rounded-lg p-1">
-                    <canvas id="assetStatusChart" style="width:100%;height:160px;"></canvas>
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-cyan-600">
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-archive mr-2 text-cyan-600'></i>Asset Status Overview</h3>
+                <div class="bg-white rounded-lg">
+                    <canvas id="assetStatusChart" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
 
             <!-- Chart 5: Document Status (DTLR) -->
-            <div class="chart-card bg-white p-4 rounded-lg shadow">
-                <h3 class="font-bold text-gray-800 flex items-center">
-                    <i class='bx bxs-file mr-2 text-red-600'></i>
-                    Document Status
-                </h3>
-                <div class="chart-placeholder h-32 bg-white rounded-lg p-1">
-                    <canvas id="documentStatusChart" style="width:100%;height:160px;"></canvas>
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-red-600">
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-file mr-2 text-red-600'></i>Document Status</h3>
+                <div class="bg-white rounded-lg">
+                    <canvas id="documentStatusChart" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
 
             <!-- Chart 6: Vendor Performance (PSM) -->
-            <div class="chart-card bg-white p-4 rounded-lg shadow">
-                <h3 class="font-bold text-gray-800 flex items-center">
-                    <i class='bx bxs-user-detail mr-2 text-green-600'></i>
-                    Vendor Performance
-                </h3>
-                <div class="chart-placeholder h-32 bg-white rounded-lg p-1">
-                    <canvas id="vendorPerformanceChart" style="width:100%;height:160px;"></canvas>
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 border-b-4 border-green-600">
+                <h3 class="font-bold text-gray-800 flex items-center mb-3"><i class='bx bxs-user-detail mr-2 text-green-600'></i>Vendor Performance</h3>
+                <div class="bg-white rounded-lg">
+                    <canvas id="vendorPerformanceChart" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
         </div>
@@ -413,11 +395,22 @@ if (!JWT_TOKEN) {
 var CSRF_TOKEN = (typeof CSRF_TOKEN !== 'undefined' && CSRF_TOKEN) ? CSRF_TOKEN : (document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '');
 
 document.addEventListener('DOMContentLoaded', function () {
+    configureChartsTheme();
     initializeModuleCharts();
     wireDashboardMetricLinks();
     ensureAuth().then(loadDashboardStats);
     initRouteAwareMetrics();
 });
+
+function configureChartsTheme(){
+    if (typeof Chart === 'undefined') return;
+    Chart.defaults.color = '#334155';
+    Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    Chart.defaults.plugins.legend.labels.font.size = 10;
+    Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.25)';
+}
 
 function initializeModuleCharts() {
     window.__charts = window.__charts || {};
@@ -593,7 +586,7 @@ async function loadDashboardStats(){
         upsertChart('poStatusChart', 'doughnut', poLabels, {
             data: poValues,
             backgroundColor: ['#F59E0B','#10B981','#3B82F6','#06B6D4','#8B5CF6','#F97316','#22C55E','#84CC16','#A855F7','#EF4444','#6B7280','#94A3B8']
-        });
+        }, { responsive: true, maintainAspectRatio: false, cutout: '58%', plugins: { legend: { display: true, position: 'bottom' } } });
 
         // CHARTS: Inventory by Category (total_quantity)
         var cats = Array.isArray(catJson.data) ? catJson.data : (Array.isArray(catJson) ? catJson : []);
@@ -609,8 +602,9 @@ async function loadDashboardStats(){
         upsertChart('projectProgressChart', 'bar', ['Active','Delayed','Completed'], {
             label: 'Projects',
             data: [activeProjects, delayedProjects, completedProjects],
-            backgroundColor: ['#3B82F6','#F59E0B','#10B981']
-        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } } });
+            backgroundColor: ['#3B82F6','#F59E0B','#10B981'],
+            borderRadius: 8
+        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,0.2)' } }, x: { ticks: { font: { size: 11 } } } } });
 
         // CHARTS: Asset Status Overview
         var assetMap = {};
@@ -628,7 +622,7 @@ async function loadDashboardStats(){
         upsertChart('assetStatusChart', 'doughnut', assetLabels, {
             data: assetValues,
             backgroundColor: ['#06B6D4','#F59E0B','#EF4444','#10B981','#6B7280','#A78BFA']
-        });
+        }, { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { display: true, position: 'bottom' } } });
 
         // CHARTS: Document Status
         var docMap = {};
@@ -645,7 +639,7 @@ async function loadDashboardStats(){
         upsertChart('documentStatusChart', 'pie', docLabels, {
             data: docValues,
             backgroundColor: ['#F59E0B','#10B981','#6B7280','#EF4444','#3B82F6','#A78BFA']
-        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 9 } } } } });
+        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } });
 
         var el;
         el = document.getElementById('poTotalValue'); if(el) el.textContent = poTotal.toLocaleString();
