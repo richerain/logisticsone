@@ -860,6 +860,8 @@ function filterQuoteStatus(status) {
     currentQuotesPage = 1;
     displayQuotes(currentQuotes);
 }
+// Ensure availability for inline onclick handlers
+window.filterQuoteStatus = filterQuoteStatus;
 
 function loadQuoteStats() {
     const list = currentQuotes || [];

@@ -264,7 +264,7 @@ class PSMController extends Controller
     {
         try {
             $validated = $request->validate([
-                'status' => 'required|in:Pending,Approved,Rejected,Cancel,Vendor-Review,In-Progress,Completed',
+                'status' => 'required|in:Pending,Approved,Rejected,Cancel,PO Received,Processing Order,Dispatched,Delivered,Vendor-Review,In-Progress,Completed',
                 'approved_by' => 'nullable|string|max:255',
             ]);
 
