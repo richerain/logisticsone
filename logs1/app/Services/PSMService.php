@@ -1480,7 +1480,8 @@ class PSMService
     {
         try {
             $cols = ['req_id','req_items','req_price','req_requester','req_dept','req_date','req_status','created_at','updated_at'];
-            $list = $this->psmRepository->getRequisitionsByRequesterDept($requester, $dept, $cols);
+            $statuses = ['Approved', 'Rejected'];
+            $list = $this->psmRepository->getRequisitionsByRequesterDept($requester, $dept, $cols, $statuses);
             return [
                 'success' => true,
                 'data' => $list,

@@ -351,13 +351,15 @@ class PSMRepository
     /**
      * Get requisitions by requester and department
      */
-    public function getRequisitionsByRequesterDept($requester, $dept, $columns = ['*'])
+    public function getRequisitionsByRequesterDept($requester, $dept, $columns = ['*'], $statuses = null)
     {
-        return Requisition::select($columns)
+        $q = Requisition::select($columns)
             ->where('req_requester', $requester)
-            ->where('req_dept', $dept)
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->where('req_dept', $dept);
+        if (is_array($statuses) && !empty($statuses)) {
+            $q->whereIn('req_status', $statuses);
+        }
+        return $q->orderBy('created_at', 'desc')->get();
     }
 
     /**
