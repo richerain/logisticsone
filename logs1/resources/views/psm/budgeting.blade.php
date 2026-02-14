@@ -304,9 +304,12 @@
             }
 
             // Filters
-            document.getElementById('consolidatedSearchInput')?.addEventListener('input', applyConsolidatedFilters);
-            document.getElementById('consolidatedDeptFilter')?.addEventListener('change', applyConsolidatedFilters);
-            document.getElementById('budgetStatusFilter')?.addEventListener('change', applyBudgetStatusFilters);
+            var elSearch = document.getElementById('consolidatedSearchInput');
+            if (elSearch) elSearch.addEventListener('input', applyConsolidatedFilters);
+            var elDept = document.getElementById('consolidatedDeptFilter');
+            if (elDept) elDept.addEventListener('change', applyConsolidatedFilters);
+            var elBudgetStatus = document.getElementById('budgetStatusFilter');
+            if (elBudgetStatus) elBudgetStatus.addEventListener('change', applyBudgetStatusFilters);
         }
 
         // --- Requisition Logic ---
@@ -340,8 +343,10 @@
         }
 
         function applyConsolidatedFilters() {
-            const searchTerm = document.getElementById('consolidatedSearchInput')?.value.toLowerCase() || '';
-            const deptFilter = document.getElementById('consolidatedDeptFilter')?.value || '';
+            var si = document.getElementById('consolidatedSearchInput');
+            const searchTerm = (si && si.value ? si.value.toLowerCase() : '') || '';
+            var df = document.getElementById('consolidatedDeptFilter');
+            const deptFilter = (df && df.value) ? df.value : '';
 
             filteredRequisitions = allApprovedRequisitions.filter(req => {
                 // EXCLUDE: items that are already "Approved" in budget approval
@@ -489,7 +494,8 @@
         }
 
         function applyBudgetStatusFilters() {
-            const statusFilter = document.getElementById('budgetStatusFilter')?.value || '';
+            var bs = document.getElementById('budgetStatusFilter');
+            const statusFilter = (bs && bs.value) ? bs.value : '';
             const filteredRequests = allBudgetRequests.filter(req => {
                 return !statusFilter || req.req_status === statusFilter;
             });
@@ -553,7 +559,7 @@
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-gray-50 transition-colors';
                     
-                    const isPending = req.req_status?.toLowerCase() === 'pending';
+                    const isPending = (req.req_status ? String(req.req_status).toLowerCase() : '') === 'pending';
 
                     const statusClass = getStatusClass(req.req_status);
                     const amountFormatted = formatCurrency(req.req_amount || 0);
@@ -592,7 +598,8 @@
         }
 
         function getStatusClass(status) {
-            switch(status?.toLowerCase()) {
+            var s = status ? String(status).toLowerCase() : '';
+            switch(s) {
                 case 'approved': return 'bg-green-600 text-white border-green-700';
                 case 'rejected': return 'bg-red-600 text-white border-red-700';
                 case 'pending': return 'bg-yellow-500 text-white border-yellow-600';
