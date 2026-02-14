@@ -420,178 +420,27 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function initializeModuleCharts() {
-    // Chart 1: Purchase Order Status (PSM)
-    const poCtx = document.getElementById('poStatusChart');
-    if (poCtx) {
-        new Chart(poCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Approved', 'Pending', 'Rejected', 'Draft'],
-                datasets: [{
-                    data: [25, 12, 5, 5],
-                    backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#6B7280'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        display: true,
-                        position: 'bottom',
-                        labels: { boxWidth: 12, font: { size: 10 } }
-                    }
-                }
-            }
-        });
+    window.__charts = window.__charts || {};
+}
+// helpers: create or update charts
+function upsertChart(canvasId, chartType, labels, dataset, options){
+    var ctx = document.getElementById(canvasId);
+    if (!ctx || typeof Chart === 'undefined') return;
+    window.__charts = window.__charts || {};
+    var existing = window.__charts[canvasId];
+    if (existing){
+        existing.data.labels = labels;
+        existing.data.datasets = [dataset];
+        existing.update();
+        return;
     }
-
-    // Chart 2: Inventory Categories (SWS)
-    const inventoryCtx = document.getElementById('inventoryChart');
-    if (inventoryCtx) {
-        new Chart(inventoryCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Furniture', 'Electronics', 'Office Supplies', 'Equipment', 'Raw Materials'],
-                datasets: [{
-                    data: [350, 280, 420, 150, 47],
-                    backgroundColor: ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        display: true,
-                        position: 'bottom',
-                        labels: { boxWidth: 12, font: { size: 9 } }
-                    }
-                }
-            }
-        });
-    }
-
-    // Chart 3: Project Progress (PLT)
-    const projectCtx = document.getElementById('projectProgressChart');
-    if (projectCtx) {
-        new Chart(projectCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Warehouse Relocation', 'System Implementation', 'Fleet Upgrade', 'Process Optimization', 'Training Program'],
-                datasets: [{
-                    label: 'Completion %',
-                    data: [65, 90, 45, 75, 30],
-                    backgroundColor: '#F59E0B',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: { callback: function(value) { return value + '%'; } }
-                    },
-                    x: { ticks: { font: { size: 8 } } }
-                }
-            }
-        });
-    }
-
-    // Chart 4: Asset Status (ALMS)
-    const assetCtx = document.getElementById('assetStatusChart');
-    if (assetCtx) {
-        new Chart(assetCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Operational', 'Under Maintenance', 'Out of Service', 'In Storage'],
-                datasets: [{
-                    data: [245, 18, 21, 15],
-                    backgroundColor: ['#06B6D4', '#F59E0B', '#EF4444', '#6B7280'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        display: true,
-                        position: 'bottom',
-                        labels: { boxWidth: 12, font: { size: 10 } }
-                    }
-                }
-            }
-        });
-    }
-
-    // Chart 5: Document Status (DTLR)
-    const documentCtx = document.getElementById('documentStatusChart');
-    if (documentCtx) {
-        new Chart(documentCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Approved', 'Pending Review', 'Rejected', 'Archived'],
-                datasets: [{
-                    data: [1245, 387, 210, 125],
-                    backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#6B7280'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        display: true,
-                        position: 'bottom',
-                        labels: { boxWidth: 12, font: { size: 9 } }
-                    }
-                }
-            }
-        });
-    }
-
-    // Chart 6: Vendor Performance (PSM)
-    const vendorCtx = document.getElementById('vendorPerformanceChart');
-    if (vendorCtx) {
-        new Chart(vendorCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'On-Time Delivery Rate',
-                    data: [85, 88, 92, 90, 87, 94],
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#10B981'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: false,
-                        min: 80,
-                        max: 100,
-                        ticks: { callback: function(value) { return value + '%'; } }
-                    }
-                }
-            }
-        });
-    }
-}// Module Charts Data Initialization end
+    var cfg = {
+        type: chartType,
+        data: { labels: labels, datasets: [dataset] },
+        options: options || { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
+    };
+    window.__charts[canvasId] = new Chart(ctx, cfg);
+}
 
 function wireDashboardMetricLinks(){
     var go = function(path){ window.location.href = '?module=' + path; };
@@ -655,25 +504,27 @@ async function loadDashboardStats(){
         'Authorization': typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : ''
     };
     try{
-        var [poRes, vendorRes, invRes, projRes, assetsRes, docsRes] = await Promise.all([
+        var [poRes, vendorRes, invRes, projRes, assetsRes, docsRes, catRes] = await Promise.all([
             fetch('/api/v1/psm/purchase-management', { headers: headers, credentials: 'include' }),
             fetch('/api/v1/psm/vendor-management/stats', { headers: headers, credentials: 'include' }),
             fetch('/api/v1/sws/inventory-stats', { headers: headers, credentials: 'include' }),
             fetch('/api/v1/plt/projects/stats', { headers: headers, credentials: 'include' }),
             fetch('/api/v1/alms/assets', { headers: headers, credentials: 'include' }),
-            fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' })
+            fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' }),
+            fetch('/api/v1/sws/stock-levels', { headers: headers, credentials: 'include' })
         ]);
         // Retry once if unauthorized
-        if ([poRes, vendorRes, invRes, projRes, assetsRes, docsRes].some(function(r){ return r && r.status === 401; })){
+        if ([poRes, vendorRes, invRes, projRes, assetsRes, docsRes, catRes].some(function(r){ return r && r.status === 401; })){
             await ensureAuth();
             headers['Authorization'] = typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : '';
-            [poRes, vendorRes, invRes, projRes, assetsRes, docsRes] = await Promise.all([
+            [poRes, vendorRes, invRes, projRes, assetsRes, docsRes, catRes] = await Promise.all([
                 fetch('/api/v1/psm/purchase-management', { headers: headers, credentials: 'include' }),
                 fetch('/api/v1/psm/vendor-management/stats', { headers: headers, credentials: 'include' }),
                 fetch('/api/v1/sws/inventory-stats', { headers: headers, credentials: 'include' }),
                 fetch('/api/v1/plt/projects/stats', { headers: headers, credentials: 'include' }),
                 fetch('/api/v1/alms/assets', { headers: headers, credentials: 'include' }),
-                fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' })
+                fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' }),
+                fetch('/api/v1/sws/stock-levels', { headers: headers, credentials: 'include' })
             ]);
         }
         var poJson = await poRes.json().catch(function(){ return {}; });
@@ -682,6 +533,7 @@ async function loadDashboardStats(){
         var projJson = await projRes.json().catch(function(){ return {}; });
         var assetsJson = await assetsRes.json().catch(function(){ return {}; });
         var docsJson = await docsRes.json().catch(function(){ return {}; });
+        var catJson = await catRes.json().catch(function(){ return {}; });
 
         var purchases = Array.isArray(poJson.data) ? poJson.data : (Array.isArray(poJson.items) ? poJson.items : (Array.isArray(poJson) ? poJson : []));
         var poTotal = purchases.length || 0;
@@ -720,6 +572,80 @@ async function loadDashboardStats(){
             return s === 'pending_review' || s === 'pending' || s.indexOf('pending') !== -1;
         }).length;
         var docsTotal = docs.length || 0;
+
+        // CHARTS: Purchase Orders status distribution
+        var poMap = {};
+        purchases.forEach(function(p){
+            var raw = String((p.pur_status || p.status || '')).trim().toLowerCase();
+            var key = raw.replace(/_/g,' ');
+            if (!key) key = 'other';
+            poMap[key] = (poMap[key] || 0) + 1;
+        });
+        var poOrder = ['pending','approved','processing order','vendor-review','po received','dispatched','delivered','in-progress','completed','rejected','cancel','other'];
+        var poLabels = [];
+        var poValues = [];
+        poOrder.forEach(function(k){
+            if (poMap[k]){ poLabels.push(k.replace(/\b\w/g, c => c.toUpperCase())); poValues.push(poMap[k]); }
+        });
+        if (poLabels.length === 0){
+            Object.keys(poMap).forEach(function(k){ poLabels.push(k.replace(/\b\w/g, c => c.toUpperCase())); poValues.push(poMap[k]); });
+        }
+        upsertChart('poStatusChart', 'doughnut', poLabels, {
+            data: poValues,
+            backgroundColor: ['#F59E0B','#10B981','#3B82F6','#06B6D4','#8B5CF6','#F97316','#22C55E','#84CC16','#A855F7','#EF4444','#6B7280','#94A3B8']
+        });
+
+        // CHARTS: Inventory by Category (total_quantity)
+        var cats = Array.isArray(catJson.data) ? catJson.data : (Array.isArray(catJson) ? catJson : []);
+        var catLabels = cats.map(function(c){ return c.name || 'Unknown'; }).slice(0, 12);
+        var catValues = cats.map(function(c){ return parseInt(c.total_quantity || 0); }).slice(0, 12);
+        upsertChart('inventoryChart', 'pie', catLabels, {
+            data: catValues,
+            backgroundColor: ['#8B5CF6','#3B82F6','#10B981','#F59E0B','#EF4444','#06B6D4','#A78BFA','#34D399','#FBBF24','#60A5FA','#FB7185','#14B8A6']
+        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 9 } } } } });
+
+        // CHARTS: Project Progress (Active/Delayed/Completed)
+        var completedProjects = Math.max(0, totalProjects - activeProjects - delayedProjects);
+        upsertChart('projectProgressChart', 'bar', ['Active','Delayed','Completed'], {
+            label: 'Projects',
+            data: [activeProjects, delayedProjects, completedProjects],
+            backgroundColor: ['#3B82F6','#F59E0B','#10B981']
+        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { ticks: { font: { size: 10 } } } } });
+
+        // CHARTS: Asset Status Overview
+        var assetMap = {};
+        assets.forEach(function(a){
+            var s = String((a.asset_status || a.status || '')).toLowerCase();
+            if (s.indexOf('maint') !== -1) s = 'Under Maintenance';
+            else if (s.indexOf('retir') !== -1 || s.indexOf('dispose') !== -1) s = 'Retired';
+            else if (s.indexOf('use') !== -1 || s === 'in_use') s = 'In Use';
+            else if (s.indexOf('avail') !== -1) s = 'Available';
+            else s = s ? s.replace(/\b\w/g, c => c.toUpperCase()) : 'Other';
+            assetMap[s] = (assetMap[s] || 0) + 1;
+        });
+        var assetLabels = Object.keys(assetMap);
+        var assetValues = assetLabels.map(function(k){ return assetMap[k]; });
+        upsertChart('assetStatusChart', 'doughnut', assetLabels, {
+            data: assetValues,
+            backgroundColor: ['#06B6D4','#F59E0B','#EF4444','#10B981','#6B7280','#A78BFA']
+        });
+
+        // CHARTS: Document Status
+        var docMap = {};
+        docs.forEach(function(d){
+            var s = String((d.doc_status || d.status || '')).toLowerCase();
+            if (s === 'pending_review' || s.indexOf('pending') !== -1) s = 'Pending Review';
+            else if (s.indexOf('index') !== -1) s = 'Indexed';
+            else if (s.indexOf('arch') !== -1) s = 'Archived';
+            else s = s ? s.replace(/\b\w/g, c => c.toUpperCase()) : 'Other';
+            docMap[s] = (docMap[s] || 0) + 1;
+        });
+        var docLabels = Object.keys(docMap);
+        var docValues = docLabels.map(function(k){ return docMap[k]; });
+        upsertChart('documentStatusChart', 'pie', docLabels, {
+            data: docValues,
+            backgroundColor: ['#F59E0B','#10B981','#6B7280','#EF4444','#3B82F6','#A78BFA']
+        }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 9 } } } } });
 
         var el;
         el = document.getElementById('poTotalValue'); if(el) el.textContent = poTotal.toLocaleString();
