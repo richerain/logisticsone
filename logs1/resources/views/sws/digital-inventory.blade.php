@@ -1993,12 +1993,16 @@ function groupIncomingAssets(data) {
             const newItem = { ...item };
             newItem.sws_purcprod_prod_unit = parseFloat(item.sws_purcprod_prod_unit) || 0;
             newItem.sws_purcprod_prod_price = parseFloat(item.sws_purcprod_prod_price) || 0;
+            newItem.sws_purcprod_inventory = (item.sws_purcprod_inventory || 'no');
             groupedMap.set(key, newItem);
         } else {
             // Aggregate existing entry
             const existingItem = groupedMap.get(key);
             existingItem.sws_purcprod_prod_unit += parseFloat(item.sws_purcprod_prod_unit) || 0;
             existingItem.sws_purcprod_prod_price += parseFloat(item.sws_purcprod_prod_price) || 0;
+            const cur = (existingItem.sws_purcprod_inventory || '').toString().toLowerCase();
+            const incoming = (item.sws_purcprod_inventory || '').toString().toLowerCase();
+            existingItem.sws_purcprod_inventory = (cur === 'no' || incoming !== 'yes') ? 'no' : 'yes';
         }
     });
 
@@ -2040,9 +2044,10 @@ async function loadIncomingAssets() {
 }
 
 function renderIncomingAssets() {
+    const visible = (incomingAssetsData || []).filter(x => (x.sws_purcprod_inventory || '').toString().toLowerCase() !== 'yes');
     const start = (currentIncomingAssetsPage - 1) * incomingAssetsPerPage;
     const end = start + incomingAssetsPerPage;
-    const paginatedData = incomingAssetsData.slice(start, end);
+    const paginatedData = visible.slice(start, end);
     const tbody = els.incomingAssetsTableBody;
     
     tbody.innerHTML = '';
@@ -2095,7 +2100,7 @@ function renderIncomingAssets() {
         tbody.appendChild(tr);
     });
 
-    updateIncomingAssetsPagination(incomingAssetsData.length);
+    updateIncomingAssetsPagination(visible.length);
 }
 
 function updateIncomingBadge() {
@@ -2413,7 +2418,7 @@ async function saveItem(e) {
         // Mark incoming asset as inventoried = "yes"
         if (incomingId) {
             try {
-                await fetch(`/api/v1/sws/incoming-assets/${incomingId}`, {
+                const upd = await fetch(`/api/v1/sws/incoming-assets/${incomingId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2425,6 +2430,17 @@ async function saveItem(e) {
                     body: JSON.stringify({ sws_purcprod_inventory: 'yes' }),
                     credentials: 'include'
                 });
+                // Optimistically update local dataset to remove immediately
+                if (upd && upd.ok) {
+                    incomingAssetsData = (incomingAssetsData || []).map(x => {
+                        if (String(x.sws_purcprod_id) === String(incomingId)) {
+                            return { ...x, sws_purcprod_inventory: 'yes' };
+                        }
+                        return x;
+                    });
+                    renderIncomingAssets();
+                    updateIncomingBadge();
+                }
             } catch (e) {
                 console.warn('Failed to mark incoming as inventoried:', e);
             }

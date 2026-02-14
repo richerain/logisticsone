@@ -52,6 +52,7 @@ Route::delete('/locations/{id}', [SWSController::class, 'deleteLocation']);
 // Incoming Assets (mirror of PSM Purchase Products into SWS)
 Route::get('/incoming-assets', [SWSController::class, 'getIncomingAssets']);
 Route::delete('/incoming-assets/{id}', [SWSController::class, 'deleteIncomingAsset']);
+Route::patch('/incoming-assets/{id}', [SWSController::class, 'updateIncomingAsset']);
 
 // Purchase Product Management Routes (consumed from PSM)
 Route::prefix('purchase-product-management')->group(function () {

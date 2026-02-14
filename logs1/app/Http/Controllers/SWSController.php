@@ -130,6 +130,30 @@ class SWSController extends Controller
         }
     }
 
+    public function updateIncomingAsset(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'sws_purcprod_inventory' => ['required', Rule::in(['yes', 'no'])],
+            ]);
+            $updated = IncomingAsset::where('sws_purcprod_id', $id)
+                ->update([
+                    'sws_purcprod_inventory' => $validated['sws_purcprod_inventory'],
+                    'updated_at' => now(),
+                ]);
+            return response()->json([
+                'success' => true,
+                'updated' => $updated,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to update incoming asset: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update incoming asset',
+            ], 500);
+        }
+    }
+
     public function showWarehouse(string $id)
     {
         $item = Warehouse::find($id);
