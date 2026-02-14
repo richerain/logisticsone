@@ -78,48 +78,54 @@
             <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Quick Management</h3>
         </div>
         <div class="p-4">
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                <button id="transferBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+            <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
+                <button id="transferBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
                         <i class='bx bx-transfer text-xl'></i>
                     </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter">Transfer</span>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Transfer</span>
                 </button>
 
-                <button id="viewLocationsBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                <button id="viewLocationsBtn" class="hidden w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
                         <i class='bx bx-map text-xl'></i>
                     </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter">Location</span>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Location</span>
                 </button>
 
-                <button id="viewCategoriesBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                <button id="viewCategoriesBtn" class="hidden w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
                         <i class='bx bx-category-alt text-xl'></i>
                     </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter">Category</span>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Category</span>
                 </button>
 
-                <button id="generateReportBtn" class="flex flex-col items-center justify-center gap-2 p-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
-                    <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                <button id="generateReportBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200 group">
+                    <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-brand-primary group-hover:text-white transition-colors">
                         <i class='bx bxs-report text-xl'></i>
                     </div>
-                    <span class="text-[11px] font-bold uppercase tracking-tighter">Reports</span>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Reports</span>
                 </button>
 
-                <button id="purchaseNewItemBtn" class="flex items-center justify-center gap-3 p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-sm uppercase tracking-wide">
-                    <i class='bx bxs-purchase-tag'></i>
-                    Purchase New Item
+                <button id="purchaseNewItemBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-400/30 flex items-center justify-center">
+                        <i class='bx bxs-purchase-tag text-xl'></i>
+                    </div>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Purchase</span>
                 </button>
 
-                <button id="inventoryNewItemBtn" class="flex items-center justify-center gap-2 p-2.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-[11px] uppercase tracking-tight">
-                    <i class='bx bxs-down-arrow-square'></i>
-                    Inventory Item
+                <button id="inventoryNewItemBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                        <i class='bx bxs-down-arrow-square text-xl'></i>
+                    </div>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Inventory</span>
                 </button>
 
-                <button id="incomingAssetsBtn" class="flex items-center justify-center gap-2 p-2.5 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200 font-bold text-[11px] uppercase tracking-tight">
-                    <i class='bx bx-import'></i>
-                    Incoming Assets
+                <button id="incomingAssetsBtn" class="w-28 h-28 flex-shrink-0 flex flex-col items-center justify-center gap-2 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                        <i class='bx bx-import text-xl'></i>
+                    </div>
+                    <span class="text-[11px] font-bold uppercase tracking-tighter whitespace-nowrap">Incoming</span>
                 </button>
             </div>
         </div>
@@ -147,19 +153,19 @@
                     </h4>
                 </div>
                 
-                <div id="stockLevelsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="stockLevelsContainer" class="grid grid-cols-1 gap-3">
                     <!-- Equipment -->
                     <div class="group">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300">
                                     <i class='bx bx-wrench text-base'></i>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-700">Equipment</span>
+                                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">Equipment</span>
                             </div>
-                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">0%</span>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded whitespace-nowrap">0%</span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                             <div class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
@@ -168,14 +174,14 @@
                     <div class="group">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300">
+                                <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-all duration-300">
                                     <i class='bx bx-package text-base'></i>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-700">Supplies</span>
+                                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">Supplies</span>
                             </div>
-                            <span class="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded">0%</span>
+                            <span class="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded whitespace-nowrap">0%</span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                             <div class="bg-yellow-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
@@ -184,14 +190,14 @@
                     <div class="group">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
+                                <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all duration-300">
                                     <i class='bx bx-chair text-base'></i>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-700">Furniture</span>
+                                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">Furniture</span>
                             </div>
-                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">0%</span>
+                            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded whitespace-nowrap">0%</span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                             <div class="bg-green-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
@@ -200,14 +206,14 @@
                     <div class="group">
                         <div class="flex items-center justify-between mb-2">
                             <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
+                                <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
                                     <i class='bx bx-car text-base'></i>
                                 </div>
-                                <span class="text-sm font-semibold text-gray-700">Automotive</span>
+                                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">Automotive</span>
                             </div>
-                            <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">0%</span>
+                            <span class="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded whitespace-nowrap">0%</span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                             <div class="bg-purple-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
