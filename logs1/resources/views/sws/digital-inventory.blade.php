@@ -370,9 +370,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
-                    <select id="item_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Select Item from Completed Purchase</option>
-                    </select>
+                    <input type="text" id="item_name" required readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Select from Incoming Assets table">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
@@ -742,64 +740,53 @@
 
 <!-- Incoming Assets Modal -->
 <div id="incomingAssetsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Incoming Assets (Purchase Products)</h3>
-            <button id="closeIncomingAssetsModal" class="text-gray-500 hover:text-gray-700">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full max-w-7xl max-h-[90vh] flex flex-col">
+        <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class='bx bx-import text-2xl text-gray-800'></i>
+                <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Incoming Assets (Purchase Products)</h3>
+            </div>
+            <button id="closeIncomingAssetsModal" class="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
                 <i class='bx bx-x text-2xl'></i>
             </button>
         </div>
-        
-        <div class="overflow-x-auto mb-4 border rounded-lg">
-            <table class="table table-zebra w-full">
-                <thead>
-                    <tr class="bg-gray-700 text-white">
-                        <th class="whitespace-nowrap">ID</th>
-                        <th class="whitespace-nowrap">Prod ID</th>
-                        <th class="whitespace-nowrap">Name</th>
-                        <th class="whitespace-nowrap">Price</th>
-                        <th class="whitespace-nowrap">Unit</th>
-                        <th class="whitespace-nowrap">Type</th>
-                        <th class="whitespace-nowrap">Status</th>
-                        <th class="whitespace-nowrap">Date</th>
-                        <th class="whitespace-nowrap">Warranty</th>
-                        <th class="whitespace-nowrap">Expiration</th>
-                        <th class="whitespace-nowrap">Desc</th>
-                        <th class="whitespace-nowrap">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="incomingAssetsTableBody">
-                    <tr>
-                        <td colspan="12" class="text-center py-8 text-gray-500">Loading...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-            <div class="flex flex-1 justify-between sm:hidden">
-                <button id="incomingAssetsPrevBtnMobile" class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</button>
-                <button id="incomingAssetsNextBtnMobile" class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</button>
+        <div class="p-6 overflow-x-auto">
+            <div class="overflow-x-auto rounded-xl border border-gray-100">
+                <table class="table table-zebra w-full">
+                    <thead class="bg-gray-800 font-bold text-white">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Prod ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Price</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Unit</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Warranty</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Expiration</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase">Desc</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium tracking-wider whitespace-nowrap uppercase text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incomingAssetsTableBody">
+                        <tr>
+                            <td colspan="12" class="text-center py-4">
+                                <div class="flex justify-center items-center">
+                                    <div class="loading loading-spinner mr-3"></div>
+                                    Loading incoming assets...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-sm text-gray-700" id="incomingAssetsPagerInfo">
-                        Showing <span class="font-medium">0</span> to <span class="font-medium">0</span> of <span class="font-medium">0</span> results
-                    </p>
-                </div>
-                <div>
-                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                        <button id="incomingAssetsPrevBtn" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                            <span class="sr-only">Previous</span>
-                            <i class='bx bx-chevron-left h-5 w-5'></i>
-                        </button>
-                        <span id="incomingAssetsPageDisplay" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">1</span>
-                        <button id="incomingAssetsNextBtn" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                            <span class="sr-only">Next</span>
-                            <i class='bx bx-chevron-right h-5 w-5'></i>
-                        </button>
-                    </nav>
+            <div id="incomingPager" class="flex items-center justify-between mt-3">
+                <div id="incomingPagerInfo" class="text-sm text-gray-600"></div>
+                <div class="join">
+                    <button class="btn btn-sm join-item" id="incomingPrevBtn" data-action="prev">Prev</button>
+                    <span class="btn btn-sm join-item" id="incomingPageDisplay">1 / 1</span>
+                    <button class="btn btn-sm join-item" id="incomingNextBtn" data-action="next">Next</button>
                 </div>
             </div>
         </div>
@@ -935,6 +922,9 @@
         </div>
     </div>
 </div>
+
+<!-- Dual Inventory Backdrop -->
+<div id="dualInventoryBackdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[59]"></div>
 
 <!-- Success Modal -->
 <div id="di_success_modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
@@ -2079,7 +2069,7 @@ function renderIncomingAssets() {
 
     paginatedData.forEach(item => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50';
+        tr.className = 'hover:bg-gray-50 transition-colors border-b border-gray-100 group';
         tr.innerHTML = `
             <td class="font-mono text-sm whitespace-nowrap">${item.sws_purcprod_id}</td>
             <td class="font-mono text-sm whitespace-nowrap">${item.sws_purcprod_prod_id || '-'}</td>
@@ -2097,9 +2087,14 @@ function renderIncomingAssets() {
             <td class="whitespace-nowrap">${item.sws_purcprod_expiration || '-'}</td>
             <td class="max-w-xs truncate whitespace-nowrap" title="${item.sws_purcprod_desc || ''}">${item.sws_purcprod_desc || '-'}</td>
             <td class="whitespace-nowrap">
-                <button onclick="deleteIncomingAsset('${item.sws_purcprod_id}')" class="text-red-600 hover:text-red-900 flex items-center gap-1">
-                    <i class='bx bx-trash'></i>
-                </button>
+                <div class="flex justify-end gap-1">
+                    <button class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90" title="View" onclick="viewIncomingAsset('${item.sws_purcprod_id}')">
+                        <i class='bx bx-show-alt text-lg'></i>
+                    </button>
+                    <button class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all active:scale-90" title="Add to Inventory" onclick="addIncomingAssetToForm('${item.sws_purcprod_id}')">
+                        <i class='bx bx-plus-circle text-lg'></i>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);
@@ -2166,42 +2161,17 @@ window.deleteIncomingAsset = function(id) {
 }
 
 function updateIncomingAssetsPagination(totalItems) {
-    const totalPages = Math.ceil(totalItems / incomingAssetsPerPage);
+    const totalPages = Math.max(1, Math.ceil(totalItems / incomingAssetsPerPage));
     const start = totalItems === 0 ? 0 : (currentIncomingAssetsPage - 1) * incomingAssetsPerPage + 1;
     const end = Math.min(currentIncomingAssetsPage * incomingAssetsPerPage, totalItems);
-
-    if (els.incomingAssetsPagerInfo) {
-        els.incomingAssetsPagerInfo.innerHTML = `Showing <span class="font-medium">${start}</span> to <span class="font-medium">${end}</span> of <span class="font-medium">${totalItems}</span> results`;
-    }
-
-    if (els.incomingAssetsPageDisplay) {
-        els.incomingAssetsPageDisplay.textContent = currentIncomingAssetsPage;
-    }
-
-    const prevDisabled = currentIncomingAssetsPage === 1;
-    const nextDisabled = currentIncomingAssetsPage === totalPages || totalPages === 0;
-
-    if (els.incomingAssetsPrevBtn) els.incomingAssetsPrevBtn.disabled = prevDisabled;
-    if (els.incomingAssetsNextBtn) els.incomingAssetsNextBtn.disabled = nextDisabled;
-    if (els.incomingAssetsPrevBtnMobile) els.incomingAssetsPrevBtnMobile.disabled = prevDisabled;
-    if (els.incomingAssetsNextBtnMobile) els.incomingAssetsNextBtnMobile.disabled = nextDisabled;
-
-    // Style updates for disabled state
-    const updateBtnStyle = (btn, disabled) => {
-        if (!btn) return;
-        if (disabled) {
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            btn.classList.remove('hover:bg-gray-50');
-        } else {
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.classList.add('hover:bg-gray-50');
-        }
-    };
-
-    updateBtnStyle(els.incomingAssetsPrevBtn, prevDisabled);
-    updateBtnStyle(els.incomingAssetsNextBtn, nextDisabled);
-    updateBtnStyle(els.incomingAssetsPrevBtnMobile, prevDisabled);
-    updateBtnStyle(els.incomingAssetsNextBtnMobile, nextDisabled);
+    const info = document.getElementById('incomingPagerInfo');
+    const display = document.getElementById('incomingPageDisplay');
+    if (info) info.textContent = `Showing ${start}-${end} of ${totalItems}`;
+    if (display) display.textContent = `${currentIncomingAssetsPage} / ${totalPages}`;
+    const prev = document.getElementById('incomingPrevBtn');
+    const next = document.getElementById('incomingNextBtn');
+    if (prev) prev.disabled = currentIncomingAssetsPage <= 1;
+    if (next) next.disabled = currentIncomingAssetsPage >= totalPages;
 }
 
 function openIncomingAssetsModal() {
@@ -2250,6 +2220,61 @@ function closeEditItemModal() {
     els.editItemModal.classList.add('hidden');
 }
 
+function findIncomingById(id) {
+    return (incomingAssetsData || []).find(x => String(x.sws_purcprod_id) === String(id));
+}
+
+function viewIncomingAsset(id) {
+    const item = findIncomingById(id);
+    if (!item) return;
+    Swal.fire({
+        title: 'Incoming Asset',
+        html: `
+            <div class="text-left">
+                <p><strong>ID:</strong> ${item.sws_purcprod_id}</p>
+                <p><strong>Prod ID:</strong> ${item.sws_purcprod_prod_id || '-'}</p>
+                <p><strong>Name:</strong> ${item.sws_purcprod_prod_name || '-'}</p>
+                <p><strong>Price:</strong> ${formatCurrency(item.sws_purcprod_prod_price)}</p>
+                <p><strong>Unit:</strong> ${item.sws_purcprod_prod_unit || '-'}</p>
+                <p><strong>Type:</strong> ${item.sws_purcprod_prod_type || '-'}</p>
+                <p><strong>Status:</strong> ${item.sws_purcprod_status || 'Pending'}</p>
+                <p><strong>Date:</strong> ${formatDate(item.sws_purcprod_date)}</p>
+                <p><strong>Warranty:</strong> ${item.sws_purcprod_warranty || '-'}</p>
+                <p><strong>Expiration:</strong> ${item.sws_purcprod_expiration || '-'}</p>
+                <p><strong>Description:</strong> ${item.sws_purcprod_desc || '-'}</p>
+            </div>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Close'
+    });
+}
+
+function addIncomingAssetToForm(id) {
+    const item = findIncomingById(id);
+    if (!item) return;
+    document.getElementById('item_name').value = item.sws_purcprod_prod_name || '';
+    document.getElementById('psm_prod_id').value = item.sws_purcprod_prod_id || '';
+    document.getElementById('psm_purcprod_id').value = item.sws_purcprod_id || '';
+    const skuInput = document.getElementById('item_stock_keeping_unit');
+    if (item.sws_purcprod_prod_id) {
+        skuInput.value = item.sws_purcprod_prod_id;
+    } else {
+        skuInput.value = '';
+    }
+    document.getElementById('item_description').value = item.sws_purcprod_desc || '';
+    document.getElementById('item_current_stock').value = item.sws_purcprod_prod_unit || 0;
+    document.getElementById('item_unit_price').value = item.sws_purcprod_prod_price || 0;
+    document.getElementById('item_expiration_date').value = item.sws_purcprod_expiration || '';
+    document.getElementById('item_warranty_end').value = item.sws_purcprod_warranty || '';
+    if (item.sws_purcprod_prod_type) {
+        const type = item.sws_purcprod_prod_type.toLowerCase();
+        const typeSelect = document.getElementById('item_item_type');
+        if ([...typeSelect.options].some(o => o.value === type)) {
+            typeSelect.value = type;
+        }
+    }
+}
+
 async function prepareAddItemPane() {
     els.addItemForm.reset();
     document.getElementById('item_max_stock').value = 100;
@@ -2257,21 +2282,7 @@ async function prepareAddItemPane() {
     document.getElementById('item_is_collateral').checked = false;
     updateItemCodePreview();
     await loadIncomingAssets();
-    populateItemNameDropdown();
-    const itemNameSelect = document.getElementById('item_name');
-    const skuInput = document.getElementById('item_stock_keeping_unit');
-    itemNameSelect.onchange = onPurchaseItemSelected;
-    const categorySelect = document.getElementById('item_category_id');
-    categorySelect.onchange = function() {
-        if (!skuInput.value && itemNameSelect.value) {
-            const selectedOption = itemNameSelect.options[itemNameSelect.selectedIndex];
-            const itemName = selectedOption ? (selectedOption.dataset.itemName || selectedOption.text) : '';
-            const categoryName = this.options[this.selectedIndex]?.text || '';
-            if (itemName) {
-                skuInput.value = generateSKU(itemName, categoryName);
-            }
-        }
-    };
+    document.getElementById('item_name').value = '';
 }
 
 window.isDualInventoryOpen = false;
@@ -2281,6 +2292,7 @@ async function openInventoryDualModal() {
     await prepareAddItemPane();
     els.incomingAssetsModal.className = "fixed inset-y-0 left-0 right-1/2 bg-transparent flex items-stretch p-4 z-[60]";
     els.addItemModal.className = "fixed inset-y-0 left-1/2 right-0 bg-transparent flex items-stretch p-4 z-[60]";
+    const backdrop = document.getElementById('dualInventoryBackdrop');
     const inInner = els.incomingAssetsModal.querySelector('.bg-white');
     const addInner = els.addItemModal.querySelector('.bg-white');
     if (inInner) {
@@ -2289,6 +2301,7 @@ async function openInventoryDualModal() {
     if (addInner) {
         addInner.classList.add('w-full','h-full','max-w-none','rounded-xl','shadow-lg','overflow-hidden');
     }
+    if (backdrop) backdrop.classList.remove('hidden');
     els.incomingAssetsModal.classList.remove('hidden');
     els.addItemModal.classList.remove('hidden');
     currentIncomingAssetsPage = 1;
@@ -2299,19 +2312,20 @@ function closeInventoryDualModal() {
     window.isDualInventoryOpen = false;
     els.incomingAssetsModal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50";
     els.addItemModal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50";
+    const backdrop = document.getElementById('dualInventoryBackdrop');
+    if (backdrop) backdrop.classList.add('hidden');
 }
 
 // Item CRUD Functions
 async function saveItem(e) {
     e.preventDefault();
     
-    const itemNameSelect = document.getElementById('item_name');
-    if (!itemNameSelect.value) {
-        notify('Please select an item', 'error');
+    const itemNameInput = document.getElementById('item_name');
+    if (!itemNameInput.value) {
+        notify('Please choose an incoming asset via the Add button', 'error');
         return;
     }
-    const selectedOption = itemNameSelect.options[itemNameSelect.selectedIndex];
-    const itemName = selectedOption ? (selectedOption.dataset.itemName || selectedOption.text) : '';
+    const itemName = itemNameInput.value;
 
     const categoryVal = document.getElementById('item_category_id').value;
     // console.log('Category Value in saveItem:', categoryVal);
@@ -2775,7 +2789,7 @@ function initDigitalInventory() {
 
     // Incoming Assets Pagination Listeners
     const changeIncomingAssetsPage = (delta) => {
-        const totalPages = Math.ceil(incomingAssetsData.length / incomingAssetsPerPage);
+        const totalPages = Math.max(1, Math.ceil(incomingAssetsData.length / incomingAssetsPerPage));
         const newPage = currentIncomingAssetsPage + delta;
         if (newPage >= 1 && newPage <= totalPages) {
             currentIncomingAssetsPage = newPage;
@@ -2783,10 +2797,10 @@ function initDigitalInventory() {
         }
     };
 
-    if (els.incomingAssetsPrevBtn) els.incomingAssetsPrevBtn.addEventListener('click', () => changeIncomingAssetsPage(-1));
-    if (els.incomingAssetsNextBtn) els.incomingAssetsNextBtn.addEventListener('click', () => changeIncomingAssetsPage(1));
-    if (els.incomingAssetsPrevBtnMobile) els.incomingAssetsPrevBtnMobile.addEventListener('click', () => changeIncomingAssetsPage(-1));
-    if (els.incomingAssetsNextBtnMobile) els.incomingAssetsNextBtnMobile.addEventListener('click', () => changeIncomingAssetsPage(1));
+    const incomingPrev = document.getElementById('incomingPrevBtn');
+    const incomingNext = document.getElementById('incomingNextBtn');
+    if (incomingPrev) incomingPrev.addEventListener('click', () => changeIncomingAssetsPage(-1));
+    if (incomingNext) incomingNext.addEventListener('click', () => changeIncomingAssetsPage(1));
 
     // View Location Details Modal Listeners
     if (els.closeViewLocationModal) els.closeViewLocationModal.addEventListener('click', () => els.viewLocationModal.classList.add('hidden'));
