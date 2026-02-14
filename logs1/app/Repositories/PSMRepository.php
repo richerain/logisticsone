@@ -441,10 +441,9 @@ class PSMRepository
         if (!empty($filters['status'])) {
             $query->where('preq_status', $filters['status']);
         }
+        // By default exclude processed requests (kept legacy compatibility with any non-null marker)
         if (empty($filters['include_reviewed'])) {
-            $query->where(function($q) {
-                $q->whereNull('preq_process')->orWhere('preq_process', '!=', 'Reviewed');
-            });
+            $query->whereNull('preq_process');
         }
         return $query->get();
     }

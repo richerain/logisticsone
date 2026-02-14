@@ -94,8 +94,8 @@ class PSMService
             }
             // Mark request as received (rename Reviewed -> PO-Received)
             $this->psmRepository->updatePurchaseRequestByPreqId($preqId, [
-                'preq_status' => 'PO-Received',
-                'preq_process' => 'PO-Received',
+                'preq_status' => 'PO-Received',   // status label with hyphen
+                'preq_process' => 'PO Received',  // process marker with space
                 'updated_at' => now(),
             ]);
 
