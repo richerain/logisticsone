@@ -356,8 +356,16 @@
 <!-- Add New Item Modal -->
 <div id="addItemModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Add New Inventory Item</h3>
+        <div class="px-0 pb-4 -mt-2">
+            <div class="bg-gradient-to-r from-gray-50 to-white px-4 py-3 border border-gray-100 rounded-xl flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <i class='bx bxs-down-arrow-square text-xl'></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 leading-none">Inventory New Item</h3>
+                    <p class="text-xs text-gray-500 mt-1">Create a new inventory record from incoming assets</p>
+                </div>
+            </div>
         </div>
         <form id="addItemForm">
             <input type="hidden" id="psm_purchase_id" name="psm_purchase_id">
@@ -370,9 +378,8 @@
                     <input type="text" id="item_name" required readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Select from Incoming Assets table">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                    <input type="text" id="item_stock_keeping_unit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Auto-generated if empty">
-                    <p class="text-xs text-gray-500 mt-1">Product variant identifier (e.g., MF-LAPTOP-BLACK-16GB)</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Product ID</label>
+                    <input type="text" id="item_stock_keeping_unit" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="From incoming asset product id">
                 </div>
             </div>
             <div class="mb-4" style="display:none">
@@ -2070,7 +2077,7 @@ function renderIncomingAssets() {
             <td class="font-semibold whitespace-nowrap">${item.sws_purcprod_prod_name || '-'}</td>
             <td class="whitespace-nowrap">${formatCurrency(item.sws_purcprod_prod_price)}</td>
             <td class="whitespace-nowrap">${item.sws_purcprod_prod_unit || '-'}</td>
-            <td class="whitespace-nowrap">${item.sws_purcprod_prod_type || '-'}</td>
+            <td class="whitespace-nowrap capitalize">${item.sws_purcprod_prod_type || '-'}</td>
             <td class="whitespace-nowrap">
                 <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     ${item.sws_purcprod_status || 'Pending'}
@@ -2265,6 +2272,30 @@ window.addIncomingAssetToForm = function(id) {
         const typeSelect = document.getElementById('item_item_type');
         if ([...typeSelect.options].some(o => o.value === type)) {
             typeSelect.value = type;
+        }
+        // Auto-select Category by matching category name to type
+        const categorySelect = document.getElementById('item_category_id');
+        if (categorySelect) {
+            const t = (item.sws_purcprod_prod_type || '').trim().toLowerCase();
+            let matchedValue = '';
+            for (const opt of categorySelect.options) {
+                if ((opt.text || '').trim().toLowerCase() === t) {
+                    matchedValue = opt.value;
+                    break;
+                }
+            }
+            if (!matchedValue && t) {
+                for (const opt of categorySelect.options) {
+                    if ((opt.text || '').trim().toLowerCase().includes(t)) {
+                        matchedValue = opt.value;
+                        break;
+                    }
+                }
+            }
+            if (matchedValue) {
+                categorySelect.value = matchedValue;
+                categorySelect.dispatchEvent(new Event('change'));
+            }
         }
     }
 }
