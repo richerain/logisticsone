@@ -98,7 +98,7 @@
 </div>
 <!-- Inventory Metrics section end -->
 <!-- Quick Management section start -->
-<div class="mt-2 mb-1">
+<div class="mt-4 mb-4">
     <div class="rounded-2xl overflow-hidden">
         <div class="p-4">
             <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
