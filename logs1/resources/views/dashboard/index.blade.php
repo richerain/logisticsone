@@ -34,7 +34,7 @@
         <div class="flex items-center mb-2 space-x-2 text-gray-700">
             <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>Overview Metrics</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5 hidden">
             <!-- Stats 01: Active Quotes -->
             <div class="stat card bg-white shadow-xl hover:shadow-2xl transition-shadow rounded-lg border-l-4 border-t-0 border-r-0 border-b-0 border-blue-700">
                 <div class="stat-title flex items-center justify-between">
@@ -642,39 +642,41 @@ async function loadDashboardStats(){
         var assetsJson = await assetsRes.json().catch(function(){ return {}; });
         var docsJson = await docsRes.json().catch(function(){ return {}; });
 
-        var purchases = Array.isArray(poJson.data) ? poJson.data : (Array.isArray(poJson) ? poJson : []);
+        var purchases = Array.isArray(poJson.data) ? poJson.data : (Array.isArray(poJson.items) ? poJson.items : (Array.isArray(poJson) ? poJson : []));
         var poTotal = purchases.length || 0;
         var poPending = purchases.filter(function(p){
-            var s = String((p.pur_status || '')).toLowerCase();
+            var s = String((p.pur_status || p.status || '')).toLowerCase();
             return s.indexOf('pending') !== -1;
         }).length;
         var poActive = purchases.filter(function(p){
-            var s = String((p.pur_status || '')).toLowerCase();
-            return s !== 'cancel' && s !== 'delivered';
+            var s = String((p.pur_status || p.status || '')).toLowerCase();
+            return s.indexOf('cancel') === -1 && s.indexOf('deliver') === -1 && s.indexOf('closed') === -1;
         }).length;
 
-        var vStats = vendorJson && vendorJson.data ? vendorJson.data : {};
-        var activeVendors = parseInt(vStats.active_vendors || vStats.total_vendors || 0);
-        var totalProducts = parseInt(vStats.total_products || 0);
+        var vStats = vendorJson && (vendorJson.data || vendorJson.stats) ? (vendorJson.data || vendorJson.stats) : {};
+        var activeVendors = parseInt(vStats.active_vendors || vStats.vendors_active || vStats.total_vendors || 0);
+        var totalProducts = parseInt(vStats.total_products || vStats.products_total || 0);
 
-        var invStats = invJson && invJson.data ? invJson.data : {};
-        var totalItems = parseInt(invStats.total_items || 0);
-        var lowItems = parseInt(invStats.low_stock_items || 0);
+        var invStats = invJson && (invJson.data || invJson.stats) ? (invJson.data || invJson.stats) : {};
+        var totalItems = parseInt(invStats.total_items || invStats.items_total || 0);
+        var lowItems = parseInt(invStats.low_stock_items || invStats.low_stock || 0);
 
-        var projStats = projJson && projJson.data ? projJson.data : {};
-        var activeProjects = parseInt(projStats.active || 0);
-        var delayedProjects = parseInt(projStats.delayed || 0);
-        var totalProjects = parseInt(projStats.total || (activeProjects + delayedProjects) || 0);
+        var projStats = projJson && (projJson.data || projJson.stats) ? (projJson.data || projJson.stats) : {};
+        var activeProjects = parseInt(projStats.active || projStats.ongoing || 0);
+        var delayedProjects = parseInt(projStats.delayed || projStats.behind || 0);
+        var totalProjects = parseInt(projStats.total || projStats.projects_total || (activeProjects + delayedProjects) || 0);
 
         var assets = Array.isArray(assetsJson.data) ? assetsJson.data : (Array.isArray(assetsJson) ? assetsJson : []);
         var assetsTotal = assets.length || 0;
         var assetsMaint = assets.filter(function(x){
-            return String((x.asset_status || '')).toLowerCase() === 'under_maintenance';
+            var s = String((x.asset_status || x.status || '')).toLowerCase();
+            return s.indexOf('maint') !== -1;
         }).length;
 
         var docs = Array.isArray(docsJson.data) ? docsJson.data : (Array.isArray(docsJson) ? docsJson : []);
         var docsPending = docs.filter(function(d){
-            return String((d.doc_status || '')).toLowerCase() === 'pending_review';
+            var s = String((d.doc_status || d.status || '')).toLowerCase();
+            return s === 'pending_review' || s === 'pending' || s.indexOf('pending') !== -1;
         }).length;
         var docsTotal = docs.length || 0;
 
