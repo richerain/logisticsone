@@ -8,7 +8,7 @@
     </div>
 </div>
 <!-- Inventory Metrics section start (PM style) -->
-<div class="mt-4 mb-4">
+<div class="mt-4 mb-2">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Items -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
