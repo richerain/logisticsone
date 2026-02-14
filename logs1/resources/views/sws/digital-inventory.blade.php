@@ -1663,7 +1663,7 @@ function renderInventoryItems() {
                     <div class="flex justify-end gap-1">
                         <button class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:scale-90 view-item-btn" 
                                 title="View Details" data-id="${item.item_id}">
-                            <i class='bx bx-show text-lg'></i>
+                            <i class='bx bx-show-alt text-lg'></i>
                         </button>
                         <button class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-all active:scale-90 edit-item-btn" 
                                 title="Edit Item" data-id="${item.item_id}">
