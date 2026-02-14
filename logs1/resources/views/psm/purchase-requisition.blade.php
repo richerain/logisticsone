@@ -633,7 +633,7 @@
             '<div class="flex items-center justify-between text-[11px] text-gray-500 px-1">' +
                 '<div class="flex items-center gap-2">' +
                     '<span>Price: PHP ' + parseFloat(price).toLocaleString(undefined, {minimumFractionDigits: 2}) + '</span>' +
-                    '<span>×</span>' +
+                    '<span>&times;</span>' +
                     '<span>Qty: ' + count + '</span>' +
                 '</div>' +
                 '<div class="font-bold text-blue-600">' +
