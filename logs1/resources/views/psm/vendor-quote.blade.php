@@ -150,28 +150,40 @@
                 <form method="dialog"><button class="text-white/80 hover:text-white transition-colors"><i class='bx bx-x text-2xl'></i></button></form>
             </div>
             <div class="p-6">
-                <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                    <table id="notifTable" class="table table-sm table-zebra w-full">
-                        <thead>
-                            <tr class="bg-gray-900 font-bold text-white">
-                                <th class="whitespace-nowrap py-3">Request ID</th>
-                                <th class="whitespace-nowrap py-3">Items</th>
-                                <th class="whitespace-nowrap py-3">Units</th>
-                                <th class="whitespace-nowrap py-3">Total Amount</th>
-                                <th class="whitespace-nowrap py-3">Vendor</th>
-                                <th class="whitespace-nowrap py-3">Vendor Type</th>
-                                <th class="whitespace-nowrap py-3">Status</th>
-                                <th class="whitespace-nowrap py-3">Ordered By</th>
-                                <th class="whitespace-nowrap py-3">Description</th>
-                                <th class="whitespace-nowrap py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="notifTableBody">
-                            <tr>
-                                <!-- data rows -->
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="border border-gray-200 rounded-lg">
+                    <div class="overflow-x-auto">
+                        <div class="max-h-[65vh] overflow-y-auto">
+                            <table id="notifTable" class="table table-sm table-zebra w-full">
+                                <thead class="sticky top-0 z-10 bg-gray-900 text-white">
+                                    <tr class="bg-gray-900 font-bold text-white">
+                                        <th class="whitespace-nowrap py-3">Request ID</th>
+                                        <th class="whitespace-nowrap py-3">Items</th>
+                                        <th class="whitespace-nowrap py-3">Units</th>
+                                        <th class="whitespace-nowrap py-3">Total Amount</th>
+                                        <th class="whitespace-nowrap py-3">Vendor</th>
+                                        <th class="whitespace-nowrap py-3">Vendor Type</th>
+                                        <th class="whitespace-nowrap py-3">Status</th>
+                                        <th class="whitespace-nowrap py-3">Ordered By</th>
+                                        <th class="whitespace-nowrap py-3">Description</th>
+                                        <th class="whitespace-nowrap py-3">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="notifTableBody">
+                                    <tr>
+                                        <!-- data rows -->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="notifPager" class="p-3 flex justify-between items-center border-t border-gray-200">
+                        <div id="notifPagerInfo" class="text-sm text-gray-600">0–0 of 0</div>
+                        <div class="join">
+                            <button class="join-item btn btn-sm" id="notifPrevBtn" data-action="prev">Prev</button>
+                            <span class="join-item btn btn-sm" id="notifPageDisplay">1 / 1</span>
+                            <button class="join-item btn btn-sm" id="notifNextBtn" data-action="next">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -337,6 +349,10 @@ var elements = {
     newPurchaseCountSpan: document.getElementById('newPurchasePulseCount'),
     notifModal: document.getElementById('my_modal_4'),
     notifTableBody: document.getElementById('notifTableBody'),
+    notifPrevBtn: document.getElementById('notifPrevBtn'),
+    notifNextBtn: document.getElementById('notifNextBtn'),
+    notifPagerInfo: document.getElementById('notifPagerInfo'),
+    notifPageDisplay: document.getElementById('notifPageDisplay'),
     quotesTableBody: document.getElementById('quotesTableBody'),
     // Stats
     totalQuotes: document.getElementById('totalQuotes'),
@@ -364,6 +380,8 @@ let currentQuotesPage = 1;
 const quotesPageSize = 10;
 let currentQuoteStatusFilter = '';
 let vendorVendorId = null;
+let currentNotifPage = 1;
+const notifPageSize = 10;
 
 function safeShowLoading() {
     try { if (typeof window !== 'undefined' && typeof window.showLoading === 'function') return window.showLoading(); } catch (e) {}
@@ -455,6 +473,7 @@ async function loadNotifications() {
                 list = list.filter(r => String(r.preq_ven_id || '') === String(vendorVendorId));
             }
             currentNotifications = list;
+            currentNotifPage = 1;
             displayNotifications(currentNotifications);
             setNotificationIndicator(currentNotifications.length);
         } else {
@@ -469,9 +488,17 @@ async function loadNotifications() {
     }
 }
 
-function displayNotifications(list) {
+function renderNotifPage() {
     if (!elements.notifTableBody) return;
-    if (!list || list.length === 0) {
+    const total = currentNotifications.length || 0;
+    const totalPages = Math.max(1, Math.ceil(total / notifPageSize));
+    if (currentNotifPage > totalPages) currentNotifPage = totalPages;
+    if (currentNotifPage < 1) currentNotifPage = 1;
+    const start = (currentNotifPage - 1) * notifPageSize;
+    const end = Math.min(start + notifPageSize, total);
+    const slice = currentNotifications.slice(start, end);
+
+    if (total === 0) {
         elements.notifTableBody.innerHTML = `
             <tr>
                 <td colspan="10" class="px-6 py-8 text-center text-gray-500">
@@ -479,9 +506,8 @@ function displayNotifications(list) {
                     <p class="text-lg">No pending purchase requests</p>
                 </td>
             </tr>`;
-        return;
-    }
-    elements.notifTableBody.innerHTML = list.map((r) => {
+    } else {
+        elements.notifTableBody.innerHTML = slice.map((r) => {
         const itemsText = Array.isArray(r.preq_name_items) ? r.preq_name_items.map(i => typeof i === 'object' ? (i.name || '') : (i || '')).join(', ') : '';
         return `
             <tr>
@@ -506,7 +532,21 @@ function displayNotifications(list) {
                 </td>
             </tr>
         `;
-    }).join('');
+        }).join('');
+    }
+    if (elements.notifPageDisplay) elements.notifPageDisplay.textContent = `${currentNotifPage} / ${totalPages}`;
+    if (elements.notifPrevBtn) elements.notifPrevBtn.disabled = currentNotifPage <= 1;
+    if (elements.notifNextBtn) elements.notifNextBtn.disabled = currentNotifPage >= totalPages;
+    if (elements.notifPagerInfo) {
+        const from = total === 0 ? 0 : (start + 1);
+        const to = end;
+        elements.notifPagerInfo.textContent = `${from}–${to} of ${total}`;
+    }
+}
+
+function displayNotifications(list) {
+    currentNotifications = Array.isArray(list) ? list : [];
+    renderNotifPage();
 }
 
 window.viewApprovedPurchase = function(id) {
@@ -623,6 +663,25 @@ if (elements.confirmReviewBtn) {
 if (elements.reviewConfirmModal) {
     elements.reviewConfirmModal.addEventListener('close', function() {
         if (elements.notifModal) elements.notifModal.removeAttribute('inert');
+    });
+}
+
+// Pagination controls for New Purchase Order modal
+if (elements.notifPrevBtn) {
+    elements.notifPrevBtn.addEventListener('click', function(){
+        if (currentNotifPage > 1) {
+            currentNotifPage--;
+            renderNotifPage();
+        }
+    });
+}
+if (elements.notifNextBtn) {
+    elements.notifNextBtn.addEventListener('click', function(){
+        const totalPages = Math.max(1, Math.ceil((currentNotifications.length || 0) / notifPageSize));
+        if (currentNotifPage < totalPages) {
+            currentNotifPage++;
+            renderNotifPage();
+        }
     });
 }
 
