@@ -245,7 +245,7 @@
     <!-- Statistics Section start -->
     <div class="mb-3 bg-white p-5 rounded-lg shadow-xl overflow-visible">
         <!-- Quick Module Status Overview -->
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="mt-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <!-- SWS Status -->
             <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-100 border-b-4 border-purple-600 hover:shadow-md transition">
                 <div class="flex items-center justify-between">
