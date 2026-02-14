@@ -89,7 +89,10 @@
                     <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Value</h4>
                 </div>
                 <div class="flex items-end gap-2">
-                    <span id="totalValue" class="text-4xl font-black text-gray-800 leading-none">₱0.00</span>
+                    <span id="totalValue" class="text-4xl font-black text-gray-800 leading-none price-mask" data-masked="1" data-price="₱0.00">*****</span>
+                    <button type="button" class="p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Value" onclick="toggleInventoryValueVisibility(this)">
+                        <i class="bx bx-show-alt text-2xl"></i>
+                    </button>
                     <span class="text-xs text-gray-500 mb-1">Current valuation</span>
                 </div>
             </div>
@@ -451,13 +454,7 @@
         <!-- Modal Header -->
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm">
-                    <i class='bx bx-info-circle text-2xl'></i>
-                </div>
-                <div>
-                    <h3 class="text-xl font-bold text-gray-800 leading-none">Item Details</h3>
-                    <p class="text-xs text-gray-500 mt-1">Complete information for the selected inventory item</p>
-                </div>
+                <h3 class="text-xl font-bold text-gray-800 leading-none">Item Details</h3>
             </div>
             <button id="closeViewItemModal" class="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
                 <i class='bx bx-x text-2xl'></i>
@@ -1266,6 +1263,30 @@ function formatDate(dateString) {
     }
 }
 
+// Toggle visibility for masked total value amounts
+window.toggleInventoryValueVisibility = function(btn) {
+    try {
+        const container = btn.closest('td') || btn.closest('div.flex') || btn.parentElement;
+        if (!container) return;
+        const span = container.querySelector('.price-mask');
+        if (!span) return;
+        const isMasked = span.getAttribute('data-masked') === '1';
+        if (isMasked) {
+            span.textContent = span.getAttribute('data-price') || '';
+            span.setAttribute('data-masked', '0');
+            btn.title = 'Hide Total Value';
+            btn.innerHTML = '<i class="bx bx-hide text-2xl"></i>';
+        } else {
+            span.textContent = '*****';
+            span.setAttribute('data-masked', '1');
+            btn.title = 'Show Total Value';
+            btn.innerHTML = '<i class="bx bx-show-alt text-2xl"></i>';
+        }
+    } catch (e) {
+        console.warn('toggleInventoryValueVisibility error:', e);
+    }
+};
+
 // Format date for input fields (YYYY-MM-DD)
 function formatDateForInput(dateString) {
     if (!dateString) return '';
@@ -1457,7 +1478,11 @@ async function loadInventoryStats() {
 
 function renderInventoryStats(stats) {
     els.totalItems.textContent = formatNumber(stats.total_items || 0);
-    els.totalValue.textContent = formatCurrency(stats.total_value || 0);
+    if (els.totalValue) {
+        els.totalValue.setAttribute('data-price', formatCurrency(stats.total_value || 0));
+        els.totalValue.textContent = '*****';
+        els.totalValue.setAttribute('data-masked', '1');
+    }
     els.lowStockItems.textContent = formatNumber(stats.low_stock_items || 0);
     els.outOfStockItems.textContent = formatNumber(stats.out_of_stock_items || 0);
 
@@ -1518,7 +1543,11 @@ async function loadInventoryItems() {
             
             // Calculate and update total value
             const totalValue = calculateTotalValue(inventoryItems);
-            els.totalValue.textContent = formatCurrency(totalValue);
+            if (els.totalValue) {
+                els.totalValue.setAttribute('data-price', formatCurrency(totalValue));
+                els.totalValue.textContent = '*****';
+                els.totalValue.setAttribute('data-masked', '1');
+            }
             
             renderInventoryItems();
         } else {
@@ -1651,7 +1680,12 @@ function renderInventoryItems() {
                 <td class="px-4 py-4 whitespace-nowrap text-center text-sm font-bold text-gray-700">${formatNumber(currentStock)}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-500">${formatNumber(maxStock)}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-emerald-600">${formatCurrency(unitPrice)}</td>
-                <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-black text-emerald-700">${formatCurrency(totalValue)}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-black text-emerald-700">
+                    <span class="price-mask" data-masked="1" data-price="${formatCurrency(totalValue)}">*****</span>
+                    <button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Value" onclick="toggleInventoryValueVisibility(this)">
+                        <i class="bx bx-show-alt text-2xl"></i>
+                    </button>
+                </td>
                 <td class="px-4 py-4 whitespace-nowrap">
                     <span class="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 w-fit ${getStatusBadgeClass(status)}">
                         ${getStatusIcon(status)}
@@ -2224,6 +2258,10 @@ function findIncomingById(id) {
     return (incomingAssetsData || []).find(x => String(x.sws_purcprod_id) === String(id));
 }
 
+// Expose modal open/close to global for inline handlers
+window.openViewItemModal = openViewItemModal;
+window.closeViewItemModal = closeViewItemModal;
+
 window.viewIncomingAsset = function(id) {
     const item = findIncomingById(id);
     if (!item) return;
@@ -2356,8 +2394,84 @@ async function saveItem(e) {
     // Find existing inventory item by Product ID (SKU)
     const existing = (inventoryItems || []).find(i => String(i.item_stock_keeping_unit || '').trim() === sku);
     if (!existing) {
-        notify(`No existing inventory item found with Product ID ${sku}`, 'error');
-        return;
+        // Create a brand new inventory item using form details
+        const payloadCreate = {
+            item_name: itemNameVal,
+            item_description: document.getElementById('item_description')?.value || null,
+            item_category_id: document.getElementById('item_category_id')?.value || null,
+            item_stored_from: document.getElementById('item_stored_from')?.value || null,
+            item_item_type: document.getElementById('item_item_type')?.value || 'illiquid',
+            item_is_fixed: !!document.getElementById('item_is_fixed')?.checked,
+            item_expiration_date: document.getElementById('item_expiration_date')?.value || null,
+            item_warranty_end: document.getElementById('item_warranty_end')?.value || null,
+            item_is_collateral: !!document.getElementById('item_is_collateral')?.checked,
+            item_unit_price: document.getElementById('item_unit_price')?.value ? parseFloat(document.getElementById('item_unit_price').value) : null,
+            item_current_stock: deltaUnits,
+            item_max_stock: document.getElementById('item_max_stock')?.value ? parseInt(document.getElementById('item_max_stock').value) : 100,
+            item_liquidity_risk_level: 'medium',
+            item_stock_keeping_unit: sku
+        };
+        try {
+            const response = await fetch(SWS_ITEMS_API, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                },
+                body: JSON.stringify(payloadCreate),
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message || 'Failed to create inventory item');
+
+            // Mark incoming asset as inventoried = "yes"
+            if (incomingId) {
+                try {
+                    const upd = await fetch(`/api/v1/sws/incoming-assets/${incomingId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': CSRF_TOKEN,
+                            'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                        },
+                        body: JSON.stringify({ sws_purcprod_inventory: 'yes' }),
+                        credentials: 'include'
+                    });
+                    if (upd && upd.ok) {
+                        incomingAssetsData = (incomingAssetsData || []).map(x => {
+                            if (String(x.sws_purcprod_id) === String(incomingId)) {
+                                return { ...x, sws_purcprod_inventory: 'yes' };
+                            }
+                            return x;
+                        });
+                        renderIncomingAssets();
+                        updateIncomingBadge();
+                    }
+                } catch (e) {
+                    console.warn('Failed to mark incoming as inventoried:', e);
+                }
+            }
+
+            notify('New inventory item created from incoming asset', 'success');
+            closeAddItemModal();
+            await Promise.all([
+                loadInventoryItems(),
+                loadInventoryStats(),
+                loadStockLevels(),
+                loadIncomingAssets()
+            ]);
+            return;
+        } catch (e) {
+            console.error('Error creating new item:', e);
+            notify(e.message || 'Error creating new inventory item', 'error');
+            return;
+        }
     }
 
     // Fetch latest item details to avoid overwriting other fields
@@ -2568,7 +2682,7 @@ async function viewItem(itemId) {
                                 <p class="font-bold font-mono text-gray-800">${itemCode}</p>
                             </div>
                             <div>
-                                <span class="text-xs text-gray-500 block">SKU / Product ID</span>
+                                <span class="text-xs text-gray-500 block">Product ID</span>
                                 <p class="font-bold font-mono text-gray-800">${item.item_stock_keeping_unit || 'N/A'}</p>
                             </div>
                             <div>
@@ -2629,7 +2743,12 @@ async function viewItem(itemId) {
                             </div>
                             <div>
                                 <span class="text-xs text-emerald-600/70 block">Total Inventory Value</span>
-                                <p class="text-2xl font-black text-emerald-800">${formatCurrency(totalValue)}</p>
+                                <p class="text-2xl font-black text-emerald-800">
+                                    <span class="price-mask" data-masked="1" data-price="${formatCurrency(totalValue)}">*****</span>
+                                    <button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Value" onclick="toggleInventoryValueVisibility(this)">
+                                        <i class="bx bx-show-alt text-2xl"></i>
+                                    </button>
+                                </p>
                             </div>
                         </div>
                     </div>
