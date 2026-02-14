@@ -846,7 +846,7 @@
             const overallPrice = parseFloat(data.req_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
             const overallEl = document.getElementById('view_req_overall_price');
             if (overallEl) {
-                overallEl.setAttribute('data-price', '₱' + overallPrice);
+                overallEl.setAttribute('data-price', 'PHP ' + overallPrice);
                 overallEl.setAttribute('data-masked', '1');
                 overallEl.textContent = '*****';
             }
@@ -955,7 +955,7 @@
 
         tbody.innerHTML = requisitions.map(req => {
             const items = Array.isArray(req.req_items) ? req.req_items : JSON.parse(req.req_items || '[]');
-            const priceFormatted = '₱' + parseFloat(req.req_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+            const priceFormatted = 'PHP ' + parseFloat(req.req_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
             return '<tr class="hover:bg-gray-50 transition-colors">' +
                     '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">' + req.req_id + '</td>' +
                     '<td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="' + items.join(', ') + '">' +
