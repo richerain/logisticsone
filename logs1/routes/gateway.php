@@ -89,6 +89,10 @@ Route::middleware(['api.key'])->prefix('psm/external')->group(function () {
     Route::post('/products', [App\Http\Controllers\PSMController::class, 'createProduct']);
     Route::put('/products/{id}', [App\Http\Controllers\PSMController::class, 'updateProduct']);
     Route::delete('/products/{id}', [App\Http\Controllers\PSMController::class, 'deleteProduct']);
+
+    // PSM Requisition API Endpoints (key-based public access)
+    Route::get('/requisitions', [App\Http\Controllers\PSMController::class, 'externalGetRequisitions']);
+    Route::match(['post','patch'], '/requisitions/{reqId}/status', [App\Http\Controllers\PSMController::class, 'externalUpdateRequisitionStatus']);
 });
 
 Route::middleware([
