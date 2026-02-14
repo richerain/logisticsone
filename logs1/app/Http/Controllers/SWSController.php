@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\SWS\Item;
+use App\Models\SWS\IncomingAsset;
+use App\Models\PSM\PurchaseProduct;
 use App\Models\SWS\Location;
 use App\Models\SWS\Transaction;
 use App\Models\SWS\Warehouse;
@@ -62,6 +64,70 @@ class SWSController extends Controller
             });
 
         return response()->json(['data' => $warehouses]);
+    }
+
+    public function getIncomingAssets(Request $request)
+    {
+        try {
+            $psmProducts = PurchaseProduct::query()->orderByDesc('purcprod_date')->get();
+
+            foreach ($psmProducts as $p) {
+                $existing = IncomingAsset::where('sws_purcprod_id', $p->purcprod_id)->first();
+                $payload = [
+                    'sws_purcprod_id' => $p->purcprod_id,
+                    'sws_purcprod_prod_id' => $p->purcprod_prod_id,
+                    'sws_purcprod_prod_name' => $p->purcprod_prod_name,
+                    'sws_purcprod_prod_price' => $p->purcprod_prod_price,
+                    'sws_purcprod_prod_unit' => $p->purcprod_prod_unit,
+                    'sws_purcprod_prod_type' => $p->purcprod_prod_type,
+                    'sws_purcprod_status' => $p->purcprod_status,
+                    'sws_purcprod_date' => $p->purcprod_date,
+                    'sws_purcprod_warranty' => $p->purcprod_warranty,
+                    'sws_purcprod_expiration' => $p->purcprod_expiration,
+                    'sws_purcprod_desc' => $p->purcprod_desc,
+                ];
+
+                if ($existing) {
+                    // Preserve inventory flag if present
+                    $existing->fill($payload);
+                    $existing->save();
+                } else {
+                    // Default inventory flag to 'no'
+                    $payload['sws_purcprod_inventory'] = 'no';
+                    IncomingAsset::create($payload);
+                }
+            }
+
+            $assets = IncomingAsset::orderByDesc('created_at')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $assets,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to get incoming assets: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load incoming assets',
+            ], 500);
+        }
+    }
+
+    public function deleteIncomingAsset($id)
+    {
+        try {
+            $deleted = IncomingAsset::where('sws_purcprod_id', $id)->delete();
+            return response()->json([
+                'success' => true,
+                'deleted' => $deleted,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to delete incoming asset: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete incoming asset',
+            ], 500);
+        }
     }
 
     public function showWarehouse(string $id)

@@ -144,11 +144,17 @@
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Inventory</span>
                 </button>
 
-                <button id="incomingAssetsBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
+                <button id="incomingAssetsBtn" class="relative h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
                     <span class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
                         <i class='bx bx-import text-lg'></i>
                     </span>
                     <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Incoming</span>
+                    <span id="incomingBadge" class="hidden absolute -top-1 -right-1">
+                        <span class="relative flex h-5 w-5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span id="incomingBadgeCount" class="relative inline-flex rounded-full h-5 w-5 bg-red-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
+                        </span>
+                    </span>
                 </button>
             </div>
         </div>
@@ -1914,11 +1920,11 @@ function populateItemNameDropdown() {
         // Use the index as the value to easily retrieve the item data later
         option.value = index; 
         // Display Name and Prod ID (or ID if Prod ID is missing)
-        const displayId = item.purcprod_prod_id || item.purcprod_id;
-        option.textContent = `${item.purcprod_prod_name || 'Unknown Item'} (ID: ${displayId})`;
+        const displayId = item.sws_purcprod_prod_id || item.sws_purcprod_id;
+        option.textContent = `${item.sws_purcprod_prod_name || 'Unknown Item'} (ID: ${displayId})`;
         
         // Store name in dataset for SKU generation
-        option.dataset.itemName = item.purcprod_prod_name;
+        option.dataset.itemName = item.sws_purcprod_prod_name;
         
         select.appendChild(option);
     });
@@ -1949,38 +1955,38 @@ function onPurchaseItemSelected(e) {
     // Populate Form Fields
     
     // Set PSM tracking IDs
-    if (item.purcprod_prod_id) {
-        document.getElementById('psm_prod_id').value = item.purcprod_prod_id;
+    if (item.sws_purcprod_prod_id) {
+        document.getElementById('psm_prod_id').value = item.sws_purcprod_prod_id;
     }
-    if (item.purcprod_id) {
-        document.getElementById('psm_purcprod_id').value = item.purcprod_id;
+    if (item.sws_purcprod_id) {
+        document.getElementById('psm_purcprod_id').value = item.sws_purcprod_id;
     }
     
     // SKU - Use Prod ID
-    if (item.purcprod_prod_id) {
-        skuInput.value = item.purcprod_prod_id;
+    if (item.sws_purcprod_prod_id) {
+        skuInput.value = item.sws_purcprod_prod_id;
     } else {
         skuInput.value = '';
     }
     
     // Description
-    document.getElementById('item_description').value = item.purcprod_desc || '';
+    document.getElementById('item_description').value = item.sws_purcprod_desc || '';
     
     // Stock (Aggregated Units)
-    document.getElementById('item_current_stock').value = item.purcprod_prod_unit || 0;
+    document.getElementById('item_current_stock').value = item.sws_purcprod_prod_unit || 0;
     
     // Price (Aggregated Price)
-    document.getElementById('item_unit_price').value = item.purcprod_prod_price || 0;
+    document.getElementById('item_unit_price').value = item.sws_purcprod_prod_price || 0;
 
     // Expiration Date
-    document.getElementById('item_expiration_date').value = item.purcprod_expiration || '';
+    document.getElementById('item_expiration_date').value = item.sws_purcprod_expiration || '';
 
     // Warranty End
-    document.getElementById('item_warranty_end').value = item.purcprod_warranty || '';
+    document.getElementById('item_warranty_end').value = item.sws_purcprod_warranty || '';
     
     // Item Type (Map to lowercase if exists)
-    if (item.purcprod_prod_type) {
-        const type = item.purcprod_prod_type.toLowerCase();
+    if (item.sws_purcprod_prod_type) {
+        const type = item.sws_purcprod_prod_type.toLowerCase();
         const typeSelect = document.getElementById('item_item_type');
         // Check if option exists
         if ([...typeSelect.options].some(o => o.value === type)) {
@@ -1999,21 +2005,21 @@ function groupIncomingAssets(data) {
     const groupedMap = new Map();
 
     data.forEach(item => {
-        const prodId = item.purcprod_prod_id;
+        const prodId = item.sws_purcprod_prod_id;
         // Group by prodId if available, otherwise use unique record ID
-        const key = prodId ? prodId : `unique_${item.purcprod_id}`;
+        const key = prodId ? prodId : `unique_${item.sws_purcprod_id}`;
 
         if (!groupedMap.has(key)) {
             // Create new entry
             const newItem = { ...item };
-            newItem.purcprod_prod_unit = parseFloat(item.purcprod_prod_unit) || 0;
-            newItem.purcprod_prod_price = parseFloat(item.purcprod_prod_price) || 0;
+            newItem.sws_purcprod_prod_unit = parseFloat(item.sws_purcprod_prod_unit) || 0;
+            newItem.sws_purcprod_prod_price = parseFloat(item.sws_purcprod_prod_price) || 0;
             groupedMap.set(key, newItem);
         } else {
             // Aggregate existing entry
             const existingItem = groupedMap.get(key);
-            existingItem.purcprod_prod_unit += parseFloat(item.purcprod_prod_unit) || 0;
-            existingItem.purcprod_prod_price += parseFloat(item.purcprod_prod_price) || 0;
+            existingItem.sws_purcprod_prod_unit += parseFloat(item.sws_purcprod_prod_unit) || 0;
+            existingItem.sws_purcprod_prod_price += parseFloat(item.sws_purcprod_prod_price) || 0;
         }
     });
 
@@ -2022,7 +2028,7 @@ function groupIncomingAssets(data) {
 
 async function loadIncomingAssets() {
     try {
-        const response = await fetch('/api/v1/sws/purchase-product-management', {
+        const response = await fetch('/api/v1/sws/incoming-assets', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -2040,9 +2046,11 @@ async function loadIncomingAssets() {
             // Group data by Prod ID before assigning
             incomingAssetsData = groupIncomingAssets(result.data);
             renderIncomingAssets();
+            updateIncomingBadge();
         } else {
             incomingAssetsData = [];
             renderIncomingAssets();
+            updateIncomingBadge();
         }
     } catch (e) {
         console.error('Error loading incoming assets:', e);
@@ -2079,23 +2087,23 @@ function renderIncomingAssets() {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50';
         tr.innerHTML = `
-            <td class="font-mono text-sm whitespace-nowrap">${item.purcprod_id}</td>
-            <td class="font-mono text-sm whitespace-nowrap">${item.purcprod_prod_id || '-'}</td>
-            <td class="font-semibold whitespace-nowrap">${item.purcprod_prod_name || '-'}</td>
-            <td class="whitespace-nowrap">${formatCurrency(item.purcprod_prod_price)}</td>
-            <td class="whitespace-nowrap">${item.purcprod_prod_unit || '-'}</td>
-            <td class="whitespace-nowrap">${item.purcprod_prod_type || '-'}</td>
+            <td class="font-mono text-sm whitespace-nowrap">${item.sws_purcprod_id}</td>
+            <td class="font-mono text-sm whitespace-nowrap">${item.sws_purcprod_prod_id || '-'}</td>
+            <td class="font-semibold whitespace-nowrap">${item.sws_purcprod_prod_name || '-'}</td>
+            <td class="whitespace-nowrap">${formatCurrency(item.sws_purcprod_prod_price)}</td>
+            <td class="whitespace-nowrap">${item.sws_purcprod_prod_unit || '-'}</td>
+            <td class="whitespace-nowrap">${item.sws_purcprod_prod_type || '-'}</td>
             <td class="whitespace-nowrap">
                 <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    ${item.purcprod_status || 'Pending'}
+                    ${item.sws_purcprod_status || 'Pending'}
                 </span>
             </td>
-            <td class="whitespace-nowrap">${formatDate(item.purcprod_date)}</td>
-            <td class="whitespace-nowrap">${item.purcprod_warranty || '-'}</td>
-            <td class="whitespace-nowrap">${item.purcprod_expiration || '-'}</td>
-            <td class="max-w-xs truncate whitespace-nowrap" title="${item.purcprod_desc || ''}">${item.purcprod_desc || '-'}</td>
+            <td class="whitespace-nowrap">${formatDate(item.sws_purcprod_date)}</td>
+            <td class="whitespace-nowrap">${item.sws_purcprod_warranty || '-'}</td>
+            <td class="whitespace-nowrap">${item.sws_purcprod_expiration || '-'}</td>
+            <td class="max-w-xs truncate whitespace-nowrap" title="${item.sws_purcprod_desc || ''}">${item.sws_purcprod_desc || '-'}</td>
             <td class="whitespace-nowrap">
-                <button onclick="deleteIncomingAsset('${item.purcprod_id}')" class="text-red-600 hover:text-red-900 flex items-center gap-1">
+                <button onclick="deleteIncomingAsset('${item.sws_purcprod_id}')" class="text-red-600 hover:text-red-900 flex items-center gap-1">
                     <i class='bx bx-trash'></i>
                 </button>
             </td>
@@ -2104,6 +2112,22 @@ function renderIncomingAssets() {
     });
 
     updateIncomingAssetsPagination(incomingAssetsData.length);
+}
+
+function updateIncomingBadge() {
+    const badge = document.getElementById('incomingBadge');
+    const countEl = document.getElementById('incomingBadgeCount');
+    if (!badge || !countEl) return;
+    const pending = (incomingAssetsData || []).filter(x => {
+        const v = (x.sws_purcprod_inventory || '').toString().toLowerCase();
+        return v !== 'yes';
+    }).length;
+    if (pending > 0) {
+        countEl.textContent = pending > 99 ? '99+' : String(pending);
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
 }
 
 window.deleteIncomingAsset = function(id) {
@@ -2117,7 +2141,7 @@ window.deleteIncomingAsset = function(id) {
         confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/api/v1/sws/purchase-product-management/${id}`, {
+            fetch(`/api/v1/sws/incoming-assets/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
@@ -2700,7 +2724,8 @@ function initDigitalInventory() {
         loadStockLevels(),
         loadCategories(),
         loadWarehouses(),
-        loadLocations()
+        loadLocations(),
+        loadIncomingAssets()
     ]);
     
     // Quick Actions Event Listeners
