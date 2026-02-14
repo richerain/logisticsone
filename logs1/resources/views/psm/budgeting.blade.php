@@ -483,7 +483,7 @@
 
         function formatCurrency(amount) {
             const val = parseFloat(amount || 0);
-            return '₱' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return 'PHP ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function formatDate(dateString) {
