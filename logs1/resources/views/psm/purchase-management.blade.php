@@ -1316,20 +1316,24 @@ function formatUserLabelDisplay(label, fallback) {
     if (!raw) {
         return '<span class="text-sm text-gray-500">' + fallback + '</span>';
     }
-    
-    const parts = raw.split('-');
-    const name = parts[0].trim();
-    const roleRaw = parts.slice(1).join('-').trim();
-    
-    if (!roleRaw) {
-        return '<span class="text-sm font-semibold text-gray-900">' + name + '</span>';
+    let requester = raw;
+    let dept = '';
+    if (raw.includes('/')) {
+        const parts = raw.split('/');
+        requester = (parts[0] || '').trim();
+        dept = parts.slice(1).join('/').trim();
+    } else if (raw.includes('-')) {
+        const parts = raw.split('-');
+        requester = (parts[0] || '').trim();
+        dept = parts.slice(1).join('-').trim();
     }
-    
-    const role = roleRaw.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    
+    if (!dept) {
+        return '<span class="text-sm font-semibold text-gray-900">' + requester + '</span>';
+    }
+    const deptTitle = dept.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     return '<div class="flex flex-col leading-tight">' +
-            '<span class="text-sm font-semibold text-gray-900">' + name + '</span>' +
-            '<span class="text-xs text-gray-500">' + role + '</span>' +
+            '<span class="text-sm font-semibold text-gray-900">' + requester + '</span>' +
+            '<span class="text-xs text-gray-500">' + deptTitle + '</span>' +
         '</div>';
 }
 

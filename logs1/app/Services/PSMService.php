@@ -92,9 +92,10 @@ class PSMService
                     'data' => null,
                 ];
             }
-            // Update request process marker
+            // Mark request as received (rename Reviewed -> PO-Received)
             $this->psmRepository->updatePurchaseRequestByPreqId($preqId, [
-                'preq_process' => 'Reviewed',
+                'preq_status' => 'PO-Received',
+                'preq_process' => 'PO-Received',
                 'updated_at' => now(),
             ]);
 
@@ -122,7 +123,7 @@ class PSMService
             DB::commit();
             return [
                 'success' => true,
-                'message' => 'Purchase request reviewed',
+                'message' => 'Purchase request received',
                 'data' => [
                     'request' => $req,
                     'quote' => $quoteResult['data'] ?? null

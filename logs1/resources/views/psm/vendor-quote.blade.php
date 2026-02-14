@@ -29,15 +29,15 @@
     <dialog id="reviewRequestConfirmModal" class="modal backdrop-blur-sm">
         <div class="modal-box w-11/12 max-w-md bg-white rounded-xl shadow-2xl p-0 overflow-hidden">
             <div class="px-6 py-4 flex justify-between items-center border-b">
-                <h3 class="text-lg font-bold text-gray-800">Review Purchase Order</h3>
+                <h3 class="text-lg font-bold text-gray-800">Received Purchase Order</h3>
                 <form method="dialog"><button class="text-gray-500 hover:text-gray-800 transition-colors p-1 rounded-full"><i class='bx bx-x text-2xl'></i></button></form>
             </div>
             <div class="p-6 space-y-4">
-                <p class="text-sm text-gray-600">Proceed to review this purchase order?</p>
+                <p class="text-sm text-gray-600">Received Purchase Order?</p>
                 <div class="flex justify-end gap-3">
                     <button id="cancelReviewRequestBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
                     <button id="confirmReviewRequestBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2">
-                        <i class='bx bx-check-circle'></i> review purchase order
+                        <i class='bx bx-check-circle'></i> Yes, Received It!
                     </button>
                 </div>
             </div>
@@ -472,7 +472,7 @@ function displayNotifications(list) {
                         <button class="text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view-po" data-id="${r.preq_id}" title="View Purchase Order">
                             <i class='bx bx-show-alt text-xl'></i>
                         </button>
-                        <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="review-po" data-id="${r.preq_id}" title="Review Purchase Order">
+                        <button class="text-indigo-600 hover:text-indigo-900 transition-colors p-2 rounded-lg hover:bg-indigo-50" data-action="review-po" data-id="${r.preq_id}" title="Received Purchase Order">
                             <i class='bx bx-check-circle text-xl'></i>
                         </button>
                     </div>
@@ -1176,7 +1176,7 @@ if (confirmReviewBtn) {
                 document.getElementById('viewPurchaseOrderModal')?.close();
                 document.getElementById('my_modal_4')?.close();
                 if (typeof showNotification === 'function') {
-                    showNotification('Successfully reviewed purchase order', 'success');
+                    showNotification('Purchase order received', 'success');
                 } else {
                     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Successfully reviewed purchase order', showConfirmButton: false, timer: 3000 });
                 }
