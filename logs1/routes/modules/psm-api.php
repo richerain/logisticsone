@@ -62,6 +62,12 @@ Route::prefix('budget-logs')->group(function () {
     Route::get('/', [PSMController::class, 'getBudgetLogs']);
 });
 
+// External endpoints with API key
+Route::prefix('external')->group(function () {
+    Route::get('/requisitions', [PSMController::class, 'externalGetRequisitions']);
+    Route::match(['post','patch'], '/requisitions/{reqId}/status', [PSMController::class, 'externalUpdateRequisitionStatus']);
+});
+
 // PSM Requisition Routes
 Route::prefix('requisitions')->group(function () {
     Route::get('/', [PSMController::class, 'getRequisitions']);

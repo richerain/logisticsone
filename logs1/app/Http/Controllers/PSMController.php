@@ -728,6 +728,42 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * External: Get requisitions by requester/dept with key
+     * Example: /api/v1/psm/external/requisitions?key=...&requester=Via%20Jeves&dept=Log2%20Dept
+     */
+    public function externalGetRequisitions(Request $request)
+    {
+        $key = $request->query('key');
+        $expected = env('PSM_EXTERNAL_API_KEY', '63cfb7730dcc34299fa38cb1a620f701');
+        if (!$key || $key !== $expected) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+        $requester = $request->query('requester', 'Via Jeves');
+        $dept = $request->query('dept', 'Log2 Dept');
+        $result = $this->psmService->getRequisitionsByRequesterDept($requester, $dept);
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
+
+    /**
+     * External: Update requisition status by req_id with key
+     * Example: /api/v1/psm/external/requisitions/REQN20260215ABC12/status?key=...&status=Approved
+     */
+    public function externalUpdateRequisitionStatus(Request $request, $reqId)
+    {
+        $key = $request->query('key');
+        $expected = env('PSM_EXTERNAL_API_KEY', '63cfb7730dcc34299fa38cb1a620f701');
+        if (!$key || $key !== $expected) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+        $status = $request->query('status') ?? $request->input('status');
+        if (!$status) {
+            return response()->json(['success' => false, 'message' => 'Status is required'], 400);
+        }
+        $result = $this->psmService->updateRequisitionStatusByReqId($reqId, $status);
+        return response()->json($result, $result['success'] ? 200 : 400);
+    }
+
     public function listApprovedPurchasesForQuote()
     {
         try {

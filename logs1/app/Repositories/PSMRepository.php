@@ -349,6 +349,31 @@ class PSMRepository
     }
 
     /**
+     * Get requisitions by requester and department
+     */
+    public function getRequisitionsByRequesterDept($requester, $dept, $columns = ['*'])
+    {
+        return Requisition::select($columns)
+            ->where('req_requester', $requester)
+            ->where('req_dept', $dept)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Update requisition status by req_id
+     */
+    public function updateRequisitionStatusByReqId($reqId, $status)
+    {
+        $requisition = Requisition::where('req_id', $reqId)->first();
+        if ($requisition) {
+            $requisition->update(['req_status' => $status]);
+            return $requisition;
+        }
+        return null;
+    }
+
+    /**
      * Mark requisitions as consolidated
      */
     public function markRequisitionsAsConsolidated($reqIds, $parentBudgetReqId = null)

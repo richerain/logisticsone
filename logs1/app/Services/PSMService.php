@@ -1474,6 +1474,47 @@ class PSMService
     }
 
     /**
+     * Get requisitions filtered by requester and dept (for external API)
+     */
+    public function getRequisitionsByRequesterDept($requester, $dept)
+    {
+        try {
+            $cols = ['req_id','req_items','req_price','req_requester','req_dept','req_date','req_status','created_at','updated_at'];
+            $list = $this->psmRepository->getRequisitionsByRequesterDept($requester, $dept, $cols);
+            return [
+                'success' => true,
+                'data' => $list,
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ];
+        }
+    }
+
+    /**
+     * Update requisition status by req_id (Approved/Rejected)
+     */
+    public function updateRequisitionStatusByReqId($reqId, $status)
+    {
+        try {
+            $normalized = $this->normalizeExternalStatus($status);
+            if (!in_array($normalized, ['Approved','Rejected'])) {
+                return ['success' => false, 'message' => 'Invalid status'];
+            }
+            $req = $this->psmRepository->updateRequisitionStatusByReqId($reqId, $normalized);
+            if ($req) {
+                return ['success' => true, 'data' => $req, 'message' => 'Status updated'];
+            }
+            return ['success' => false, 'message' => 'Requisition not found'];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Import external requisitions from partner API and register into our PSM requisitions
      */
     public function importExternalRequisitions()
