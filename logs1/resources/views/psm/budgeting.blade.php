@@ -214,14 +214,19 @@
 
 <script>
     (function() {
-        const currentUser = "{{ Auth::user()->name ?? 'PSM Admin' }}";
-        var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? (auth()->user()->roles ?? "" ) : ""); ?>';
+        const CURRENT_USER_FIRSTNAME = "{{ Auth::user()->firstname ?? '' }}";
+        const CURRENT_USER_MIDDLENAME = "{{ Auth::user()->middlename ?? '' }}";
+        const CURRENT_USER_LASTNAME = "{{ Auth::user()->lastname ?? '' }}";
+        const CURRENT_USER_NAME_FALLBACK = "{{ Auth::user()->name ?? '' }}";
+        var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? strtoupper(auth()->user()->roles ?? "" ) : ""); ?>';
         function getCurrentUserDisplay() {
-            var name = (currentUser || '').trim();
+            var parts = [CURRENT_USER_FIRSTNAME, CURRENT_USER_MIDDLENAME, CURRENT_USER_LASTNAME].map(function(s){ return (s || '').trim(); }).filter(Boolean);
+            var full = parts.join(' ').trim();
+            if (!full) full = (CURRENT_USER_NAME_FALLBACK || '').trim();
             var role = (CURRENT_USER_ROLE || '').trim();
-            if (name && role) return name + ' - ' + role;
-            if (name) return name;
-            if (role) return role;
+            if (full && role) return full + ' - ' + role.toUpperCase();
+            if (full) return full;
+            if (role) return role.toUpperCase();
             return 'Unknown';
         }
         let allVendors = [];
@@ -649,7 +654,7 @@
                     req_amount: totalAmount,
                     req_purpose: purpose,
                     req_dept: consolidatedDept,
-                    req_by: currentUser,
+                    req_by: getCurrentUserDisplay(),
                     included_req_ids: reqIds
                 })
             })
