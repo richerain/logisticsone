@@ -64,6 +64,10 @@ Route::middleware(['api.key'])->prefix('alms/external')->group(function () {
     Route::put('/maintenance', [App\Http\Controllers\ALMSController::class, 'storeMaintenance']);
 });
 
+Route::middleware(['api.key'])->prefix('sws/external')->group(function () {
+    Route::get('/room-requests', [App\Http\Controllers\SWSController::class, 'getRoomRequests']);
+    Route::post('/room-requests', [App\Http\Controllers\SWSController::class, 'createRoomRequest']);
+});
 Route::middleware(['api.key'])->prefix('psm/external')->group(function () {
     // PSM Budget API Endpoints
     Route::get('/budget', [App\Http\Controllers\PSMController::class, 'getCurrentBudget']);

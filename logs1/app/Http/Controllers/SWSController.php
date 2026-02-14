@@ -494,10 +494,10 @@ class SWSController extends Controller
         ]);
 
         $u = auth()->user();
-        $name = trim(($u->firstname ?? '').' '.($u->lastname ?? ''));
-        $role = trim((string) ($u->roles ?? ''));
+        $name = trim(($u?->firstname ?? '').' '.($u?->lastname ?? ''));
+        $role = trim((string) ($u?->roles ?? ''));
         $label = trim($name.($role ? ' - '.$role : ''));
-        $fallback = $u->email ?? (string) auth()->id();
+        $fallback = $u?->email ?? 'system';
         $requester = $validated['rmreq_requester'] ?? ($label !== '' ? $label : $fallback);
         $data = [
             'rmreq_requester' => $requester,
