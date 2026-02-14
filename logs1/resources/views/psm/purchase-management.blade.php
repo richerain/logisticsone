@@ -1206,7 +1206,12 @@ function displayPurchases(purchases) {
             '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + companyTypeHtml + '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">' + purchase.pur_unit + '</td>' +
-            '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">' + currencyFormatted + '</td>' +
+            '<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">' +
+                '<span class="price-mask" data-masked="1" data-price="' + currencyFormatted + '">*****</span>' +
+                '<button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Amount" onclick="togglePurchasePriceVisibility(this)">' +
+                    '<i class="bx bx-show-alt text-2xl"></i>' +
+                '</button>' +
+            '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + deliveryDateFormatted + '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' + orderedByHtml + '</td>' +
             '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' +
@@ -1479,7 +1484,10 @@ function displayApprovedRequisitions(consolidatedRequests) {
                     '</div>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap text-right text-sm font-bold text-green-600">' +
-                    formatCurrency(req.con_total_price || 0) +
+                    '<span class="price-mask" data-masked="1" data-price="' + formatCurrency(req.con_total_price || 0) + '">*****</span>' +
+                    '<button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Amount" onclick="togglePurchasePriceVisibility(this)">' +
+                        '<i class="bx bx-show-alt text-2xl"></i>' +
+                    '</button>' +
                 '</td>' +
                 '<td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">' +
                     formatDate(req.con_date || req.created_at) +
@@ -2193,7 +2201,10 @@ function viewPurchase(id) {
                 '</div>' +
                 '<div class="text-right">' +
                     '<span class="text-sm text-gray-500 block">Total Amount</span>' +
-                    '<span class="text-xl font-bold text-green-600">' + formatCurrency(purchase.pur_total_amount) + '</span>' +
+                    '<span class="text-xl font-bold text-green-600 price-mask" data-masked="1" data-price="' + formatCurrency(purchase.pur_total_amount) + '">*****</span>' +
+                    '<button type="button" class="ml-2 p-1.5 align-middle text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded" title="Show Total Amount" onclick="togglePurchasePriceVisibility(this)">' +
+                        '<i class="bx bx-show-alt text-2xl"></i>' +
+                    '</button>' +
                 '</div>' +
             '</div>' +
 
@@ -2370,5 +2381,29 @@ function formatDateRange(a, b) {
     if (A && B) return A + ' to ' + B;
     return A || B;
 }
+
+// Toggle visibility for masked purchase price/amount values
+window.togglePurchasePriceVisibility = function(btn) {
+    try {
+        const container = btn.closest('td') || btn.closest('div.text-right') || btn.parentElement;
+        if (!container) return;
+        const span = container.querySelector('.price-mask');
+        if (!span) return;
+        const isMasked = span.getAttribute('data-masked') === '1';
+        if (isMasked) {
+            span.textContent = span.getAttribute('data-price') || '';
+            span.setAttribute('data-masked', '0');
+            btn.title = 'Hide Total Amount';
+            btn.innerHTML = '<i class="bx bx-hide text-2xl"></i>';
+        } else {
+            span.textContent = '*****';
+            span.setAttribute('data-masked', '1');
+            btn.title = 'Show Total Amount';
+            btn.innerHTML = '<i class="bx bx-show-alt text-2xl"></i>';
+        }
+    } catch (e) {
+        console.warn('togglePurchasePriceVisibility error:', e);
+    }
+};
 
 </script>
