@@ -358,9 +358,6 @@
     <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-semibold">Add New Inventory Item</h3>
-            <button id="closeAddItemModal" class="text-gray-500 hover:text-gray-700">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
         </div>
         <form id="addItemForm">
             <input type="hidden" id="psm_purchase_id" name="psm_purchase_id">
@@ -440,7 +437,7 @@
                 <p class="text-xs text-gray-500 mt-1">Format: ITM + Year + Month + Day + 5 random alphanumeric characters</p>
             </div>
             <div class="flex justify-end gap-3">
-                <button type="button" id="cancelAddItemModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                <button type="button" id="cancelAddItemModal" class="px-4 py-2 bg-gray-200 rounded-lg">Close</button>
                 <button type="submit" id="saveItemBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Item</button>
             </div>
         </form>
@@ -746,9 +743,6 @@
                 <i class='bx bx-import text-2xl text-gray-800'></i>
                 <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Incoming Assets (Purchase Products)</h3>
             </div>
-            <button id="closeIncomingAssetsModal" class="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
-                <i class='bx bx-x text-2xl'></i>
-            </button>
         </div>
         <div class="p-6 overflow-x-auto">
             <div class="overflow-x-auto rounded-xl border border-gray-100">
@@ -2224,7 +2218,7 @@ function findIncomingById(id) {
     return (incomingAssetsData || []).find(x => String(x.sws_purcprod_id) === String(id));
 }
 
-function viewIncomingAsset(id) {
+window.viewIncomingAsset = function(id) {
     const item = findIncomingById(id);
     if (!item) return;
     Swal.fire({
@@ -2249,7 +2243,7 @@ function viewIncomingAsset(id) {
     });
 }
 
-function addIncomingAssetToForm(id) {
+window.addIncomingAssetToForm = function(id) {
     const item = findIncomingById(id);
     if (!item) return;
     document.getElementById('item_name').value = item.sws_purcprod_prod_name || '';
