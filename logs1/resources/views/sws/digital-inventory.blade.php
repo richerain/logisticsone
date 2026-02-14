@@ -2327,6 +2327,31 @@ window.addIncomingAssetToForm = function(id) {
             if (catNameEl) catNameEl.value = item.sws_purcprod_prod_type || '';
         }
     }
+
+    // Auto-fill from existing Inventory if Product ID already registered
+    try {
+        const prodId = (item.sws_purcprod_prod_id || '').toString().trim();
+        const existing = (inventoryItems || []).find(inv => String(inv.item_stock_keeping_unit || '').trim() === prodId);
+        if (existing) {
+            const storedFromEl = document.getElementById('item_stored_from');
+            const itemTypeEl = document.getElementById('item_item_type');
+            const riskEl = document.getElementById('item_liquidity_risk_level');
+            const isFixedEl = document.getElementById('item_is_fixed');
+            const isCollateralEl = document.getElementById('item_is_collateral');
+            if (storedFromEl) storedFromEl.value = existing.item_stored_from || '';
+            if (itemTypeEl && existing.item_item_type) {
+                const v = (existing.item_item_type || '').toString().toLowerCase();
+                if ([...itemTypeEl.options].some(o => o.value === v)) itemTypeEl.value = v; else itemTypeEl.value = '';
+            }
+            if (riskEl && existing.item_liquidity_risk_level) {
+                const v = (existing.item_liquidity_risk_level || '').toString().toLowerCase();
+                // options likely: low|medium|high
+                if ([...riskEl.options].some(o => o.value === v)) riskEl.value = v; else riskEl.value = '';
+            }
+            if (isFixedEl) isFixedEl.checked = !!existing.item_is_fixed;
+            if (isCollateralEl) isCollateralEl.checked = !!existing.item_is_collateral;
+        }
+    } catch (_) {}
 }
 
 async function prepareAddItemPane() {
@@ -2396,12 +2421,20 @@ async function saveItem(e) {
     const existing = (inventoryItems || []).find(i => String(i.item_stock_keeping_unit || '').trim() === sku);
     if (!existing) {
         // Create a brand new inventory item using form details
+        // Enforce required fields for new Product ID
+        const storedFromVal = (document.getElementById('item_stored_from')?.value || '').trim();
+        const itemTypeVal = (document.getElementById('item_item_type')?.value || '').trim();
+        const riskVal = (document.getElementById('item_liquidity_risk_level')?.value || '').trim();
+        if (!storedFromVal || !itemTypeVal || !riskVal) {
+            notify('Please complete Stored From, Item Type, and Liquidity Risk Level', 'error');
+            return;
+        }
         const payloadCreate = {
             item_name: itemNameVal,
             item_description: document.getElementById('item_description')?.value || null,
             item_category_id: document.getElementById('item_category_id')?.value || null,
-            item_stored_from: document.getElementById('item_stored_from')?.value || null,
-            item_item_type: document.getElementById('item_item_type')?.value || 'illiquid',
+            item_stored_from: storedFromVal,
+            item_item_type: itemTypeVal,
             item_is_fixed: !!document.getElementById('item_is_fixed')?.checked,
             item_expiration_date: document.getElementById('item_expiration_date')?.value || null,
             item_warranty_end: document.getElementById('item_warranty_end')?.value || null,
@@ -2409,7 +2442,7 @@ async function saveItem(e) {
             item_unit_price: document.getElementById('item_unit_price')?.value ? parseFloat(document.getElementById('item_unit_price').value) : null,
             item_current_stock: deltaUnits,
             item_max_stock: document.getElementById('item_max_stock')?.value ? parseInt(document.getElementById('item_max_stock').value) : 100,
-            item_liquidity_risk_level: 'medium',
+            item_liquidity_risk_level: riskVal,
             item_stock_keeping_unit: sku
         };
         try {
