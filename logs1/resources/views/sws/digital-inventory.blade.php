@@ -8,7 +8,7 @@
     </div>
 </div>
 <!-- Inventory Metrics section start (PM style) -->
-<div class="mt-4 mb-2">
+<div class="mt-4 mb-1">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Items -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300">
@@ -98,7 +98,7 @@
 </div>
 <!-- Inventory Metrics section end -->
 <!-- Quick Management section start -->
-<div class="mt-2 mb-2">
+<div class="mt-2 mb-1">
     <div class="rounded-2xl overflow-hidden">
         <div class="p-4">
             <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
