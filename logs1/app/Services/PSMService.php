@@ -11,6 +11,7 @@ use App\Models\VendorAccount;
 use App\Repositories\PSMRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -1470,6 +1471,114 @@ class PSMService
                 'message' => 'Failed to delete quote: '.$e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Import external requisitions from partner API and register into our PSM requisitions
+     */
+    public function importExternalRequisitions()
+    {
+        DB::beginTransaction();
+        try {
+            $response = Http::timeout(15)->get('https://log2.microfinancial-1.com/api/purchase_requisition.php');
+            if (!$response->ok()) {
+                throw new Exception('External API error: HTTP '.$response->status());
+            }
+            $payload = $response->json();
+            // Accept both wrapped {success,data} and raw array formats
+            $data = [];
+            if (is_array($payload)) {
+                $data = isset($payload['data']) && is_array($payload['data']) ? $payload['data'] : $payload;
+            }
+            $imported = 0;
+            $updated = 0;
+            foreach ($data as $ext) {
+                if (!is_array($ext)) continue;
+                $reqId = $this->resolveExternalReqId($ext);
+                $mapped = $this->mapExternalRequisition($ext);
+                // Upsert by req_id to ensure idempotency
+                $existing = \App\Models\PSM\Requisition::where('req_id', $reqId)->first();
+                if ($existing) {
+                    $existing->update($mapped);
+                    $updated++;
+                } else {
+                    $this->psmRepository->upsertRequisitionByReqId($reqId, $mapped);
+                    $imported++;
+                }
+            }
+            DB::commit();
+            return [
+                'success' => true,
+                'message' => 'External requisitions imported',
+                'data' => ['imported' => $imported, 'updated' => $updated],
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to import external requisitions: '.$e->getMessage(),
+            ];
+        }
+    }
+
+    private function resolveExternalReqId(array $ext): string
+    {
+        $raw = $ext['req_id'] ?? $ext['id'] ?? $ext['request_id'] ?? null;
+        if ($raw) {
+            return 'EXT'.preg_replace('/[^A-Za-z0-9\-]/', '', (string)$raw);
+        }
+        $datePart = now()->format('Ymd');
+        return 'EXT'.$datePart.$this->generateRandomAlphanumeric(5);
+    }
+
+    private function mapExternalRequisition(array $ext): array
+    {
+        $items = $ext['req_items'] ?? $ext['items'] ?? $ext['item_list'] ?? null;
+        if (is_string($items)) {
+            $split = array_map('trim', preg_split('/[,;]+/', $items));
+            $items = array_values(array_filter($split, fn($s) => $s !== ''));
+        }
+        if (!is_array($items)) {
+            $items = [];
+        }
+        $total = $ext['req_price'] ?? $ext['total'] ?? $ext['amount'] ?? null;
+        if ($total === null) {
+            $total = 0;
+            foreach ($items as $it) {
+                if (is_array($it) && isset($it['price'])) {
+                    $total += floatval($it['price']);
+                }
+            }
+        }
+        $statusRaw = $ext['req_status'] ?? $ext['status'] ?? 'Pending';
+        $status = $this->normalizeExternalStatus($statusRaw);
+        $date = $ext['req_date'] ?? $ext['date'] ?? $ext['created_at'] ?? null;
+        try {
+            $date = $date ? date('Y-m-d', strtotime($date)) : now()->format('Y-m-d');
+        } catch (\Throwable $t) {
+            $date = now()->format('Y-m-d');
+        }
+        return [
+            'req_items' => $items,
+            'req_chosen_vendor' => $ext['req_chosen_vendor'] ?? $ext['vendor'] ?? null,
+            'req_price' => $total,
+            'req_requester' => $ext['req_requester'] ?? $ext['requester'] ?? $ext['requested_by'] ?? 'External',
+            'req_dept' => $ext['req_dept'] ?? $ext['department'] ?? $ext['dept'] ?? 'External',
+            'req_date' => $date,
+            'req_note' => $ext['req_note'] ?? $ext['note'] ?? $ext['remarks'] ?? $ext['description'] ?? null,
+            'req_status' => $status,
+            'is_consolidated' => 0,
+        ];
+    }
+
+    private function normalizeExternalStatus($status): string
+    {
+        $s = strtolower(trim((string)$status));
+        if (in_array($s, ['approved', 'approve'])) return 'Approved';
+        if (in_array($s, ['reject', 'rejected'])) return 'Rejected';
+        if (in_array($s, ['pending', 'new', 'open'])) return 'Pending';
+        if (in_array($s, ['cancel', 'cancelled', 'canceled'])) return 'Cancel';
+        return ucwords($s ?: 'Pending');
     }
 
     /**

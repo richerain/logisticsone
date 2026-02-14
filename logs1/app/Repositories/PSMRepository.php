@@ -335,6 +335,20 @@ class PSMRepository
     }
 
     /**
+     * Upsert requisition by req_id
+     */
+    public function upsertRequisitionByReqId($reqId, $data)
+    {
+        $existing = Requisition::where('req_id', $reqId)->first();
+        if ($existing) {
+            $existing->update($data);
+            return $existing;
+        }
+        $data['req_id'] = $reqId;
+        return Requisition::create($data);
+    }
+
+    /**
      * Mark requisitions as consolidated
      */
     public function markRequisitionsAsConsolidated($reqIds, $parentBudgetReqId = null)

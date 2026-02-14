@@ -712,6 +712,22 @@ class PSMController extends Controller
         }
     }
 
+    /**
+     * Import external requisitions from partner API into local PSM
+     */
+    public function importExternalRequisitions()
+    {
+        try {
+            $result = $this->psmService->importExternalRequisitions();
+            return response()->json($result, $result['success'] ? 200 : 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function listApprovedPurchasesForQuote()
     {
         try {

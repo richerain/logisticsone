@@ -901,7 +901,18 @@
     async function fetchRequisitions(page = 1) {
         try {
             const params = new URLSearchParams({ page, ...currentFilters });
-            
+            // Trigger server-side import from external source on first page to keep data in sync
+            if (page === 1) {
+                try {
+                    await fetch('/api/v1/psm/requisitions/import-external', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
+                    });
+                } catch (syncErr) {
+                    console.warn('External requisition import failed:', syncErr);
+                }
+            }
+
             // Fetch internal requisitions
             const response = await fetch(API_URL + '?' + params, {
                 headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
@@ -915,61 +926,7 @@
             if (result.success) {
                 allRequisitions = result.data;
             }
-
-            // Fetch external requisitions if it's the first page or filtering
-            if (page === 1) {
-                try {
-                    // Use internal proxy to avoid CORS issues
-                    const externalResponse = await fetch('/api/v1/psm/purchase-management/external-requisitions', {
-                        headers: { 'Authorization': 'Bearer ' + JWT_TOKEN, 'Accept': 'application/json' }
-                    });
-                    const externalResult = await externalResponse.json();
-                    
-                    if (externalResult && externalResult.status === 'success' && Array.isArray(externalResult.data)) {
-                        const externalData = externalResult.data.map(item => ({
-                            id: 'ext_' + item.req_id,
-                            req_id: item.req_id,
-                            req_items: [item.requisition_item], // Wrap single item in array
-                            req_price: 0, // Not provided by external API
-                            req_requester: item.requester || 'External User',
-                            req_dept: item.department || 'External Dept',
-                            req_date: item.date || item.created_at || new Date().toISOString(),
-                            req_note: 'Qty: ' + (item.quantity || 1) + ' - Integrated from Log2 API',
-                            req_status: item.status || 'Pending',
-                            is_external: true
-                        }));
-
-                        // Filter external data based on current filters
-                        let filteredExternal = externalData;
-                        if (currentFilters.search) {
-                            const search = currentFilters.search.toLowerCase();
-                            filteredExternal = filteredExternal.filter(item => 
-                                item.req_id.toLowerCase().includes(search) || 
-                                item.req_requester.toLowerCase().includes(search) || 
-                                item.req_dept.toLowerCase().includes(search)
-                            );
-                        }
-                        if (currentFilters.status) {
-                            filteredExternal = filteredExternal.filter(item => item.req_status === currentFilters.status);
-                        }
-                        if (currentFilters.dept) {
-                            filteredExternal = filteredExternal.filter(item => item.req_dept === currentFilters.dept);
-                        }
-
-                        // Update stats with external data
-                        filteredExternal.forEach(item => {
-                            stats.total++;
-                            const statusKey = item.req_status.toLowerCase();
-                            if (stats[statusKey] !== undefined) stats[statusKey]++;
-                        });
-
-                        // Prepend external data to the list
-                        allRequisitions = [...filteredExternal, ...allRequisitions];
-                    }
-                } catch (extError) {
-                    console.error('Error fetching external requisitions:', extError);
-                }
-            }
+            
             
             currentRequisitions = allRequisitions;
             renderRequisitions(allRequisitions);
