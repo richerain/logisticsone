@@ -497,36 +497,50 @@ async function loadDashboardStats(){
         'Authorization': typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : ''
     };
     try{
-        var [poRes, vendorRes, invRes, projRes, assetsRes, docsRes, catRes] = await Promise.all([
-            fetch('/api/v1/psm/purchase-management', { headers: headers, credentials: 'include' }),
-            fetch('/api/v1/psm/vendor-management/stats', { headers: headers, credentials: 'include' }),
-            fetch('/api/v1/sws/inventory-stats', { headers: headers, credentials: 'include' }),
-            fetch('/api/v1/plt/projects/stats', { headers: headers, credentials: 'include' }),
-            fetch('/api/v1/alms/assets', { headers: headers, credentials: 'include' }),
-            fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' }),
-            fetch('/api/v1/sws/stock-levels', { headers: headers, credentials: 'include' })
-        ]);
-        // Retry once if unauthorized
-        if ([poRes, vendorRes, invRes, projRes, assetsRes, docsRes, catRes].some(function(r){ return r && r.status === 401; })){
+        async function doFetchSet(){
+            var reqs = [
+                ['po','/api/v1/psm/purchase-management'],
+                ['vendor','/api/v1/psm/vendor-management/stats'],
+                ['inv','/api/v1/sws/inventory-stats'],
+                ['proj','/api/v1/plt/projects/stats'],
+                ['assets','/api/v1/alms/assets'],
+                ['docs','/api/v1/dtlr/document-tracker'],
+                ['cats','/api/v1/sws/stock-levels']
+            ];
+            var settled = await Promise.allSettled(reqs.map(function(e){ return fetch(e[1], { headers: headers, credentials: 'include' }); }));
+            var map = {};
+            var had401 = false;
+            settled.forEach(function(r, i){
+                var key = reqs[i][0];
+                if (r.status === 'fulfilled'){
+                    map[key] = r.value;
+                    if (r.value && r.value.status === 401) had401 = true;
+                }else{
+                    map[key] = null;
+                }
+            });
+            return { map: map, had401: had401 };
+        }
+        var r1 = await doFetchSet();
+        if (r1.had401){
             await ensureAuth();
             headers['Authorization'] = typeof JWT_TOKEN !== 'undefined' && JWT_TOKEN ? ('Bearer ' + JWT_TOKEN) : '';
-            [poRes, vendorRes, invRes, projRes, assetsRes, docsRes, catRes] = await Promise.all([
-                fetch('/api/v1/psm/purchase-management', { headers: headers, credentials: 'include' }),
-                fetch('/api/v1/psm/vendor-management/stats', { headers: headers, credentials: 'include' }),
-                fetch('/api/v1/sws/inventory-stats', { headers: headers, credentials: 'include' }),
-                fetch('/api/v1/plt/projects/stats', { headers: headers, credentials: 'include' }),
-                fetch('/api/v1/alms/assets', { headers: headers, credentials: 'include' }),
-                fetch('/api/v1/dtlr/document-tracker', { headers: headers, credentials: 'include' }),
-                fetch('/api/v1/sws/stock-levels', { headers: headers, credentials: 'include' })
-            ]);
+            var r2 = await doFetchSet();
+            r1 = r2;
         }
-        var poJson = await poRes.json().catch(function(){ return {}; });
-        var vendorJson = await vendorRes.json().catch(function(){ return {}; });
-        var invJson = await invRes.json().catch(function(){ return {}; });
-        var projJson = await projRes.json().catch(function(){ return {}; });
-        var assetsJson = await assetsRes.json().catch(function(){ return {}; });
-        var docsJson = await docsRes.json().catch(function(){ return {}; });
-        var catJson = await catRes.json().catch(function(){ return {}; });
+        async function safeJson(res, def){
+            try{
+                if (res && (res.ok || res.status === 200)) { return await res.json(); }
+            }catch(e){}
+            return def || {};
+        }
+        var poJson = await safeJson(r1.map.po, {});
+        var vendorJson = await safeJson(r1.map.vendor, {});
+        var invJson = await safeJson(r1.map.inv, {});
+        var projJson = await safeJson(r1.map.proj, {});
+        var assetsJson = await safeJson(r1.map.assets, {});
+        var docsJson = await safeJson(r1.map.docs, {});
+        var catJson = await safeJson(r1.map.cats, {});
 
         var purchases = Array.isArray(poJson.data) ? poJson.data : (Array.isArray(poJson.items) ? poJson.items : (Array.isArray(poJson) ? poJson : []));
         var poTotal = purchases.length || 0;
