@@ -404,12 +404,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function configureChartsTheme(){
     if (typeof Chart === 'undefined') return;
-    Chart.defaults.color = '#334155';
-    Chart.defaults.font.family = 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial';
-    Chart.defaults.font.size = 12;
-    Chart.defaults.plugins.legend.labels.boxWidth = 12;
-    Chart.defaults.plugins.legend.labels.font.size = 10;
-    Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.25)';
+    var d = Chart.defaults || {};
+    Chart.defaults = d;
+    d.color = '#334155';
+    d.font = d.font || {};
+    d.font.family = 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial';
+    d.font.size = 12;
+    d.plugins = d.plugins || {};
+    d.plugins.legend = d.plugins.legend || {};
+    d.plugins.legend.labels = d.plugins.legend.labels || {};
+    d.plugins.legend.labels.boxWidth = 12;
+    d.plugins.legend.labels.font = d.plugins.legend.labels.font || {};
+    d.plugins.legend.labels.font.size = 10;
+    d.borderColor = 'rgba(148, 163, 184, 0.25)';
 }
 
 function initializeModuleCharts() {
