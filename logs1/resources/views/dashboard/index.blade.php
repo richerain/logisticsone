@@ -421,6 +421,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeModuleCharts();
     wireDashboardMetricLinks();
     ensureAuth().then(loadDashboardStats);
+    initRouteAwareMetrics();
 });
 
 function initializeModuleCharts() {
@@ -619,6 +620,36 @@ async function ensureAuth(){
             }
         }
     }catch(e){}
+}
+
+function isDashboardRoute(){
+    try{
+        var params = new URLSearchParams(window.location.search);
+        var m = params.get('module');
+        return !m || m === 'dashboard';
+    }catch(e){ return true; }
+}
+
+function initRouteAwareMetrics(){
+    if (isDashboardRoute()){
+        try { ensureAuth().then(loadDashboardStats); } catch(e){}
+    }
+    (function(){
+        var origPush = history.pushState;
+        var origReplace = history.replaceState;
+        history.pushState = function(){ var r = origPush.apply(this, arguments); window.dispatchEvent(new Event('locationchange')); return r; };
+        history.replaceState = function(){ var r = origReplace.apply(this, arguments); window.dispatchEvent(new Event('locationchange')); return r; };
+        window.addEventListener('popstate', function(){ window.dispatchEvent(new Event('locationchange')); });
+    })();
+    var reinit = function(){
+        if (isDashboardRoute()){
+            ensureAuth().then(loadDashboardStats);
+        }
+    };
+    window.addEventListener('locationchange', reinit);
+    window.addEventListener('pageshow', reinit);
+    window.addEventListener('visibilitychange', function(){ if (!document.hidden) reinit(); });
+    window.addEventListener('focus', reinit);
 }
 
 async function loadDashboardStats(){
