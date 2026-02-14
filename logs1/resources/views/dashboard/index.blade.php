@@ -82,56 +82,6 @@
         </div>
     </div>
     <!-- Vendor Charts Section end -->
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Recent RFQs -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Recent RFQs</h3>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-100 transition-colors">
-                    <div>
-                        <h4 class="font-medium text-gray-900">Office Furniture Supply</h4>
-                        <p class="text-sm text-gray-500">ID: RFQ-2025-001</p>
-                    </div>
-                    <span class="px-3 py-1 text-xs font-semibold text-blue-800 bg-white rounded-full">Open</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-100 transition-colors">
-                    <div>
-                        <h4 class="font-medium text-gray-900">Laptop Procurement</h4>
-                        <p class="text-sm text-gray-500">ID: RFQ-2025-002</p>
-                    </div>
-                    <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-white rounded-full">Awarded</span>
-                </div>
-                <div class="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-100 transition-colors">
-                    <div>
-                        <h4 class="font-medium text-gray-900">Network Equipment</h4>
-                        <p class="text-sm text-gray-500">ID: RFQ-2025-003</p>
-                    </div>
-                    <span class="px-3 py-1 text-xs font-semibold text-yellow-800 bg-white rounded-full">Pending</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notifications -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Notifications</h3>
-            <div class="space-y-4">
-                <div class="flex items-start p-3 bg-white rounded-lg">
-                    <i class='bx bx-info-circle text-blue-500 text-xl mr-3 mt-0.5'></i>
-                    <div>
-                        <p class="text-sm text-gray-800">Your quote for <strong>Office Chairs</strong> has been viewed.</p>
-                        <span class="text-xs text-gray-500">2 hours ago</span>
-                    </div>
-                </div>
-                <div class="flex items-start p-3 bg-white rounded-lg">
-                    <i class='bx bx-check-circle text-green-500 text-xl mr-3 mt-0.5'></i>
-                    <div>
-                        <p class="text-sm text-gray-800">New Purchase Order received #PO-4821.</p>
-                        <span class="text-xs text-gray-500">Yesterday</span>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 @else
     <div class="mb-6 flex items-center justify-between gap-4">
