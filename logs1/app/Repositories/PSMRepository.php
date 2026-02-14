@@ -16,6 +16,7 @@ use App\Models\PSM\Budget;
 use App\Models\PSM\BudgetLog;
 use App\Models\PSM\Consolidated;
 use App\Models\PSM\PurchaseRequest;
+use App\Models\VendorAccount;
 use Illuminate\Support\Str;
 
 class PSMRepository
@@ -441,6 +442,9 @@ class PSMRepository
         if (!empty($filters['status'])) {
             $query->where('preq_status', $filters['status']);
         }
+        if (!empty($filters['vendor_id'])) {
+            $query->where('preq_ven_id', $filters['vendor_id']);
+        }
         // By default exclude processed requests (kept legacy compatibility with any non-null marker)
         if (empty($filters['include_reviewed'])) {
             $query->whereNull('preq_process');
@@ -466,6 +470,10 @@ class PSMRepository
     public function upsertPurchaseRequestFromPurchase(Purchase $purchase)
     {
         $existing = PurchaseRequest::where('preq_id', $purchase->pur_id)->first();
+        $vendorId = null;
+        if (!empty($purchase->pur_company_name)) {
+            $vendorId = VendorAccount::where('company_name', $purchase->pur_company_name)->value('vendorid');
+        }
         if ($existing) {
             // Do not override processed requests
             if (!empty($existing->preq_process)) {
@@ -475,7 +483,7 @@ class PSMRepository
                 'preq_name_items' => $purchase->pur_name_items,
                 'preq_unit' => $purchase->pur_unit,
                 'preq_total_amount' => $purchase->pur_total_amount,
-                'preq_ven_id' => null,
+                'preq_ven_id' => $vendorId,
                 'preq_ven_company_name' => $purchase->pur_company_name,
                 'preq_ven_type' => $purchase->pur_ven_type,
                 'preq_status' => 'Pending',
@@ -490,7 +498,7 @@ class PSMRepository
             'preq_name_items' => $purchase->pur_name_items,
             'preq_unit' => $purchase->pur_unit,
             'preq_total_amount' => $purchase->pur_total_amount,
-            'preq_ven_id' => null,
+            'preq_ven_id' => $vendorId,
             'preq_ven_company_name' => $purchase->pur_company_name,
             'preq_ven_type' => $purchase->pur_ven_type,
             'preq_status' => 'Pending',

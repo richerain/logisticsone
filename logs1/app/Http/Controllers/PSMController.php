@@ -164,6 +164,7 @@ class PSMController extends Controller
         try {
             $filters = [
                 'status' => $request->get('status'),
+                'vendor_id' => $request->get('vendor_id'),
             ];
             $data = $this->psmService->getPurchaseRequests($filters);
             return response()->json([

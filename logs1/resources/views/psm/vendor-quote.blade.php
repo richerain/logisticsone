@@ -327,6 +327,7 @@ var API_BASE_URL = '<?php echo url('/api/v1'); ?>';
 var PSM_QUOTES_API = `${API_BASE_URL}/psm/vendor-quote`;
 var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
 var PSM_PURCHASE_REQUESTS_API = `${API_BASE_URL}/psm/purchase-requests`;
+var VENDOR_ME_API = `${API_BASE_URL}/vendor/auth/me`;
 
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 var JWT_TOKEN = typeof JWT_TOKEN !== 'undefined' ? JWT_TOKEN : localStorage.getItem('jwt');
@@ -362,6 +363,7 @@ var quotesLoadingTimer = null;
 let currentQuotesPage = 1;
 const quotesPageSize = 10;
 let currentQuoteStatusFilter = '';
+let vendorVendorId = null;
 
 function safeShowLoading() {
     try { if (typeof window !== 'undefined' && typeof window.showLoading === 'function') return window.showLoading(); } catch (e) {}
@@ -380,8 +382,30 @@ var selectedRequestPreqId = null;
 initVendorQuote();
 
 async function initVendorQuote() {
+    await loadVendorSelf();
     await loadNotifications();
     await loadQuotes();
+}
+
+async function loadVendorSelf() {
+    try {
+        const response = await fetch(`${VENDOR_ME_API}?t=${new Date().getTime()}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (response.ok) {
+            const result = await response.json();
+            if (result && result.success && result.user && result.user.vendorid) {
+                vendorVendorId = result.user.vendorid;
+            }
+        }
+    } catch(e) {}
 }
 
 function setNotificationIndicator(count) {
@@ -412,7 +436,8 @@ async function loadNotifications() {
         } catch (e) {
             // Non-blocking; proceed to fetch list even if sync fails
         }
-        const response = await fetch(`${PSM_PURCHASE_REQUESTS_API}?status=Pending&t=${new Date().getTime()}`, {
+        const qVendor = vendorVendorId ? `&vendor_id=${encodeURIComponent(vendorVendorId)}` : '';
+        const response = await fetch(`${PSM_PURCHASE_REQUESTS_API}?status=Pending${qVendor}&t=${new Date().getTime()}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -425,7 +450,11 @@ async function loadNotifications() {
         if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         const result = await response.json();
         if (result.success) {
-            currentNotifications = result.data || [];
+            let list = result.data || [];
+            if (vendorVendorId) {
+                list = list.filter(r => String(r.preq_ven_id || '') === String(vendorVendorId));
+            }
+            currentNotifications = list;
             displayNotifications(currentNotifications);
             setNotificationIndicator(currentNotifications.length);
         } else {
