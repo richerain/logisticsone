@@ -215,6 +215,15 @@
 <script>
     (function() {
         const currentUser = "{{ Auth::user()->name ?? 'PSM Admin' }}";
+        var CURRENT_USER_ROLE = '<?php echo e(auth()->check() ? (auth()->user()->roles ?? "" ) : ""); ?>';
+        function getCurrentUserDisplay() {
+            var name = (currentUser || '').trim();
+            var role = (CURRENT_USER_ROLE || '').trim();
+            if (name && role) return name + ' - ' + role;
+            if (name) return name;
+            if (role) return role;
+            return 'Unknown';
+        }
         let allVendors = [];
         const Toast = Swal.mixin({
             toast: true,
@@ -634,7 +643,7 @@
                     req_amount: totalAmount,
                     req_purpose: purpose,
                     req_dept: consolidatedDept,
-                    req_by: currentUser,
+                    req_by: getCurrentUserDisplay(),
                     included_req_ids: reqIds
                 })
             })
