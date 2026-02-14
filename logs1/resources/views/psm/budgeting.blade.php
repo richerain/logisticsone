@@ -351,6 +351,12 @@
                 return matchesSearch && matchesDept;
             });
 
+            filteredRequisitions.sort((a, b) => {
+                const da = new Date(a.con_date || a.created_at || a.req_date || 0);
+                const db = new Date(b.con_date || b.created_at || b.req_date || 0);
+                return db - da;
+            });
+
             currentConsolidatedPage = 1;
             displayConsolidatedTable();
             updateConsolidatedTotal();
@@ -643,7 +649,7 @@
                     req_amount: totalAmount,
                     req_purpose: purpose,
                     req_dept: consolidatedDept,
-                    req_by: getCurrentUserDisplay(),
+                    req_by: currentUser,
                     included_req_ids: reqIds
                 })
             })
