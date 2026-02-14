@@ -100,10 +100,6 @@
 <!-- Quick Management section (moved below Inventory Metrics) start -->
 <div class="mt-4 mb-4">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-gradient-to-r from-gray-50 to-white px-6 py-3 border-b border-gray-100 flex items-center gap-2">
-            <i class='bx bx-bolt-circle text-brand-primary'></i>
-            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Quick Management</h3>
-        </div>
         <div class="p-4">
             <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
                 <button id="transferBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
