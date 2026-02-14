@@ -97,9 +97,9 @@
     </div>
 </div>
 <!-- Inventory Metrics section end -->
-<!-- Quick Management section (moved below Inventory Metrics) start -->
+<!-- Quick Management section start -->
 <div class="mt-4 mb-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-4">
             <div class="flex gap-3 overflow-x-auto flex-nowrap pb-1">
                 <button id="transferBtn" class="h-12 px-4 flex-shrink-0 inline-flex items-center gap-3 bg-white border border-gray-200 rounded-xl hover:border-brand-primary hover:text-brand-primary hover:shadow-md transition-all duration-200">
