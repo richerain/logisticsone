@@ -244,11 +244,6 @@
 
     <!-- Statistics Section start -->
     <div class="mb-3 bg-white p-5 rounded-lg shadow-xl overflow-visible">
-        <div class="flex items-center mb-2 space-x-2 text-gray-700">
-            <h2 class="text-lg font-semibold"><i class='bx bx-fw bx-stats'></i>System Overview Metrics</h2>
-        </div>
-        <!-- Metric cards moved above this section -->
-
         <!-- Quick Module Status Overview -->
         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <!-- SWS Status -->
