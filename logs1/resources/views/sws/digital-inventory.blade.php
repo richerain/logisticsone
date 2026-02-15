@@ -4245,7 +4245,7 @@ async function submitTransfer(e) {
                 'X-CSRF-TOKEN': CSRF_TOKEN,
                 'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
             },
-            body: JSON.stringify({ item_id: parseInt(itemId), location_to_id: parseInt(toLocId), transfer_units: units }),
+            body: JSON.stringify({ item_id: parseInt(itemId), location_to_id: toLocId, transfer_units: units }),
             credentials: 'include'
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
