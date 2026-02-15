@@ -21,7 +21,7 @@ Route::delete('/milestones/{id}', [PLTController::class, 'deleteMilestone']);
 Route::get('/movement-project', [PLTController::class, 'getMovementProjects']);
 Route::post('/movement-project', [PLTController::class, 'createMovementProject']);
 Route::put('/movement-project/{id}/status', [PLTController::class, 'updateMovementStatus']);
-Route::put('/movement-project/{id}/end-date', [PLTController::class, 'updateMovementEndDate']);
+// Removed set end date route
 Route::delete('/movement-project/{id}', [PLTController::class, 'deleteMovementProject']);
 
 // Additional PLT routes can be added here as the module develops

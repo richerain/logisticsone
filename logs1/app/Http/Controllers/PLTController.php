@@ -125,7 +125,7 @@ class PLTController extends Controller
     public function updateMovementStatus(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'mp_status' => 'required|in:pending,in-progress,delayed,completed',
+            'mp_status' => 'required|in:in-progress,delayed,completed',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -135,16 +135,60 @@ class PLTController extends Controller
             ], 422);
         }
         try {
+            $newStatus = $validator->validated()['mp_status'];
+            $movement = DB::connection('plt')->table('plt_movement_project')->where('mp_id', $id)->first();
+            if (! $movement) {
+                return response()->json(['success' => false, 'message' => 'Not found'], 404);
+            }
+
+            $updateData = [
+                'mp_status' => $newStatus,
+                'updated_at' => now(),
+            ];
+            if ($newStatus === 'completed') {
+                $updateData['mp_project_end'] = now()->toDateString();
+            }
+
             $updated = DB::connection('plt')->table('plt_movement_project')
                 ->where('mp_id', $id)
-                ->update([
-                    'mp_status' => $validator->validated()['mp_status'],
-                    'updated_at' => now(),
-                ]);
+                ->update($updateData);
             if ($updated === 0) {
                 return response()->json(['success' => false, 'message' => 'Not found'], 404);
             }
-            return response()->json(['success' => true, 'message' => 'Status updated']);
+            
+            // When completed, decrement DI stock and log transfer in SWS
+            if ($newStatus === 'completed') {
+                try {
+                    $item = \App\Models\SWS\Item::where('item_name', $movement->mp_item_name)->first();
+                    if ($item) {
+                        $qty = (int) ($movement->mp_unit_transfer ?? 0);
+                        $newStock = max(0, (int)$item->item_current_stock - $qty);
+                        $item->item_current_stock = $newStock;
+                        $item->item_updated_at = now();
+                        $item->save();
+
+                        $fromLoc = \App\Models\SWS\Location::where('loc_name', $movement->mp_stored_from)->first();
+                        $toLoc = \App\Models\SWS\Location::where('loc_name', $movement->mp_stored_to)->first();
+                        \App\Models\SWS\Transaction::create([
+                            'tra_item_id' => $item->item_id,
+                            'tra_type' => 'transfer',
+                            'tra_quantity' => $qty,
+                            'tra_from_location_id' => $fromLoc->loc_id ?? null,
+                            'tra_to_location_id' => $toLoc->loc_id ?? null,
+                            'tra_warehouse_id' => null,
+                            'tra_transaction_date' => now(),
+                            'tra_reference_id' => 'PLT-MOVE-' . $movement->mp_id,
+                            'tra_status' => 'completed',
+                            'tra_notes' => 'Finalized PLT movement to ' . ($movement->mp_stored_to ?? 'unknown'),
+                        ]);
+                    }
+                } catch (\Throwable $ex) {
+                    // Soft-fail: log error but do not break status update
+                    \Log::error('Failed to finalize DI stock on PLT completion: ' . $ex->getMessage());
+                }
+            }
+
+            return response()->json(['success' => true, 'message' => 'Status updated', 'data' => ['mp_project_end' => $updateData['mp_project_end'] ?? null]]);
         } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => 'Failed to update status'], 500);
         }

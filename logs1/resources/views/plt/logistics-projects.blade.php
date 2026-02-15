@@ -217,7 +217,6 @@
         <div class="space-y-4">
             <label class="block text-sm font-medium text-gray-700">Status</label>
             <select id="updateStatusSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                <option value="pending">Pending</option>
                 <option value="in-progress">In Progress</option>
                 <option value="delayed">Delayed</option>
                 <option value="completed">Completed</option>
@@ -230,20 +229,7 @@
     </div>
 </div>
 
-<!-- Set End Date Modal -->
-<div id="setEndDateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl p-6 w-full max-w-md">
-        <h3 class="text-xl font-bold mb-4">Set End Date</h3>
-        <div class="space-y-4">
-            <label class="block text-sm font-medium text-gray-700">End Date</label>
-            <input type="date" id="endDateInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-        </div>
-        <div class="mt-6 flex justify-end gap-2">
-            <button id="cancelEndDate" class="btn">Cancel</button>
-            <button id="confirmEndDate" class="btn btn-primary">Set</button>
-        </div>
-    </div>
-</div>
+<!-- Set End Date Modal removed -->
 
 <!-- Delete Confirm Modal -->
 <div id="deleteMovementModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -736,7 +722,14 @@ function updateMovementStats() {
 
 function renderProjects() {
     if (projects.length === 0) {
-        els.tableBody.innerHTML = `<tr><td colspan="11" class="px-6 py-4 text-center text-gray-500">No records found</td></tr>`;
+        els.tableBody.innerHTML = `<tr>
+            <td colspan="11" class="px-6 py-8 text-center text-gray-500">
+                <div class="flex flex-col items-center justify-center">
+                    <i class='bx bx-package text-6xl text-gray-300 mb-3'></i>
+                    <div class="text-gray-500">No records found</div>
+                </div>
+            </td>
+        </tr>`;
         return;
     }
     els.tableBody.innerHTML = projects.map(m => {
@@ -763,9 +756,7 @@ function renderProjects() {
                         <button class="text-amber-600 hover:text-amber-800" title="Update Status" data-action="status" data-id="${m.mp_id}">
                             <i class='bx bx-edit text-xl'></i>
                         </button>
-                        <button class="text-purple-600 hover:text-purple-800" title="Set End Date" data-action="end" data-id="${m.mp_id}">
-                            <i class='bx bx-calendar-check text-xl'></i>
-                        </button>
+                        
                         <button class="text-red-600 hover:text-red-800" title="Delete" data-action="delete" data-id="${m.mp_id}">
                             <i class='bx bx-trash text-xl'></i>
                         </button>
@@ -1264,12 +1255,7 @@ function handleTableClick(e) {
         openModal(document.getElementById('updateStatusModal'));
         return;
     }
-    if (action === 'end') {
-        const input = document.getElementById('endDateInput');
-        input.value = movement.mp_project_end ? String(movement.mp_project_end).substring(0,10) : '';
-        openModal(document.getElementById('setEndDateModal'));
-        return;
-    }
+    
     if (action === 'delete') {
         openModal(document.getElementById('deleteMovementModal'));
         return;
@@ -1310,34 +1296,7 @@ document.getElementById('confirmUpdateStatus').addEventListener('click', async (
     }
 });
 
-// Set End Date modal actions
-document.getElementById('cancelEndDate').addEventListener('click', () => {
-    closeModal(document.getElementById('setEndDateModal'));
-});
-document.getElementById('confirmEndDate').addEventListener('click', async () => {
-    try {
-        const endDate = document.getElementById('endDateInput').value;
-        if (!endDate) { notify('Please pick an end date', 'error'); return; }
-        const res = await fetch(`${PLT_API}/movement-project/${selectedMovementId}/end-date`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            body: JSON.stringify({ mp_project_end: endDate }),
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        closeModal(document.getElementById('setEndDateModal'));
-        notify('End date set', 'success');
-        loadProjects(currentPage);
-    } catch (e) {
-        notify('Failed to set end date', 'error');
-    }
-});
+// Set End Date actions removed
 
 // Delete modal actions
 document.getElementById('cancelDeleteMovement').addEventListener('click', () => {
