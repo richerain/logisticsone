@@ -484,6 +484,18 @@
             </button>
         </div>
         <form id="transferItemForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Category Filter</label>
+                    <select id="transfer_filter_category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Search Item</label>
+                    <input id="transfer_search" type="text" placeholder="Search by name or code" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Select Item *</label>
                 <select id="transfer_item_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
@@ -1239,6 +1251,8 @@ const categoriesPageSize = 10;
     transferLocationTo: document.getElementById('transfer_location_to'),
     transferUnits: document.getElementById('transfer_units'),
     transferUnitsWarning: document.getElementById('transfer_units_warning'),
+    transferFilterCategory: document.getElementById('transfer_filter_category'),
+    transferSearch: document.getElementById('transfer_search'),
     
     // View Locations Modal
     viewLocationsModal: document.getElementById('viewLocationsModal'),
@@ -3386,6 +3400,12 @@ function initDigitalInventory() {
     if (els.transferItemSelect) els.transferItemSelect.addEventListener('change', onTransferItemSelectChange);
     if (els.transferUnits) els.transferUnits.addEventListener('input', validateTransferUnits);
     if (els.transferItemForm) els.transferItemForm.addEventListener('submit', submitTransfer);
+    if (els.transferFilterCategory) els.transferFilterCategory.addEventListener('change', () => {
+        renderTransferItemOptions();
+    });
+    if (els.transferSearch) els.transferSearch.addEventListener('input', () => {
+        renderTransferItemOptions();
+    });
     
     if (els.closeViewItemModal) els.closeViewItemModal.addEventListener('click', closeViewItemModal);
     if (els.viewItemModal) {
@@ -4085,6 +4105,9 @@ window.deleteCategory = deleteCategory;
 
 function openTransferModal() {
     els.transferItemModal.classList.remove('hidden');
+    populateTransferFilters();
+    if (els.transferSearch) els.transferSearch.value = '';
+    if (els.transferFilterCategory) els.transferFilterCategory.value = '';
     renderTransferItemOptions();
     els.transferItemDetails.innerHTML = '';
     els.transferLocationFrom.value = '';
@@ -4098,11 +4121,41 @@ function closeTransferModal() {
 }
 
 function renderTransferItemOptions() {
-    const selectable = inventoryItems.filter(i => i.status === 'In Stock' || i.status === 'Low Stock');
+    let selectable = inventoryItems.filter(i => i.status === 'In Stock' || i.status === 'Low Stock');
+    const catVal = (els.transferFilterCategory?.value || '').trim().toLowerCase();
+    const q = (els.transferSearch?.value || '').trim().toLowerCase();
+    if (catVal) {
+        selectable = selectable.filter(i => (i.category || '').toString().toLowerCase() === catVal);
+    }
+    if (q) {
+        selectable = selectable.filter(i => {
+            const hay = [
+                i.item_name || '',
+                i.item_code || '',
+                i.item_stock_keeping_unit || ''
+            ].join(' ').toLowerCase();
+            return hay.includes(q);
+        });
+    }
     const options = ['<option value="">Select Item</option>'].concat(
         selectable.map(i => `<option value="${i.item_id}">${i.item_name} (${i.item_code || 'N/A'})</option>`)
     ).join('');
     els.transferItemSelect.innerHTML = options;
+}
+
+function populateTransferFilters() {
+    const sel = els.transferFilterCategory;
+    if (!sel) return;
+    const uniqueCats = new Set();
+    if (Array.isArray(categories) && categories.length) {
+        categories.forEach(c => uniqueCats.add((c.cat_name || '').toString()));
+    } else {
+        (inventoryItems || []).forEach(i => uniqueCats.add((i.category || '').toString()));
+    }
+    const sorted = Array.from(uniqueCats).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+    sel.innerHTML = ['<option value="">All Categories</option>'].concat(
+        sorted.map(n => `<option value="${n.toLowerCase()}">${n}</option>`)
+    ).join('');
 }
 
 async function onTransferItemSelectChange() {
