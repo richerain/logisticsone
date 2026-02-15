@@ -1186,6 +1186,7 @@ var SWS_INVENTORY_STATS_API = `${API_BASE_URL}/sws/inventory-stats`;
 var SWS_STOCK_LEVELS_API = `${API_BASE_URL}/sws/stock-levels`;
 var SWS_LOCATIONS_API = `${API_BASE_URL}/sws/locations`;
 var SWS_DIGITAL_INVENTORY_REPORT_API = `${API_BASE_URL}/sws/digital-inventory/report`;
+var PLT_MOVEMENT_PROJECT_API = `${API_BASE_URL}/plt/movement-project`;
 var CSRF_TOKEN = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 // Prioritize server-injected token, then global window token, then localStorage
 var JWT_TOKEN = '{{ $jwtToken ?? "" }}';
@@ -1198,6 +1199,7 @@ if (!JWT_TOKEN) {
 var CURRENT_USER_NAME = '<?php echo e(auth()->check() ? trim((auth()->user()->firstname ?? "")." ".(auth()->user()->lastname ?? "")) : ""); ?>';
 
 var inventoryItems = [];
+var currentTransferItem = null;
 let currentDiPage = 1;
 const diPageSize = 10;
 var categories = [];
@@ -4187,6 +4189,7 @@ async function onTransferItemSelectChange() {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         const item = result.data;
+        currentTransferItem = item;
         const unitPrice = parseFloat(item.item_unit_price) || 0;
         const quantity = parseInt(item.item_current_stock) || 0;
         els.transferLocationFrom.value = item.item_stored_from || '';
@@ -4248,6 +4251,44 @@ async function submitTransfer(e) {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         if (result.success) {
+            try {
+                const toLocName = (function(){
+                    const sel = els.transferLocationTo;
+                    if (!sel) return '';
+                    const idx = sel.selectedIndex;
+                    return idx >= 0 ? (sel.options[idx]?.text || '') : '';
+                })();
+                const payload = {
+                    mp_item_name: (currentTransferItem && currentTransferItem.item_name) ? currentTransferItem.item_name : '',
+                    mp_unit_transfer: units,
+                    mp_stored_from: els.transferLocationFrom.value || '',
+                    mp_stored_to: toLocName || '',
+                    mp_item_type: (currentTransferItem && currentTransferItem.item_item_type) ? currentTransferItem.item_item_type : '',
+                    mp_movement_type: 'Stock Transfer',
+                    mp_status: 'pending'
+                };
+                const pltRes = await fetch(PLT_MOVEMENT_PROJECT_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+                    },
+                    body: JSON.stringify(payload),
+                    credentials: 'include'
+                });
+                if (!pltRes.ok) {
+                    throw new Error(`HTTP ${pltRes.status}`);
+                }
+                const pltResult = await pltRes.json();
+                if (!pltResult.success) {
+                    console.warn('Failed to record movement in PLT:', pltResult.message || 'unknown');
+                }
+            } catch (err) {
+                console.warn('PLT movement creation failed', err);
+            }
             notify('Item transferred successfully', 'success');
             closeTransferModal();
             await Promise.all([

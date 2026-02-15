@@ -72,6 +72,51 @@ class PLTController extends Controller
         }
     }
 
+    public function createMovementProject(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'mp_item_name' => 'required|string|max:255',
+            'mp_unit_transfer' => 'required|integer|min:1',
+            'mp_stored_from' => 'nullable|string|max:255',
+            'mp_stored_to' => 'nullable|string|max:255',
+            'mp_item_type' => 'nullable|string|max:100',
+            'mp_movement_type' => 'nullable|in:Stock Transfer,Asset Transfer',
+            'mp_status' => 'nullable|in:pending,in-progress,delayed,completed',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        try {
+            $payload = $validator->validated();
+            if (empty($payload['mp_movement_type'])) {
+                $payload['mp_movement_type'] = 'Stock Transfer';
+            }
+            if (empty($payload['mp_status'])) {
+                $payload['mp_status'] = 'pending';
+            }
+            $payload['created_at'] = now();
+            $payload['updated_at'] = now();
+            $id = DB::connection('plt')->table('plt_movement_project')->insertGetId($payload, 'mp_id');
+            $record = DB::connection('plt')->table('plt_movement_project')->where('mp_id', $id)->first();
+            return response()->json([
+                'success' => true,
+                'data' => $record,
+                'message' => 'Movement created',
+            ], 201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to create movement',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function getProject($id)
     {
         $result = $this->pltService->getProject($id);
