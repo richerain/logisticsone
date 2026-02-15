@@ -1793,10 +1793,6 @@ function renderInventoryItems() {
                                 title="Edit Item" data-id="${item.item_id}">
                             <i class='bx bx-edit text-lg'></i>
                         </button>
-                        <button class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-all active:scale-90 delete-item-btn" 
-                                title="Delete Item" data-id="${item.item_id}">
-                            <i class='bx bx-trash text-lg'></i>
-                        </button>
                     </div>
                 </td>
             </tr>
