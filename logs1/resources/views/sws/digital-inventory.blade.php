@@ -137,7 +137,7 @@
                     <span class="w-8 h-8 rounded-lg bg-emerald-400/30 flex items-center justify-center">
                         <i class='bx bxs-purchase-tag text-lg'></i>
                     </span>
-                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Purchase</span>
+                    <span class="text-[12px] font-bold uppercase tracking-tight whitespace-nowrap">Purchase Requisition</span>
                 </button>
 
                 <button id="inventoryNewItemBtn" class="relative h-12 px-4 flex-1 min-w-[160px] sm:min-w-[180px] inline-flex items-center gap-3 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/90 shadow-sm hover:shadow-md transition-all duration-200">
@@ -785,6 +785,72 @@
     </div>
 </div>
 
+<!-- DI Requisition Modal -->
+<div id="diRequisitionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[60] p-4">
+    <div class="bg-white rounded-2xl shadow-lg w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
+        <!-- Left: Vendor Products -->
+        <div class="p-6 border-r border-gray-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">Vendor Products</h3>
+                <button id="closeDiRequisitionModal" class="text-gray-400 hover:text-gray-600">
+                    <i class='bx bx-x text-2xl'></i>
+                </button>
+            </div>
+            <div class="mb-3">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Choose Vendor</label>
+                <select id="di_req_vendor_select" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Choose a Vendor Company...</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <input id="di_vendor_product_search" type="text" placeholder="Search vendor products..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+            <div class="overflow-y-auto max-h-[55vh] border rounded-xl">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Product</th>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Description</th>
+                            <th class="px-4 py-2 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Price</th>
+                            <th class="px-4 py-2 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="di_vendor_products_tbody" class="divide-y divide-gray-100">
+                        <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm">Please select a vendor</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Right: New Purchase Requisition -->
+        <div class="p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">New Purchase Requisition</h3>
+            <form id="diRequisitionForm" class="space-y-4">
+                <input type="hidden" id="di_req_id">
+                <input type="hidden" id="di_req_date">
+                <input type="hidden" id="di_req_requester">
+                <input type="hidden" id="di_req_dept">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Chosen Vendor</label>
+                    <input id="di_req_vendor_display" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50" disabled>
+                    <input id="di_req_vendor_id" type="hidden">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Items</label>
+                    <div id="di_req_items_container" class="space-y-2"></div>
+                    <button type="button" id="di_add_custom_item" class="mt-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition">Add Custom Item</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Notes / Remarks</label>
+                    <textarea id="di_req_note" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">Low Stock item need for restocking</textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t">
+                    <button type="button" id="di_req_cancel_btn" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                    <button type="submit" id="di_req_submit_btn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-colors">Submit Requisition</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <!-- View Categories Modal -->
 <div id="viewCategoriesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -1091,6 +1157,7 @@ var API_BASE_URL = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : '<?php e
 var SWS_DIGITAL_INVENTORY_API = `${API_BASE_URL}/sws/digital-inventory`;
 var PSM_PURCHASES_API = `${API_BASE_URL}/psm/purchase-management`;
 var SWS_ITEMS_API = `${API_BASE_URL}/sws/items`;
+var PSM_REQUISITIONS_API = `${API_BASE_URL}/psm/requisitions`;
 var completedPurchases = [];
 var SWS_CATEGORIES_API = `${API_BASE_URL}/sws/categories`;
 var SWS_WAREHOUSES_API = `${API_BASE_URL}/sws/warehouse`;
@@ -1107,6 +1174,7 @@ if (!JWT_TOKEN && typeof window.SERVER_JWT_TOKEN !== 'undefined') {
 if (!JWT_TOKEN) {
     JWT_TOKEN = localStorage.getItem('jwt');
 }
+var CURRENT_USER_NAME = '<?php echo e(auth()->check() ? trim((auth()->user()->firstname ?? "")." ".(auth()->user()->lastname ?? "")) : ""); ?>';
 
 var inventoryItems = [];
 let currentDiPage = 1;
@@ -1227,6 +1295,19 @@ const categoriesPageSize = 10;
     incomingAssetsPageDisplay: document.getElementById('incomingAssetsPageDisplay'),
     incomingAssetsPrevBtn: document.getElementById('incomingAssetsPrevBtn'),
     incomingAssetsNextBtn: document.getElementById('incomingAssetsNextBtn'),
+
+    // DI Requisition Modal
+    diRequisitionModal: document.getElementById('diRequisitionModal'),
+    closeDiRequisitionModal: document.getElementById('closeDiRequisitionModal'),
+    diReqVendorSelect: document.getElementById('di_req_vendor_select'),
+    diVendorProductSearch: document.getElementById('di_vendor_product_search'),
+    diVendorProductsTbody: document.getElementById('di_vendor_products_tbody'),
+    diRequisitionForm: document.getElementById('diRequisitionForm'),
+    diReqVendorDisplay: document.getElementById('di_req_vendor_display'),
+    diReqVendorId: document.getElementById('di_req_vendor_id'),
+    diReqItemsContainer: document.getElementById('di_req_items_container'),
+    diReqAddCustomItem: document.getElementById('di_add_custom_item'),
+    diReqNote: document.getElementById('di_req_note'),
     incomingAssetsPrevBtnMobile: document.getElementById('incomingAssetsPrevBtnMobile'),
     incomingAssetsNextBtnMobile: document.getElementById('incomingAssetsNextBtnMobile'),
     incomingAssetsBtn: document.getElementById('incomingAssetsBtn')
@@ -1926,6 +2007,245 @@ async function fetchCompletedPurchases() {
     }
 }
 
+// Purchase Requisition Integration
+let diSelectedItems = new Map(); // name -> count
+let diItemPrices = new Map(); // name -> price
+let diVendors = [];
+
+function openDiRequisitionModal() {
+    if (!els.diRequisitionModal) return;
+    diSelectedItems.clear();
+    diItemPrices.clear();
+    updateDiReqItemsContainer();
+    const idEl = document.getElementById('di_req_id');
+    const dateEl = document.getElementById('di_req_date');
+    const reqEl = document.getElementById('di_req_requester');
+    const deptEl = document.getElementById('di_req_dept');
+    if (idEl) idEl.value = generateReqID();
+    if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+    if (reqEl) reqEl.value = (CURRENT_USER_NAME || '').trim();
+    if (deptEl) deptEl.value = 'Logistic Office';
+    els.diReqVendorDisplay.value = '';
+    els.diReqVendorId.value = '';
+    els.diRequisitionModal.classList.remove('hidden');
+    fetchDiVendors();
+}
+
+function closeDiRequisitionModal() {
+    if (els.diRequisitionModal) els.diRequisitionModal.classList.add('hidden');
+}
+window.closeDiRequisitionModal = closeDiRequisitionModal;
+
+async function fetchDiVendors() {
+    try {
+        const response = await fetch('/api/v1/psm/vendors', {
+            headers: { 'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : '', 'Accept': 'application/json' }
+        });
+        const result = await response.json();
+        if (result.success) {
+            diVendors = result.data || [];
+            populateDiVendorDropdown(diVendors);
+        }
+    } catch (e) {
+        console.error('Error fetching vendors:', e);
+    }
+}
+
+function populateDiVendorDropdown(vendors) {
+    const sel = els.diReqVendorSelect;
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Choose a Vendor Company...</option>';
+    vendors.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.ven_id;
+        opt.textContent = v.ven_company_name || v.name || v.ven_id;
+        sel.appendChild(opt);
+    });
+}
+
+async function fetchDiVendorProducts(venId) {
+    try {
+        const response = await fetch('/api/v1/psm/product-management/by-vendor/' + venId, {
+            headers: { 'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : '', 'Accept': 'application/json' }
+        });
+        const result = await response.json();
+        if (result.success) {
+            renderDiVendorProducts(result.data || []);
+        }
+    } catch (e) {
+        console.error('Error fetching vendor products:', e);
+    }
+}
+
+function renderDiVendorProducts(products) {
+    const tb = els.diVendorProductsTbody;
+    const q = (els.diVendorProductSearch.value || '').toLowerCase();
+    const filtered = (products || []).filter(p =>
+        (p.prod_name || '').toLowerCase().includes(q) ||
+        (p.prod_desc || '').toLowerCase().includes(q) ||
+        (p.prod_id || '').toLowerCase().includes(q)
+    );
+    if (!filtered.length) {
+        tb.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm">No products found</td></tr>';
+        return;
+    }
+    tb.innerHTML = filtered.map(p => {
+        const price = parseFloat(p.prod_price || 0);
+        const safeName = (p.prod_name || '').replace(/"/g, '&quot;');
+        return '' +
+        '<tr class="hover:bg-gray-50 transition-colors">' +
+            '<td class="px-4 py-3 whitespace-nowrap">' +
+                '<div class="text-xs font-bold text-gray-900">' + (p.prod_name || '-') + '</div>' +
+                '<div class="text-[10px] text-gray-500">' + (p.prod_id || '-') + '</div>' +
+            '</td>' +
+            '<td class="px-4 py-3 text-[11px] text-gray-600 max-w-[150px] truncate" title="' + (p.prod_desc || '') + '">' +
+                (p.prod_desc || '-') +
+            '</td>' +
+            '<td class="px-4 py-3 text-[11px] font-bold text-blue-600 whitespace-nowrap">' +
+                'PHP ' + price.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) +
+            '</td>' +
+            '<td class="px-4 py-3 text-right">' +
+                '<button type="button" class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all active:scale-90" ' +
+                    'onclick="window.diAddItemToRequisition(\'' + safeName.replace(/'/g, "\\'") + '\',' + price + ')">' +
+                    '<i class="bx bx-plus text-lg"></i>' +
+                '</button>' +
+            '</td>' +
+        '</tr>';
+    }).join('');
+}
+
+window.diAddItemToRequisition = function(name, price) {
+    const current = diSelectedItems.get(name) || 0;
+    diSelectedItems.set(name, current + 1);
+    diItemPrices.set(name, price || 0);
+    updateDiReqItemsContainer();
+};
+
+function updateDiReqItemsContainer() {
+    const c = els.diReqItemsContainer;
+    if (!c) return;
+    if (diSelectedItems.size === 0) {
+        c.innerHTML = '<div class="text-sm text-gray-500">No items selected yet</div>';
+        return;
+    }
+    const rows = [];
+    diSelectedItems.forEach((count, name) => {
+        const price = diItemPrices.get(name) || 0;
+        rows.push(
+            '<div class="flex items-center gap-2 di-item-row">' +
+                '<input type="text" name="items[]" value="' + name.replace(/"/g, '&quot;') + '" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg" readonly>' +
+                '<div class="flex items-center gap-1">' +
+                    '<button type="button" class="px-2 py-1 bg-gray-100 rounded" onclick="window.diDecItem(\'' + name.replace(/'/g, "\\'") + '\')">-</button>' +
+                    '<span class="w-6 text-center font-bold">' + count + '</span>' +
+                    '<button type="button" class="px-2 py-1 bg-gray-100 rounded" onclick="window.diIncItem(\'' + name.replace(/'/g, "\\'") + '\')">+</button>' +
+                '</div>' +
+                '<span class="text-xs text-gray-500 w-24 text-right">PHP ' + (price * count).toLocaleString(undefined, {minimumFractionDigits:2}) + '</span>' +
+                '<button type="button" class="px-2 py-1 text-red-500 hover:bg-red-50 rounded" onclick="window.diRemoveItem(\'' + name.replace(/'/g, "\\'") + '\')"><i class="bx bx-trash"></i></button>' +
+            '</div>'
+        );
+    });
+    c.innerHTML = rows.join('');
+}
+
+window.diIncItem = function(name) {
+    const count = diSelectedItems.get(name) || 0;
+    diSelectedItems.set(name, count + 1);
+    updateDiReqItemsContainer();
+};
+window.diDecItem = function(name) {
+    const count = diSelectedItems.get(name) || 0;
+    if (count <= 1) diSelectedItems.delete(name);
+    else diSelectedItems.set(name, count - 1);
+    updateDiReqItemsContainer();
+};
+window.diRemoveItem = function(name) {
+    diSelectedItems.delete(name);
+    diItemPrices.delete(name);
+    updateDiReqItemsContainer();
+};
+
+function generateReqID() {
+    const now = new Date();
+    const dateStr = now.getFullYear().toString() + (now.getMonth()+1).toString().padStart(2,'0') + now.getDate().toString().padStart(2,'0');
+    const random = Math.random().toString(36).substring(2,7).toUpperCase();
+    return 'REQN' + dateStr + random;
+}
+
+// DI requisition events
+if (els.closeDiRequisitionModal) els.closeDiRequisitionModal.addEventListener('click', closeDiRequisitionModal);
+if (els.diReqCancelBtn) els.diReqCancelBtn?.addEventListener('click', closeDiRequisitionModal);
+if (els.diReqVendorSelect) els.diReqVendorSelect.addEventListener('change', function() {
+    const venId = this.value;
+    const vendor = (diVendors || []).find(v => String(v.ven_id) === String(venId));
+    els.diReqVendorDisplay.value = vendor ? (vendor.ven_company_name || vendor.name || venId) : '';
+    els.diReqVendorId.value = venId || '';
+    if (venId) fetchDiVendorProducts(venId);
+    else els.diVendorProductsTbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500 text-sm">Please select a vendor</td></tr>';
+});
+if (els.diVendorProductSearch) els.diVendorProductSearch.addEventListener('input', function(){
+    const venId = els.diReqVendorSelect.value;
+    if (venId) fetchDiVendorProducts(venId);
+});
+if (els.diReqAddCustomItem) els.diReqAddCustomItem.addEventListener('click', function(){
+    const c = els.diReqItemsContainer;
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-2';
+    div.innerHTML = '<input type="text" name="items[]" placeholder="Enter item name/description" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg">' +
+                    '<button type="button" class="px-2 py-1 text-red-500 hover:bg-red-50 rounded" onclick="this.parentElement.remove()"><i class="bx bx-trash"></i></button>';
+    c.appendChild(div);
+});
+if (els.diRequisitionForm) els.diRequisitionForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const venId = els.diReqVendorId.value;
+    const requester = (document.getElementById('di_req_requester').value || '').trim();
+    const dept = (document.getElementById('di_req_dept').value || '').trim();
+    const note = els.diReqNote.value || '';
+    const formItems = Array.from(els.diRequisitionForm.querySelectorAll('input[name="items[]"]')).map(i => i.value.trim()).filter(Boolean);
+    // Merge selected Items map keys and any custom items
+    const selectedNames = Array.from(diSelectedItems.keys());
+    const allItems = selectedNames.concat(formItems);
+    if (allItems.length === 0) {
+        notify('Please add at least one item', 'error');
+        return;
+    }
+    let totalReqPrice = 0;
+    diSelectedItems.forEach((count, name) => {
+        const price = diItemPrices.get(name) || 0;
+        totalReqPrice += (count * price);
+    });
+    const payload = {
+        req_id: document.getElementById('di_req_id').value,
+        req_date: document.getElementById('di_req_date').value,
+        req_requester: requester,
+        req_dept: dept,
+        req_note: note,
+        req_items: allItems,
+        req_chosen_vendor: venId || null,
+        req_price: totalReqPrice,
+        req_status: 'Pending'
+    };
+    try {
+        const response = await fetch(PSM_REQUISITIONS_API, {
+            method: 'POST',
+            headers: {
+                'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : '',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.success) {
+            notify('Requisition submitted successfully', 'success');
+            closeDiRequisitionModal();
+        } else {
+            notify(result.message || 'Failed to submit requisition', 'error');
+        }
+    } catch (err) {
+        console.error('Requisition submit error:', err);
+        notify('Error connecting to server', 'error');
+    }
+});
 function populateItemNameDropdown() {
     const select = document.getElementById('item_name');
     if (!select) return;
@@ -3041,7 +3361,7 @@ function initDigitalInventory() {
     if (els.addCategoryForm) els.addCategoryForm.addEventListener('submit', saveCategory);
 
     if (els.generateReportBtn) els.generateReportBtn.addEventListener('click', openDigitalInventoryReportModal);
-    if (els.purchaseNewItemBtn) els.purchaseNewItemBtn.addEventListener('click', openUnderDevelopmentModal);
+    if (els.purchaseNewItemBtn) els.purchaseNewItemBtn.addEventListener('click', openDiRequisitionModal);
     if (els.inventoryNewItemBtn) els.inventoryNewItemBtn.addEventListener('click', openInventoryDualModal);
     
     // Modal Event Listeners
