@@ -10,7 +10,7 @@
 
 <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden">
+        <div id="statCardTotal" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden cursor-pointer hover:bg-blue-50 transition">
             <div class="flex items-center">
                 <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
                     <i class='bx bx-transfer-alt text-2xl'></i>
@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-500 p-6 relative overflow-hidden">
+        <div id="statCardCompleted" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-500 p-6 relative overflow-hidden cursor-pointer hover:bg-green-50 transition">
             <div class="flex items-center">
                 <div class="p-3 bg-green-50 rounded-xl text-green-600">
                     <i class='bx bx-check-circle text-2xl'></i>
@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden">
+        <div id="statCardInProgress" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden cursor-pointer hover:bg-yellow-50 transition">
             <div class="flex items-center">
                 <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
                     <i class='bx bx-time text-2xl'></i>
@@ -43,7 +43,7 @@
                 </div>
             </div>
         </div>
-        <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-500 p-6 relative overflow-hidden">
+        <div id="statCardDelayed" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-500 p-6 relative overflow-hidden cursor-pointer hover:bg-red-50 transition">
             <div class="flex items-center">
                 <div class="p-3 bg-red-50 rounded-xl text-red-600">
                     <i class='bx bx-error-circle text-2xl'></i>
@@ -80,6 +80,20 @@
                 <option value="delayed">Delayed</option>
                 <option value="completed">Completed</option>
             </select>
+            <!-- Movement Type Filter -->
+            <select id="movementTypeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">All Movement Type</option>
+                <option value="Stock Transfer">Stock Transfer</option>
+                <option value="Asset Transfer">Asset Transfer</option>
+            </select>
+            <!-- Item Type Filter -->
+            <select id="itemTypeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">All Item Type</option>
+                <option value="supplies">Supplies</option>
+                <option value="automotive">Automotive</option>
+                <option value="furniture">Furniture</option>
+                <option value="equipment">Equipment</option>
+            </select>
         </div>
         
         <div class="flex gap-2"></div>
@@ -98,13 +112,15 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Stored To</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Item Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Movement Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Project Start</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Project End</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Action</th>
                     </tr>
                 </thead>
                 <tbody id="projectsTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="11" class="px-6 py-4 text-center text-gray-500">
                             <div class="flex justify-center items-center py-4">
                                 <div class="loading loading-spinner mr-3"></div>
                                 Loading movements...
@@ -370,10 +386,16 @@ const els = {
     statCompleted: document.getElementById('statCompleted'),
     statInProgress: document.getElementById('statInProgress'),
     statDelayed: document.getElementById('statDelayed'),
+    statCardTotal: document.getElementById('statCardTotal'),
+    statCardCompleted: document.getElementById('statCardCompleted'),
+    statCardInProgress: document.getElementById('statCardInProgress'),
+    statCardDelayed: document.getElementById('statCardDelayed'),
     
     // Search and Filter
     searchInput: document.getElementById('searchInput'),
     statusFilter: document.getElementById('statusFilter'),
+    movementTypeFilter: document.getElementById('movementTypeFilter'),
+    itemTypeFilter: document.getElementById('itemTypeFilter'),
     
     // Buttons
     addProjectBtn: document.getElementById('addProjectBtn'),
@@ -498,16 +520,28 @@ function formatMovementCode(m) {
 function movementStatusBadge(status) {
     const v = String(status || '').toLowerCase();
     const map = {
-        'completed': { bg: 'bg-green-100 text-green-800', icon: 'bx bx-check-circle' },
-        'in-progress': { bg: 'bg-yellow-100 text-yellow-800', icon: 'bx bx-time-five' },
-        'delayed': { bg: 'bg-red-100 text-red-800', icon: 'bx bx-error-circle' },
-        'pending': { bg: 'bg-gray-100 text-gray-800', icon: 'bx bx-dots-horizontal-rounded' }
+        'completed': { bg: 'bg-green-600 text-white', icon: 'bx bx-check-circle' },
+        'in-progress': { bg: 'bg-blue-600 text-white', icon: 'bx bx-time-five' },
+        'delayed': { bg: 'bg-red-600 text-white', icon: 'bx bx-error-circle' },
+        'pending': { bg: 'bg-yellow-600 text-white', icon: 'bx bx-time-five' }
     };
     const m = map[v] || map.pending;
     const label = (v.replace('-', ' ') || 'pending').replace(/\b\w/g, c => c.toUpperCase());
     return `<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-base font-extrabold ${m.bg}">
         <i class="${m.icon} text-lg"></i><span>${label}</span>
     </span>`;
+}
+
+function itemTypeBadge(type) {
+    const t = String(type || '').toLowerCase();
+    const map = {
+        'supplies': { bg: 'bg-sky-100 text-sky-800', label: 'Supplies' },
+        'automotive': { bg: 'bg-amber-100 text-amber-800', label: 'Automotive' },
+        'furniture': { bg: 'bg-rose-100 text-rose-800', label: 'Furniture' },
+        'equipment': { bg: 'bg-violet-100 text-violet-800', label: 'Equipment' }
+    };
+    const m = map[t] || { bg: 'bg-gray-100 text-gray-800', label: type || '-' };
+    return `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${m.bg}">${m.label}</span>`;
 }
 
 function getStatusBadge(status) {
@@ -563,6 +597,8 @@ async function loadProjects(page = 1) {
     try {
         const search = els.searchInput.value;
         const status = els.statusFilter.value;
+        const movetype = els.movementTypeFilter.value;
+        const itemtype = els.itemTypeFilter.value;
         
         let url = `${PLT_API}/movement-project?page=${page}`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
@@ -583,16 +619,23 @@ async function loadProjects(page = 1) {
         const result = await response.json();
         
         const payload = result.data !== undefined ? result.data : result;
-        projects = Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []);
+        let data = Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []);
+        if (movetype) {
+            data = data.filter(x => String(x.mp_movement_type || '') === movetype);
+        }
+        if (itemtype) {
+            data = data.filter(x => String(x.mp_item_type || '').toLowerCase() === itemtype.toLowerCase());
+        }
+        projects = data;
         currentPage = payload?.current_page || 1;
         totalPages = payload?.last_page || 1;
-        totalItems = typeof payload?.total === 'number' ? payload.total : (projects.length || 0);
+        totalItems = projects.length || (typeof payload?.total === 'number' ? payload.total : 0);
         perPage = typeof payload?.per_page === 'number' ? payload.per_page : perPage;
         renderProjects();
         renderProjectsPager(totalItems, totalPages);
         updateMovementStats();
     } catch (e) {
-        els.tableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-600">Failed to load movements: ${e.message}</td></tr>`;
+        els.tableBody.innerHTML = `<tr><td colspan="11" class="px-6 py-4 text-center text-red-600">Failed to load movements: ${e.message}</td></tr>`;
         notify('Error loading movements', 'error');
     }
 }
@@ -610,7 +653,7 @@ function updateMovementStats() {
 
 function renderProjects() {
     if (projects.length === 0) {
-        els.tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">No records found</td></tr>`;
+        els.tableBody.innerHTML = `<tr><td colspan="11" class="px-6 py-4 text-center text-gray-500">No records found</td></tr>`;
         return;
     }
     els.tableBody.innerHTML = projects.map(m => {
@@ -624,8 +667,10 @@ function renderProjects() {
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">${m.mp_unit_transfer ?? 0}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${m.mp_stored_from || '-'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${m.mp_stored_to || '-'}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${displayItemType}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">${itemTypeBadge(displayItemType)}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${m.mp_movement_type || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(m.mp_project_start)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(m.mp_project_end)}</td>
                 <td class="px-6 py-4 whitespace-nowrap">${movementStatusBadge(m.mp_status)}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                     <div class="flex items-center gap-3">
@@ -1249,6 +1294,13 @@ function initLogisticsProjects() {
     // Search and filter
     els.searchInput.addEventListener('input', debounce(() => loadProjects(1), 300));
     els.statusFilter.addEventListener('change', () => loadProjects(1));
+    els.movementTypeFilter.addEventListener('change', () => loadProjects(1));
+    els.itemTypeFilter.addEventListener('change', () => loadProjects(1));
+    // Stat cards click to filter
+    if (els.statCardTotal) els.statCardTotal.addEventListener('click', () => { els.statusFilter.value=''; loadProjects(1); });
+    if (els.statCardCompleted) els.statCardCompleted.addEventListener('click', () => { els.statusFilter.value='completed'; loadProjects(1); });
+    if (els.statCardInProgress) els.statCardInProgress.addEventListener('click', () => { els.statusFilter.value='in-progress'; loadProjects(1); });
+    if (els.statCardDelayed) els.statCardDelayed.addEventListener('click', () => { els.statusFilter.value='delayed'; loadProjects(1); });
     // Load initial data
     loadProjects();
 }
