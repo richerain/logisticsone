@@ -8,8 +8,7 @@
     </div>
 </div>
 
-<div class="bg-white rounded-lg shadow-lg p-6">
-    <!-- Statistics Cards -->
+<!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden">
             <div class="flex items-center">
@@ -57,6 +56,7 @@
         </div>
     </div>
 
+<div class="bg-white rounded-lg shadow-lg p-6">
     <!-- Section Title -->
     <div class="flex items-center gap-3 mb-3">
         <i class='bx bx-transfer-alt text-2xl text-gray-800'></i>
