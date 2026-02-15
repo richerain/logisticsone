@@ -8,28 +8,89 @@
     </div>
 </div>
 
+<!-- Stats Section (separate) -->
+<div class="mt-2 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Total -->
+        <div id="flow_card_total" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Show all">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-package text-6xl text-blue-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                        <i class='bx bx-package text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Items</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="flow_total_items" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">All</span>
+                </div>
+            </div>
+        </div>
+        <!-- Incoming -->
+        <div id="flow_card_incoming" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-emerald-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter: Incoming">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-import text-6xl text-emerald-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+                        <i class='bx bx-import text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Incoming</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="flow_incoming" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Today/All</span>
+                </div>
+            </div>
+        </div>
+        <!-- Outgoing -->
+        <div id="flow_card_outgoing" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-rose-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter: Outgoing">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-export text-6xl text-rose-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-rose-50 rounded-xl text-rose-600">
+                        <i class='bx bx-export text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Outgoing</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="flow_outgoing" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Today/All</span>
+                </div>
+            </div>
+        </div>
+        <!-- Transfers -->
+        <div id="flow_card_transfers" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter: Transfers">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-transfer text-6xl text-yellow-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
+                        <i class='bx bx-transfer text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Transfers</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="flow_transfers" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">All</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inventory Movements Section -->
 <div class="bg-white rounded-lg shadow-lg p-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat-card bg-blue-50 p-4 rounded-lg text-center">
-            <i class='bx bx-package text-3xl text-blue-600 mb-2'></i>
-            <h3 class="font-semibold text-blue-800">Total Items</h3>
-            <p id="flow_total_items" class="text-2xl font-bold text-blue-600">0</p>
-        </div>
-        <div class="stat-card bg-green-50 p-4 rounded-lg text-center">
-            <i class='bx bx-import text-3xl text-green-600 mb-2'></i>
-            <h3 class="font-semibold text-green-800">Incoming</h3>
-            <p id="flow_incoming" class="text-2xl font-bold text-green-600">0</p>
-        </div>
-        <div class="stat-card bg-red-50 p-4 rounded-lg text-center">
-            <i class='bx bx-export text-3xl text-red-600 mb-2'></i>
-            <h3 class="font-semibold text-red-800">Outgoing</h3>
-            <p id="flow_outgoing" class="text-2xl font-bold text-red-600">0</p>
-        </div>
-        <div class="stat-card bg-yellow-50 p-4 rounded-lg text-center">
-            <i class='bx bx-transfer text-3xl text-yellow-600 mb-2'></i>
-            <h3 class="font-semibold text-yellow-800">Transfers</h3>
-            <p id="flow_transfers" class="text-2xl font-bold text-yellow-600">0</p>
-        </div>
+    <div class="flex items-center gap-3 mb-3">
+        <i class='bx bx-transfer text-2xl text-gray-800'></i>
+        <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Inventory Movements</h3>
     </div>
 
     <div class="flex items-center gap-3 mb-4 whitespace-nowrap">
@@ -147,13 +208,12 @@ async function loadInventoryFlow() {
             <td class="whitespace-nowrap">${t.reference_id || ''}</td>
             <td class="whitespace-nowrap">
                 <button class="text-gray-700 transition-colors p-2 rounded-lg hover:bg-gray-50" data-action="view" data-id="${t.tra_id}" title="View Full Details"><i class='bx bx-detail text-xl'></i></button>
-                <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50 ml-2" data-action="delete" data-id="${t.tra_id}" title="Delete"><i class='bx bx-trash text-xl'></i></button>
             </td>
         </tr>
     `);
     tbody.innerHTML = rows.length > 0 
         ? rows.join('') 
-        : '<tr><td colspan="9" class="text-center py-4 text-gray-500">No inventory flows</td></tr>';
+        : '<tr><td colspan="9" class="text-center py-8 text-gray-500"><div class="flex flex-col items-center justify-center"><i class="bx bx-transfer text-6xl text-gray-300 mb-3"></i>No inventory flows</div></td></tr>';
 
     renderFlowPager(total, totalPages);
 
@@ -169,9 +229,6 @@ async function loadInventoryFlow() {
                 if (!t) return;
                 renderFlowDetails(t);
                 document.getElementById('flow_view_modal').classList.remove('hidden');
-            } else if (action === 'delete') {
-                window._flowPendingDeleteId = id;
-                document.getElementById('flow_confirm_modal').classList.remove('hidden');
             }
         });
     });
@@ -216,6 +273,32 @@ document.getElementById('flowPager').addEventListener('click', function(ev){
     const act = btn.getAttribute('data-action');
     if(act === 'prev'){ currentFlowPage = Math.max(1, currentFlowPage - 1); loadInventoryFlow(); }
     if(act === 'next'){ const max = Math.max(1, Math.ceil((getFlowFiltered().length||0)/flowPageSize)); currentFlowPage = Math.min(max, currentFlowPage + 1); loadInventoryFlow(); }
+});
+
+// Card filters
+document.getElementById('flow_card_total').addEventListener('click', () => {
+    document.getElementById('flow_status_filter').value = '';
+    document.getElementById('flow_search').value = '';
+    currentFlowPage = 1;
+    loadInventoryFlow();
+});
+document.getElementById('flow_card_incoming').addEventListener('click', () => {
+    document.getElementById('flow_status_filter').value = '';
+    document.getElementById('flow_search').value = 'incoming';
+    currentFlowPage = 1;
+    loadInventoryFlow();
+});
+document.getElementById('flow_card_outgoing').addEventListener('click', () => {
+    document.getElementById('flow_status_filter').value = '';
+    document.getElementById('flow_search').value = 'outgoing';
+    currentFlowPage = 1;
+    loadInventoryFlow();
+});
+document.getElementById('flow_card_transfers').addEventListener('click', () => {
+    document.getElementById('flow_status_filter').value = '';
+    document.getElementById('flow_search').value = 'transfer';
+    currentFlowPage = 1;
+    loadInventoryFlow();
 });
 
 function renderStatusBadge(status) {
@@ -306,51 +389,10 @@ document.body.insertAdjacentHTML('beforeend', `
         <div id="flow_view_content"></div>
     </div>
 </div>
-<div id="flow_confirm_modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">Delete Transaction</h3>
-            <button id="flow_confirm_close" class="text-gray-500 hover:text-gray-700"><i class='bx bx-x text-2xl'></i></button>
-        </div>
-        <p class="text-gray-700 mb-4">Are you sure you want to delete this transaction?</p>
-        <div class="flex justify-end gap-3">
-            <button id="flow_confirm_cancel" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
-            <button id="flow_confirm_delete" class="px-4 py-2 bg-red-600 text-white rounded-lg">Delete</button>
-        </div>
-    </div>
-</div>
 `);
 
 document.getElementById('flow_view_close').addEventListener('click', () => {
     document.getElementById('flow_view_modal').classList.add('hidden');
-});
-document.getElementById('flow_confirm_close').addEventListener('click', () => {
-    document.getElementById('flow_confirm_modal').classList.add('hidden');
-});
-document.getElementById('flow_confirm_cancel').addEventListener('click', () => {
-    document.getElementById('flow_confirm_modal').classList.add('hidden');
-});
-document.getElementById('flow_confirm_delete').addEventListener('click', async () => {
-    const id = window._flowPendingDeleteId;
-    if (!id) return;
-    const url = `${API_BASE_URL}/sws/inventory-flow/${id}`;
-    const res = await fetch(url, {
-        method: 'DELETE',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': CSRF_TOKEN,
-            'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-        },
-        credentials: 'include'
-    });
-    const result = await res.json();
-    document.getElementById('flow_confirm_modal').classList.add('hidden');
-    if (result.success) {
-        loadInventoryFlow();
-    } else {
-        alert(result.message || 'Failed to delete');
-    }
 });
 
 loadInventoryFlow();
