@@ -57,6 +57,12 @@
         </div>
     </div>
 
+    <!-- Section Title -->
+    <div class="flex items-center gap-3 mb-3">
+        <i class='bx bx-transfer-alt text-2xl text-gray-800'></i>
+        <h3 class="text-lg font-bold text-gray-800 tracking-tight leading-none">Movement Records</h3>
+    </div>
+
     <!-- Action Bar -->
     <div class="flex justify-between items-center mb-6">
         <div class="flex gap-4 items-center">
@@ -81,9 +87,6 @@
 
     <!-- Projects Table -->
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div class="px-6 py-3 border-b border-gray-100 bg-gray-50/80">
-            <h3 class="text-sm font-bold text-gray-700 tracking-wider uppercase">Movement Records</h3>
-        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-800 font-bold text-gray-100">
