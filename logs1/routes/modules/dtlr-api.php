@@ -12,6 +12,8 @@ Route::patch('/document-tracker/{docId}/status', [DTLRController::class, 'update
 Route::delete('/document-tracker/{docId}', [DTLRController::class, 'deleteDocument']);
 Route::get('/logistics-record', [DTLRController::class, 'getLogisticsRecord']);
 
+// External dataset with API key
+Route::get('/document-tracker/external', [DTLRController::class, 'externalDocumentTracker']);
 // Additional DTLR routes can be added here as the module develops
 Route::get('/test', function () {
     return response()->json([

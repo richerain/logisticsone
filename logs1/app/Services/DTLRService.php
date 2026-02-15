@@ -89,6 +89,50 @@ class DTLRService
         }
     }
 
+    public function createDocumentFromContent(string $docType, string $docTitle, string $binary, string $originalName = 'document.pdf', string $mime = 'application/pdf', string $status = 'pending_review')
+    {
+        DB::connection('dtlr')->beginTransaction();
+        try {
+            $this->ensureDocumentsTableExists();
+            $docId = $this->generateDocId();
+            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION) ?: 'pdf');
+            $storeName = $docId.'.'.$ext;
+            $path = 'dtlr/documents/'.$storeName;
+            Storage::disk('local')->put($path, $binary);
+            $size = Storage::disk('local')->size($path);
+
+            $doc = $this->dtlrRepository->createDocument([
+                'doc_id' => $docId,
+                'doc_type' => $docType,
+                'doc_title' => $docTitle,
+                'doc_status' => $status,
+                'doc_file_available' => true,
+                'doc_file_path' => $path,
+                'doc_file_original_name' => $originalName,
+                'doc_file_mime' => $mime,
+                'doc_file_size' => (int) $size,
+            ]);
+
+            $this->upsertLogisticsRecordFromDocument($doc, 'Upload document');
+
+            DB::connection('dtlr')->commit();
+
+            return [
+                'success' => true,
+                'data' => $doc,
+                'message' => 'Document created successfully',
+            ];
+        } catch (\Throwable $e) {
+            DB::connection('dtlr')->rollBack();
+            Log::error('Error creating DTLR document from content: '.$e->getMessage());
+            return [
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to create document',
+            ];
+        }
+    }
+
     public function getLogisticsRecords()
     {
         try {

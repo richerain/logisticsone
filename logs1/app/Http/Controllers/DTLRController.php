@@ -110,4 +110,19 @@ class DTLRController extends Controller
 
         return response()->json($result, $result['success'] ? 200 : 500);
     }
+
+    public function externalDocumentTracker(Request $request)
+    {
+        $key = (string) $request->query('key', '');
+        $envKeys = trim((string) env('DTLR_EXTERNAL_KEYS', ''));
+        $allowed = array_filter(array_map('trim', explode(',', $envKeys)));
+        if (empty($allowed)) {
+            $allowed = ['63cfb7730dcc34299fa38cb1a620f701'];
+        }
+        if (!in_array($key, $allowed, true)) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+        $result = $this->dtlrService->getAllDocuments();
+        return response()->json($result, $result['success'] ? 200 : 500);
+    }
 }

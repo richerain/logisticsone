@@ -975,7 +975,7 @@
             </div>
         </div>
         <div class="flex justify-end gap-3 mb-4">
-            <button id="di_report_preview" class="px-4 py-2 bg-gray-700 text-white rounded-lg"><i class='bx bx-show-alt mr-2'></i>Preview Report</button>
+            <button id="di_report_preview" class="px-4 py-2 bg-gray-700 text-white rounded-lg"><i class='bx bx-show-alt mr-2'></i>Generate Report</button>
             <button id="di_report_clear" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg"><i class='bx bx-eraser mr-2'></i>Clear Preview</button>
             <button id="di_report_download" class="px-4 py-2 bg-blue-600 text-white rounded-lg"><i class='bx bx-download mr-2'></i>Download PDF</button>
             <button id="di_report_print" class="px-4 py-2 bg-green-600 text-white rounded-lg"><i class='bx bx-printer mr-2'></i>Print Report</button>
@@ -4377,6 +4377,41 @@ document.getElementById('di_report_preview').addEventListener('click', () => {
             </table>
         </div>
     `;
+
+    // Automatically generate and download PDF; backend will also register the report in Document Tracker
+    document.getElementById('di_download_modal').classList.remove('hidden');
+    const range = document.getElementById('di_report_range').value;
+    const params = new URLSearchParams();
+    if (range) params.set('range', range);
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    params.set('format', 'pdf');
+    fetch(`${SWS_DIGITAL_INVENTORY_REPORT_API}?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/pdf',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': CSRF_TOKEN,
+            'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+        },
+        credentials: 'include'
+    }).then(async res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const urlObj = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = urlObj;
+        a.download = `digital-inventory-report.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(urlObj);
+        document.getElementById('di_download_modal').classList.add('hidden');
+        document.getElementById('di_success_modal').classList.remove('hidden');
+    }).catch(() => {
+        document.getElementById('di_download_modal').classList.add('hidden');
+        notify('Failed to generate PDF', 'error');
+    });
 });
 
 document.getElementById('di_report_clear').addEventListener('click', () => {

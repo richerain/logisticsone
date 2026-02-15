@@ -12,6 +12,7 @@ use App\Models\PLT\Project;
 use App\Models\PLT\TrackingLog;
 use App\Models\SWS\RoomRequest;
 use App\Services\SWSService;
+use App\Services\DTLRService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -565,17 +566,41 @@ class SWSController extends Controller
             }
 
             $items = $query->orderBy('item_created_at', 'desc')->get();
+            $summary = [
+                'total_items' => $items->count(),
+                'total_value' => $items->reduce(function ($carry, $i) {
+                    return $carry + ((float) $i->item_unit_price) * (int) ($i->item_current_stock ?? 0);
+                }, 0.0),
+                'low_stock_items' => $items->filter(function ($i) {
+                    $max = (int) ($i->item_max_stock ?? 0);
+                    $cur = (int) ($i->item_current_stock ?? 0);
+                    return $cur > 0 && $max > 0 && $cur <= ($max * 0.2);
+                })->count(),
+                'out_of_stock_items' => $items->filter(fn ($i) => (int) ($i->item_current_stock ?? 0) <= 0)->count(),
+            ];
             $payload = [
                 'items' => $items,
                 'from' => $from,
                 'to' => $to,
                 'generated_at' => now()->toDateTimeString(),
+                'summary' => $summary,
             ];
 
             if ($request->query('format') === 'pdf') {
                 $pdf = Pdf::loadView('generate-reports.digital-inventory-report', $payload);
-
-                return $pdf->download('digital-inventory-report.pdf');
+                $binary = $pdf->output();
+                try {
+                    /** @var DTLRService $dtlr */
+                    $dtlr = app(DTLRService::class);
+                    $title = 'Digital Inventory Report - '.now()->format('Y-m-d H:i');
+                    $dtlr->createDocumentFromContent('Good Received Note', $title, $binary, 'digital-inventory-report.pdf', 'application/pdf', 'pending_review');
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to register report in DTLR: '.$e->getMessage());
+                }
+                return response($binary, 200, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="digital-inventory-report.pdf"',
+                ]);
             }
 
             return view('generate-reports.digital-inventory-report', $payload);
