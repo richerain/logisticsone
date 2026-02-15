@@ -49,43 +49,41 @@
             <!-- Status Filter -->
             <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <option value="">All Status</option>
-                <option value="planning">Planning</option>
-                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="delayed">Delayed</option>
                 <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
             </select>
         </div>
         
-        <div class="flex gap-2">
-            <!-- Add New Project Button -->
-            <button id="addProjectBtn" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap">
-                <i class='bx bx-plus'></i> Add Project
-            </button>
-        </div>
+        <div class="flex gap-2"></div>
     </div>
 
     <!-- Projects Table -->
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-6 py-3 border-b border-gray-100 bg-gray-50/80">
+            <h3 class="text-sm font-bold text-gray-700 tracking-wider uppercase">Movement Records</h3>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-800 font-bold text-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Project ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Project Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Manager</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Date Range</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Budget</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Movement ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Item Name</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider whitespace-nowrap">Units</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Stored From</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Stored To</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Item Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Movement Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Progress</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="projectsTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
                             <div class="flex justify-center items-center py-4">
                                 <div class="loading loading-spinner mr-3"></div>
-                                Loading projects...
+                                Loading movements...
                             </div>
                         </td>
                     </tr>
@@ -455,7 +453,7 @@ async function loadProjects(page = 1) {
         const search = els.searchInput.value;
         const status = els.statusFilter.value;
         
-        let url = `${PLT_API}/projects?page=${page}`;
+        let url = `${PLT_API}/movement-project?page=${page}`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
         if (status) url += `&status=${encodeURIComponent(status)}`;
 
@@ -473,89 +471,60 @@ async function loadProjects(page = 1) {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         
-        if (result.success) {
-            projects = result.data.data || [];
-            currentPage = result.data.current_page || 1;
-            totalPages = result.data.last_page || 1;
-            totalItems = typeof result.data.total === 'number' ? result.data.total : (projects.length || 0);
-            perPage = typeof result.data.per_page === 'number' ? result.data.per_page : perPage;
-            renderProjects();
-            renderProjectsPager(totalItems, totalPages);
-        } else {
-            throw new Error(result.message);
-        }
+        const payload = result.data !== undefined ? result.data : result;
+        projects = Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []);
+        currentPage = payload?.current_page || 1;
+        totalPages = payload?.last_page || 1;
+        totalItems = typeof payload?.total === 'number' ? payload.total : (projects.length || 0);
+        perPage = typeof payload?.per_page === 'number' ? payload.per_page : perPage;
+        renderProjects();
+        renderProjectsPager(totalItems, totalPages);
+        updateMovementStats();
     } catch (e) {
-        els.tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-red-600">Failed to load projects: ${e.message}</td></tr>`;
-        notify('Error loading projects', 'error');
+        els.tableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-red-600">Failed to load movements: ${e.message}</td></tr>`;
+        notify('Error loading movements', 'error');
     }
 }
 
-async function loadStats() {
-    try {
-        const response = await fetch(`${PLT_API}/projects/stats`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
-            },
-            credentials: 'include'
-        });
-
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            const stats = result.data;
-            els.statTotalProjects.textContent = stats.total || 0;
-            els.statCompleted.textContent = stats.completed || 0;
-            els.statInProgress.textContent = stats.active || 0;
-            els.statDelayed.textContent = stats.delayed || 0;
-        }
-    } catch (e) {
-        console.error('Error loading stats:', e);
-    }
+function updateMovementStats() {
+    const total = projects.length;
+    const completed = projects.filter(m => String(m.mp_status || '').toLowerCase() === 'completed').length;
+    const inProgress = projects.filter(m => String(m.mp_status || '').toLowerCase() === 'in-progress').length;
+    const delayed = projects.filter(m => String(m.mp_status || '').toLowerCase() === 'delayed').length;
+    if (els.statTotalProjects) els.statTotalProjects.textContent = total;
+    if (els.statCompleted) els.statCompleted.textContent = completed;
+    if (els.statInProgress) els.statInProgress.textContent = inProgress;
+    if (els.statDelayed) els.statDelayed.textContent = delayed;
 }
 
 function renderProjects() {
     if (projects.length === 0) {
-        els.tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">No projects found</td></tr>`;
+        els.tableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">No records found</td></tr>`;
         return;
     }
-    
-    els.tableBody.innerHTML = '';
-    projects.forEach(project => {
-        const progress = project.progress || 0;
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50';
-        tr.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap font-mono text-sm">${formatProjectCode(project)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="font-medium text-gray-900 capitalize">${project.pro_project_name || ''}</div>
-                <div class="text-sm text-gray-500 truncate max-w-xs">${project.pro_description || ''}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${project.pro_assigned_manager_id || ''}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDateRange(project.pro_start_date, project.pro_end_date)}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${formatCurrency(project.pro_budget_allocated)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${getStatusBadge(project.pro_status)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${getProgressBar(getProjectProgress(project))}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex gap-2">
-                    ${project.pro_status === 'cancelled' ? '' : `<button class="text-indigo-600 transition-colors p-2 rounded-lg hover:bg-gray-50" title="Manage Milestones" data-action="milestones" data-id="${project.pro_id}"><i class='bx bx-flag text-xl'></i></button>`}
-                    <button class="text-primary transition-colors p-2 rounded-lg hover:bg-gray-50" title="View Details" data-action="view" data-id="${project.pro_id}">
-                        <i class='bx bx-show-alt text-xl'></i>
-                    </button>
-                    ${project.pro_status === 'completed' || project.pro_status === 'cancelled' ? '' : `<button class="text-warning transition-colors p-2 rounded-lg hover:bg-gray-50" title="Edit Project" data-action="edit" data-id="${project.pro_id}"><i class='bx bx-edit text-xl'></i></button>`}
-                    ${project.pro_status === 'cancelled' || project.pro_status === 'completed' ? '' : `<button class="text-gray-700 transition-colors p-2 rounded-lg hover:bg-gray-50" title="Cancel Project" data-action="cancel" data-id="${project.pro_id}"><i class='bx bx-block text-xl'></i></button>`}
-                    <button class="text-error transition-colors p-2 rounded-lg hover:bg-gray-50" title="Delete Project" data-action="delete" data-id="${project.pro_id}">
-                        <i class='bx bx-trash text-xl'></i>
-                    </button>
-                </div>
-            </td>
+    els.tableBody.innerHTML = projects.map(m => {
+        const statusClass = (s) => {
+            const v = String(s || '').toLowerCase();
+            if (v === 'completed') return 'bg-green-100 text-green-700';
+            if (v === 'in-progress') return 'bg-amber-100 text-amber-700';
+            if (v === 'delayed') return 'bg-red-100 text-red-700';
+            return 'bg-gray-100 text-gray-700';
+        };
+        return `
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm">${m.mp_id}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${m.mp_item_name || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">${m.mp_unit_transfer ?? 0}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${m.mp_stored_from || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${m.mp_stored_to || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize">${m.mp_item_type || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${m.mp_movement_type || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-3 py-1.5 rounded-full text-xs font-bold ${statusClass(m.mp_status)}">${(m.mp_status || '').replace('-', ' ') || '-'}</span>
+                </td>
+            </tr>
         `;
-        els.tableBody.appendChild(tr);
-    });
+    }).join('');
 }
 
 function renderProjectsPager(total, pages) {
@@ -639,12 +608,7 @@ async function saveProject(e) {
         const result = await response.json();
         
         if (result.success) {
-            await loadProjects(currentPage);
-            await loadStats();
-            closeProjectModal();
             notify(result.message, 'success');
-        } else {
-            throw new Error(result.message);
         }
     } catch (e) {
         notify('Error saving project: ' + e.message, 'error');
@@ -680,11 +644,7 @@ async function deleteProject(id) {
         const result = await response.json();
         
         if (result.success) {
-            await loadProjects(currentPage);
-            await loadStats();
             notify(result.message, 'success');
-        } else {
-            throw new Error(result.message);
         }
     } catch (e) {
         notify('Error deleting project: ' + e.message, 'error');
@@ -718,11 +678,7 @@ async function cancelProject(id) {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         if (result.success) {
-            await loadProjects(currentPage);
-            await loadStats();
             notify('Project cancelled', 'success');
-        } else {
-            throw new Error(result.message);
         }
     } catch (e) {
         notify('Error cancelling project: ' + e.message, 'error');
@@ -1023,24 +979,7 @@ function setMilestoneStatusOptions(mode) {
 
 
 function handleTableClick(e) {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    
-    const action = btn.dataset.action;
-    const id = btn.dataset.id;
-    
-    if (action === 'edit') {
-        const project = projects.find(p => String(p.pro_id) === String(id));
-        if (project) openProjectModal(true, project);
-    } else if (action === 'delete') {
-        deleteProject(id);
-    } else if (action === 'view') {
-        viewProject(id);
-    } else if (action === 'milestones') {
-        openMilestoneModal(id);
-    } else if (action === 'cancel') {
-        cancelProject(id);
-    }
+    return;
 }
 
 // Pager interactions
@@ -1053,64 +992,11 @@ document.getElementById('projectsPager').addEventListener('click', function(ev){
 });
 
 function initLogisticsProjects() {
-    // Event listeners for buttons
-    els.addProjectBtn.addEventListener('click', () => openProjectModal(false));
-    
-    // Modal event listeners
-    els.closeProjectModal.addEventListener('click', closeProjectModal);
-    els.cancelProjectModal.addEventListener('click', closeProjectModal);
-    
-    
-    // Form submissions
-    els.projectForm.addEventListener('submit', saveProject);
-    
-    
     // Search and filter
     els.searchInput.addEventListener('input', debounce(() => loadProjects(1), 300));
     els.statusFilter.addEventListener('change', () => loadProjects(1));
-    
-    // Table interactions
-    els.tableBody.addEventListener('click', handleTableClick);
-    els.closeViewProjectModal && els.closeViewProjectModal.addEventListener('click', closeViewProjectModal);
-    els.closeMilestoneModal && els.closeMilestoneModal.addEventListener('click', closeMilestoneModal);
-    els.addMilestoneBtn && els.addMilestoneBtn.addEventListener('click', () => openMilestoneForm(false));
-    els.milestoneForm && els.milestoneForm.addEventListener('submit', saveMilestone);
-    els.cancelMilestone && els.cancelMilestone.addEventListener('click', closeMilestoneEditModal);
-    els.closeMilestoneEditModal && els.closeMilestoneEditModal.addEventListener('click', closeMilestoneEditModal);
-    els.closeMilestoneDeleteModal && els.closeMilestoneDeleteModal.addEventListener('click', closeMilestoneDeleteModal);
-    els.cancelDeleteMilestone && els.cancelDeleteMilestone.addEventListener('click', closeMilestoneDeleteModal);
-    els.confirmDeleteMilestone && els.confirmDeleteMilestone.addEventListener('click', async () => {
-        if (!window._milePendingDeleteId) return;
-        await deleteMilestone(window._milePendingDeleteId);
-    });
-    els.milestoneTableBody && els.milestoneTableBody.addEventListener('click', async (e) => {
-        const b = e.target.closest('button');
-        if (!b) return;
-        const act = b.dataset.action;
-        const mid = b.dataset.id;
-        if (act === 'mile_basic_edit' || act === 'mile_set_dates' || act === 'mile_update_status') {
-            // Fetch single milestone for edit
-            const projectId = els.mileProjectId.value;
-            const response = await fetch(`${PLT_API}/projects/${projectId}/milestones`, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': CSRF_TOKEN, 'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : '' }, credentials: 'include' });
-            const result = await response.json();
-            const m = (result.data || []).find(x => String(x.mile_id) === String(mid));
-            if (m) {
-                const mode = act === 'mile_set_dates' ? 'dates' : (act === 'mile_update_status' ? 'status' : 'basic');
-                openMilestoneForm(true, m, mode);
-            }
-        } else if (act === 'delete_mile') {
-            openMilestoneDeleteModal(mid);
-        }
-    });
-    
-    // Modal backdrop clicks
-    els.projectModal.addEventListener('click', function(e) {
-        if (e.target === this) closeProjectModal();
-    });
-
     // Load initial data
     loadProjects();
-    loadStats();
 }
 
 // Utility function for debouncing
