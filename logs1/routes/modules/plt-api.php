@@ -20,6 +20,9 @@ Route::delete('/milestones/{id}', [PLTController::class, 'deleteMilestone']);
 // Movement Project (new)
 Route::get('/movement-project', [PLTController::class, 'getMovementProjects']);
 Route::post('/movement-project', [PLTController::class, 'createMovementProject']);
+Route::put('/movement-project/{id}/status', [PLTController::class, 'updateMovementStatus']);
+Route::put('/movement-project/{id}/end-date', [PLTController::class, 'updateMovementEndDate']);
+Route::delete('/movement-project/{id}', [PLTController::class, 'deleteMovementProject']);
 
 // Additional PLT routes can be added here as the module develops
 Route::get('/test', function () {

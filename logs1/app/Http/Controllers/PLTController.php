@@ -82,6 +82,8 @@ class PLTController extends Controller
             'mp_item_type' => 'nullable|string|max:100',
             'mp_movement_type' => 'nullable|in:Stock Transfer,Asset Transfer',
             'mp_status' => 'nullable|in:pending,in-progress,delayed,completed',
+            'mp_project_start' => 'nullable|date',
+            'mp_project_end' => 'nullable|date|after_or_equal:mp_project_start',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -97,6 +99,9 @@ class PLTController extends Controller
             }
             if (empty($payload['mp_status'])) {
                 $payload['mp_status'] = 'pending';
+            }
+            if (empty($payload['mp_project_start'])) {
+                $payload['mp_project_start'] = now()->toDateString();
             }
             $payload['created_at'] = now();
             $payload['updated_at'] = now();
@@ -117,6 +122,74 @@ class PLTController extends Controller
         }
     }
 
+    public function updateMovementStatus(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'mp_status' => 'required|in:pending,in-progress,delayed,completed',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        try {
+            $updated = DB::connection('plt')->table('plt_movement_project')
+                ->where('mp_id', $id)
+                ->update([
+                    'mp_status' => $validator->validated()['mp_status'],
+                    'updated_at' => now(),
+                ]);
+            if ($updated === 0) {
+                return response()->json(['success' => false, 'message' => 'Not found'], 404);
+            }
+            return response()->json(['success' => true, 'message' => 'Status updated']);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to update status'], 500);
+        }
+    }
+
+    public function updateMovementEndDate(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'mp_project_end' => 'required|date',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        try {
+            $updated = DB::connection('plt')->table('plt_movement_project')
+                ->where('mp_id', $id)
+                ->update([
+                    'mp_project_end' => $validator->validated()['mp_project_end'],
+                    'updated_at' => now(),
+                ]);
+            if ($updated === 0) {
+                return response()->json(['success' => false, 'message' => 'Not found'], 404);
+            }
+            return response()->json(['success' => true, 'message' => 'End date set']);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to set end date'], 500);
+        }
+    }
+
+    public function deleteMovementProject($id)
+    {
+        try {
+            $deleted = DB::connection('plt')->table('plt_movement_project')->where('mp_id', $id)->delete();
+            if ($deleted === 0) {
+                return response()->json(['success' => false, 'message' => 'Not found'], 404);
+            }
+            return response()->json(['success' => true, 'message' => 'Movement deleted']);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete movement'], 500);
+        }
+    }
     public function getProject($id)
     {
         $result = $this->pltService->getProject($id);

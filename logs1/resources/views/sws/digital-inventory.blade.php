@@ -4263,7 +4263,9 @@ async function submitTransfer(e) {
                     mp_unit_transfer: units,
                     mp_stored_from: els.transferLocationFrom.value || '',
                     mp_stored_to: toLocName || '',
-                    mp_item_type: (currentTransferItem && currentTransferItem.item_item_type) ? currentTransferItem.item_item_type : '',
+                    mp_item_type: (currentTransferItem && currentTransferItem.category && currentTransferItem.category.cat_name)
+                        ? currentTransferItem.category.cat_name
+                        : (currentTransferItem && currentTransferItem.item_item_type ? currentTransferItem.item_item_type : ''),
                     mp_movement_type: 'Stock Transfer',
                     mp_status: 'pending'
                 };
