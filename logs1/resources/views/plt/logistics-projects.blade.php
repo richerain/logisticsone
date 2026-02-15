@@ -9,48 +9,106 @@
 </div>
 
 <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div id="statCardTotal" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden cursor-pointer hover:bg-blue-50 transition">
-            <div class="flex items-center">
-                <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
-                    <i class='bx bx-transfer-alt text-2xl'></i>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <!-- Total -->
+        <div id="statCardTotal" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Show all movements">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-transfer-alt text-6xl text-blue-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                        <i class='bx bx-transfer-alt text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Movements</h4>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Movements</p>
-                    <p id="statTotalProjects" class="text-2xl font-black text-gray-800">0</p>
+                <div class="flex items-end gap-2">
+                    <span id="statTotalProjects" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">All records</span>
                 </div>
             </div>
         </div>
-        <div id="statCardCompleted" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-500 p-6 relative overflow-hidden cursor-pointer hover:bg-green-50 transition">
-            <div class="flex items-center">
-                <div class="p-3 bg-green-50 rounded-xl text-green-600">
-                    <i class='bx bx-check-circle text-2xl'></i>
+        <!-- Pending -->
+        <div id="statCardPending" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter to Pending">
+            <div id="pendingBadgePulse" class="hidden absolute top-4 right-4 z-20">
+                <span class="relative flex h-6 w-6">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                    <span id="pendingPulseCount" class="relative inline-flex rounded-full h-6 w-6 bg-yellow-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
+                </span>
+            </div>
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-time-five text-6xl text-yellow-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
+                        <i class='bx bx-time-five text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending</h4>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Completed</p>
-                    <p id="statCompleted" class="text-2xl font-black text-gray-800">0</p>
+                <div class="flex items-end gap-2">
+                    <span id="statPending" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Awaiting action</span>
                 </div>
             </div>
         </div>
-        <div id="statCardInProgress" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-yellow-500 p-6 relative overflow-hidden cursor-pointer hover:bg-yellow-50 transition">
-            <div class="flex items-center">
-                <div class="p-3 bg-yellow-50 rounded-xl text-yellow-600">
-                    <i class='bx bx-time text-2xl'></i>
+        <!-- In Progress -->
+        <div id="statCardInProgress" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-blue-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter to In Progress">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-time-five text-6xl text-blue-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-blue-50 rounded-xl text-blue-600">
+                        <i class='bx bx-time-five text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">In Progress</h4>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">In Progress</p>
-                    <p id="statInProgress" class="text-2xl font-black text-gray-800">0</p>
+                <div class="flex items-end gap-2">
+                    <span id="statInProgress" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Ongoing</span>
                 </div>
             </div>
         </div>
-        <div id="statCardDelayed" class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-500 p-6 relative overflow-hidden cursor-pointer hover:bg-red-50 transition">
-            <div class="flex items-center">
-                <div class="p-3 bg-red-50 rounded-xl text-red-600">
-                    <i class='bx bx-error-circle text-2xl'></i>
+        <!-- Delayed -->
+        <div id="statCardDelayed" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-red-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter to Delayed">
+            <div id="delayedBadgePulse" class="hidden absolute top-4 right-4 z-20">
+                <span class="relative flex h-6 w-6">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span id="delayedPulseCount" class="relative inline-flex rounded-full h-6 w-6 bg-red-500 text-[10px] font-bold text-white items-center justify-center border-2 border-white">0</span>
+                </span>
+            </div>
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-error text-6xl text-red-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-red-50 rounded-xl text-red-600">
+                        <i class='bx bx-error text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Delayed</h4>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Delayed</p>
-                    <p id="statDelayed" class="text-2xl font-black text-gray-800">0</p>
+                <div class="flex items-end gap-2">
+                    <span id="statDelayed" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Behind schedule</span>
+                </div>
+            </div>
+        </div>
+        <!-- Completed -->
+        <div id="statCardCompleted" class="cursor-pointer bg-white rounded-2xl shadow-sm border border-gray-100 border-b-4 border-green-500 p-6 relative overflow-hidden group hover:shadow-md transition-all duration-300" title="Filter to Completed">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
+                <i class='bx bx-check-circle text-6xl text-green-600'></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="p-3 bg-green-50 rounded-xl text-green-600">
+                        <i class='bx bx-check-circle text-2xl'></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Completed</h4>
+                </div>
+                <div class="flex items-end gap-2">
+                    <span id="statCompleted" class="text-4xl font-black text-gray-800 leading-none">0</span>
+                    <span class="text-xs text-gray-500 mb-1">Finished</span>
                 </div>
             </div>
         </div>
@@ -384,12 +442,18 @@ const els = {
     // Stats
     statTotalProjects: document.getElementById('statTotalProjects'),
     statCompleted: document.getElementById('statCompleted'),
+    statPending: document.getElementById('statPending'),
     statInProgress: document.getElementById('statInProgress'),
     statDelayed: document.getElementById('statDelayed'),
     statCardTotal: document.getElementById('statCardTotal'),
     statCardCompleted: document.getElementById('statCardCompleted'),
+    statCardPending: document.getElementById('statCardPending'),
     statCardInProgress: document.getElementById('statCardInProgress'),
     statCardDelayed: document.getElementById('statCardDelayed'),
+    pendingBadgePulse: document.getElementById('pendingBadgePulse'),
+    pendingPulseCount: document.getElementById('pendingPulseCount'),
+    delayedBadgePulse: document.getElementById('delayedBadgePulse'),
+    delayedPulseCount: document.getElementById('delayedPulseCount'),
     
     // Search and Filter
     searchInput: document.getElementById('searchInput'),
@@ -642,13 +706,32 @@ async function loadProjects(page = 1) {
 
 function updateMovementStats() {
     const total = projects.length;
+    const pending = projects.filter(m => String(m.mp_status || '').toLowerCase() === 'pending').length;
     const completed = projects.filter(m => String(m.mp_status || '').toLowerCase() === 'completed').length;
     const inProgress = projects.filter(m => String(m.mp_status || '').toLowerCase() === 'in-progress').length;
     const delayed = projects.filter(m => String(m.mp_status || '').toLowerCase() === 'delayed').length;
     if (els.statTotalProjects) els.statTotalProjects.textContent = total;
+    if (els.statPending) els.statPending.textContent = pending;
     if (els.statCompleted) els.statCompleted.textContent = completed;
     if (els.statInProgress) els.statInProgress.textContent = inProgress;
     if (els.statDelayed) els.statDelayed.textContent = delayed;
+    // Pulsing badges for pending and delayed
+    if (els.pendingBadgePulse) {
+        if (pending > 0) {
+            els.pendingBadgePulse.classList.remove('hidden');
+            if (els.pendingPulseCount) els.pendingPulseCount.textContent = pending;
+        } else {
+            els.pendingBadgePulse.classList.add('hidden');
+        }
+    }
+    if (els.delayedBadgePulse) {
+        if (delayed > 0) {
+            els.delayedBadgePulse.classList.remove('hidden');
+            if (els.delayedPulseCount) els.delayedPulseCount.textContent = delayed;
+        } else {
+            els.delayedBadgePulse.classList.add('hidden');
+        }
+    }
 }
 
 function renderProjects() {
@@ -1298,6 +1381,7 @@ function initLogisticsProjects() {
     els.itemTypeFilter.addEventListener('change', () => loadProjects(1));
     // Stat cards click to filter
     if (els.statCardTotal) els.statCardTotal.addEventListener('click', () => { els.statusFilter.value=''; loadProjects(1); });
+    if (els.statCardPending) els.statCardPending.addEventListener('click', () => { els.statusFilter.value='pending'; loadProjects(1); });
     if (els.statCardCompleted) els.statCardCompleted.addEventListener('click', () => { els.statusFilter.value='completed'; loadProjects(1); });
     if (els.statCardInProgress) els.statCardInProgress.addEventListener('click', () => { els.statusFilter.value='in-progress'; loadProjects(1); });
     if (els.statCardDelayed) els.statCardDelayed.addEventListener('click', () => { els.statusFilter.value='delayed'; loadProjects(1); });
