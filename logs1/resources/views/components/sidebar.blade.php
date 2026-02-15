@@ -136,22 +136,15 @@
     </div>
 
     <!-- Project Logistics Tracker -->
-    <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
-      <span class="flex items-center gap-3 text-left">
+    <a href="#" data-module="plt-logistics-projects"
+       class="sidebar-link mt-1 flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 active:scale-[0.99] group">
+      <span class="flex items-center gap-3 font-semibold">
         <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
           <i class='bx bxs-truck text-xl'></i>
         </span>
-        <span class="leading-tight">Project Logistics Tracker</span>
+        Project Logistics Tracker
       </span>
-      <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
-    </button>
-    <div class="submenu hidden mt-1">
-      <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
-        <a href="#" data-module="plt-logistics-projects" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-package'></i> Logistics Projects
-        </a>
-      </div>
-    </div>
+    </a>
 
     <!-- Asset Lifecycle & Maintenance System -->
     <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
@@ -203,25 +196,15 @@
     @if($role === 'superadmin')
     <div class="text-xs font-bold text-gray-400 tracking-wider px-2 mt-6 mb-2">SYSTEM ADMIN</div>
 
-    <button class="dropdown-toggle mt-1 w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 active:translate-x-0 active:scale-[0.99] font-semibold group">
-      <span class="flex items-center gap-3 text-left">
+    <a href="#" data-module="um-account-management"
+       class="sidebar-link mt-1 flex items-center justify-between px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 active:scale-[0.99] font-semibold group">
+      <span class="flex items-center gap-3 font-semibold">
         <span class="inline-flex w-9 h-9 rounded-lg bg-emerald-50 items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors shrink-0">
           <i class='bx bxs-user-account text-xl'></i>
         </span>
-        <span class="leading-tight">User Management</span>
+        User Management
       </span>
-      <i class='bx bx-chevron-down text-emerald-400 transition-transform duration-300 text-xl'></i>
-    </button>
-    <div class="submenu hidden mt-1">
-      <div class="pl-4 pr-2 py-2 space-y-1 border-l-2 border-gray-100 ml-8">
-        <a href="#" data-module="um-account-management" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bxs-user-detail'></i> Account Management
-        </a>
-        <a href="#" data-module="um-audit-trail" class="sidebar-link block px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-green-50 hover:text-brand-primary transition-all duration-200 hover:translate-x-1 flex items-center gap-2">
-          <i class='bx bx-history'></i> Audit Trail
-        </a>
-      </div>
-    </div>
+    </a>
     @endif
 
     <!-- Footer -->
