@@ -99,11 +99,12 @@
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Item Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Movement Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider whitespace-nowrap">Action</th>
                     </tr>
                 </thead>
                 <tbody id="projectsTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="9" class="px-6 py-4 text-center text-gray-500">
                             <div class="flex justify-center items-center py-4">
                                 <div class="loading loading-spinner mr-3"></div>
                                 Loading movements...
@@ -120,6 +121,64 @@
             <button class="btn btn-sm join-item" id="projectsPrevBtn" data-action="prev">Prev</button>
             <span class="btn btn-sm join-item" id="projectsPageDisplay">1 / 1</span>
             <button class="btn btn-sm join-item" id="projectsNextBtn" data-action="next">Next</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Movement Modal -->
+<div id="viewMovementModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-lg">
+        <h3 class="text-xl font-bold mb-4">Movement Details</h3>
+        <div id="viewMovementContent" class="text-sm text-gray-700 space-y-2"></div>
+        <div class="mt-6 text-right">
+            <button id="closeViewMovement" class="btn btn-primary">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div id="updateStatusModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4">Update Status</h3>
+        <div class="space-y-4">
+            <label class="block text-sm font-medium text-gray-700">Status</label>
+            <select id="updateStatusSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="delayed">Delayed</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+            <button id="cancelUpdateStatus" class="btn">Cancel</button>
+            <button id="confirmUpdateStatus" class="btn btn-primary">Update</button>
+        </div>
+    </div>
+</div>
+
+<!-- Set End Date Modal -->
+<div id="setEndDateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4">Set End Date</h3>
+        <div class="space-y-4">
+            <label class="block text-sm font-medium text-gray-700">End Date</label>
+            <input type="date" id="endDateInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+            <button id="cancelEndDate" class="btn">Cancel</button>
+            <button id="confirmEndDate" class="btn btn-primary">Set</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="deleteMovementModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4">Delete Movement</h3>
+        <p class="text-sm text-gray-700">Are you sure you want to delete this movement?</p>
+        <div class="mt-6 flex justify-end gap-2">
+            <button id="cancelDeleteMovement" class="btn">Cancel</button>
+            <button id="confirmDeleteMovement" class="btn btn-error">Delete</button>
         </div>
     </div>
 </div>
@@ -422,6 +481,35 @@ function formatProjectCode(p) {
     return `PRJ${datePart}${tail}`;
 }
 
+function formatMovementCode(m) {
+    const d = m.created_at ? new Date(m.created_at) : new Date();
+    const datePart = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}`;
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let seed = Number(m.mp_id || 0) * 1103515245 + 12345;
+    let tail = '';
+    for (let i = 0; i < 5; i++) {
+        seed = (seed >>> 1) ^ (seed << 3);
+        if (seed < 0) seed = -seed;
+        tail += alphabet[seed % alphabet.length];
+    }
+    return `MVMT${datePart}${tail}`;
+}
+
+function movementStatusBadge(status) {
+    const v = String(status || '').toLowerCase();
+    const map = {
+        'completed': { bg: 'bg-green-100 text-green-800', icon: 'bx bx-check-circle' },
+        'in-progress': { bg: 'bg-yellow-100 text-yellow-800', icon: 'bx bx-time-five' },
+        'delayed': { bg: 'bg-red-100 text-red-800', icon: 'bx bx-error-circle' },
+        'pending': { bg: 'bg-gray-100 text-gray-800', icon: 'bx bx-dots-horizontal-rounded' }
+    };
+    const m = map[v] || map.pending;
+    const label = (v.replace('-', ' ') || 'pending').replace(/\b\w/g, c => c.toUpperCase());
+    return `<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-base font-extrabold ${m.bg}">
+        <i class="${m.icon} text-lg"></i><span>${label}</span>
+    </span>`;
+}
+
 function getStatusBadge(status) {
     const statusConfig = {
         'planning': { class: 'badge-info', icon: 'bx bx-planet', text: 'Planning' },
@@ -522,28 +610,38 @@ function updateMovementStats() {
 
 function renderProjects() {
     if (projects.length === 0) {
-        els.tableBody.innerHTML = `<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">No records found</td></tr>`;
+        els.tableBody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">No records found</td></tr>`;
         return;
     }
     els.tableBody.innerHTML = projects.map(m => {
-        const statusClass = (s) => {
-            const v = String(s || '').toLowerCase();
-            if (v === 'completed') return 'bg-green-100 text-green-700';
-            if (v === 'in-progress') return 'bg-amber-100 text-amber-700';
-            if (v === 'delayed') return 'bg-red-100 text-red-700';
-            return 'bg-gray-100 text-gray-700';
-        };
+        const code = formatMovementCode(m);
+        const itemType = String(m.mp_item_type || '').toLowerCase();
+        const displayItemType = itemType ? itemType.replace(/\b\w/g, c => c.toUpperCase()) : '-';
         return `
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm">${m.mp_id}</td>
+                <td class="px-6 py-4 whitespace-nowrap font-mono text-sm">${code}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${m.mp_item_name || '-'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">${m.mp_unit_transfer ?? 0}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${m.mp_stored_from || '-'}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${m.mp_stored_to || '-'}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize">${m.mp_item_type || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${displayItemType}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${m.mp_movement_type || '-'}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${movementStatusBadge(m.mp_status)}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span class="px-3 py-1.5 rounded-full text-xs font-bold ${statusClass(m.mp_status)}">${(m.mp_status || '').replace('-', ' ') || '-'}</span>
+                    <div class="flex items-center gap-3">
+                        <button class="text-blue-600 hover:text-blue-800" title="View" data-action="view" data-id="${m.mp_id}">
+                            <i class='bx bx-show-alt text-xl'></i>
+                        </button>
+                        <button class="text-amber-600 hover:text-amber-800" title="Update Status" data-action="status" data-id="${m.mp_id}">
+                            <i class='bx bx-edit text-xl'></i>
+                        </button>
+                        <button class="text-purple-600 hover:text-purple-800" title="Set End Date" data-action="end" data-id="${m.mp_id}">
+                            <i class='bx bx-calendar-check text-xl'></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800" title="Delete" data-action="delete" data-id="${m.mp_id}">
+                            <i class='bx bx-trash text-xl'></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -1001,9 +1099,142 @@ function setMilestoneStatusOptions(mode) {
 }
 
 
+// Movement actions
+let selectedMovementId = null;
+function openModal(el) { el.classList.remove('hidden'); el.classList.add('flex'); }
+function closeModal(el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+
 function handleTableClick(e) {
-    return;
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = btn.getAttribute('data-id');
+    const action = btn.getAttribute('data-action');
+    selectedMovementId = id;
+    const movement = projects.find(p => String(p.mp_id) === String(id));
+    if (!movement) return;
+    if (action === 'view') {
+        const html = `
+            <div><span class="font-semibold">Movement ID:</span> ${formatMovementCode(movement)}</div>
+            <div><span class="font-semibold">Item Name:</span> ${movement.mp_item_name || '-'}</div>
+            <div><span class="font-semibold">Units:</span> ${movement.mp_unit_transfer ?? 0}</div>
+            <div><span class="font-semibold">Stored From:</span> ${movement.mp_stored_from || '-'}</div>
+            <div><span class="font-semibold">Stored To:</span> ${movement.mp_stored_to || '-'}</div>
+            <div><span class="font-semibold">Item Type:</span> ${movement.mp_item_type || '-'}</div>
+            <div><span class="font-semibold">Movement Type:</span> ${movement.mp_movement_type || '-'}</div>
+            <div><span class="font-semibold">Status:</span> ${(String(movement.mp_status||'').replace('-', ' '))}</div>
+            <div><span class="font-semibold">Project Start:</span> ${formatDate(movement.mp_project_start)}</div>
+            <div><span class="font-semibold">Project End:</span> ${formatDate(movement.mp_project_end)}</div>
+            <div><span class="font-semibold">Created At:</span> ${formatDate(movement.created_at)}</div>
+        `;
+        document.getElementById('viewMovementContent').innerHTML = html;
+        openModal(document.getElementById('viewMovementModal'));
+        return;
+    }
+    if (action === 'status') {
+        const sel = document.getElementById('updateStatusSelect');
+        sel.value = String(movement.mp_status || 'pending');
+        openModal(document.getElementById('updateStatusModal'));
+        return;
+    }
+    if (action === 'end') {
+        const input = document.getElementById('endDateInput');
+        input.value = movement.mp_project_end ? String(movement.mp_project_end).substring(0,10) : '';
+        openModal(document.getElementById('setEndDateModal'));
+        return;
+    }
+    if (action === 'delete') {
+        openModal(document.getElementById('deleteMovementModal'));
+        return;
+    }
 }
+els.tableBody.addEventListener('click', handleTableClick);
+
+// View modal close
+document.getElementById('closeViewMovement').addEventListener('click', () => {
+    closeModal(document.getElementById('viewMovementModal'));
+});
+
+// Update Status modal actions
+document.getElementById('cancelUpdateStatus').addEventListener('click', () => {
+    closeModal(document.getElementById('updateStatusModal'));
+});
+document.getElementById('confirmUpdateStatus').addEventListener('click', async () => {
+    try {
+        const status = document.getElementById('updateStatusSelect').value;
+        const res = await fetch(`${PLT_API}/movement-project/${selectedMovementId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            body: JSON.stringify({ mp_status: status }),
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        closeModal(document.getElementById('updateStatusModal'));
+        notify('Status updated', 'success');
+        loadProjects(currentPage);
+    } catch (e) {
+        notify('Failed to update status', 'error');
+    }
+});
+
+// Set End Date modal actions
+document.getElementById('cancelEndDate').addEventListener('click', () => {
+    closeModal(document.getElementById('setEndDateModal'));
+});
+document.getElementById('confirmEndDate').addEventListener('click', async () => {
+    try {
+        const endDate = document.getElementById('endDateInput').value;
+        if (!endDate) { notify('Please pick an end date', 'error'); return; }
+        const res = await fetch(`${PLT_API}/movement-project/${selectedMovementId}/end-date`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            body: JSON.stringify({ mp_project_end: endDate }),
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        closeModal(document.getElementById('setEndDateModal'));
+        notify('End date set', 'success');
+        loadProjects(currentPage);
+    } catch (e) {
+        notify('Failed to set end date', 'error');
+    }
+});
+
+// Delete modal actions
+document.getElementById('cancelDeleteMovement').addEventListener('click', () => {
+    closeModal(document.getElementById('deleteMovementModal'));
+});
+document.getElementById('confirmDeleteMovement').addEventListener('click', async () => {
+    try {
+        const res = await fetch(`${PLT_API}/movement-project/${selectedMovementId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Authorization': JWT_TOKEN ? `Bearer ${JWT_TOKEN}` : ''
+            },
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        closeModal(document.getElementById('deleteMovementModal'));
+        notify('Movement deleted', 'success');
+        loadProjects(currentPage);
+    } catch (e) {
+        notify('Failed to delete movement', 'error');
+    }
+});
 
 // Pager interactions
 document.getElementById('projectsPager').addEventListener('click', function(ev){
