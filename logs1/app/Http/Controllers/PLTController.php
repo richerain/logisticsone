@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\PLTService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class PLTController extends Controller
 {
@@ -25,6 +26,50 @@ class PLTController extends Controller
         $result = $this->pltService->getAllProjects($filters);
 
         return response()->json($result, $result['success'] ? 200 : 400);
+    }
+
+    public function getMovementProjects(Request $request)
+    {
+        try {
+            $perPage = (int) ($request->get('per_page', 10));
+            $perPage = $perPage > 0 ? $perPage : 10;
+            $page = (int) ($request->get('page', 1));
+            $status = $request->get('status');
+            $search = $request->get('search');
+
+            $query = DB::connection('plt')->table('plt_movement_project');
+
+            if (! empty($status)) {
+                $query->where('mp_status', $status);
+            }
+            if (! empty($search)) {
+                $query->where(function ($q) use ($search) {
+                    $like = '%'.$search.'%';
+                    $q->where('mp_item_name', 'like', $like)
+                        ->orWhere('mp_stored_from', 'like', $like)
+                        ->orWhere('mp_stored_to', 'like', $like)
+                        ->orWhere('mp_item_type', 'like', $like)
+                        ->orWhere('mp_movement_type', 'like', $like);
+                });
+            }
+
+            $query->orderBy('created_at', 'desc');
+
+            $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'success' => true,
+                'data' => $paginator,
+                'message' => 'Movement records loaded',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'Failed to load movement records',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function getProject($id)

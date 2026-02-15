@@ -17,6 +17,9 @@ Route::post('/projects/{id}/milestones', [PLTController::class, 'createMilestone
 Route::put('/milestones/{id}', [PLTController::class, 'updateMilestone']);
 Route::delete('/milestones/{id}', [PLTController::class, 'deleteMilestone']);
 
+// Movement Project (new)
+Route::get('/movement-project', [PLTController::class, 'getMovementProjects']);
+
 // Additional PLT routes can be added here as the module develops
 Route::get('/test', function () {
     return response()->json([
