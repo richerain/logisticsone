@@ -441,14 +441,14 @@ class SWSController extends Controller
                 'pro_end_date' => null,
                 'pro_status' => 'planning',
                 'pro_budget_allocated' => 0,
-                'pro_assigned_manager_id' => null,
+                'pro_assigned_manager_id' => auth()->id() ?? 0,
             ]);
 
             TrackingLog::create([
                 'track_project_id' => $project->pro_id,
-                'track_log_type' => 'init',
+                'track_log_type' => 'dispatch_event',
                 'track_description' => 'Created from SWS transfer '.$referenceId,
-                'track_logged_by' => auth()->id() ?? null,
+                'track_logged_by' => (optional(auth()->user())->name ?? 'system'),
                 'track_reference_id' => $referenceId,
             ]);
 
