@@ -484,43 +484,52 @@
             </button>
         </div>
         <form id="transferItemForm">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Category Filter</label>
-                    <select id="transfer_filter_category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">All Categories</option>
-                    </select>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Item Details -->
+                <div class="order-2 lg:order-1">
+                    <h4 class="text-sm font-bold text-gray-700 mb-2">Item Details</h4>
+                    <div id="transferItemDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Search Item</label>
-                    <input id="transfer_search" type="text" placeholder="Search by name or code" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <!-- Right: Controls -->
+                <div class="order-1 lg:order-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Search Item</label>
+                            <input id="transfer_search" type="text" placeholder="Search by name or code" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Category Filter</label>
+                            <select id="transfer_filter_category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Item *</label>
+                        <select id="transfer_item_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Location From</label>
+                            <input type="text" id="transfer_location_from" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Location To *</label>
+                            <select id="transfer_location_to" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Transfer Units *</label>
+                        <input type="number" id="transfer_units" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <p id="transfer_units_warning" class="text-xs text-red-600 mt-1 hidden">Transfer units exceed current stock</p>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" id="cancelTransferItemModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                        <button type="submit" id="confirmTransferBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Transfer</button>
+                    </div>
                 </div>
             </div>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Select Item *</label>
-                <select id="transfer_item_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
-            </div>
-            <div id="transferItemDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Location From</label>
-                    <input type="text" id="transfer_location_from" readonly class="w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Location To *</label>
-                    <select id="transfer_location_to" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
-                </div>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Transfer Units *</label>
-                <input type="number" id="transfer_units" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <p id="transfer_units_warning" class="text-xs text-red-600 mt-1 hidden">Transfer units exceed current stock</p>
-            </div>
-            <div class="flex justify-end gap-3">
-                <button type="button" id="cancelTransferItemModal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
-                <button type="submit" id="confirmTransferBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Transfer</button>
-            </div>
-</form>
+        </form>
     </div>
 </div>
 
