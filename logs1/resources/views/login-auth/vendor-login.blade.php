@@ -195,7 +195,7 @@
                 </div>
 
                 <!-- Open Vendor Opportunities Button -->
-                <div class="w-full max-w-md mt-2 opacity-0 animate-entrance-up delay-[1200ms]">
+                <div class="hidden w-full max-w-md mt-2 opacity-0 animate-entrance-up delay-[1200ms]">
                     <button type="button" id="opportunitiesBtn" 
                         class="w-full bg-white hover:bg-gray-100 text-brand-primary font-bold py-3 px-4 rounded-lg
                                 transition-all duration-300 shadow-lg hover:shadow-amber-400/20
@@ -209,7 +209,7 @@
     </main>
 
     <!-- Vendor Opportunities Section -->
-    <section id="opportunitiesSection" class="min-h-screen bg-gray-100 py-16 px-6 relative overflow-hidden">
+    <section id="opportunitiesSection" class="hidden min-h-screen bg-gray-100 py-16 px-6 relative overflow-hidden">
         <!-- Background Elements -->
         <div class="absolute inset-0 z-0 pointer-events-none opacity-20">
             <div class="absolute w-64 h-64 top-10 right-10 bg-brand-primary/20 rounded-full blur-3xl"></div>
